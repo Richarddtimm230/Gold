@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Page links for action buttons
-    document.getElementById('uploadResultsBtn').onclick = () => window.location.href = "upload-results-manual.html";
+    document.getElementById('uploadResultsBtn').onclick = () => window.location.href = "upload-results.html";
     document.getElementById('bulkEditBtn').onclick = () => window.location.href = "bulk-edit-results.html";
     document.getElementById('publishResultsBtn').onclick = () => window.location.href = "publish-results.html";
     document.getElementById('exportCSVBtn').onclick = () => window.location.href = "export-csv.html";

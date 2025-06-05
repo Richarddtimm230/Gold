@@ -1,17 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
-  try {
-    // Replace the connection string below with your MongoDB Atlas URI
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-    console.log('MongoDB Atlas Connected');
-  } catch (err) {
-    console.error(err.message);
-    process.exit(1);
-  }
-};
-
-module.exports = connectDB;
+const uri = process.env.MONGODB_URI;
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Atlas Connected'))
+  .catch(err => console.error('MongoDB connection error:', err));

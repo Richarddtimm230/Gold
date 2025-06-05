@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Publish Results - Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="result.css">
+    <link rel="stylesheet" href="publish-results.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+            <div>
+                <div class="name">RICHARD TIMOTHY</div>
+                <div class="role">System Administrator</div>
+            </div>
+        </div>
+        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <nav>
+            <a href="index.html"><span>🏠</span> Dashboard</a>
+            <a href="#"><span>🎓</span> Admission</a>
+            <a href="#"><span>🌐</span> Multi-location</a>
+            <a href="#"><span>👥</span> People</a>
+            <a href="#"><span>📚</span> Academics</a>
+            <a href="#"><span>💻</span> E-Class</a>
+            <a class="" href="results.html"><span>📄</span> Results</a>
+            <a href="#"><span>💰</span> Finance</a>
+            <a href="#"><span>🗓️</span> Attendance</a>
+            <a href="#"><span>⚙️</span> Admin</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <header>
+            <div class="school-title">
+                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+                <span>GOLD AND LINC SCHOOLS</span>
+            </div>
+            <div class="header-actions">
+                <span class="icon">🔔</span>
+                <span class="icon">❓</span>
+                <span class="icon">⚙️</span>
+                <span class="icon">🔍</span>
+            </div>
+        </header>
+        <div class="page-title">
+            <h2>Publish Student Results <span class="admin-badge">Admin</span></h2>
+        </div>
+        <div class="results-filters">
+            <select id="sessionSelect">
+                <option>2024–2025</option>
+                <option>2023–2024</option>
+            </select>
+            <select id="termSelect">
+                <option>THIRD TERM</option>
+                <option>SECOND TERM</option>
+                <option>FIRST TERM</option>
+            </select>
+            <select id="classSelect">
+                <option>All Classes</option>
+                <option>JSS1</option>
+                <option>JSS2</option>
+                <option>JSS3</option>
+                <option>SS1</option>
+                <option>SS2</option>
+                <option>SS3</option>
+            </select>
+            <select id="subjectSelect">
+                <option>All Subjects</option>
+                <option>Mathematics</option>
+                <option>English Language</option>
+                <option>Biology</option>
+                <option>Physics</option>
+                <option>Chemistry</option>
+            </select>
+            <button id="filterBtn">Filter</button>
+        </div>
+        <div class="results-table-container">
+            <form id="publishForm">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"/></th>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Subject</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Remarks</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="publishResultsTbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+                <div class="publish-actions">
+                    <button type="submit" id="publishSelectedBtn">Publish Selected Results</button>
+                    <span id="publishStatus"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="install-app">
+        <div>
+            <strong>Install App</strong>
+            <p>You can now access the school portal easier and swifter through the School Portal App.</p>
+            <button>Install App</button>
+        </div>
+    </div>
+    <div class="support-tab">Support</div>
+    <div class="eclass-fab">e-Class</div>
+    <script src="publish-results.js"></script>
+</body>
+</html>

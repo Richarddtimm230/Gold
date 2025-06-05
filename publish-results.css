@@ -1,0 +1,23 @@
+.publish-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+#publishSelectedBtn {
+    background: #20c997;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+}
+#publishSelectedBtn:hover {
+    background: #157a6e;
+}
+#publishStatus {
+    font-weight: 600;
+    font-size: 1rem;
+}

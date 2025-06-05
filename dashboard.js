@@ -1,3 +1,4 @@
+
 // Chart.js configuration for Monthly Finance Summary
 document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('financeChart').getContext('2d');

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Results - Admin Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="result.css">
+    <link rel="stylesheet" href="upload-results.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="modal show" id="uploadResultsModal">
+    <div class="modal-content">
+        <span class="close" id="closeUploadModal">&times;</span>
+        <h3>Upload Results</h3>
+        <form id="uploadForm">
+            <label for="resultsFile">Select Excel/CSV File:</label>
+            <input type="file" id="resultsFile" accept=".xlsx,.xls,.csv" required>
+            <button type="submit" id="parseFileBtn">Preview</button>
+        </form>
+        <div id="fileErrors" class="error"></div>
+        <div id="previewSection" style="display:none;">
+            <h4>Preview & Validate Results</h4>
+            <div id="mappingSection"></div>
+            <div style="overflow-x:auto;">
+                <table id="previewTable" class="results-table"></table>
+            </div>
+            <button id="confirmUploadBtn">Confirm & Upload</button>
+        </div>
+        <div id="uploadStatus"></div>
+    </div>
+</div>
+<script src="upload-results.js"></script>
+</body>
+</html>

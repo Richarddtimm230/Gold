@@ -2,34 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Upload Results - Admin Dashboard</title>
+    <title>Manual Upload Results - Admin Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="result.css">
+    <link rel="stylesheet" href="results.css">
     <link rel="stylesheet" href="upload-results.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-<div class="modal show" id="uploadResultsModal">
-    <div class="modal-content">
-        <span class="close" id="closeUploadModal">&times;</span>
-        <h3>Upload Results</h3>
-        <form id="uploadForm">
-            <label for="resultsFile">Select Excel/CSV File:</label>
-            <input type="file" id="resultsFile" accept=".xlsx,.xls,.csv" required>
-            <button type="submit" id="parseFileBtn">Preview</button>
-        </form>
-        <div id="fileErrors" class="error"></div>
-        <div id="previewSection" style="display:none;">
-            <h4>Preview & Validate Results</h4>
-            <div id="mappingSection"></div>
-            <div style="overflow-x:auto;">
-                <table id="previewTable" class="results-table"></table>
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+            <div>
+                <div class="name">RICHARD TIMOTHY</div>
+                <div class="role">System Administrator</div>
             </div>
-            <button id="confirmUploadBtn">Confirm & Upload</button>
         </div>
-        <div id="uploadStatus"></div>
+        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <nav>
+            <a href="index.html"><span>🏠</span> Dashboard</a>
+            <a href="#"><span>🎓</span> Admission</a>
+            <a href="#"><span>🌐</span> Multi-location</a>
+            <a href="#"><span>👥</span> People</a>
+            <a href="#"><span>📚</span> Academics</a>
+            <a href="#"><span>💻</span> E-Class</a>
+            <a class="active" href="results.html"><span>📄</span> Results</a>
+            <a href="#"><span>💰</span> Finance</a>
+            <a href="#"><span>🗓️</span> Attendance</a>
+            <a href="#"><span>⚙️</span> Admin</a>
+        </nav>
     </div>
-</div>
-<script src="upload-results.js"></script>
+    <div class="main-content">
+        <header>
+            <div class="school-title">
+                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+                <span>GOLD AND LINC SCHOOLS</span>
+            </div>
+            <div class="header-actions">
+                <span class="icon">🔔</span>
+                <span class="icon">❓</span>
+                <span class="icon">⚙️</span>
+                <span class="icon">🔍</span>
+            </div>
+        </header>
+        <div class="page-title">
+            <h2>Manual Upload of Student Results <span class="admin-badge">Admin</span></h2>
+        </div>
+        <form id="manualUploadForm">
+            <div class="results-filters">
+                <label>
+                    Session:
+                    <select id="sessionSelect" name="session" required>
+                        <option>2024–2025</option>
+                        <option>2023–2024</option>
+                    </select>
+                </label>
+                <label>
+                    Term:
+                    <select id="termSelect" name="term" required>
+                        <option>THIRD TERM</option>
+                        <option>SECOND TERM</option>
+                        <option>FIRST TERM</option>
+                    </select>
+                </label>
+                <label>
+                    Class:
+                    <select id="classSelect" name="class" required>
+                        <option>JSS1</option>
+                        <option>JSS2</option>
+                        <option>JSS3</option>
+                        <option>SS1</option>
+                        <option>SS2</option>
+                        <option>SS3</option>
+                    </select>
+                </label>
+                <label>
+                    Subject:
+                    <select id="subjectSelect" name="subject" required>
+                        <option>Mathematics</option>
+                        <option>English Language</option>
+                        <option>Biology</option>
+                        <option>Physics</option>
+                        <option>Chemistry</option>
+                    </select>
+                </label>
+            </div>
+            <div class="manual-upload-table-container">
+                <table class="results-table" id="manualResultsTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manualResultsTbody">
+                        <tr>
+                            <td><input type="text" name="student_id[]" required></td>
+                            <td><input type="text" name="student_name[]" required></td>
+                            <td><input type="number" name="score[]" min="0" max="100" required></td>
+                            <td><input type="text" name="grade[]" required></td>
+                            <td><input type="text" name="remarks[]"></td>
+                            <td>
+                                <button class="remove-row-btn" type="button" title="Remove row">🗑️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button id="addRowBtn" type="button">+ Add another student</button>
+            </div>
+            <div style="margin-top:20px;">
+                <button type="submit" class="results-actions-btn">Submit Results</button>
+                <span id="uploadStatus" style="margin-left:16px;"></span>
+            </div>
+        </form>
+    </div>
+    <div class="install-app">
+        <div>
+            <strong>Install App</strong>
+            <p>You can now access the school portal easier and swifter through the School Portal App.</p>
+            <button>Install App</button>
+        </div>
+    </div>
+    <div class="support-tab">Support</div>
+    <div class="eclass-fab">e-Class</div>
+    <script src="upload-results.js"></script>
 </body>
 </html>

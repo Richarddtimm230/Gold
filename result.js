@@ -48,9 +48,9 @@ function renderResultsTable(results) {
             <td>${result.remarks}</td>
             <td class="status-${result.status.toLowerCase()}">${result.status}</td>
             <td>
-                <button class="action-btn edit" title="Edit">✏️</button>
-                <button class="action-btn delete" title="Delete">🗑️</button>
-                <button class="action-btn publish" title="Publish">📢</button>
+                <a class="action-btn edit" title="Edit" href="edit-result.html?id=${result.id}">✏️</a>
+                <a class="action-btn delete" title="Delete" href="delete-result.html?id=${result.id}">🗑️</a>
+                <a class="action-btn publish" title="Publish" href="publish-result.html?id=${result.id}">📢</a>
             </td>
         `;
         tbody.appendChild(tr);
@@ -80,6 +80,13 @@ document.addEventListener('DOMContentLoaded', function() {
         renderResultsTable(filtered);
     };
 
+    // Page links for action buttons
+    document.getElementById('uploadResultsBtn').onclick = () => window.location.href = "upload-results-manual.html";
+    document.getElementById('bulkEditBtn').onclick = () => window.location.href = "bulk-edit-results.html";
+    document.getElementById('publishResultsBtn').onclick = () => window.location.href = "publish-results.html";
+    document.getElementById('exportCSVBtn').onclick = () => window.location.href = "export-csv.html";
+    document.getElementById('manageTemplatesBtn').onclick = () => window.location.href = "manage-templates.html";
+
     // Statistics Modal
     const statsModal = document.getElementById('statisticsModal');
     document.getElementById('viewStatsBtn').onclick = function() {
@@ -91,20 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     window.onclick = function(event) {
         if (event.target == statsModal) statsModal.style.display = 'none';
-    };
-
-    // Demo upload, publish, bulk edit, export, manage templates
-    document.getElementById('uploadResultsBtn').onclick = () => alert('Upload Results feature coming soon!');
-    document.getElementById('bulkEditBtn').onclick = () => alert('Bulk Edit Results feature coming soon!');
-    document.getElementById('publishResultsBtn').onclick = () => alert('Publish Results feature coming soon!');
-    document.getElementById('exportCSVBtn').onclick = () => alert('Export CSV feature coming soon!');
-    document.getElementById('manageTemplatesBtn').onclick = () => alert('Manage Templates feature coming soon!');
-
-    // Row action buttons (edit/delete/publish)
-    document.getElementById('resultsTbody').onclick = function(e) {
-        if (e.target.classList.contains('edit')) alert('Edit result feature coming soon!');
-        if (e.target.classList.contains('delete')) alert('Delete result feature coming soon!');
-        if (e.target.classList.contains('publish')) alert('Publish result feature coming soon!');
     };
 });
 

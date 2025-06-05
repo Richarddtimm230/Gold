@@ -1,0 +1,158 @@
+.page-title {
+    margin: 24px 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.page-title h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+.admin-badge {
+    background: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+.results-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.results-actions button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 9px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.results-actions button:hover {
+    background: #0056b3;
+}
+.results-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.results-filters select, .results-filters input[type="text"] {
+    padding: 7px 10px;
+    border: 1px solid #e3e8ee;
+    border-radius: 4px;
+    font-size: 15px;
+}
+.results-filters button {
+    background: #20c997;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 17px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.results-filters button:hover {
+    background: #157a6e;
+}
+.results-table-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    padding: 14px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+}
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+.results-table thead {
+    background: #f4f6fa;
+}
+.results-table th, .results-table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e3e8ee;
+}
+.results-table th {
+    font-weight: 600;
+}
+.results-table tr:hover {
+    background: #f5fbff;
+}
+.results-table td .action-btn {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 7px;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s;
+}
+.results-table td .action-btn.delete {
+    background: #dc3545;
+}
+.results-table td .action-btn.publish {
+    background: #20c997;
+}
+.results-table td .action-btn:hover {
+    opacity: 0.9;
+}
+.status-published {
+    color: #20c997;
+    font-weight: 600;
+}
+.status-draft {
+    color: #888;
+    font-weight: 500;
+}
+.status-pending {
+    color: #ffc107;
+    font-weight: 600;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background: rgba(0,0,0,0.25);
+}
+.modal-content {
+    background: #fff;
+    margin: 60px auto;
+    padding: 28px;
+    border-radius: 10px;
+    width: 650px;
+    max-width: 92vw;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.19);
+    position: relative;
+}
+.modal-content .close {
+    position: absolute;
+    right: 20px;
+    top: 14px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+}
+@media (max-width: 900px) {
+    .modal-content { width: 98vw; }
+    .results-actions, .results-filters { flex-direction: column; gap: 8px;}
+}

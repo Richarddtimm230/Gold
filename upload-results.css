@@ -1,0 +1,22 @@
+/* Additional modal-specific styles */
+#uploadResultsModal {
+    display: block !important; /* Always show for this standalone page or modal */
+}
+#uploadResultsModal .modal-content {
+    min-width: 400px;
+}
+#previewTable td.error {
+    background: #ffd1d1;
+    color: #c00;
+}
+#error, .error {
+    color: #c00;
+    margin-top: 9px;
+    font-weight: 600;
+}
+#mappingSection {
+    margin-bottom: 15px;
+}
+#mappingSection label {
+    margin-right: 9px;
+}

@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const Student = require('../models/Student');
+const studentAuthMiddleware = require('../middleware/studentAuth'); // Import BEFORE using!
 
 // Multer setup for photo uploads
 const storage = multer.memoryStorage();
@@ -107,7 +109,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
-// GET /api/students - retrieve all students with filters
+// GET /api/students - retrieve all students with filters (summary fields only)
 router.get('/', async (req, res) => {
   try {
     const filter = {};
@@ -115,7 +117,9 @@ router.get('/', async (req, res) => {
     if (req.query.classArm) filter.classArm = req.query.classArm;
     if (req.query.academicSession) filter.academicSession = req.query.academicSession;
 
+    // Only summary fields returned for privacy
     const students = await Student.find(filter)
+      .select('student_id surname firstname regNo class classArm photo academicSession')
       .sort({ surname: 1, firstname: 1 });
 
     res.json(students);
@@ -124,12 +128,10 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// ...existing code...
 
 // GET /api/students/me - get logged-in student profile for dashboard
 router.get('/me', studentAuthMiddleware, async (req, res) => {
   const student = req.student;
-  // Return only dashboard-friendly fields
   res.json({
     name: `${student.firstname} ${student.surname}`,
     reg_no: student.regNo,
@@ -148,11 +150,8 @@ router.get('/me', studentAuthMiddleware, async (req, res) => {
     // Add other dashboard fields as needed
   });
 });
-// ...existing code...
-const jwt = require('jsonwebtoken');
-const studentAuthMiddleware = require('../middleware/studentAuth');
 
-// Student login route
+// POST /api/students/login - student login (for AJAX login, not used in unified login)
 router.post('/login', async (req, res) => {
   const { regNo, studentEmail, password } = req.body;
   if ((!regNo && !studentEmail) || !password) {
@@ -176,10 +175,11 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
-      student: {
+      user: {
         id: student._id,
         name: `${student.firstname} ${student.surname}`,
         regNo: student.regNo,
+        role: 'student',
         class: student.class,
         photo_url: student.photo
       }
@@ -188,4 +188,5 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Server error.' });
   }
 });
+
 module.exports = router;

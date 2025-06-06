@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="students.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 <body>
   <div class="sidebar">
@@ -229,38 +231,73 @@
       return true;
     }
 
-    document.getElementById('enroll-student-form').onsubmit = async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const submitBtn = document.getElementById('submit-btn');
-      const spinner = document.getElementById('form-spinner');
-      const photoInput = document.getElementById('student-photo');
-      if (photoInput.files.length) formData.append('photo', photoInput.files[0]);
+async function uploadStudentData(studentData, image) {
+  const formData = new FormData();
+  for (const key in studentData) {
+    if (studentData[key] !== undefined && studentData[key] !== null) {
+      formData.append(key, studentData[key]);
+    }
+  }
+  if (image) {
+    formData.append('photo', image);
+  }
+  try {
+    const response = await axios.post(
+      'https://d-1-z03x.onrender.com/api/students',
+      formData,
+      { headers: { Accept: 'application/json' } }
+    );
+    console.log('Upload successful:', response.data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      console.error('Upload failed:', error.response.data);
+      throw error.response.data;
+    } else {
+      console.error('Upload failed:', error);
+      throw error;
+    }
+  }
+}
 
-      submitBtn.disabled = true;
-      spinner.style.display = 'inline-block';
+document.getElementById('enroll-student-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  const submitBtn = document.getElementById('submit-btn');
+  const spinner = document.getElementById('form-spinner');
+  const photoInput = document.getElementById('student-photo');
+  if (photoInput && photoInput.files.length) formData.set('photo', photoInput.files[0]);
 
+  submitBtn.disabled = true;
+  if (spinner) spinner.style.display = 'inline-block';
+
+  try {
+    const res = await fetch('https://d-1-z03x.onrender.com/api/students', {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('enroll-success').style.display = 'block';
+    } else {
+      let errorText = 'Failed to enroll student.';
       try {
-        const res = await fetch('/api/students', {
-          method: 'POST',
-          body: formData
-        });
-        if (res.ok) {
-          form.style.display = 'none';
-          document.getElementById('enroll-success').style.display = 'block';
-        } else {
-          const error = await res.json();
-          alert(error.error || 'Failed to enroll student.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Network error occurred.');
-      } finally {
-        submitBtn.disabled = false;
-        spinner.style.display = 'none';
+        const error = await res.json();
+        errorText = error && error.error ? error.error : errorText;
+      } catch (parseErr) {
+        // If error response is not JSON
       }
-    };
+      alert(errorText);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error occurred.');
+  } finally {
+    submitBtn.disabled = false;
+    if (spinner) spinner.style.display = 'none';
+  }
+};
   </script>
 </body>
 </html>

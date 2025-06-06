@@ -422,77 +422,85 @@ document.addEventListener('DOMContentLoaded', function() {
     console.error('No form with class .login-form found!');
     return;
   }
+
   loginForm.addEventListener('submit', async function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const emailOrReg = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const spinner = document.getElementById('spinner');
-  const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const emailOrReg = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const spinner = document.getElementById('spinner');
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
 
-  // Reset UI states
-  spinner.style.display = 'none';
-  submitBtn.disabled = false;
-  submitBtn.style.opacity = '1';
+    // Reset UI states
+    if (spinner) spinner.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    }
 
-  if (!emailOrReg || !password) {
-    alert('Please fill in all fields.');
-    return;
-  }
-
-  const isEmail = emailOrReg.includes('@');
-  const body = isEmail
-    ? { email: emailOrReg, password }
-    : { regNo: emailOrReg, password };
-
-  spinner.style.display = 'block';
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.6';
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    let data = {};
-    try {
-      data = await res.json();
-    } catch (err) {
-      alert('Server error: Invalid JSON response');
+    if (!emailOrReg || !password) {
+      alert('Please fill in all fields.');
       return;
     }
 
-    if (res.ok && data?.token) {
-      // Store JWT token
-      localStorage.setItem('token', data.token);
+    const isEmail = emailOrReg.includes('@');
+    const body = isEmail
+      ? { email: emailOrReg, password }
+      : { regNo: emailOrReg, password };
 
-      // Role-based redirect (robust and extensible)
-      const role = data.user?.role?.toLowerCase();
-      if (role === 'superadmin') {
-        window.location.href = 'index.html';
-      } else if (role === 'admin') {
-        window.location.href = 'admin-dashboard.html';
-      } else if (role === 'teacher') {
-        window.location.href = 'teacher-dashboard.html';
-      } else if (role === 'student') {
-        window.location.href = 'student-dashboard.html';
-      } else {
-        // Fallback: redirect to a general dashboard or error page
-        window.location.href = 'index.html';
-      }
-    } else {
-      alert(data?.error || 'Invalid login credentials');
+    if (spinner) spinner.style.display = 'block';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
     }
-  } catch (err) {
-    console.error('[Login Error]', err);
-    alert('Network or server error');
-  } finally {
-    spinner.style.display = 'none';
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = '1';
-  }
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (err) {
+        alert('Server error: Invalid JSON response');
+        return;
+      }
+
+      if (res.ok && data?.token) {
+        // Store JWT token
+        localStorage.setItem('token', data.token);
+
+        // Role-based redirect (robust and extensible)
+        const role = data.user?.role?.toLowerCase();
+        if (role === 'superadmin') {
+          window.location.href = 'index.html';
+        } else if (role === 'admin') {
+          window.location.href = 'admin-dashboard.html';
+        } else if (role === 'teacher') {
+          window.location.href = 'teacher-dashboard.html';
+        } else if (role === 'student') {
+          window.location.href = 'student-dashboard.html';
+        } else {
+          // Fallback: redirect to a general dashboard or error page
+          window.location.href = 'index.html';
+        }
+      } else {
+        alert(data?.error || 'Invalid login credentials');
+      }
+    } catch (err) {
+      console.error('[Login Error]', err);
+      alert('Network or server error');
+    } finally {
+      if (spinner) spinner.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+      }
+    }
+  });
 });
 </script>
 </body>

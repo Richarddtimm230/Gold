@@ -294,24 +294,29 @@
 
     // Submit handler
     document.getElementById('enroll-student-form').onsubmit = async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      // Add photo if attached
-      const photoInput = document.getElementById('student-photo');
-      if(photoInput.files.length) formData.append('photo', photoInput.files[0]);
-      // API call
-      const res = await fetch('/api/students', {
-        method: 'POST',
-        body: formData
-      });
-      if(res.ok) {
-        form.style.display='none';
-        document.getElementById('enroll-success').style.display='block';
-      } else {
-        alert('Failed to enroll student');
-      }
-    };
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  const photoInput = document.getElementById('student-photo');
+  if(photoInput.files.length) formData.append('photo', photoInput.files[0]);
+  const res = await fetch('/api/students', {
+    method: 'POST',
+    body: formData
+  });
+  if(res.ok) {
+    form.style.display='none';
+    document.getElementById('enroll-success').style.display='block';
+  } else {
+    let errMsg = "Unknown error";
+    try {
+      const error = await res.json();
+      errMsg = error.error || JSON.stringify(error);
+    } catch (e) {
+      errMsg = res.statusText;
+    }
+    alert('Failed to enroll student: ' + errMsg);
+  }
+};
   </script>
 </body>
 </html>

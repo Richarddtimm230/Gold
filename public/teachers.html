@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Enrollment | School Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html,body{margin:0;padding:0;background:#f7fafc;font-family:"Segoe UI",Arial,sans-serif;}
+    .enroll-container{
+      max-width: 900px; margin: 40px auto 30px auto; background:#fff; border-radius:10px;
+      box-shadow:0 3px 18px rgba(0,0,0,0.06); padding:32px 18px 24px 18px;
+    }
+    h2{margin-top:0;text-align:center;color:#007bff;}
+    .form-tabs{display:flex;gap:3px;margin-bottom:25px;}
+    .form-tab{
+      flex:1;background:#f1f3f7;border:none;
+      padding:11px 2px;font-weight:500;font-size:16px;
+      color:#222;border-radius:8px 8px 0 0;
+      cursor:pointer;transition:background .11s;
+      border-bottom:2.5px solid transparent;
+    }
+    .form-tab.active{background:#fff;color:#007bff;border-bottom:2.5px solid #007bff;}
+    .form-section{display:none;}
+    .form-section.active{display:block;}
+    .form-row{display:flex;gap:17px;}
+    .form-group{flex:1 1 0;display:flex;flex-direction:column;margin-bottom:18px;}
+    .form-group label{font-weight:500;margin-bottom:4px;}
+    .form-group input[type="text"],.form-group input[type="email"],.form-group input[type="date"],.form-group input[type="password"],.form-group input[type="tel"],.form-group select{
+      padding:8px 10px;border-radius:6px;border:1px solid #d9dee3;font-size:15px;background:#f8fafc;}
+    .form-group textarea{
+      padding:8px 10px;border-radius:6px;border:1px solid #d9dee3;font-size:15px;min-height:44px;background:#f8fafc;}
+    .form-group input[type="file"]{padding:3px 0;}
+    .photo-uploader{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
+    .photo-box{
+      width:90px;height:90px;border-radius:10px;overflow:hidden;background:#f8fafc;
+      border:2px dashed #bfbfbf;display:flex;align-items:center;justify-content:center;margin-bottom:4px;
+    }
+    .photo-box img{width:86px;height:86px;object-fit:cover;border-radius:8px;}
+    .photo-placeholder{color:#bbb;font-size:39px;}
+    button[type=submit],.form-actions button{
+      background:#007bff;color:#fff;border:none;border-radius:6px;padding:10px 32px;font-size:16px;font-weight:600;cursor:pointer;transition:background .13s;}
+    button[type=submit]:hover,.form-actions button:hover{background:#0056b3;}
+    .form-actions{text-align:right;margin-top:9px;}
+    @media (max-width:700px){
+      .form-row{flex-direction:column;gap:0;}
+      .enroll-container {padding:18px 2vw 18px 2vw;}
+    }
+    .note{font-size:14px;color:#888;margin-bottom:9px;}
+  </style>
+</head>
+<body>
+<div class="enroll-container">
+  <h2>Staff Enrollment Form</h2>
+  <div class="form-tabs">
+    <button class="form-tab active" data-tab="basic">Basic Details</button>
+    <button class="form-tab" data-tab="contact">Contact</button>
+    <button class="form-tab" data-tab="employment">Employment</button>
+    <button class="form-tab" data-tab="identity">Identification</button>
+    <button class="form-tab" data-tab="kin">Next of Kin</button>
+    <button class="form-tab" data-tab="bank">Bank Details</button>
+    <button class="form-tab" data-tab="emergency">Emergency</button>
+    <button class="form-tab" data-tab="login">Login</button>
+  </div>
+  <form id="staffEnrollForm" enctype="multipart/form-data" autocomplete="off">
+    <!-- Basic Details -->
+    <div class="form-section active" id="tab-basic">
+      <div class="form-row">
+        <div class="form-group" style="max-width:140px;align-items:center;">
+          <label>Photo</label>
+          <div class="photo-uploader">
+            <div class="photo-box" id="photoBox">
+              <span class="photo-placeholder" id="photoPlaceholder">🖼️</span>
+              <img src="" id="staffPhoto" style="display:none;" alt="Photo">
+            </div>
+            <input type="file" id="photoInput" name="photo" accept="image/*">
+          </div>
+        </div>
+        <div style="flex:3;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" name="first_name" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" name="last_name" required>
+            </div>
+            <div class="form-group">
+              <label>Other Name(s)</label>
+              <input type="text" name="other_names">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Gender</label>
+              <select name="gender" required>
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" name="dob" required>
+            </div>
+            <div class="form-group">
+              <label>Marital Status</label>
+              <select name="marital_status" required>
+                <option value="">Select</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Divorced</option>
+                <option>Widowed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Contact Information -->
+    <div class="form-section" id="tab-contact">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Home Address</label>
+          <input type="text" name="address" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" required placeholder="+234...">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" required>
+        </div>
+      </div>
+    </div>
+    <!-- Employment -->
+    <div class="form-section" id="tab-employment">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Designation</label>
+          <select name="designation" required>
+            <option value="">Select</option>
+            <option>Teacher</option>
+            <option>Head Teacher</option>
+            <option>Principal</option>
+            <option>Assistant</option>
+            <option>Admin Officer</option>
+            <option>Bursar</option>
+            <option>Librarian</option>
+            <option>Counselor</option>
+            <option>Security</option>
+            <option>Cleaner</option>
+            <option>Driver</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" name="department" required>
+        </div>
+        <div class="form-group">
+          <label>Staff Type</label>
+          <select name="staff_type" required>
+            <option value="">Select</option>
+            <option>Teaching</option>
+            <option>Non-Teaching</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date Joined</label>
+          <input type="date" name="date_joined" required>
+        </div>
+        <div class="form-group">
+          <label>Highest Qualification</label>
+          <input type="text" name="qualification" required>
+        </div>
+        <div class="form-group">
+          <label>Years of Experience</label>
+          <input type="text" name="experience" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Previous Employer/School</label>
+          <input type="text" name="previous_employer">
+        </div>
+        <div class="form-group">
+          <label>Specialization/Subjects</label>
+          <input type="text" name="specialization" placeholder="e.g. English, Mathematics">
+        </div>
+      </div>
+    </div>
+    <!-- Identification -->
+    <div class="form-section" id="tab-identity">
+      <div class="note">Provide at least one valid identification.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID Type</label>
+          <select name="id_type" required>
+            <option value="">Select</option>
+            <option>National ID</option>
+            <option>Voter's Card</option>
+            <option>International Passport</option>
+            <option>Driver's License</option>
+            <option>School ID</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ID Number</label>
+          <input type="text" name="id_number" required>
+        </div>
+        <div class="form-group">
+          <label>ID Upload</label>
+          <input type="file" name="id_upload" accept="image/*,application/pdf">
+        </div>
+      </div>
+    </div>
+    <!-- Next of Kin -->
+    <div class="form-section" id="tab-kin">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="kin_name" required>
+        </div>
+        <div class="form-group">
+          <label>Relationship</label>
+          <input type="text" name="kin_relationship" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="kin_phone" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" name="kin_address">
+        </div>
+      </div>
+    </div>
+    <!-- Bank Details -->
+    <div class="form-section" id="tab-bank">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" name="bank_name" required>
+        </div>
+        <div class="form-group">
+          <label>Account Name</label>
+          <input type="text" name="account_name" required>
+        </div>
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="text" name="account_number" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pension Scheme</label>
+          <input type="text" name="pension" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Tax ID (TIN)</label>
+          <input type="text" name="tax_id" placeholder="Optional">
+        </div>
+      </div>
+    </div>
+    <!-- Emergency Contact -->
+    <div class="form-section" id="tab-emergency">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="emergency_name" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="emergency_phone" required>
+        </div>
+        <div class="form-group">
+          <label>Relationship</label>
+          <input type="text" name="emergency_relationship" required>
+        </div>
+      </div>
+    </div>
+    <!-- Login Details -->
+    <div class="form-section" id="tab-login">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email (for portal login)</label>
+          <input type="email" name="login_email" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="login_password" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Access Level</label>
+          <select name="access_level" required>
+            <option value="">Select</option>
+            <option>Teacher</option>
+            <option>Head Teacher</option>
+            <option>Principal</option>
+            <option>HR</option>
+            <option>Account/Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Submit Enrollment</button>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  // Tab navigation
+  document.querySelectorAll('.form-tab').forEach(tab=>{
+    tab.onclick = function() {
+      document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
+      document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+      window.scrollTo(0,0);
+    }
+  });
+
+  // Photo uploader
+  document.getElementById('photoInput').onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById('staffPhoto').src = ev.target.result;
+      document.getElementById('staffPhoto').style.display = 'block';
+      document.getElementById('photoPlaceholder').style.display = 'none';
+    }
+    reader.readAsDataURL(file);
+  };
+
+  // Demo submit handler
+  document.getElementById('staffEnrollForm').onsubmit = function(e) {
+    e.preventDefault();
+    alert('Staff enrollment submitted! Ready to connect to backend API.');
+  }
+</script>
+</body>
+</html>

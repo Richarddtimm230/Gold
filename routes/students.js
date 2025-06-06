@@ -7,31 +7,49 @@ const Student = require('../models/Student');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Helper function for filtering students
-function buildStudentQuery(query) {
-  const filter = {};
-  if (query.class) filter.class = query.class;
-  if (query.classArm) filter.classArm = query.classArm;
-  if (query.academicSession) filter.academicSession = query.academicSession;
-  // Add accountStatus, subscriptionStatus here if needed, e.g. filter.accountStatus = query.accountStatus;
-  return filter;
+// Utility: generate student_id if needed
+function generateStudentId() {
+  return 'STU' + Math.floor(100000 + Math.random() * 900000); // e.g., STU123456
 }
 
 // POST /api/students - enroll new student
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
-    // Handle photo upload (save as buffer, or change to save URL if you use cloud upload)
+
+    // Validate required fields (add/remove as per your schema)
+    const required = ['surname', 'firstname', 'dob', 'gender', 'regNo', 'class', 'parentName', 'parentRelationship', 'parentPhone', 'password'];
+    for (const field of required) {
+      if (!data[field] || data[field].trim() === "") {
+        return res.status(400).json({ error: `Missing required field: ${field}` });
+      }
+    }
+
+    // If student_id is required and not supplied, generate one
+    let student_id = data.student_id;
+    if (!student_id) {
+      student_id = generateStudentId();
+    }
+
+    // Handle photo
     let photo;
     if (req.file) {
-      // Option 1: Save photo as buffer (not scalable for large images/db)
-      // photo = req.file.buffer;
-
-      // Option 2: Save as base64 (for small images)
       photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
-    // TODO: Hash password before saving in production!
+
+    // Ensure regNo and student_id are unique
+    const regNoExists = await Student.findOne({ regNo: data.regNo });
+    if (regNoExists) {
+      return res.status(400).json({ error: 'A student with that registration number already exists.' });
+    }
+    const studentIdExists = await Student.findOne({ student_id });
+    if (studentIdExists) {
+      return res.status(400).json({ error: 'A student with that student ID already exists.' });
+    }
+
+    // Create new student
     const student = new Student({
+      student_id,
       surname: data.surname,
       firstname: data.firstname,
       othernames: data.othernames,
@@ -41,6 +59,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       state: data.state,
       lga: data.lga,
       address: data.address,
+      photo,
       regNo: data.regNo,
       class: data.class,
       classArm: data.classArm,
@@ -59,26 +78,37 @@ router.post('/', upload.single('photo'), async (req, res) => {
       bloodGroup: data.bloodGroup,
       genotype: data.genotype,
       medical: data.medical,
-      password: data.password, // hash before saving in production!
-      photo
+      password: data.password, // Hash in production!
     });
     await student.save();
     res.status(201).json({ message: 'Student enrolled successfully!' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('[ENROLL ERROR]', error); // This shows up in Render logs!
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'Duplicate unique field (student_id or regNo).' });
+    }
+    res.status(500).json({ error: error.message || 'Unknown server error.' });
   }
 });
 
 // GET /api/students - retrieve students with optional filters
 router.get('/', async (req, res) => {
   try {
-    const filter = buildStudentQuery(req.query);
-    // Optionally populate class name, adjust as needed if class is ObjectId
+    const filter = {};
+    if (req.query.class) filter.class = req.query.class;
+    if (req.query.classArm) filter.classArm = req.query.classArm;
+    if (req.query.academicSession) filter.academicSession = req.query.academicSession;
+    // Add more filters as needed
+
     const students = await Student.find(filter)
-      .populate('class', 'name') // If using Class collection
+      .populate('class', 'name')
       .sort({ surname: 1, firstname: 1 });
     res.json(students);
   } catch (error) {
+    console.error('[GET STUDENTS ERROR]', error);
     res.status(500).json({ error: error.message });
   }
 });

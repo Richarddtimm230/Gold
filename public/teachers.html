@@ -325,6 +325,10 @@
           </select>
         </div>
       </div>
+      <div id="enrollSpinner" style="display:none; text-align:center; margin-bottom:12px;">
+  <img src="https://i.imgur.com/llF5iyg.gif" alt="Loading..." width="40">
+  <div style="font-size:14px; color:#007bff;">Submitting, please wait...</div>
+            </div>
       <div class="form-actions">
         <button type="submit">Submit Enrollment</button>
       </div>
@@ -376,50 +380,50 @@
     }
     reader.readAsDataURL(file);
   };
+document.getElementById('staffEnrollForm').onsubmit = async function(e) {
+  e.preventDefault();
 
-  // Submit handler (enroll form)
-  document.getElementById('staffEnrollForm').onsubmit = async function(e) {
-    e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
 
-    const form = e.target;
-    const formData = new FormData(form);
+  // Show spinner, disable submit button
+  const spinner = document.getElementById('enrollSpinner');
+  spinner.style.display = '';
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const origText = submitBtn.textContent;
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.disabled = true;
 
-    // Show loading state (optional)
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const origText = submitBtn.textContent;
-    submitBtn.textContent = 'Submitting...';
-    submitBtn.disabled = true;
+  try {
+    const response = await fetch('/api/staff', {
+      method: 'POST',
+      body: formData
+    });
 
-    try {
-      // Update the endpoint below to your backend route for staff enrollment
-      const response = await fetch('/api/staff', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert('Error: ' + (errorData.error || response.statusText));
-      } else {
-        const respData = await response.json();
-        alert(respData.message || 'Staff enrollment successful!');
-        form.reset();
-        // Reset the photo box UI
-        document.getElementById('staffPhoto').style.display = 'none';
-        document.getElementById('photoPlaceholder').style.display = '';
-        // Return to first tab
-        document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
-        document.querySelector('.form-tab[data-tab="enroll"]').classList.add('active');
-        document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
-        document.getElementById('tab-enroll').classList.add('active');
-      }
-    } catch (err) {
-      alert('Network or server error: ' + err.message);
-    } finally {
-      submitBtn.textContent = origText;
-      submitBtn.disabled = false;
+    const respData = await response.json();
+    if (!response.ok) {
+      alert('Error: ' + (respData.error || response.statusText));
+    } else {
+      alert(respData.message || 'Staff enrollment successful!');
+      form.reset();
+      // Reset photo UI if you use it
+      document.getElementById('staffPhoto').style.display = 'none';
+      document.getElementById('photoPlaceholder').style.display = '';
+      // Optionally, switch tabs
+      document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelector('.form-tab[data-tab="enroll"]').classList.add('active');
+      document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
+      document.getElementById('tab-enroll').classList.add('active');
     }
+  } catch (err) {
+    alert('Network or server error: ' + err.message);
+  } finally {
+    spinner.style.display = 'none';
+    submitBtn.textContent = origText;
+    submitBtn.disabled = false;
   }
+}
+
 
   // -------- STAFF LIST + MODAL --------
   let staffDataCache = [];

@@ -124,5 +124,24 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// ...existing code...
+router.get('/', async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.class) filter.class = req.query.class;
+    if (req.query.classArm) filter.classArm = req.query.classArm;
+    if (req.query.academicSession) filter.academicSession = req.query.academicSession;
+
+    // Only select summary fields!
+    const students = await Student.find(filter)
+      .select('student_id surname firstname regNo class classArm photo academicSession')
+      .sort({ surname: 1, firstname: 1 });
+
+    res.json(students);
+  } catch (error) {
+    console.error('[GET STUDENTS ERROR]', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

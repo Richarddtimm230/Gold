@@ -14,7 +14,7 @@ const StudentSchema = new mongoose.Schema({
   photo: { type: String }, // Store URL or base64 string, or use Buffer for binary
 
   regNo: { type: String, required: true, unique: true }, // Admission/Registration Number
-  class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true },
+  class: { type: String, required: true },
   classArm: { type: String },
   previousSchool: { type: String },
   admissionDate: { type: Date },

@@ -410,10 +410,36 @@
         pwToggle.classList.add('fa-eye');
       }
     }
-    document.querySelector('.login-form').onsubmit = function(e) {
-      e.preventDefault();
-      // Implement actual login logic here
-      alert('Login submitted! (Connect to your backend)');
+    
+    document.querySelector('.login-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const emailOrReg = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const isEmail = emailOrReg.includes('@');
+  const body = isEmail
+    ? { email: emailOrReg, password }
+    : { regNo: emailOrReg, password };
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('token', data.token);
+    // Redirect by role
+    if (data.user.role === 'superadmin') {
+      window.location.href = "index.html";
+    } else if (data.user.role === 'admin') {
+      window.location.href = "admin-dashboard.html";
+    } else if (data.user.role === 'teacher') {
+      window.location.href = "teacher-dashboard.html";
+    } else {
+      window.location.href = "student-dashboard.html";
+    }
+  } else {
+    alert(data.error || 'Login failed');
+  }
     }
   </script>
 </body>

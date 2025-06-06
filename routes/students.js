@@ -7,12 +7,30 @@ const Student = require('../models/Student');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// Helper function for filtering students
+function buildStudentQuery(query) {
+  const filter = {};
+  if (query.class) filter.class = query.class;
+  if (query.classArm) filter.classArm = query.classArm;
+  if (query.academicSession) filter.academicSession = query.academicSession;
+  // Add accountStatus, subscriptionStatus here if needed, e.g. filter.accountStatus = query.accountStatus;
+  return filter;
+}
+
 // POST /api/students - enroll new student
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
-    // Handle photo upload (save to cloud or as base64, here just as buffer)
-    const photo = req.file ? req.file.buffer : undefined;
+    // Handle photo upload (save as buffer, or change to save URL if you use cloud upload)
+    let photo;
+    if (req.file) {
+      // Option 1: Save photo as buffer (not scalable for large images/db)
+      // photo = req.file.buffer;
+
+      // Option 2: Save as base64 (for small images)
+      photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+    // TODO: Hash password before saving in production!
     const student = new Student({
       surname: data.surname,
       firstname: data.firstname,
@@ -46,6 +64,20 @@ router.post('/', upload.single('photo'), async (req, res) => {
     });
     await student.save();
     res.status(201).json({ message: 'Student enrolled successfully!' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/students - retrieve students with optional filters
+router.get('/', async (req, res) => {
+  try {
+    const filter = buildStudentQuery(req.query);
+    // Optionally populate class name, adjust as needed if class is ObjectId
+    const students = await Student.find(filter)
+      .populate('class', 'name') // If using Class collection
+      .sort({ surname: 1, firstname: 1 });
+    res.json(students);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

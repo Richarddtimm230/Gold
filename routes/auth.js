@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Student = require('../models/Student');
+const Staff = require('../models/Staff'); // <-- Import Staff model
 
 // --- UNIFIED LOGIN ROUTE ---
 router.post('/login', async (req, res) => {
@@ -12,7 +13,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Email/registration number and password are required.' });
   }
   try {
-    // Try User (staff/admin/superadmin)
+    // 1. Try User (admin/superadmin)
     let user = null;
     if (email) {
       user = await User.findOne({ email });
@@ -42,7 +43,39 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Try Student (regNo or email)
+    // 2. Try Staff (by login_email or email)
+    let staff = null;
+    if (email) {
+      staff = await Staff.findOne({ login_email: email });
+      if (!staff) {
+        staff = await Staff.findOne({ email });
+      }
+    }
+    // Staff can ONLY login with email (not regNo)
+    if (staff && await bcrypt.compare(password, staff.login_password)) {
+      const token = jwt.sign(
+        {
+          id: staff._id,
+          role: staff.access_level || 'staff',
+          email: staff.login_email || staff.email
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        token,
+        user: {
+          id: staff._id,
+          name: `${staff.first_name} ${staff.last_name}`,
+          email: staff.login_email || staff.email,
+          role: staff.access_level || 'staff',
+          department: staff.department,
+          designation: staff.designation
+        }
+      });
+    }
+
+    // 3. Try Student (by regNo or studentEmail)
     let student = null;
     if (regNo) {
       student = await Student.findOne({ regNo });
@@ -86,13 +119,27 @@ async function authMiddleware(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Try fetching user (staff/admin)
+    // 1. Try fetching user (admin/superadmin)
     let user = await User.findById(decoded.id).select('-password');
     if (user) {
       req.user = user;
       return next();
     }
-    // Fallback: Try fetching student
+    // 2. Try fetching staff
+    let staff = await Staff.findById(decoded.id).select('-login_password');
+    if (staff) {
+      req.user = {
+        id: staff._id,
+        name: `${staff.first_name} ${staff.last_name}`,
+        email: staff.login_email || staff.email,
+        role: staff.access_level || 'staff',
+        department: staff.department,
+        designation: staff.designation
+        // Add more fields as needed
+      };
+      return next();
+    }
+    // 3. Fallback: Try fetching student
     let student = await Student.findById(decoded.id).select('-password');
     if (student) {
       req.user = {

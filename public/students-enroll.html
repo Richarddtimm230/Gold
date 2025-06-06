@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enroll Student | Gold and Linc Schools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="students.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+            <div>
+                <div class="name">RICHARD TIMOTHY</div>
+                <div class="role">System Administrator</div>
+            </div>
+        </div>
+        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <nav>
+            <a href="index.html"><span>🏠</span> Dashboard</a>
+            <a href="admission"><span>🎓</span> Admission</a>
+            <a href="people.html"><span>👥</span> People</a>
+            <a href="academics"><span>📚</span> Academics</a>
+            <a href="e-class"><span>💻</span> E-Class</a>
+            <a href="results.html"><span>📄</span> Results</a>
+            <a href="finance"><span>💰</span> Finance</a>
+            <a href="attendance"><span>🗓️</span> Attendance</a>
+            <a href="admin"><span>⚙️</span> Admin</a>
+        </nav>
+    </div>
+    <div class="main-content main-content-students">
+        <header>
+            <div class="school-title">
+                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+                <span>GOLD AND LINC SCHOOLS</span>
+            </div>
+            <div class="header-actions">
+                <span class="icon">🔔</span>
+                <span class="icon">❓</span>
+                <span class="icon">⚙️</span>
+                <span class="icon">🔍</span>
+            </div>
+        </header>
+    <div class="enroll-container">
+      <div class="enroll-header">
+        <div class="enroll-steps">
+          <span class="step step-active">1</span>
+          <span class="step-divider"></span>
+          <span class="step">2</span>
+          <span class="step-divider"></span>
+          <span class="step">3</span>
+        </div>
+        <div class="enroll-title">Enroll a New Student</div>
+      </div>
+      <form class="enroll-form" id="enroll-student-form" enctype="multipart/form-data">
+        <!-- Step 1: Personal Information -->
+        <div class="enroll-step" id="step-1">
+          <div class="form-photo-group">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" id="student-photo-preview" alt="Student Photo" class="student-photo">
+            <label class="photo-upload-label">
+              <input type="file" accept="image/*" id="student-photo" style="display:none">
+              <span>+ Upload Photo</span>
+            </label>
+          </div>
+          <div class="form-fields">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="surname">Surname *</label>
+                <input type="text" id="surname" name="surname" required>
+              </div>
+              <div class="form-group">
+                <label for="firstname">First Name *</label>
+                <input type="text" id="firstname" name="firstname" required>
+              </div>
+              <div class="form-group">
+                <label for="othernames">Other Names</label>
+                <input type="text" id="othernames" name="othernames">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="dob">Date of Birth *</label>
+                <input type="date" id="dob" name="dob" required>
+              </div>
+              <div class="form-group">
+                <label for="gender">Gender *</label>
+                <select id="gender" name="gender" required>
+                  <option value="">Select</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="nationality">Nationality</label>
+                <input type="text" id="nationality" name="nationality">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="state">State of Origin</label>
+                <input type="text" id="state" name="state">
+              </div>
+              <div class="form-group">
+                <label for="lga">LGA</label>
+                <input type="text" id="lga" name="lga">
+              </div>
+              <div class="form-group">
+                <label for="student-address">Home Address</label>
+                <input type="text" id="student-address" name="address">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Step 2: Academic Info & Parent/Guardian -->
+        <div class="enroll-step" id="step-2" style="display:none;">
+          <div class="form-fields">
+            <div class="step-section-title">Academic Information</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regno">Admission/Registration Number *</label>
+                <input type="text" id="regno" name="regNo" required>
+              </div>
+              <div class="form-group">
+                <label for="class">Class *</label>
+                <select id="class" name="class" required>
+                  <option value="">Select</option>
+                  <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+                  <option>SS1</option><option>SS2</option><option>SS3</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="class-arm">Class Arm/Section</label>
+                <input type="text" id="class-arm" name="classArm">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="prev-school">Previous School</label>
+                <input type="text" id="prev-school" name="previousSchool">
+              </div>
+              <div class="form-group">
+                <label for="admission-date">Admission Date</label>
+                <input type="date" id="admission-date" name="admissionDate">
+              </div>
+              <div class="form-group">
+                <label for="academic-session">Academic Session</label>
+                <select id="academic-session" name="academicSession">
+                  <option value="2024-2025">2024-2025</option>
+                  <option value="2023-2024">2023-2024</option>
+                </select>
+              </div>
+            </div>
+            <div class="step-section-title">Parent / Guardian Information</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="parent-name">Name *</label>
+                <input type="text" id="parent-name" name="parentName" required>
+              </div>
+              <div class="form-group">
+                <label for="parent-relationship">Relationship *</label>
+                <input type="text" id="parent-relationship" name="parentRelationship" required>
+              </div>
+              <div class="form-group">
+                <label for="parent-phone">Phone Number *</label>
+                <input type="tel" id="parent-phone" name="parentPhone" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="parent-email">Parent Email</label>
+                <input type="email" id="parent-email" name="parentEmail">
+              </div>
+              <div class="form-group">
+                <label for="parent-address">Parent Address</label>
+                <input type="text" id="parent-address" name="parentAddress">
+              </div>
+              <div class="form-group">
+                <label for="parent-occupation">Occupation</label>
+                <input type="text" id="parent-occupation" name="parentOccupation">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Step 3: Contact & Health -->
+        <div class="enroll-step" id="step-3" style="display:none;">
+          <div class="form-fields">
+            <div class="step-section-title">Student Contact & Health</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="student-email">Student Email</label>
+                <input type="email" id="student-email" name="studentEmail">
+              </div>
+              <div class="form-group">
+                <label for="student-phone">Student Phone Number</label>
+                <input type="tel" id="student-phone" name="studentPhone">
+              </div>
+              <div class="form-group">
+                <label for="religion">Religion</label>
+                <input type="text" id="religion" name="religion">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="blood-group">Blood Group</label>
+                <input type="text" id="blood-group" name="bloodGroup">
+              </div>
+              <div class="form-group">
+                <label for="genotype">Genotype</label>
+                <input type="text" id="genotype" name="genotype">
+              </div>
+              <div class="form-group">
+                <label for="medical">Medical Conditions/Allergies</label>
+                <input type="text" id="medical" name="medical">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" required>
+                <div class="checkbox-inline">
+                  <input type="checkbox" id="auto-pass">
+                  <label for="auto-pass">Auto Generate Password</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="enroll-actions">
+          <button type="button" class="btn-back" id="back-btn" style="display:none;">Back</button>
+          <button type="button" class="btn-next" id="next-btn">Next</button>
+          <button type="submit" class="btn-next" id="submit-btn" style="display:none;">Submit</button>
+        </div>
+      </form>
+      <div class="enroll-success" id="enroll-success" style="display:none;">
+        <h3>✅ Student enrolled successfully!</h3>
+      </div>
+    </div>
+  </div>
+  <div class="support-tab">Support</div>
+  <div class="eclass-fab">e-Class</div>
+  <script>
+    // Stepper logic
+    let currentStep = 1;
+    const steps = [1,2,3];
+    function showStep(step) {
+      steps.forEach(s => {
+        document.getElementById('step-'+s).style.display = (s===step) ? 'flex' : 'none';
+        document.querySelectorAll('.step')[s-1].classList.toggle('step-active', s===step);
+      });
+      document.getElementById('back-btn').style.display = (step>1)?'inline-block':'none';
+      document.getElementById('next-btn').style.display = (step<3)?'inline-block':'none';
+      document.getElementById('submit-btn').style.display = (step===3)?'inline-block':'none';
+    }
+    document.getElementById('next-btn').onclick = function() { if(validateStep(currentStep)){ currentStep++; showStep(currentStep);} };
+    document.getElementById('back-btn').onclick = function() { currentStep--; showStep(currentStep); };
+    showStep(currentStep);
+
+    // Photo preview
+    document.getElementById('student-photo').onchange = function(e) {
+      if(this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e2 => document.getElementById('student-photo-preview').src = e2.target.result;
+        reader.readAsDataURL(this.files[0]);
+      }
+    };
+
+    // Auto-generate password
+    document.getElementById('auto-pass').onchange = function() {
+      if(this.checked) {
+        document.getElementById('password').value = generatePassword();
+      } else {
+        document.getElementById('password').value = '';
+      }
+    };
+    function generatePassword() {
+      return Math.random().toString(36).slice(-8) + Math.floor(Math.random()*100);
+    }
+
+    // Form validation for step progression
+    function validateStep(step) {
+      const form = document.getElementById('enroll-student-form');
+      if(step===1) {
+        // Surname, First Name, DOB, Gender required
+        return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
+      }
+      if(step===2) {
+        return form.regNo.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
+      }
+      return true;
+    }
+
+    // Submit handler
+    document.getElementById('enroll-student-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      // Add photo if attached
+      const photoInput = document.getElementById('student-photo');
+      if(photoInput.files.length) formData.append('photo', photoInput.files[0]);
+      // API call
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        body: formData
+      });
+      if(res.ok) {
+        form.style.display='none';
+        document.getElementById('enroll-success').style.display='block';
+      } else {
+        alert('Failed to enroll student');
+      }
+    };
+  </script>
+</body>
+</html>

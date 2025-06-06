@@ -21,7 +21,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
     // Required field list
     const required = [
       'surname', 'firstname', 'dob', 'gender',
-      'regNo', 'className', 'parentName',
+      'regNo', 'class', 'parentName',
       'parentRelationship', 'parentPhone', 'password'
     ];
 
@@ -73,7 +73,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       address: data.address,
       photo,
       regNo: data.regNo,
-      className: data.className,
+      class: data.class,
       classArm: data.classArm,
       previousSchool: data.previousSchool,
       admissionDate,
@@ -111,7 +111,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    if (req.query.className) filter.className = req.query.className;
+    if (req.query.class) filter.class = req.query.class;
     if (req.query.classArm) filter.classArm = req.query.classArm;
     if (req.query.academicSession) filter.academicSession = req.query.academicSession;
 

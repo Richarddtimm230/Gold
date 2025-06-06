@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gold and Linc Schools - People</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="people.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+            <div>
+                <div class="name">RICHARD TIMOTHY</div>
+                <div class="role">System Administrator</div>
+            </div>
+        </div>
+        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <nav>
+            <a href="index.html"><span>🏠</span> Dashboard</a>
+            <a href="admission"><span>🎓</span> Admission</a>
+            <a class="active" href="people.html"><span>👥</span> People</a>
+            <a href="academics"><span>📚</span> Academics</a>
+            <a href="e-class"><span>💻</span> E-Class</a>
+            <a href="results.html"><span>📄</span> Results</a>
+            <a href="finance"><span>💰</span> Finance</a>
+            <a href="attendance"><span>🗓️</span> Attendance</a>
+            <a href="admin"><span>⚙️</span> Admin</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <header>
+            <div class="school-title">
+                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+                <span>GOLD AND LINC SCHOOLS</span>
+            </div>
+            <div class="header-actions">
+                <span class="icon">🔔</span>
+                <span class="icon">❓</span>
+                <span class="icon">⚙️</span>
+                <span class="icon">🔍</span>
+            </div>
+        </header>
+        <h2>People</h2>
+        <div class="people-sections">
+            <!-- STUDENTS SECTION -->
+            <div class="people-section">
+                <button class="section-toggle" data-section="students">
+                    <span>🧑‍🎓</span> Students <span class="arrow">&#9660;</span>
+                </button>
+                <div class="section-content" id="students-section">
+                    <input type="text" class="sub-search" placeholder="Search student...">
+                    <ul class="section-list">
+                        <li>View Students</li>
+                        <li>Enroll Student</li>
+                        <li>Bulk-enroll Students (Excel Import)</li>
+                        <li>Students Promotion / Class Transfer / Graduation</li>
+                        <li>Student Tags</li>
+                        <li>Graduated (Alumni)</li>
+                        <li>Communication Book</li>
+                        <li>Birthday Anniversaries</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PARENTS SECTION -->
+            <div class="people-section">
+                <button class="section-toggle" data-section="parents">
+                    <span>👪</span> Parents <span class="arrow">&#9660;</span>
+                </button>
+                <div class="section-content" id="parents-section">
+                    <ul class="section-list">
+                        <li>Parents / Guardians</li>
+                        <li>Families</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- STAFF SECTION -->
+            <div class="people-section">
+                <button class="section-toggle" data-section="staff">
+                    <span>👔</span> Staff / Employees <span class="arrow">&#9660;</span>
+                </button>
+                <div class="section-content" id="staff-section">
+                    <ul class="section-list">
+                        <li>Teachers</li>
+                        <li>Bursary Officer / Accountant</li>
+                        <li>Librarian</li>
+                        <li>Registrar / Admission Officer</li>
+                        <li>Hostel Manager</li>
+                        <li>Transport Manager</li>
+                        <li>General Staff / Others</li>
+                        <li>Administrator</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="support-tab">Support</div>
+    <div class="eclass-fab">e-Class</div>
+    <script>
+        // Section expand/collapse logic
+        document.querySelectorAll('.section-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                const content = document.getElementById(section + '-section');
+                const arrow = this.querySelector('.arrow');
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                    arrow.innerHTML = '&#9660;';
+                } else {
+                    document.querySelectorAll('.section-content').forEach(sc => sc.style.display = 'none');
+                    document.querySelectorAll('.arrow').forEach(a => a.innerHTML = '&#9660;');
+                    content.style.display = 'block';
+                    arrow.innerHTML = '&#9650;';
+                }
+            });
+        });
+        // Open Students section by default
+        document.getElementById('students-section').style.display = 'block';
+        document.querySelector('.section-toggle[data-section="students"] .arrow').innerHTML = '&#9650;';
+    </script>
+</body>
+</html>

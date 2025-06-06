@@ -30,6 +30,18 @@ app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/students', studentsRoute); // <-- ADDED
+// Example (Node.js with Express)
+app.get('/api/staff', (req, res) => {
+  // Return list of staff
+});
+
+app.get('/api/staff/:id', (req, res) => {
+  // Return details for a single staff member
+});
+
+app.post('/api/staff', (req, res) => {
+  // Handle staff enrollment
+});
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -1,3 +1,13 @@
+// In index.html
+(async function(){
+  const token = localStorage.getItem('token');
+  if (!token) return window.location.href = 'login.html';
+  const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+  if (!res.ok) return window.location.href = 'login.html';
+  const user = await res.json();
+  if (user.role !== 'superadmin') window.location.href = 'login.html';
+  // else, allow access
+})();
 
 // Chart.js configuration for Monthly Finance Summary
 document.addEventListener('DOMContentLoaded', function () {

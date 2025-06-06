@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="people.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
 </head>
 <body>
     <div class="sidebar">
@@ -29,7 +30,7 @@
             <a href="admin"><span>⚙️</span> Admin</a>
         </nav>
     </div>
-    <div class="main-content">
+    <div class="main-content main-content-people">
         <header>
             <div class="school-title">
                 <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
@@ -42,84 +43,54 @@
                 <span class="icon">🔍</span>
             </div>
         </header>
-        <h2>People</h2>
-        <div class="people-sections">
+        <h2 class="people-title"><span>👥</span> People Directory</h2>
+        <div class="people-grid">
             <!-- STUDENTS SECTION -->
-            <div class="people-section">
-                <button class="section-toggle" data-section="students">
-                    <span>🧑‍🎓</span> Students <span class="arrow">&#9660;</span>
-                </button>
-                <div class="section-content" id="students-section">
-                    <input type="text" class="sub-search" placeholder="Search student...">
-                    <ul class="section-list">
-                        <li>View Students</li>
-                        <li>Enroll Student</li>
-                        <li>Bulk-enroll Students (Excel Import)</li>
-                        <li>Students Promotion / Class Transfer / Graduation</li>
-                        <li>Student Tags</li>
-                        <li>Graduated (Alumni)</li>
-                        <li>Communication Book</li>
-                        <li>Birthday Anniversaries</li>
-                    </ul>
+            <div class="people-card">
+                <div class="card-header students"><span>🧑‍🎓</span> Students</div>
+                <div class="card-body">
+                    <input type="text" class="sub-search" placeholder="Search students...">
+                    <div class="features-list">
+                        <a href="students-view.html" class="feature-link"><span>📋</span> View Students</a>
+                        <a href="students-enroll.html" class="feature-link"><span>➕</span> Enroll Student</a>
+                        <a href="students-bulk.html" class="feature-link"><span>🗂️</span> Bulk-enroll (Excel Import)</a>
+                        <a href="students-promotion.html" class="feature-link"><span>🎯</span> Promotion / Class Transfer / Graduation</a>
+                        <a href="students-tags.html" class="feature-link"><span>🏷️</span> Student Tags</a>
+                        <a href="students-alumni.html" class="feature-link"><span>🎓</span> Graduated (Alumni)</a>
+                        <a href="students-commbook.html" class="feature-link"><span>💬</span> Communication Book</a>
+                        <a href="students-birthdays.html" class="feature-link"><span>🎂</span> Birthday Anniversaries</a>
+                    </div>
                 </div>
             </div>
-
             <!-- PARENTS SECTION -->
-            <div class="people-section">
-                <button class="section-toggle" data-section="parents">
-                    <span>👪</span> Parents <span class="arrow">&#9660;</span>
-                </button>
-                <div class="section-content" id="parents-section">
-                    <ul class="section-list">
-                        <li>Parents / Guardians</li>
-                        <li>Families</li>
-                    </ul>
+            <div class="people-card">
+                <div class="card-header parents"><span>👪</span> Parents</div>
+                <div class="card-body">
+                    <div class="features-list">
+                        <a href="parents-list.html" class="feature-link"><span>👨‍👩‍👧‍👦</span> Parents / Guardians</a>
+                        <a href="families.html" class="feature-link"><span>🏡</span> Families</a>
+                    </div>
                 </div>
             </div>
-
             <!-- STAFF SECTION -->
-            <div class="people-section">
-                <button class="section-toggle" data-section="staff">
-                    <span>👔</span> Staff / Employees <span class="arrow">&#9660;</span>
-                </button>
-                <div class="section-content" id="staff-section">
-                    <ul class="section-list">
-                        <li>Teachers</li>
-                        <li>Bursary Officer / Accountant</li>
-                        <li>Librarian</li>
-                        <li>Registrar / Admission Officer</li>
-                        <li>Hostel Manager</li>
-                        <li>Transport Manager</li>
-                        <li>General Staff / Others</li>
-                        <li>Administrator</li>
-                    </ul>
+            <div class="people-card">
+                <div class="card-header staff"><span>👔</span> Staff / Employees</div>
+                <div class="card-body">
+                    <div class="features-list">
+                        <a href="staff-teachers.html" class="feature-link"><span>👩‍🏫</span> Teachers</a>
+                        <a href="staff-bursary.html" class="feature-link"><span>💼</span> Bursary Officer / Accountant</a>
+                        <a href="staff-librarian.html" class="feature-link"><span>📚</span> Librarian</a>
+                        <a href="staff-registrar.html" class="feature-link"><span>🗂️</span> Registrar / Admission Officer</a>
+                        <a href="staff-hostel.html" class="feature-link"><span>🏨</span> Hostel Manager</a>
+                        <a href="staff-transport.html" class="feature-link"><span>🚌</span> Transport Manager</a>
+                        <a href="staff-general.html" class="feature-link"><span>👷</span> General Staff / Others</a>
+                        <a href="staff-admin.html" class="feature-link"><span>🛠️</span> Administrator</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="support-tab">Support</div>
     <div class="eclass-fab">e-Class</div>
-    <script>
-        // Section expand/collapse logic
-        document.querySelectorAll('.section-toggle').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const section = this.getAttribute('data-section');
-                const content = document.getElementById(section + '-section');
-                const arrow = this.querySelector('.arrow');
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                    arrow.innerHTML = '&#9660;';
-                } else {
-                    document.querySelectorAll('.section-content').forEach(sc => sc.style.display = 'none');
-                    document.querySelectorAll('.arrow').forEach(a => a.innerHTML = '&#9660;');
-                    content.style.display = 'block';
-                    arrow.innerHTML = '&#9650;';
-                }
-            });
-        });
-        // Open Students section by default
-        document.getElementById('students-section').style.display = 'block';
-        document.querySelector('.section-toggle[data-section="students"] .arrow').innerHTML = '&#9650;';
-    </script>
 </body>
-</html>
+                    </html>

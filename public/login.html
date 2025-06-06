@@ -402,7 +402,8 @@
   </div>
   <script>
 document.addEventListener('DOMContentLoaded', function() {
-  function togglePw() {
+  // Toggle password visibility
+  window.togglePw = function() {
     const pwInput = document.getElementById('password');
     const pwToggle = document.querySelector('.toggle-pw i');
     if (pwInput.type === "password") {
@@ -414,73 +415,78 @@ document.addEventListener('DOMContentLoaded', function() {
       pwToggle.classList.remove('fa-eye-slash');
       pwToggle.classList.add('fa-eye');
     }
-  }
-
-  window.togglePw = togglePw; // allow onclick="togglePw()"
+  };
 
   const loginForm = document.querySelector('.login-form');
   if (!loginForm) {
     console.error('No form with class .login-form found!');
     return;
   }
-  loginForm.onsubmit = async function(e) {
-  e.preventDefault();
-  
-  const emailOrReg = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const spinner = document.getElementById('spinner');
-  const submitBtn = loginForm.querySelector('button[type="submit"]');
+  loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-  // Reset UI states
-  spinner.style.display = 'none';
-  submitBtn.disabled = false;
-  submitBtn.style.opacity = '1';
+    const emailOrReg = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const spinner = document.getElementById('spinner');
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
 
-  if (!emailOrReg || !password) {
-    alert('Please fill in all fields.');
-    return;
-  }
-
-  const isEmail = emailOrReg.includes('@');
-  const body = isEmail
-    ? { email: emailOrReg, password }
-    : { regNo: emailOrReg, password };
-
-  spinner.style.display = 'block';
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.6';
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json();
-
-    if (res.ok && data?.token) {
-      localStorage.setItem('token', data.token);
-      const role = data.user?.role || 'student';
-      switch (role) {
-        case 'superadmin': window.location.href = 'index.html'; break;
-        case 'admin': window.location.href = 'admin-dashboard.html'; break;
-        case 'teacher': window.location.href = 'teacher-dashboard.html'; break;
-        default: window.location.href = 'student-dashboard.html'; break;
-      }
-    } else {
-      alert(data?.error || 'Invalid login credentials');
-    }
-  } catch (err) {
-    console.error('[Login Error]', err);
-    alert('Network or server error');
-  } finally {
+    // Reset UI states
     spinner.style.display = 'none';
     submitBtn.disabled = false;
     submitBtn.style.opacity = '1';
-  }
-};
 
+    if (!emailOrReg || !password) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    const isEmail = emailOrReg.includes('@');
+    const body = isEmail
+      ? { email: emailOrReg, password }
+      : { regNo: emailOrReg, password };
+
+    spinner.style.display = 'block';
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      // Defensive: If server doesn't return JSON, handle gracefully
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (err) {
+        alert('Server error: Invalid JSON response');
+        return;
+      }
+
+      if (res.ok && data?.token) {
+        localStorage.setItem('token', data.token);
+        const role = data.user?.role || 'student';
+        switch (role) {
+          case 'superadmin': window.location.href = 'index.html'; break;
+          case 'admin': window.location.href = 'admin-dashboard.html'; break;
+          case 'teacher': window.location.href = 'teacher-dashboard.html'; break;
+          default: window.location.href = 'student-dashboard.html'; break;
+        }
+      } else {
+        alert(data?.error || 'Invalid login credentials');
+      }
+    } catch (err) {
+      console.error('[Login Error]', err);
+      alert('Network or server error');
+    } finally {
+      spinner.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    }
+  });
+});
 </script>
 </body>
 </html>

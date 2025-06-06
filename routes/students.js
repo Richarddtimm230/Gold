@@ -1,40 +1,38 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const bcrypt = require('bcrypt');
 const Student = require('../models/Student');
 
 // Multer setup for photo uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Utility: generate student_id if needed
+// Utility: generate student_id
 function generateStudentId() {
-  return 'STU' + Math.floor(100000 + Math.random() * 900000); // e.g., STU123456
+  return 'STU' + Math.floor(100000 + Math.random() * 900000);
 }
 
-// POST /api/students - enroll new student
+// POST /api/students - enroll a new student
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
 
-    // Validate required fields (add/remove as per your schema)
-    const required = ['surname', 'firstname', 'dob', 'gender', 'regNo', 'class', 'parentName', 'parentRelationship', 'parentPhone', 'password'];
+    // Required field list
+    const required = [
+      'surname', 'firstname', 'dob', 'gender',
+      'regNo', 'className', 'parentName',
+      'parentRelationship', 'parentPhone', 'password'
+    ];
+
+    // Validate required fields
     for (const field of required) {
-      if (!data[field] || data[field].trim() === "") {
+      if (
+        !data[field] ||
+        (typeof data[field] === 'string' && data[field].trim() === '')
+      ) {
         return res.status(400).json({ error: `Missing required field: ${field}` });
       }
-    }
-
-    // If student_id is required and not supplied, generate one
-    let student_id = data.student_id;
-    if (!student_id) {
-      student_id = generateStudentId();
-    }
-
-    // Handle photo
-    let photo;
-    if (req.file) {
-      photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
     // Ensure regNo and student_id are unique
@@ -42,12 +40,26 @@ router.post('/', upload.single('photo'), async (req, res) => {
     if (regNoExists) {
       return res.status(400).json({ error: 'A student with that registration number already exists.' });
     }
+
+    let student_id = data.student_id || generateStudentId();
     const studentIdExists = await Student.findOne({ student_id });
     if (studentIdExists) {
       return res.status(400).json({ error: 'A student with that student ID already exists.' });
     }
 
-    // Create new student
+    // Hash password
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Convert admission date to Date object if provided
+    const admissionDate = data.admissionDate ? new Date(data.admissionDate) : undefined;
+
+    // Handle photo
+    let photo;
+    if (req.file) {
+      photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+
+    // Create new student document
     const student = new Student({
       student_id,
       surname: data.surname,
@@ -61,10 +73,10 @@ router.post('/', upload.single('photo'), async (req, res) => {
       address: data.address,
       photo,
       regNo: data.regNo,
-      class: data.class,
+      className: data.className,
       classArm: data.classArm,
       previousSchool: data.previousSchool,
-      admissionDate: data.admissionDate,
+      admissionDate,
       academicSession: data.academicSession,
       parentName: data.parentName,
       parentRelationship: data.parentRelationship,
@@ -78,12 +90,13 @@ router.post('/', upload.single('photo'), async (req, res) => {
       bloodGroup: data.bloodGroup,
       genotype: data.genotype,
       medical: data.medical,
-      password: data.password, // Hash in production!
+      password: hashedPassword
     });
+
     await student.save();
     res.status(201).json({ message: 'Student enrolled successfully!' });
   } catch (error) {
-    console.error('[ENROLL ERROR]', error); // This shows up in Render logs!
+    console.error('[ENROLL ERROR]', error);
     if (error.name === 'ValidationError') {
       return res.status(400).json({ error: error.message });
     }
@@ -94,18 +107,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
-// GET /api/students - retrieve students with optional filters
+// GET /api/students - retrieve all students with filters
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    if (req.query.class) filter.class = req.query.class;
+    if (req.query.className) filter.className = req.query.className;
     if (req.query.classArm) filter.classArm = req.query.classArm;
     if (req.query.academicSession) filter.academicSession = req.query.academicSession;
-    // Add more filters as needed
 
     const students = await Student.find(filter)
-      .populate('class', 'name')
       .sort({ surname: 1, firstname: 1 });
+
     res.json(students);
   } catch (error) {
     console.error('[GET STUDENTS ERROR]', error);

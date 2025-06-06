@@ -102,7 +102,7 @@
               <div class="form-group"><label>Registration Number *</label><input type="text" name="regNo" required /></div>
               <div class="form-group">
                 <label>Class *</label>
-                <select name="className" required>
+                <select name="class" required>
                   <option value="">Select</option>
                   <option>JSS1</option><option>JSS2</option><option>JSS3</option>
                   <option>SS1</option><option>SS2</option><option>SS3</option>
@@ -227,7 +227,7 @@
     function validateStep(step) {
       const form = document.forms[0];
       if (step === 1) return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
-      if (step === 2) return form.regNo.value && form.className.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
+      if (step === 2) return form.regNo.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
       return true;
     }
 

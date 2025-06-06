@@ -6,6 +6,63 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="result.css">
     <link rel="stylesheet" href="upload-results.css">
+    <style>
+        .manual-upload-table-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    padding: 14px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+}
+#manualResultsTable input[type="text"],
+#manualResultsTable input[type="number"] {
+    width: 97%;
+    padding: 6px 4px;
+    font-size: 15px;
+    border-radius: 4px;
+    border: 1px solid #dde3ec;
+}
+.remove-row-btn {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 15px;
+}
+.remove-row-btn:hover {
+    background: #b52b37;
+}
+#addRowBtn {
+    margin-top: 8px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 22px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 500;
+}
+#addRowBtn:hover {
+    background: #0056b3;
+}
+.results-actions-btn {
+    background: #20c997;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.results-actions-btn:hover {
+    background: #157a6e;
+}
+    </style>
 </head>
 <body>
     <div class="sidebar">

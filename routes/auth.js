@@ -47,7 +47,7 @@ router.post('/login', async (req, res) => {
 });
 
 // --- AUTH MIDDLEWARE ---
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No token provided.' });
@@ -55,11 +55,20 @@ function authMiddleware(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    // Fetch fresh user data; don't expose password
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) return res.status(401).json({ error: 'User not found.' });
+    req.user = user;
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid or expired token.' });
   }
 }
+
+// --- GET CURRENT USER ROUTE ---
+router.get('/me', authMiddleware, (req, res) => {
+  // req.user is set by authMiddleware and does not include password
+  res.json(req.user);
+});
 
 module.exports = { router, authMiddleware };

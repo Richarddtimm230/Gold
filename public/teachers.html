@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Staff Enrollment | School Admin</title>
+  <title>Staff Management | School Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html,body{margin:0;padding:0;background:#f7fafc;font-family:"Segoe UI",Arial,sans-serif;}
     .enroll-container{
-      max-width: 900px; margin: 40px auto 30px auto; background:#fff; border-radius:10px;
+      max-width: 950px; margin: 40px auto 30px auto; background:#fff; border-radius:10px;
       box-shadow:0 3px 18px rgba(0,0,0,0.06); padding:32px 18px 24px 18px;
     }
     h2{margin-top:0;text-align:center;color:#007bff;}
@@ -46,24 +46,56 @@
       .enroll-container {padding:18px 2vw 18px 2vw;}
     }
     .note{font-size:14px;color:#888;margin-bottom:9px;}
+    /* Staff List */
+    .staff-list-section{padding:0 10px 10px 10px;}
+    .staff-list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .staff-search{padding:6px 12px;border-radius:5px;border:1px solid #d9dee3;font-size:15px;width:240px;}
+    .staff-table{width:100%;border-collapse:collapse;}
+    .staff-table th,.staff-table td{padding:8px 6px;text-align:left;}
+    .staff-table th{background:#f1f3f7;}
+    .staff-table tr{transition:background .08s;}
+    .staff-table tr:hover{background:#f0f6ff;cursor:pointer;}
+    .staff-avatar{width:38px;height:38px;border-radius:6px;object-fit:cover;background:#f4f4f4;}
+    /* Modal */
+    .modal-overlay{
+      display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999;
+      background:rgba(0,0,0,0.27);align-items:center;justify-content:center;
+    }
+    .modal-overlay.active{display:flex;}
+    .modal-content{
+      background:#fff;border-radius:10px;box-shadow:0 5px 32px rgba(0,0,0,0.17);
+      padding:26px 30px 18px 30px;max-width:480px;width:96vw;max-height:94vh;overflow-y:auto;position:relative;
+      animation:popIn .21s cubic-bezier(.3,1.7,.7,.7);
+    }
+    @keyframes popIn{from{transform:scale(.95);opacity:.2;}to{transform:scale(1);opacity:1;}}
+    .modal-close{position:absolute;top:12px;right:16px;font-size:22px;color:#888;cursor:pointer;}
+    .modal-photo{width:90px;height:90px;border-radius:11px;object-fit:cover;background:#f8fafc;margin-bottom:10px;}
+    .modal-details{margin-bottom:6px;}
+    .modal-details label{display:block;font-weight:600;margin-bottom:1px;}
+    .modal-details span{display:block;margin-bottom:5px;}
+    .modal-title{font-size:22px;font-weight:700;color:#007bff;margin-bottom:4px;}
+    .modal-section{margin-bottom:13px;}
+    .modal-section-title{font-size:15px;font-weight:600;color:#555;margin-bottom:2px;}
+    .empty-staff-list{color:#888;text-align:center;padding:30px;font-size:15px;}
   </style>
 </head>
 <body>
 <div class="enroll-container">
-  <h2>Staff Enrollment Form</h2>
+  <h2>Staff Management</h2>
   <div class="form-tabs">
-    <button class="form-tab active" data-tab="basic">Basic Details</button>
-    <button class="form-tab" data-tab="contact">Contact</button>
-    <button class="form-tab" data-tab="employment">Employment</button>
-    <button class="form-tab" data-tab="identity">Identification</button>
-    <button class="form-tab" data-tab="kin">Next of Kin</button>
-    <button class="form-tab" data-tab="bank">Bank Details</button>
-    <button class="form-tab" data-tab="emergency">Emergency</button>
-    <button class="form-tab" data-tab="login">Login</button>
+    <button class="form-tab active" data-tab="enroll">Enroll Staff</button>
+    <button class="form-tab" data-tab="view">View Staff</button>
   </div>
-  <form id="staffEnrollForm" enctype="multipart/form-data" autocomplete="off">
-    <!-- Basic Details -->
-    <div class="form-section active" id="tab-basic">
+  <!-- Enroll Staff Section -->
+  <div class="form-section active" id="tab-enroll">
+    <form id="staffEnrollForm" enctype="multipart/form-data" autocomplete="off">
+      <!-- ... (keep your existing enrollment form here, unchanged) ... -->
+      <!-- (For brevity, not repeating the form markup, copy from your existing teachers.html) -->
+      <!-- >>>>> COPY THE FULL FORM FROM THE ORIGINAL teachers.html HERE <<<<< -->
+      <!-- ... -->
+      <!-- Paste the entire enrollment form markup here, unchanged ... -->
+      <!-- ... (end of enrollment form) ... -->
+      <!-- Start of original form content -->
       <div class="form-row">
         <div class="form-group" style="max-width:140px;align-items:center;">
           <label>Photo</label>
@@ -117,9 +149,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <!-- Contact Information -->
-    <div class="form-section" id="tab-contact">
       <div class="form-row">
         <div class="form-group">
           <label>Home Address</label>
@@ -136,9 +165,6 @@
           <input type="email" name="email" required>
         </div>
       </div>
-    </div>
-    <!-- Employment -->
-    <div class="form-section" id="tab-employment">
       <div class="form-row">
         <div class="form-group">
           <label>Designation</label>
@@ -195,9 +221,6 @@
           <input type="text" name="specialization" placeholder="e.g. English, Mathematics">
         </div>
       </div>
-    </div>
-    <!-- Identification -->
-    <div class="form-section" id="tab-identity">
       <div class="note">Provide at least one valid identification.</div>
       <div class="form-row">
         <div class="form-group">
@@ -221,9 +244,6 @@
           <input type="file" name="id_upload" accept="image/*,application/pdf">
         </div>
       </div>
-    </div>
-    <!-- Next of Kin -->
-    <div class="form-section" id="tab-kin">
       <div class="form-row">
         <div class="form-group">
           <label>Full Name</label>
@@ -244,9 +264,6 @@
           <input type="text" name="kin_address">
         </div>
       </div>
-    </div>
-    <!-- Bank Details -->
-    <div class="form-section" id="tab-bank">
       <div class="form-row">
         <div class="form-group">
           <label>Bank Name</label>
@@ -271,9 +288,6 @@
           <input type="text" name="tax_id" placeholder="Optional">
         </div>
       </div>
-    </div>
-    <!-- Emergency Contact -->
-    <div class="form-section" id="tab-emergency">
       <div class="form-row">
         <div class="form-group">
           <label>Full Name</label>
@@ -288,9 +302,6 @@
           <input type="text" name="emergency_relationship" required>
         </div>
       </div>
-    </div>
-    <!-- Login Details -->
-    <div class="form-section" id="tab-login">
       <div class="form-row">
         <div class="form-group">
           <label>Email (for portal login)</label>
@@ -317,8 +328,28 @@
       <div class="form-actions">
         <button type="submit">Submit Enrollment</button>
       </div>
+      <!-- End of original form content -->
+    </form>
+  </div>
+  <!-- View Staff Section -->
+  <div class="form-section staff-list-section" id="tab-view">
+    <div class="staff-list-header">
+      <div style="font-size:17px;font-weight:600;color:#007bff;">All Staff</div>
+      <input type="text" class="staff-search" id="staffSearch" placeholder="Search staff...">
     </div>
-  </form>
+    <div id="staffList">
+      <div class="empty-staff-list">Loading staff...</div>
+    </div>
+  </div>
+</div>
+<!-- Staff Details Modal -->
+<div class="modal-overlay" id="staffModal">
+  <div class="modal-content" id="staffModalContent">
+    <span class="modal-close" id="modalCloseBtn">&times;</span>
+    <div id="modalBody">
+      <!-- Dynamic content goes here -->
+    </div>
+  </div>
 </div>
 <script>
   // Tab navigation
@@ -329,10 +360,11 @@
       document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
       document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
       window.scrollTo(0,0);
+      if(tab.dataset.tab === 'view') loadStaffList();
     }
   });
 
-  // Photo uploader
+  // Photo uploader (enroll form)
   document.getElementById('photoInput').onchange = function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -345,7 +377,7 @@
     reader.readAsDataURL(file);
   };
 
-  // Actual backend submit handler
+  // Submit handler (enroll form)
   document.getElementById('staffEnrollForm').onsubmit = async function(e) {
     e.preventDefault();
 
@@ -377,9 +409,9 @@
         document.getElementById('photoPlaceholder').style.display = '';
         // Return to first tab
         document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
-        document.querySelector('.form-tab[data-tab="basic"]').classList.add('active');
+        document.querySelector('.form-tab[data-tab="enroll"]').classList.add('active');
         document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
-        document.getElementById('tab-basic').classList.add('active');
+        document.getElementById('tab-enroll').classList.add('active');
       }
     } catch (err) {
       alert('Network or server error: ' + err.message);
@@ -388,6 +420,158 @@
       submitBtn.disabled = false;
     }
   }
+
+  // -------- STAFF LIST + MODAL --------
+  let staffDataCache = [];
+
+  async function loadStaffList() {
+    const staffListDiv = document.getElementById('staffList');
+    staffListDiv.innerHTML = '<div class="empty-staff-list">Loading staff...</div>';
+    try {
+      const resp = await fetch('/api/staff');
+      if (!resp.ok) throw new Error('Failed to fetch staff list');
+      const staff = await resp.json();
+      staffDataCache = staff;
+      renderStaffList(staff);
+    } catch (err) {
+      staffListDiv.innerHTML = '<div class="empty-staff-list">Could not load staff. Please try again.</div>';
+    }
+  }
+
+  function renderStaffList(staff) {
+    const staffListDiv = document.getElementById('staffList');
+    if (!staff || staff.length === 0) {
+      staffListDiv.innerHTML = '<div class="empty-staff-list">No staff found.</div>';
+      return;
+    }
+    let html = '<table class="staff-table"><thead><tr><th></th><th>Name</th><th>Designation</th><th>Department</th></tr></thead><tbody>';
+    for(const s of staff) {
+      html += `<tr data-id="${s.id}">
+        <td><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=007bff&color=fff'}" class="staff-avatar" alt="Staff"></td>
+        <td>${s.first_name || ''} ${s.last_name || ''}</td>
+        <td>${s.designation || ''}</td>
+        <td>${s.department || ''}</td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    staffListDiv.innerHTML = html;
+    // Add click handlers
+    staffListDiv.querySelectorAll('tbody tr').forEach(row=>{
+      row.onclick = ()=>showStaffModal(row.dataset.id);
+    });
+  }
+
+  // Staff search
+  document.getElementById('staffSearch').oninput = function() {
+    const q = this.value.trim().toLowerCase();
+    const filtered = staffDataCache.filter(s =>
+      ((s.first_name||'') + ' ' + (s.last_name||'')).toLowerCase().includes(q) ||
+      (s.designation||'').toLowerCase().includes(q) ||
+      (s.department||'').toLowerCase().includes(q)
+    );
+    renderStaffList(filtered);
+  };
+
+  // Modal logic
+  const staffModal = document.getElementById('staffModal');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  modalCloseBtn.onclick = ()=>{ staffModal.classList.remove('active'); };
+  staffModal.onclick = function(e){ if(e.target===staffModal) staffModal.classList.remove('active'); };
+
+  async function showStaffModal(id) {
+    const modalBody = document.getElementById('modalBody');
+    modalBody.innerHTML = '<div style="text-align:center;padding:36px;">Loading...</div>';
+    staffModal.classList.add('active');
+    try {
+      // Fetch staff details
+      const resp = await fetch(`/api/staff/${id}`);
+      if (!resp.ok) throw new Error('Failed to fetch staff details');
+      const s = await resp.json();
+      // Compose modal content
+      modalBody.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px;">
+          <img class="modal-photo" src="${s.photo_url||'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=007bff&color=fff'}" alt="Staff Photo">
+          <div class="modal-title">${s.first_name||''} ${s.last_name||''}</div>
+          <div style="color:#555;text-align:center;">${s.designation||''} &middot; ${s.department||''}</div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Basic Details</div>
+          <div class="modal-details">
+            <label>Other Name(s):</label><span>${s.other_names||'-'}</span>
+            <label>Gender:</label><span>${s.gender||'-'}</span>
+            <label>Date of Birth:</label><span>${s.dob||'-'}</span>
+            <label>Marital Status:</label><span>${s.marital_status||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Contact</div>
+          <div class="modal-details">
+            <label>Phone:</label><span>${s.phone||'-'}</span>
+            <label>Email:</label><span>${s.email||'-'}</span>
+            <label>Address:</label><span>${s.address||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Employment</div>
+          <div class="modal-details">
+            <label>Staff Type:</label><span>${s.staff_type||'-'}</span>
+            <label>Date Joined:</label><span>${s.date_joined||'-'}</span>
+            <label>Qualification:</label><span>${s.qualification||'-'}</span>
+            <label>Experience:</label><span>${s.experience||'-'}</span>
+            <label>Previous Employer:</label><span>${s.previous_employer||'-'}</span>
+            <label>Specialization/Subjects:</label><span>${s.specialization||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Identification</div>
+          <div class="modal-details">
+            <label>ID Type:</label><span>${s.id_type||'-'}</span>
+            <label>ID Number:</label><span>${s.id_number||'-'}</span>
+            ${s.id_upload_url?`<label>ID Upload:</label><span><a href="${s.id_upload_url}" target="_blank" style="color:#007bff;text-decoration:underline;">View ID</a></span>`:''}
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Next of Kin</div>
+          <div class="modal-details">
+            <label>Name:</label><span>${s.kin_name||'-'}</span>
+            <label>Relationship:</label><span>${s.kin_relationship||'-'}</span>
+            <label>Phone:</label><span>${s.kin_phone||'-'}</span>
+            <label>Address:</label><span>${s.kin_address||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Bank Details</div>
+          <div class="modal-details">
+            <label>Bank Name:</label><span>${s.bank_name||'-'}</span>
+            <label>Account Name:</label><span>${s.account_name||'-'}</span>
+            <label>Account Number:</label><span>${s.account_number||'-'}</span>
+            <label>Pension Scheme:</label><span>${s.pension||'-'}</span>
+            <label>Tax ID:</label><span>${s.tax_id||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Emergency Contact</div>
+          <div class="modal-details">
+            <label>Name:</label><span>${s.emergency_name||'-'}</span>
+            <label>Phone:</label><span>${s.emergency_phone||'-'}</span>
+            <label>Relationship:</label><span>${s.emergency_relationship||'-'}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">Portal Login</div>
+          <div class="modal-details">
+            <label>Email:</label><span>${s.login_email||'-'}</span>
+            <label>Access Level:</label><span>${s.access_level||'-'}</span>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      modalBody.innerHTML = '<div style="color:#b00;text-align:center;padding:36px;">Could not load staff details.</div>';
+    }
+  }
+
+  // Optionally, load staff list on first page load
+loadStaffList();
 </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ require('./db');
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const subjectsRoute = require('./routes/subjects');
+const studentsRoute = require('./routes/students'); // <-- ADDED
 const { router: authRoute, authMiddleware } = require('./routes/auth');
 const ensureSuperAdmin = require('./utils/ensureSuperAdmin');
 
@@ -28,6 +29,7 @@ app.get('/api/dashboard', authMiddleware, (req, res) => {
 app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', subjectsRoute);
+app.use('/api/students', studentsRoute); // <-- ADDED
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

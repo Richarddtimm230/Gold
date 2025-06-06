@@ -397,50 +397,64 @@
     </div>
   </div>
   <script>
-    function togglePw() {
-      const pwInput = document.getElementById('password');
-      const pwToggle = document.querySelector('.toggle-pw i');
-      if (pwInput.type === "password") {
-        pwInput.type = "text";
-        pwToggle.classList.remove('fa-eye');
-        pwToggle.classList.add('fa-eye-slash');
-      } else {
-        pwInput.type = "password";
-        pwToggle.classList.remove('fa-eye-slash');
-        pwToggle.classList.add('fa-eye');
-      }
-    }
-    
-    document.querySelector('.login-form').onsubmit = async function(e) {
-  e.preventDefault();
-  const emailOrReg = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const isEmail = emailOrReg.includes('@');
-  const body = isEmail
-    ? { email: emailOrReg, password }
-    : { regNo: emailOrReg, password };
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  if (res.ok) {
-    localStorage.setItem('token', data.token);
-    // Redirect by role
-    if (data.user.role === 'superadmin') {
-      window.location.href = "index.html";
-    } else if (data.user.role === 'admin') {
-      window.location.href = "admin-dashboard.html";
-    } else if (data.user.role === 'teacher') {
-      window.location.href = "teacher-dashboard.html";
+document.addEventListener('DOMContentLoaded', function() {
+  function togglePw() {
+    const pwInput = document.getElementById('password');
+    const pwToggle = document.querySelector('.toggle-pw i');
+    if (pwInput.type === "password") {
+      pwInput.type = "text";
+      pwToggle.classList.remove('fa-eye');
+      pwToggle.classList.add('fa-eye-slash');
     } else {
-      window.location.href = "student-dashboard.html";
+      pwInput.type = "password";
+      pwToggle.classList.remove('fa-eye-slash');
+      pwToggle.classList.add('fa-eye');
     }
-  } else {
-    alert(data.error || 'Login failed');
   }
+
+  window.togglePw = togglePw; // allow onclick="togglePw()"
+
+  const loginForm = document.querySelector('.login-form');
+  if (!loginForm) {
+    console.error('No form with class .login-form found!');
+    return;
+  }
+  loginForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const emailOrReg = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const isEmail = emailOrReg.includes('@');
+    const body = isEmail
+      ? { email: emailOrReg, password }
+      : { regNo: emailOrReg, password };
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        // Redirect by role
+        if (data.user.role === 'superadmin') {
+          window.location.href = "index.html";
+        } else if (data.user.role === 'admin') {
+          window.location.href = "admin-dashboard.html";
+        } else if (data.user.role === 'teacher') {
+          window.location.href = "teacher-dashboard.html";
+        } else {
+          window.location.href = "student-dashboard.html";
+        }
+      } else {
+        alert(data.error || 'Login failed');
+      }
+    } catch (err) {
+      alert('Network or server error');
+      console.error(err);
     }
-  </script>
+  };
+});
+</script>
 </body>
 </html>

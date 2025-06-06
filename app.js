@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const mongoose = require('mongoose');
 require('./db');
 
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const subjectsRoute = require('./routes/subjects');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
+const ensureSuperAdmin = require('./utils/ensureSuperAdmin');
 
 const app = express();
 app.use(express.json());
@@ -32,8 +34,9 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
-
-
-
+// Wait for MongoDB before creating superadmin and starting server
+mongoose.connection.once('open', async () => {
+  await ensureSuperAdmin();
+  app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+});

@@ -416,8 +416,16 @@
 
     // Dynamic fetch and fill
     async function fetchStudentDashboard() {
+      const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+      if (!token) {
+        // Optionally redirect to login
+        document.getElementById('profileName').textContent = 'Please log in';
+        return;
+      }
       try {
-        const res = await fetch('/api/students/me');
+        const res = await fetch('/api/students/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
         if (!res.ok) throw new Error('Could not fetch student data');
         const data = await res.json();
 

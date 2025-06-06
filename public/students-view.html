@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Students | Gold and Linc Schools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="students.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile">
+            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+            <div>
+                <div class="name">RICHARD TIMOTHY</div>
+                <div class="role">System Administrator</div>
+            </div>
+        </div>
+        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <nav>
+            <a href="index.html"><span>🏠</span> Dashboard</a>
+            <a href="admission"><span>🎓</span> Admission</a>
+            <a href="people.html"><span>👥</span> People</a>
+            <a href="academics"><span>📚</span> Academics</a>
+            <a href="e-class"><span>💻</span> E-Class</a>
+            <a href="results.html"><span>📄</span> Results</a>
+            <a href="finance"><span>💰</span> Finance</a>
+            <a href="attendance"><span>🗓️</span> Attendance</a>
+            <a href="admin"><span>⚙️</span> Admin</a>
+        </nav>
+    </div>
+    <div class="main-content main-content-students">
+        <header>
+            <div class="school-title">
+                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+                <span>GOLD AND LINC SCHOOLS</span>
+            </div>
+            <div class="header-actions">
+                <span class="icon">🔔</span>
+                <span class="icon">❓</span>
+                <span class="icon">⚙️</span>
+                <span class="icon">🔍</span>
+            </div>
+        </header>
+        <div class="students-view-container">
+            <div class="students-view-header">
+                <span class="filter-title">Select Class to View</span>
+            </div>
+            <form class="students-filter-form" id="students-filter-form">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="class">Class</label>
+                        <select id="class" name="class">
+                            <option value="">All Classes</option>
+                            <option value="JSS1">JSS1</option>
+                            <option value="JSS2">JSS2</option>
+                            <option value="JSS3">JSS3</option>
+                            <option value="SS1">SS1</option>
+                            <option value="SS2">SS2</option>
+                            <option value="SS3">SS3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-arm">Class Arm</label>
+                        <input type="text" id="class-arm" name="classArm" placeholder="All">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="academic-session">Academic Session</label>
+                        <select id="academic-session" name="academicSession">
+                            <option value="">All Sessions</option>
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2023-2024">2023-2024</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-status">Account Status</label>
+                        <select id="account-status" name="accountStatus">
+                            <option value="">All</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subscription-status">Subscription Status</label>
+                        <select id="subscription-status" name="subscriptionStatus">
+                            <option value="">All</option>
+                            <option value="Active">Active</option>
+                            <option value="Expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <button type="submit" class="btn-view">View</button>
+                </div>
+            </form>
+            <div class="students-list-section">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <h3 class="students-list-title">Students List</h3>
+                    <input type="text" id="search-student-input" class="sub-search" style="width:220px;" placeholder="Search by name, reg no...">
+                </div>
+                <div class="students-table-wrapper">
+                    <table class="students-table" id="students-table">
+                        <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Surname</th>
+                            <th>Firstname</th>
+                            <th>Other Names</th>
+                            <th>Class</th>
+                            <th>Arm</th>
+                            <th>Reg No</th>
+                            <th>Gender</th>
+                            <th>DOB</th>
+                            <th>Parent</th>
+                            <th>Contact</th>
+                        </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                        <tr>
+                            <td colspan="11" style="text-align:center;color:#888;">No students found.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="students-pagination" id="students-pagination" style="text-align:right;margin-top:15px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="support-tab">Support</div>
+    <div class="eclass-fab">e-Class</div>
+    <script>
+        let studentsData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const pageSize = 15;
+
+        // Fetch students from backend
+        async function fetchStudents(filters = {}) {
+            let url = '/api/students?';
+            Object.keys(filters).forEach(key => {
+                if(filters[key]) url += `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}&`;
+            });
+            const res = await fetch(url);
+            if(res.ok) {
+                studentsData = await res.json();
+                filteredData = studentsData;
+                renderStudentsTable();
+            } else {
+                studentsData = [];
+                filteredData = [];
+                renderStudentsTable();
+            }
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+            const searchVal = document.getElementById('search-student-input').value.toLowerCase();
+            // Filter by search
+            filteredData = studentsData.filter(stu =>
+                (!searchVal || (
+                    (stu.surname && stu.surname.toLowerCase().includes(searchVal)) ||
+                    (stu.firstname && stu.firstname.toLowerCase().includes(searchVal)) ||
+                    (stu.regNo && stu.regNo.toLowerCase().includes(searchVal))
+                ))
+            );
+            // Pagination
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            if(currentPage > totalPages) currentPage = 1;
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filteredData.slice(start, end);
+
+            if(pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#888;">No students found.</td></tr>`;
+            } else {
+                for(const stu of pageData) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><img src="${stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
+                            <td>${stu.surname || ''}</td>
+                            <td>${stu.firstname || ''}</td>
+                            <td>${stu.othernames || ''}</td>
+                            <td>${stu.class && stu.class.name ? stu.class.name : (stu.class || '')}</td>
+                            <td>${stu.classArm || ''}</td>
+                            <td>${stu.regNo || ''}</td>
+                            <td>${stu.gender || ''}</td>
+                            <td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td>
+                            <td>
+                                <div><b>${stu.parentName || ''}</b></div>
+                                <div style="font-size:0.95em;color:#888;">${stu.parentPhone || ''}</div>
+                            </td>
+                            <td>
+                                <div>${stu.studentEmail || ''}</div>
+                                <div style="font-size:0.95em;color:#888;">${stu.studentPhone || ''}</div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const pagDiv = document.getElementById('students-pagination');
+            pagDiv.innerHTML = '';
+            if(totalPages <= 1) return;
+            for(let i=1;i<=totalPages;i++) {
+                pagDiv.innerHTML += `<button class="page-btn${i===currentPage?' page-btn-active':''}" onclick="gotoPage(${i})">${i}</button>`;
+            }
+        }
+        window.gotoPage = function(num) {
+            currentPage = num;
+            renderStudentsTable();
+        }
+
+        // Event: filter form submit
+        document.getElementById('students-filter-form').onsubmit = function(e) {
+            e.preventDefault();
+            const filters = {
+                class: this.class.value,
+                classArm: this.classArm.value,
+                academicSession: this.academicSession.value,
+                accountStatus: this.accountStatus.value,
+                subscriptionStatus: this.subscriptionStatus.value
+            };
+            currentPage = 1;
+            fetchStudents(filters);
+        };
+
+        // Event: search input
+        document.getElementById('search-student-input').oninput = function() {
+            currentPage = 1;
+            renderStudentsTable();
+        };
+
+        // On page load, fetch all students
+        fetchStudents();
+
+    </script>
+    <style>
+        .students-table-wrapper {
+            margin-top: 22px;
+            background: #f7fafc;
+            border-radius: 10px;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px 0 rgba(44,62,80,0.06);
+        }
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+        .students-table th, .students-table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid #e3e8ee;
+            text-align: left;
+            font-size: 1.01rem;
+        }
+        .students-table th {
+            background: #e3e8ee;
+            color: #273c75;
+            font-weight: 700;
+        }
+        .students-table tr:hover td {
+            background: #eaf6fa;
+        }
+        .students-list-title {
+            font-size: 1.25rem;
+            color: #007bff;
+            margin: 22px 0 8px 0;
+        }
+        .sub-search {
+            margin: 0 0 0 18px;
+            border: 1.5px solid #e3e8ee;
+            border-radius: 7px;
+            padding: 8px 13px;
+            font-size: 1.01rem;
+            background: #fff;
+            box-shadow: 0 2px 8px 0 rgba(44,62,80,0.03);
+        }
+        .page-btn {
+            background: #f7fafc;
+            border: 1px solid #e3e8ee;
+            color: #007bff;
+            font-weight: 700;
+            padding: 6px 17px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .page-btn-active, .page-btn:hover {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+</body>
+</html>

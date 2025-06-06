@@ -4,237 +4,129 @@
     <meta charset="UTF-8">
     <title>Academic Management - Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 CDN for modals and nice styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-    body {
+      body {
         margin: 0;
         font-family: 'Segoe UI', Arial, sans-serif;
         background: #f4f8fb;
         color: #222;
-    }
-    .sidebar {
-        width: 210px;
-        background: #fff;
-        border-right: 1px solid #ececec;
-        min-height: 100vh;
-        position: fixed;
-        left: 0; top: 0;
-        padding-bottom: 40px;
-        z-index: 2;
-    }
-    .sidebar .profile {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 22px 18px 10px 18px;
-        border-bottom: 1px solid #f3f3f3;
-    }
-    .sidebar .avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #f5f5f5;
-    }
-    .sidebar .name {
-        font-weight: bold;
-        font-size: 15px;
-        margin-bottom: 2px;
-    }
-    .sidebar .role {
-        font-size: 12px;
-        color: #888;
-    }
-    .sidebar nav {
-        margin-top: 25px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding-left: 10px;
-    }
-    .sidebar nav a {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        color: #222;
-        text-decoration: none;
-        padding: 9px 15px;
-        border-radius: 5px 0 0 5px;
-        font-size: 15px;
-        font-weight: 500;
-        transition: background .13s;
-    }
-    .sidebar nav a.active, .sidebar nav a:hover {
-        background: #e6f0fa;
-        color: #007bff;
-    }
+      }
+      .sidebar {
+          width: 210px;
+          background: #fff;
+          border-right: 1px solid #ececec;
+          min-height: 100vh;
+          position: fixed;
+          left: 0; top: 0;
+          padding-bottom: 40px;
+          z-index: 2;
+      }
+      .sidebar .profile {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 22px 18px 10px 18px;
+          border-bottom: 1px solid #f3f3f3;
+      }
+      .sidebar .avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          object-fit: cover;
+          background: #f5f5f5;
+      }
+      .sidebar .name {
+          font-weight: bold;
+          font-size: 15px;
+          margin-bottom: 2px;
+      }
+      .sidebar .role {
+          font-size: 12px;
+          color: #888;
+      }
+      .sidebar nav {
+          margin-top: 25px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding-left: 10px;
+      }
+      .sidebar nav a {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          color: #222;
+          text-decoration: none;
+          padding: 9px 15px;
+          border-radius: 5px 0 0 5px;
+          font-size: 15px;
+          font-weight: 500;
+          transition: background .13s;
+      }
+      .sidebar nav a.active, .sidebar nav a:hover {
+          background: #e6f0fa;
+          color: #007bff;
+      }
 
-    .main-content {
-        margin-left: 210px;
-        padding: 0 0 30px 0;
-        min-height: 100vh;
-    }
-    header {
-        background: #fff;
-        padding: 18px 30px 6px 30px;
-        border-bottom: 1px solid #ececec;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .school-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 17px;
-        font-weight: bold;
-        color: #007bff;
-    }
-    .school-title .logo {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-    }
-    .header-actions {
-        display: flex;
-        gap: 16px;
-        font-size: 21px;
-        color: #666;
-    }
-    .page-title {
-        padding: 20px 30px 10px 30px;
-        border-bottom: 1px solid #f2f2f2;
-        background: #f8fafc;
-    }
-    .page-title h2 {
-        margin: 0;
-        font-size: 23px;
-        font-weight: 600;
-        color: #222;
-    }
-    .admin-badge {
-        background: #20c997;
-        color: #fff;
-        font-size: 13px;
-        padding: 2px 10px;
-        border-radius: 12px;
-        margin-left: 10px;
-    }
-
-    .academic-actions {
-        margin: 22px 30px 30px 30px;
-        display: flex;
-        gap: 18px;
-    }
-    .academic-actions button {
-        background: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 9px 22px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .15s;
-    }
-    .academic-actions button:hover {
-        background: #0056b3;
-    }
-    .academic-section {
-        margin: 0 30px;
-        background: #fff;
-        border-radius: 9px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        padding: 24px;
-    }
-    .academic-section table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 12px;
-    }
-    .academic-section th, .academic-section td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #eee;
-        text-align: left;
-    }
-    .academic-section th {
-        background: #f8fafc;
-        font-size: 15px;
-    }
-    .academic-section td {
-        font-size: 15px;
-    }
-    .action-btn {
-        border: none;
-        background: none;
-        font-size: 18px;
-        margin-right: 6px;
-        cursor: not-allowed;
-        color: #bbb;
-    }
-
-    .status-msg {
-        margin: 20px 30px 0 30px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #20c997;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 10;
-        left: 0; top: 0; width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.2);
-        align-items: center;
-        justify-content: center;
-    }
-    .modal-content {
-        background: #fff;
-        padding: 28px 36px 22px 36px;
-        border-radius: 9px;
-        min-width: 320px;
-        max-width: 90vw;
-        position: relative;
-        box-shadow: 0 6px 28px rgba(0,0,0,0.12);
-    }
-    .close-modal {
-        position: absolute; right: 16px; top: 9px;
-        font-size: 28px;
-        cursor: pointer;
-        color: #dc3545;
-    }
-    .modal label {
-        display: block;
-        margin: 12px 0 8px 0;
-        font-weight: 500;
-    }
-    .modal input, .modal select {
-        width: 100%;
-        padding: 7px 8px;
-        margin-bottom: 12px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        font-size: 15px;
-    }
-    .modal button {
-        margin-top: 7px;
-        background: #20c997;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 28px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-    .modal button:hover {
-        background: #157a6e;
-    }
-    @media (max-width: 800px) {
-        .sidebar { position: static; width: 100%; min-height: unset; border-right: none; }
-        .main-content { margin-left: 0; }
-        .academic-section, .academic-actions, .page-title { margin-left: 0; margin-right: 0; }
-    }
+      .main-content {
+          margin-left: 210px;
+          padding: 0 0 30px 0;
+          min-height: 100vh;
+      }
+      header {
+          background: #fff;
+          padding: 18px 30px 6px 30px;
+          border-bottom: 1px solid #ececec;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+      .school-title {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 17px;
+          font-weight: bold;
+          color: #007bff;
+      }
+      .school-title .logo {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+      }
+      .header-actions {
+          display: flex;
+          gap: 16px;
+          font-size: 21px;
+          color: #666;
+      }
+      .page-title {
+          padding: 20px 30px 10px 30px;
+          border-bottom: 1px solid #f2f2f2;
+          background: #f8fafc;
+      }
+      .page-title h2 {
+          margin: 0;
+          font-size: 23px;
+          font-weight: 600;
+          color: #222;
+      }
+      .admin-badge {
+          background: #20c997;
+          color: #fff;
+          font-size: 13px;
+          padding: 2px 10px;
+          border-radius: 12px;
+          margin-left: 10px;
+      }
+      @media (max-width: 800px) {
+          .sidebar { position: static; width: 100%; min-height: unset; border-right: none; }
+          .main-content { margin-left: 0; }
+          .academic-section, .academic-actions, .page-title { margin-left: 0; margin-right: 0; }
+      }
     </style>
 </head>
 <body>
@@ -271,308 +163,314 @@
             <h2>Academic Management <span class="admin-badge">Admin</span></h2>
         </div>
 
-        <div class="academic-actions">
-            <button id="createClassBtn">➕ Create Class</button>
-            <button id="createArmBtn">➕ Allocate Arm</button>
-            <button id="classSubjectsBtn">➕ Allocate Class Subjects</button>
-            <button id="classTeacherBtn">➕ Allocate Class Teacher</button>
-        </div>
-
-        <div class="academic-section" id="classesSection">
-            <h3>Classes</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Class Name</th>
-                        <th>Arms</th>
-                        <th>Subjects</th>
-                        <th>Class Teacher(s)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="classesTbody">
-                    <!-- Populated by JS -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <div class="modal" id="classModal">
-        <div class="modal-content">
-            <span class="close-modal" data-modal="classModal">&times;</span>
-            <h3>Create New Class</h3>
-            <form id="createClassForm">
-                <label>
-                    Class Name:
-                    <input type="text" name="class_name" required placeholder="e.g. JSS1, SS3">
-                </label>
-                <button type="submit">Create Class</button>
-            </form>
-        </div>
-    </div>
-    <div class="modal" id="armModal">
-        <div class="modal-content">
-            <span class="close-modal" data-modal="armModal">&times;</span>
-            <h3>Allocate Arm to Class</h3>
-            <form id="createArmForm">
-                <label>
-                    Select Class:
-                    <select name="class_id" id="armClassSelect" required></select>
-                </label>
-                <label>
-                    Arm Name(s) (comma-separated):
-                    <input type="text" name="arm_names" required placeholder="e.g. A, B, C">
-                </label>
-                <button type="submit">Allocate Arm(s)</button>
-            </form>
-        </div>
-    </div>
-    <div class="modal" id="subjectsModal">
-        <div class="modal-content">
-            <span class="close-modal" data-modal="subjectsModal">&times;</span>
-            <h3>Allocate Subjects to Class</h3>
-            <form id="allocateSubjectsForm">
-                <label>
-                    Select Class:
-                    <select name="class_id" id="subjectsClassSelect" required></select>
-                </label>
-                <label>
-                    Subjects (hold Ctrl to select multiple):
-                    <select name="subjects" id="subjectsSelect" multiple required>
+        <div class="container mt-4">
+            <div class="d-flex mb-4 gap-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">➕ Add Class</button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addArmModal">➕ Allocate Arm</button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">➕ Allocate Class Subjects</button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">➕ Allocate Class Teacher</button>
+            </div>
+            <div id="academicStatus" class="alert alert-success d-none"></div>
+            <div class="academic-section">
+                <h3>Classes</h3>
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Category</th>
+                            <th>Arms</th>
+                            <th>Subjects</th>
+                            <th>Class Teacher(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classesTbody">
                         <!-- Populated by JS -->
-                    </select>
-                </label>
-                <button type="submit">Allocate Subjects</button>
-            </form>
-        </div>
-    </div>
-    <div class="modal" id="teacherModal">
-        <div class="modal-content">
-            <span class="close-modal" data-modal="teacherModal">&times;</span>
-            <h3>Allocate Class Teacher</h3>
-            <form id="allocateTeacherForm">
-                <label>
-                    Select Class:
-                    <select name="class_id" id="teacherClassSelect" required></select>
-                </label>
-                <label>
-                    Select Arm (optional):
-                    <select name="arm_id" id="teacherArmSelect">
-                        <option value="">-- Whole Class --</option>
-                    </select>
-                </label>
-                <label>
-                    Teacher Name:
-                    <input type="text" name="teacher_name" required placeholder="e.g. Mrs. Okafor">
-                </label>
-                <button type="submit">Allocate Teacher</button>
-            </form>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div id="academicStatus" class="status-msg"></div>
+    <!-- Add Class Modal -->
+    <div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="addClassForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addClassModalLabel">Add Class</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label for="className" class="form-label">Class Name</label>
+                  <input type="text" class="form-control" id="className" name="className" required placeholder="e.g. JSS1">
+              </div>
+              <div class="mb-3">
+                  <label for="classCategory" class="form-label">Class Category</label>
+                  <input type="text" class="form-control" id="classCategory" name="classCategory" placeholder="e.g. Junior Secondary">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Arm Modal -->
+    <div class="modal fade" id="addArmModal" tabindex="-1" aria-labelledby="addArmModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="addArmForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addArmModalLabel">Allocate Arm to Class</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label for="armClassSelect" class="form-label">Select Class</label>
+                  <select class="form-select" id="armClassSelect" required></select>
+              </div>
+              <div class="mb-3">
+                  <label for="armNames" class="form-label">Arm Name(s) (comma-separated)</label>
+                  <input type="text" class="form-control" id="armNames" required placeholder="e.g. A, B, C">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Allocate Arm(s)</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal fade" id="addSubjectModal" tabindex="-1" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <form class="modal-content" id="addSubjectForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addSubjectModalLabel">Add Subject to Class(es)</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body row">
+              <div class="col-md-6 mb-3">
+                  <label for="subjectName" class="form-label">Subject Name (to add new)</label>
+                  <input type="text" class="form-control" id="subjectName" placeholder="e.g. Mathematics">
+              </div>
+              <div class="col-md-6 mb-3">
+                  <label for="subjectClassSelect" class="form-label">Add to Class(es)</label>
+                  <select class="form-select" id="subjectClassSelect" multiple required></select>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Add Subject</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Teacher Modal -->
+    <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="addTeacherForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addTeacherModalLabel">Allocate Class Teacher</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label for="teacherClassSelect" class="form-label">Select Class</label>
+                  <select class="form-select" id="teacherClassSelect" required></select>
+              </div>
+              <div class="mb-3">
+                  <label for="teacherArmSelect" class="form-label">Select Arm (optional)</label>
+                  <select class="form-select" id="teacherArmSelect">
+                      <option value="">-- Whole Class --</option>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label for="teacherName" class="form-label">Teacher Name</label>
+                  <input type="text" class="form-control" id="teacherName" required placeholder="e.g. Mrs. Okafor">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Allocate Teacher</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
     let classes = [];
     let subjectsList = [];
 
-    // Fetch all classes from backend
     async function fetchClasses() {
-        const res = await fetch('/api/classes');
-        classes = await res.json();
-        renderClassesTable();
+      const res = await fetch('/api/classes');
+      classes = await res.json();
+      renderClassesTable();
+      populateClassSelects();
     }
 
-    // Fetch all subjects from backend
     async function fetchSubjects() {
-        const res = await fetch('/api/subjects');
-        subjectsList = await res.json();
+      const res = await fetch('/api/subjects');
+      subjectsList = await res.json();
     }
 
     // Initial load
     fetchSubjects().then(fetchClasses);
 
-    // Utility to render class table
     function renderClassesTable() {
-        const tbody = document.getElementById('classesTbody');
-        tbody.innerHTML = '';
-        classes.forEach(cls => {
-            const arms = cls.arms && cls.arms.length ? cls.arms.join(", ") : "-";
-            const subjects = cls.subjects && cls.subjects.length
-                ? (Array.isArray(cls.subjects[0]) ? cls.subjects[0].join(", ") : cls.subjects.map(s => s.name || s).join(", "))
-                : "-";
-            const teachers = cls.teachers && cls.teachers.length
-                ? cls.teachers.map(t => t.arm ? `${t.name} (${t.arm})` : t.name).join(", ")
-                : "-";
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${cls.name}</td>
-                <td>${arms}</td>
-                <td>${subjects}</td>
-                <td>${teachers}</td>
-                <td>
-                    <button class="action-btn edit" title="Edit" disabled>✏️</button>
-                    <button class="action-btn delete" title="Delete" disabled>🗑️</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+      const tbody = document.getElementById('classesTbody');
+      tbody.innerHTML = '';
+      classes.forEach(cls => {
+        const arms = cls.arms && cls.arms.length ? cls.arms.join(', ') : '-';
+        const subjects = cls.subjects && cls.subjects.length ? cls.subjects.map(s => s.name || s).join(', ') : '-';
+        const teachers = cls.teachers && cls.teachers.length
+          ? cls.teachers.map(t => t.arm ? `${t.name} (${t.arm})` : t.name).join(', ')
+          : '-';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${cls.name}</td>
+          <td>${cls.category || '-'}</td>
+          <td>${arms}</td>
+          <td>${subjects}</td>
+          <td>${teachers}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    // Modal handling
-    function showModal(id) {
-        document.getElementById(id).style.display = 'flex';
-    }
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.onclick = () => closeModal(btn.getAttribute('data-modal'));
-    });
-    window.onclick = function(event) {
-        document.querySelectorAll('.modal').forEach(modal => {
-            if (event.target === modal) modal.style.display = 'none';
-        });
-    };
-
-    document.getElementById('createClassBtn').onclick = () => showModal('classModal');
-    document.getElementById('createArmBtn').onclick = () => {
-        populateClassSelect('armClassSelect');
-        showModal('armModal');
-    };
-    document.getElementById('classSubjectsBtn').onclick = () => {
-        populateClassSelect('subjectsClassSelect');
-        populateSubjectsSelect();
-        showModal('subjectsModal');
-    };
-    document.getElementById('classTeacherBtn').onclick = () => {
-        populateClassSelect('teacherClassSelect');
-        updateArmsSelect();
-        showModal('teacherModal');
-    };
-
-    // Populate selects
-    function populateClassSelect(selectId) {
-        const select = document.getElementById(selectId);
+    function populateClassSelects() {
+      ['armClassSelect', 'subjectClassSelect', 'teacherClassSelect'].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
         select.innerHTML = '';
         classes.forEach(cls => {
-            let option = document.createElement('option');
-            option.value = cls._id || cls.id;
-            option.textContent = cls.name;
-            select.appendChild(option);
+          let option = document.createElement('option');
+          option.value = cls._id || cls.id;
+          option.textContent = cls.name;
+          select.appendChild(option);
         });
+        if (id === 'teacherClassSelect') updateArmsSelect();
+      });
     }
-    function populateSubjectsSelect() {
-        const select = document.getElementById('subjectsSelect');
-        select.innerHTML = '';
-        subjectsList.forEach(subj => {
-            let option = document.createElement('option');
-            option.value = subj._id || subj.name || subj;
-            option.textContent = subj.name || subj;
-            select.appendChild(option);
-        });
-    }
-    // Arms for teacher allocation modal
+
     function updateArmsSelect() {
-        const classId = document.getElementById('teacherClassSelect').value;
-        const cls = classes.find(c => (c._id || c.id) == classId);
-        const select = document.getElementById('teacherArmSelect');
-        select.innerHTML = '<option value="">-- Whole Class --</option>';
-        if (cls && cls.arms) {
-            cls.arms.forEach(arm => {
-                let option = document.createElement('option');
-                option.value = arm;
-                option.textContent = arm;
-                select.appendChild(option);
-            });
-        }
+      const classId = document.getElementById('teacherClassSelect').value;
+      const cls = classes.find(c => (c._id || c.id) == classId);
+      const select = document.getElementById('teacherArmSelect');
+      select.innerHTML = '<option value="">-- Whole Class --</option>';
+      if (cls && cls.arms) {
+        cls.arms.forEach(arm => {
+          let option = document.createElement('option');
+          option.value = arm;
+          option.textContent = arm;
+          select.appendChild(option);
+        });
+      }
     }
     document.getElementById('teacherClassSelect').onchange = updateArmsSelect;
 
-    // Handle create class
-    document.getElementById('createClassForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const className = e.target.class_name.value.trim();
-        if (!className) return;
-        const res = await fetch('/api/classes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: className })
-        });
-        if (res.ok) {
-            await fetchClasses();
-            closeModal('classModal');
-            document.getElementById('academicStatus').textContent = `Class "${className}" created.`;
-            setTimeout(()=>document.getElementById('academicStatus').textContent='', 3000);
-            e.target.reset();
-        } else {
-            alert('Error creating class');
-        }
+    document.getElementById('addClassForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('className').value.trim();
+      const category = document.getElementById('classCategory').value.trim();
+      if (!name) return;
+      const res = await fetch('/api/classes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, category })
+      });
+      if (res.ok) {
+        await fetchClasses();
+        bootstrap.Modal.getInstance(document.getElementById('addClassModal')).hide();
+        showStatus(`Class "${name}" created.`);
+        e.target.reset();
+      } else {
+        alert('Error creating class');
+      }
     };
 
-    // Handle create arm
-    document.getElementById('createArmForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const classId = e.target.class_id.value;
-        const names = e.target.arm_names.value.split(',').map(a => a.trim()).filter(a => a);
-        const res = await fetch(`/api/classes/${classId}/arms`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ arms: names })
-        });
-        if (res.ok) {
-            await fetchClasses();
-            closeModal('armModal');
-            document.getElementById('academicStatus').textContent = `Arms allocated.`;
-            setTimeout(()=>document.getElementById('academicStatus').textContent='', 3000);
-            e.target.reset();
-        } else {
-            alert('Error allocating arms');
-        }
+    document.getElementById('addArmForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const classId = document.getElementById('armClassSelect').value;
+      const names = document.getElementById('armNames').value.split(',').map(a => a.trim()).filter(a => a);
+      const res = await fetch(`/api/classes/${classId}/arms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arms: names })
+      });
+      if (res.ok) {
+        await fetchClasses();
+        bootstrap.Modal.getInstance(document.getElementById('addArmModal')).hide();
+        showStatus(`Arms allocated.`);
+        e.target.reset();
+      } else {
+        alert('Error allocating arms');
+      }
     };
 
-    // Handle allocate subjects
-    document.getElementById('allocateSubjectsForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const classId = e.target.class_id.value;
-        const selected = Array.from(document.getElementById('subjectsSelect').selectedOptions).map(opt => opt.value);
+    document.getElementById('addSubjectForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const subjectName = document.getElementById('subjectName').value.trim();
+      const classIds = Array.from(document.getElementById('subjectClassSelect').selectedOptions).map(opt => opt.value);
+      if (subjectName) {
+        // First, create subject if not exists
+        await fetch('/api/subjects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: subjectName })
+        });
+        await fetchSubjects();
+      }
+      // Then, assign subject to classes
+      for (const classId of classIds) {
         const res = await fetch(`/api/classes/${classId}/subjects`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subjects: selected })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subjects: [subjectName] })
         });
-        if (res.ok) {
-            await fetchClasses();
-            closeModal('subjectsModal');
-            document.getElementById('academicStatus').textContent = `Subjects allocated.`;
-            setTimeout(()=>document.getElementById('academicStatus').textContent='', 3000);
-            e.target.reset();
-        } else {
-            alert('Error allocating subjects');
-        }
+        if (!res.ok) alert('Error allocating subject');
+      }
+      await fetchClasses();
+      bootstrap.Modal.getInstance(document.getElementById('addSubjectModal')).hide();
+      showStatus(`Subject(s) allocated to class(es).`);
+      e.target.reset();
     };
 
-    // Handle allocate teacher
-    document.getElementById('allocateTeacherForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const classId = e.target.class_id.value;
-        const arm = e.target.arm_id.value;
-        const teacherName = e.target.teacher_name.value.trim();
-        const res = await fetch(`/api/classes/${classId}/teachers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacher: { name: teacherName, arm } })
-        });
-        if (res.ok) {
-            await fetchClasses();
-            closeModal('teacherModal');
-            document.getElementById('academicStatus').textContent = `Teacher allocated.`;
-            setTimeout(()=>document.getElementById('academicStatus').textContent='', 3000);
-            e.target.reset();
-        } else {
-            alert('Error allocating teacher');
-        }
+    document.getElementById('addTeacherForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const classId = document.getElementById('teacherClassSelect').value;
+      const arm = document.getElementById('teacherArmSelect').value;
+      const teacherName = document.getElementById('teacherName').value.trim();
+      if (!teacherName) return;
+      const res = await fetch(`/api/classes/${classId}/teachers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacher: { name: teacherName, arm } })
+      });
+      if (res.ok) {
+        await fetchClasses();
+        bootstrap.Modal.getInstance(document.getElementById('addTeacherModal')).hide();
+        showStatus(`Teacher allocated.`);
+        e.target.reset();
+      } else {
+        alert('Error allocating teacher');
+      }
     };
+
+    function showStatus(msg) {
+      const status = document.getElementById('academicStatus');
+      status.textContent = msg;
+      status.classList.remove('d-none');
+      setTimeout(()=>status.classList.add('d-none'), 3000);
+    }
+
+    // Re-populate selects when any modal is opened
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('show.bs.modal', populateClassSelects);
+    });
     </script>
 </body>
 </html>

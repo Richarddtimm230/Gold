@@ -125,23 +125,67 @@ router.get('/', async (req, res) => {
   }
 });
 // ...existing code...
-router.get('/', async (req, res) => {
+
+// GET /api/students/me - get logged-in student profile for dashboard
+router.get('/me', studentAuthMiddleware, async (req, res) => {
+  const student = req.student;
+  // Return only dashboard-friendly fields
+  res.json({
+    name: `${student.firstname} ${student.surname}`,
+    reg_no: student.regNo,
+    class: student.class,
+    classArm: student.classArm,
+    session: student.academicSession,
+    term: student.term || '-',
+    photo_url: student.photo,
+    timetable: student.timetable || [],
+    news: student.news || [],
+    eclass_summary: [
+      'My Classrooms',
+      'Unread messages',
+      'Happening now'
+    ]
+    // Add other dashboard fields as needed
+  });
+});
+// ...existing code...
+const jwt = require('jsonwebtoken');
+const studentAuthMiddleware = require('../middleware/studentAuth');
+
+// Student login route
+router.post('/login', async (req, res) => {
+  const { regNo, studentEmail, password } = req.body;
+  if ((!regNo && !studentEmail) || !password) {
+    return res.status(400).json({ error: 'Registration number or email and password are required.' });
+  }
   try {
-    const filter = {};
-    if (req.query.class) filter.class = req.query.class;
-    if (req.query.classArm) filter.classArm = req.query.classArm;
-    if (req.query.academicSession) filter.academicSession = req.query.academicSession;
+    // Find student by regNo or email
+    const query = regNo ? { regNo } : { studentEmail };
+    const student = await Student.findOne(query);
+    if (!student) return res.status(401).json({ error: 'Invalid credentials.' });
 
-    // Only select summary fields!
-    const students = await Student.find(filter)
-      .select('student_id surname firstname regNo class classArm photo academicSession')
-      .sort({ surname: 1, firstname: 1 });
+    const isMatch = await bcrypt.compare(password, student.password);
+    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials.' });
 
-    res.json(students);
-  } catch (error) {
-    console.error('[GET STUDENTS ERROR]', error);
-    res.status(500).json({ error: error.message });
+    // JWT
+    const token = jwt.sign(
+      { id: student._id, regNo: student.regNo, role: 'student' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      student: {
+        id: student._id,
+        name: `${student.firstname} ${student.surname}`,
+        regNo: student.regNo,
+        class: student.class,
+        photo_url: student.photo
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
 });
-
 module.exports = router;

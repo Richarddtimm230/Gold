@@ -1,42 +1,44 @@
 const mongoose = require('mongoose');
 
-const staffSchema = new mongoose.Schema({
+const StaffSchema = new mongoose.Schema({
+  photo: String, // base64 image string
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
   other_names: String,
-  gender: { type: String, required: true },
+  gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
   dob: { type: Date, required: true },
-  marital_status: { type: String, required: true },
+  marital_status: { type: String, required: true, enum: ['Single', 'Married', 'Divorced', 'Widowed'] },
   address: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  photo: String,
   designation: { type: String, required: true },
   department: { type: String, required: true },
-  staff_type: { type: String, required: true },
+  staff_type: { type: String, required: true, enum: ['Teaching', 'Non-Teaching'] },
   date_joined: { type: Date, required: true },
   qualification: { type: String, required: true },
-  experience: String,
+  experience: { type: Number, required: true },
   previous_employer: String,
   specialization: String,
-  id_type: String,
-  id_number: String,
-  id_upload: String,
-  kin_name: String,
-  kin_relationship: String,
-  kin_phone: String,
+  id_type: { type: String, required: true },
+  id_number: { type: String, required: true },
+  id_upload: String, // base64 or file url
+  kin_name: { type: String, required: true },
+  kin_relationship: { type: String, required: true },
+  kin_phone: { type: String, required: true },
   kin_address: String,
-  bank_name: String,
-  account_name: String,
-  account_number: String,
+  bank_name: { type: String, required: true },
+  account_name: { type: String, required: true },
+  account_number: { type: String, required: true, unique: true },
   pension: String,
   tax_id: String,
-  emergency_name: String,
-  emergency_phone: String,
-  emergency_relationship: String,
+  emergency_name: { type: String, required: true },
+  emergency_phone: { type: String, required: true },
+  emergency_relationship: { type: String, required: true },
   login_email: { type: String, required: true, unique: true },
-  login_password: { type: String, required: true },
-  access_level: { type: String, required: true }
+  login_password: { type: String, required: true }, // hashed
+  access_level: { type: String, required: true, enum: [
+    'Teacher', 'Head Teacher', 'Principal', 'HR', 'Account/Admin'
+  ] },
 }, { timestamps: true });
 
-module.exports = mongoose.model('Staff', staffSchema);
+module.exports = mongoose.model('Staff', StaffSchema);

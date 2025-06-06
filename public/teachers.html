@@ -345,10 +345,48 @@
     reader.readAsDataURL(file);
   };
 
-  // Demo submit handler
-  document.getElementById('staffEnrollForm').onsubmit = function(e) {
+  // Actual backend submit handler
+  document.getElementById('staffEnrollForm').onsubmit = async function(e) {
     e.preventDefault();
-    alert('Staff enrollment submitted! Ready to connect to backend API.');
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Show loading state (optional)
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const origText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+
+    try {
+      // Update the endpoint below to your backend route for staff enrollment
+      const response = await fetch('/api/staff', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert('Error: ' + (errorData.error || response.statusText));
+      } else {
+        const respData = await response.json();
+        alert(respData.message || 'Staff enrollment successful!');
+        form.reset();
+        // Reset the photo box UI
+        document.getElementById('staffPhoto').style.display = 'none';
+        document.getElementById('photoPlaceholder').style.display = '';
+        // Return to first tab
+        document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelector('.form-tab[data-tab="basic"]').classList.add('active');
+        document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
+        document.getElementById('tab-basic').classList.add('active');
+      }
+    } catch (err) {
+      alert('Network or server error: ' + err.message);
+    } finally {
+      submitBtn.textContent = origText;
+      submitBtn.disabled = false;
+    }
   }
 </script>
 </body>

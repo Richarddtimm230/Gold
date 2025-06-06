@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #175b9c;
+      --accent: #17c3b2;
+      --bg: #f4f8fc;
+      --card: #fff;
+      --radius: 18px;
+      --shadow: 0 4px 24px 0 rgba(30, 80, 180, 0.10);
+      --text-main: #17223a;
+      --text-muted: #778;
+      --transition: 0.16s cubic-bezier(.39,.58,.57,1.01);
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(100deg, #175b9c 75%, #17c3b2 100%);
+      color: #fff;
+      padding: 0;
+      min-height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 3px 18px rgba(30,80,180,0.11);
+      position: sticky;
+      top: 0; z-index: 20;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-left: 22px;
+    }
+    .header-logo {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(23,91,156,0.11);
+      overflow: hidden;
+    }
+    .header-logo img {
+      width: 43px; height: 43px;
+    }
+    .header-title {
+      font-weight: 800;
+      font-size: 1.22rem;
+      letter-spacing: 1.5px;
+      font-family: inherit;
+      color: #fff;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-right: 24px;
+    }
+    .header-actions .icon {
+      font-size: 1.2rem;
+      color: #c5e2ff;
+      cursor: pointer;
+      transition: color var(--transition);
+    }
+    .header-actions .icon:hover { color: #fff; }
+    /* Profile Card */
+    .profile-card {
+      background: var(--card);
+      margin: -44px auto 30px auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 25px 20px 25px;
+      max-width: 540px;
+      position: relative;
+      text-align: center;
+      z-index: 11;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .profile-avatar {
+      width: 85px; height: 85px;
+      border-radius: 50%;
+      border: 3px solid #17c3b2;
+      object-fit: cover;
+      background: #eaf2fb;
+      margin-bottom: 7px;
+      box-shadow: 0 2px 16px rgba(23,91,156,0.07);
+    }
+    .profile-name {
+      font-size: 1.26rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .profile-meta {
+      color: var(--text-muted);
+      font-size: 0.99rem;
+      margin-bottom: 10px;
+    }
+    .profile-details {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 0.98rem;
+      color: #567;
+    }
+    .profile-details span { opacity: 0.82; }
+    /* Dashboard Layout */
+    .dashboard-main {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      gap: 28px;
+      padding: 0 2vw;
+      flex-wrap: wrap;
+    }
+    .main-left { flex: 2.2; min-width: 320px; }
+    .main-right { flex: 1.15; min-width: 240px; }
+    /* Timetable */
+    .timetable-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px 12px 20px;
+      margin-bottom: 19px;
+      font-size: 1.08rem;
+    }
+    .timetable-title { color: var(--primary); font-weight: 600; margin-bottom: 7px; }
+    /* Quick Access Cards */
+    .quick-cards {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      margin-bottom: 22px;
+    }
+    .quick-card {
+      background: linear-gradient(140deg, #fff 80%, #d4edfa 100%);
+      border-radius: 13px;
+      box-shadow: 0 1px 7px rgba(30,50,90,0.08);
+      padding: 18px 13px 13px 15px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: box-shadow var(--transition), transform var(--transition);
+      position: relative;
+      min-height: 85px;
+      overflow: hidden;
+    }
+    .quick-card:hover {
+      box-shadow: 0 4px 24px rgba(23,91,156,0.17);
+      transform: translateY(-3px) scale(1.03);
+    }
+    .quick-card .q-icon {
+      font-size: 1.45rem;
+      color: var(--primary);
+      margin-bottom: 9px;
+      opacity: 0.92;
+    }
+    .quick-card .q-title {
+      font-weight: 700;
+      font-size: 1.07rem;
+      margin-bottom: 2px;
+      color: #175b9c;
+      letter-spacing: 0.2px;
+    }
+    .quick-card .q-desc {
+      font-size: 0.96rem;
+      color: #556;
+      opacity: 0.91;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    .quick-card .q-badge {
+      position: absolute;
+      top: 7px; right: 13px;
+      background: #f55;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      padding: 1px 8px;
+      font-weight: 700;
+      display: none;
+    }
+    /* News & Updates */
+    .news-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 15px 13px 15px;
+      margin-bottom: 28px;
+    }
+    .news-title {
+      color: #175b9c;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+    }
+    .news-empty {
+      color: #888;
+      font-size: 0.97rem;
+      margin-bottom: 6px;
+      text-align: center;
+      padding: 12px 0 4px 0;
+    }
+    .news-btn {
+      background: #eaf6fc;
+      border: none;
+      color: #175b9c;
+      font-size: 0.96rem;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 7px 20px;
+      cursor: pointer;
+      margin: 0 auto 0 auto;
+      display: block;
+      transition: background var(--transition);
+    }
+    .news-btn:hover { background: #d5eafc; }
+    /* Main right (E-Class summary, etc) */
+    .panel-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 13px 11px 13px;
+      margin-bottom: 22px;
+    }
+    .panel-title {
+      color: #175b9c;
+      font-weight: 700;
+      font-size: 1.02rem;
+      margin-bottom: 9px;
+    }
+    .panel-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: #445;
+      font-size: 0.99rem;
+    }
+    .panel-list li {
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .panel-list .dot {
+      width: 8px; height: 8px; border-radius: 40px; background: #17c3b2; display: inline-block;
+    }
+    /* Floating action button */
+    #eclass-fab {
+      position:fixed;
+      right:17px;bottom:17px;
+      background: #17c3b2;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width:55px;height:55px;
+      font-size:2rem;
+      box-shadow:0 4px 18px rgba(30,80,180,0.15);
+      display:none;
+      z-index:99;
+      transition: background var(--transition);
+    }
+    #eclass-fab:hover { background: #175b9c; }
+    @media (max-width: 1100px) {
+      .dashboard-main { flex-direction: column; gap: 0; }
+      .main-left, .main-right { min-width: unset; }
+    }
+    @media (max-width: 700px) {
+      .dashboard-main { padding: 0 1vw; }
+      .quick-cards { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+      .profile-card { padding: 18px 8vw 13px 8vw; }
+      .main-right { margin-top: 18px; }
+      .panel-card { margin-bottom: 14px; }
+    }
+    @media (max-width: 500px) {
+      .profile-card { padding: 13px 2vw 7px 2vw; }
+      .news-card { padding: 12px 4vw 7px 4vw; }
+      .quick-card { padding: 12px 7px 10px 9px; }
+      .main-right { margin-top: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <div class="header-logo">
+        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo">
+      </div>
+      <div class="header-title">GOLD AND LINC SCHOOLS</div>
+    </div>
+    <div class="header-actions">
+      <span class="icon" title="Notifications"><i class="fa fa-bell"></i></span>
+      <span class="icon" title="Support"><i class="fa fa-question-circle"></i></span>
+      <span class="icon" title="Search"><i class="fa fa-search"></i></span>
+      <span class="icon" title="Menu"><i class="fa fa-bars"></i></span>
+    </div>
+  </header>
+  <!-- Profile summary (filled by JS) -->
+  <div class="profile-card" id="profileCard">
+    <img class="profile-avatar" id="profileAvatar" src="https://ui-avatars.com/api/?name=Student&background=17c3b2&color=fff" alt="Student Avatar">
+    <div class="profile-name" id="profileName">Student Name</div>
+    <div class="profile-meta" id="profileMeta">Registration No: -</div>
+    <div class="profile-details" id="profileDetails">
+      <span>Class: -</span>
+      <span>Session: -</span>
+      <span>Term: -</span>
+    </div>
+  </div>
+  <div class="dashboard-main">
+    <!-- Left Column -->
+    <div class="main-left">
+      <!-- Timetable (filled by JS) -->
+      <div class="timetable-card" id="timetableCard">
+        <div class="timetable-title">Today's Schedule</div>
+        <div id="timetableSummary"><strong>Loading...</strong></div>
+        <div style="margin-top:7px;">
+          <a href="#" style="color:#175b9c;font-size:0.92rem;text-decoration:underline;">See all Weekdays →</a>
+        </div>
+      </div>
+      <!-- Quick Access Cards -->
+      <div class="quick-cards">
+        <div class="quick-card" onclick="window.location.href='e-class.html'">
+          <span class="q-icon"><i class="fa fa-laptop"></i></span>
+          <span class="q-title">E-Class</span>
+          <span class="q-desc">My Classrooms</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='assignments.html'">
+          <span class="q-icon"><i class="fa fa-file-alt"></i></span>
+          <span class="q-title">Assignments</span>
+          <span class="q-desc">Assignments &amp; Exercises</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='fees.html'">
+          <span class="q-icon"><i class="fa fa-wallet"></i></span>
+          <span class="q-title">My Fees</span>
+          <span class="q-desc">Unpaid Invoices</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='results.html'">
+          <span class="q-icon"><i class="fa fa-chart-bar"></i></span>
+          <span class="q-title">Results</span>
+          <span class="q-desc">My Reports</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='communication.html'">
+          <span class="q-icon"><i class="fa fa-comments"></i></span>
+          <span class="q-title">Communication</span>
+          <span class="q-desc">Messages</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='exams.html'">
+          <span class="q-icon"><i class="fa fa-clipboard-list"></i></span>
+          <span class="q-title">Exams</span>
+          <span class="q-desc">Upcoming Exams</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='subjects.html'">
+          <span class="q-icon"><i class="fa fa-book"></i></span>
+          <span class="q-title">Subjects</span>
+          <span class="q-desc">My Subjects</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='hostel.html'">
+          <span class="q-icon"><i class="fa fa-bed"></i></span>
+          <span class="q-title">Hostel</span>
+          <span class="q-desc">Allocation</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='transport.html'">
+          <span class="q-icon"><i class="fa fa-bus"></i></span>
+          <span class="q-title">Transport</span>
+          <span class="q-desc">My Subscription</span>
+        </div>
+        <div class="quick-card" onclick="window.location.href='profile.html'">
+          <span class="q-icon"><i class="fa fa-user"></i></span>
+          <span class="q-title">Profile</span>
+          <span class="q-desc">View / Update</span>
+        </div>
+      </div>
+      <!-- News & Updates -->
+      <div class="news-card" id="newsCard">
+        <div class="news-title">News &amp; Updates</div>
+        <div class="news-empty" id="newsContent">No items found</div>
+        <button class="news-btn">News &amp; Events →</button>
+      </div>
+    </div>
+    <!-- Right Column -->
+    <div class="main-right">
+      <div class="panel-card" id="eclassPanel">
+        <div class="panel-title">E-Class</div>
+        <ul class="panel-list" id="eclassSummary">
+          <li><span class="dot"></span> My Classrooms</li>
+          <li><span class="dot"></span> Unread messages</li>
+          <li><span class="dot"></span> Happening now</li>
+        </ul>
+      </div>
+      <!-- Add more panels as needed -->
+    </div>
+  </div>
+  <!-- Floating eClass button (mobile) -->
+  <button id="eclass-fab" onclick="window.location.href='e-class.html'">
+    <i class="fa fa-laptop"></i>
+  </button>
+  <script>
+    // Responsive FAB button for mobile
+    function updateFAB() {
+      const fab = document.getElementById('eclass-fab');
+      fab.style.display = window.innerWidth < 700 ? 'block' : 'none';
+    }
+    window.addEventListener('resize', updateFAB);
+    window.addEventListener('DOMContentLoaded', updateFAB);
+
+    // Dynamic fetch and fill
+    async function fetchStudentDashboard() {
+      try {
+        const res = await fetch('/api/students/me');
+        if (!res.ok) throw new Error('Could not fetch student data');
+        const data = await res.json();
+
+        // Profile card
+        document.getElementById('profileName').textContent = data.name || 'Student Name';
+        document.getElementById('profileMeta').textContent = 'Registration No: ' + (data.reg_no || '-');
+        document.getElementById('profileDetails').innerHTML =
+          `<span>Class: ${data.class || '-'}</span>` +
+          `<span>Session: ${data.session || '-'}</span>` +
+          `<span>Term: ${data.term || '-'}</span>`;
+        // Avatar
+        if (data.photo_url) {
+          document.getElementById('profileAvatar').src = data.photo_url;
+        } else if (data.name) {
+          document.getElementById('profileAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name) + '&background=17c3b2&color=fff';
+        }
+
+        // Timetable summary (today)
+        if (data.timetable && Array.isArray(data.timetable)) {
+          const today = new Date().toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
+          const todaySchedule = data.timetable.find(d => (d.day || '').toLowerCase() === today);
+          if (todaySchedule && todaySchedule.subjects && todaySchedule.subjects.length > 0) {
+            document.getElementById('timetableSummary').innerHTML = todaySchedule.subjects.map(sub =>
+              `<div><strong>${sub.time || ''}</strong>: ${sub.name || sub.subject || ''}</div>`
+            ).join('');
+          } else {
+            document.getElementById('timetableSummary').textContent = 'No classes today!';
+          }
+        } else {
+          document.getElementById('timetableSummary').textContent = 'No timetable data.';
+        }
+
+        // News & Updates
+        if (data.news && data.news.length > 0) {
+          document.getElementById('newsContent').innerHTML = data.news.map(news =>
+            `<div style="margin-bottom:7px;"><strong>${news.title}</strong><br><span style="color:#888;font-size:0.95em;">${news.date || ''}</span><br>${news.summary || ''}</div>`
+          ).join('');
+        } else {
+          document.getElementById('newsContent').textContent = 'No items found';
+        }
+
+        // E-Class summary (right panel)
+        if (data.eclass_summary && Array.isArray(data.eclass_summary)) {
+          document.getElementById('eclassSummary').innerHTML = data.eclass_summary.map(e =>
+            `<li><span class="dot"></span> ${e}</li>`
+          ).join('');
+        }
+
+      } catch (err) {
+        document.getElementById('profileName').textContent = 'Unable to load student';
+        document.getElementById('profileMeta').textContent = '';
+        document.getElementById('profileDetails').innerHTML = '';
+        document.getElementById('timetableSummary').textContent = 'Error loading data!';
+        document.getElementById('newsContent').textContent = 'Could not fetch news';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', fetchStudentDashboard);
+  </script>
+</body>
+</html>

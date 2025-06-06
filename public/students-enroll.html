@@ -243,7 +243,7 @@ async function uploadStudentData(studentData, image) {
   }
   try {
     const response = await axios.post(
-      'https://d-1-z03x.onrender.com/api/students',
+      '/api/students',
       formData,
       { headers: { Accept: 'application/json' } }
     );
@@ -273,7 +273,7 @@ document.getElementById('enroll-student-form').onsubmit = async function(e) {
   if (spinner) spinner.style.display = 'inline-block';
 
   try {
-    const res = await fetch('https://gold-1-z03x.onrender.com/api/students', {
+    const res = await fetch('/api/students', {
       method: 'POST',
       body: formData
     });

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Student = require('../models/Student');
+const db = require('../firestore'); // Firestore instance
 
 async function studentAuthMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -9,9 +9,19 @@ async function studentAuthMiddleware(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const student = await Student.findById(decoded.id).select('-password');
-    if (!student) return res.status(401).json({ error: 'Student not found.' });
-    req.student = student;
+
+    // Fetch student from Firestore
+    const studentDoc = await db.collection('students').doc(decoded.id).get();
+
+    if (!studentDoc.exists) {
+      return res.status(401).json({ error: 'Student not found.' });
+    }
+
+    // Remove password field if it exists
+    const student = studentDoc.data();
+    delete student.password;
+
+    req.student = { id: studentDoc.id, ...student };
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid or expired token.' });

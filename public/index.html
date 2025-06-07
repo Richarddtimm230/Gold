@@ -32,6 +32,18 @@
       color: var(--text-main);
       scroll-behavior: smooth;
     }
+    /* Global safety net */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+    
     /* HEADER */
     .topbar {
       background: var(--gradient);
@@ -545,6 +557,7 @@
   padding: 60px 20px;
   background-color: #f4fbf7;
   text-align: center;
+  overflow-x: hidden;
 }
 
 .gallery-title {
@@ -561,11 +574,14 @@
   gap: 16px;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .gallery-img {
   width: 100%;
+  max-width: 100%;
   height: 180px;
   object-fit: cover;
   border-radius: 10px;
@@ -579,34 +595,19 @@
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* TABLET */
-@media (max-width: 768px) {
-  .gallery-title {
-    font-size: 2rem;
-  }
-
-  .gallery-img {
-    height: 160px;
-  }
-}
-
-/* MOBILE */
-@media (max-width: 400px) {
+/* MOBILE: Prevent scroll overflow */
+@media (max-width: 480px) {
   .gallery-grid {
     grid-template-columns: 1fr;
+    padding: 0 10px;
   }
 
   .gallery-img {
     height: auto;
     max-height: 250px;
-    width: 90%;
-  }
-
-  .gallery-title {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
   }
 }
+
 
 
     /* TESTIMONIALS */

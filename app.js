@@ -4,19 +4,28 @@ const path = require('path');
 const cors = require('cors');
 
 // --- FIREBASE ADMIN/FIRESTORE INIT ---
-const { initializeApp, cert } = require('firebase-admin/app');
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
-const serviceAccount = require('./firebaseServiceAccount.json'); // Place your downloaded serviceAccount file here
 
-initializeApp({
-  credential: cert(serviceAccount),
-  // Uncomment if you want to specify the projectId explicitly:
-  projectId: "myschoolapp-eac54",
-});
+// Prefer environment variable for service account (for Render/deployment), fallback to local file
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  serviceAccount = require('./firebaseServiceAccount.json');
+}
+
+// Guard against duplicate app initialization
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(serviceAccount),
+    projectId: 'myschoolapp-eac54', // optional if included in service account
+  });
+}
 const db = getFirestore();
 
-// Optionally attach db to app locals for easy use in routes
-// (you can also require this instance in each route file)
+const ensureSuperAdmin = require('./utils/ensureSuperAdmin'); // Adjust path if needed
+
 const app = express();
 app.locals.firestoreDB = db;
 
@@ -26,7 +35,6 @@ const classesRoute = require('./routes/classes');
 const subjectsRoute = require('./routes/subjects');
 const studentsRoute = require('./routes/students');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
-const ensureSuperAdmin = require('./utils/ensureSuperAdmin');
 
 app.use(cors());
 app.use(express.json());
@@ -50,7 +58,7 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Firestore does not need a connection event; just ensureSuperAdmin and start server
+// Ensure Superadmin, then start server
 (async () => {
   await ensureSuperAdmin(db); // Pass db if ensureSuperAdmin expects it
   app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

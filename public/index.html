@@ -172,6 +172,7 @@
     top: 65px;
     left: 0;
     right: 0;
+    overflow-y: auto;
     flex-direction: column;
     background: #fff;
     border-top: 1px solid #e3f1ea;
@@ -1199,19 +1200,62 @@
       </div>
     </div>
   </section>
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-links">
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Use</a>
-      <a href="#">Contact</a>
-      <a href="#">FAQ</a>
+    <!-- Footer -->
+  <footer class="footer" style="background: linear-gradient(90deg, #217353 0%, #0e4a30 100%);
+    color: #fff; padding: 38px 0 18px 0; text-align: center; font-size: 1.12rem; border-top-left-radius: 25px; border-top-right-radius: 25px; position: relative; margin-top: 0;">
+    <div style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;padding:0 5vw;">
+      <!-- Left: Logo + Motto -->
+      <div style="flex:1 1 240px;min-width:210px;display:flex;align-items:center;gap:18px;margin-bottom:15px;">
+        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Gold and Linc Schools Logo"
+             style="width:54px;height:54px;border-radius:17px;background:#fff;box-shadow:0 2px 11px #00000022;">
+        <div style="text-align:left;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:800;letter-spacing:.04em;line-height:1;color:#fff;">
+            Gold and Linc Schools
+          </div>
+          <div style="font-size:0.99rem;color:#ffe08a;letter-spacing:.02em;margin-top:2px;">
+            Motto: For sound learning.
+          </div>
+        </div>
+      </div>
+      <!-- Center: Links -->
+      <div style="flex:2 1 360px;min-width:220px;display:flex;flex-direction:column;align-items:center;">
+        <div class="footer-links" style="display:flex;gap:23px;justify-content:center;margin-bottom: 11px;">
+          <a href="#" style="color:#ffe08a;text-decoration:none;font-weight:600;transition:color .15s;">
+            <i class="fa fa-user-shield"></i> Privacy Policy</a>
+          <a href="#" style="color:#ffe08a;text-decoration:none;font-weight:600;transition:color .15s;">
+            <i class="fa fa-scroll"></i> Terms of Use</a>
+          <a href="#" style="color:#ffe08a;text-decoration:none;font-weight:600;transition:color .15s;">
+            <i class="fa fa-envelope"></i> Contact</a>
+          <a href="#" style="color:#ffe08a;text-decoration:none;font-weight:600;transition:color .15s;">
+            <i class="fa fa-question-circle"></i> FAQ</a>
+        </div>
+        <div style="height:1.5px;width:100%;background:#fff3;max-width:400px;margin-bottom:9px;"></div>
+        <div class="footer-contact" style="font-size:1rem;color:#fffbe7;line-height:1.7;">
+          <span style="display:inline-block;margin-bottom:3px;">
+            <i class="fa fa-map-marker-alt"></i>
+            Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State
+          </span><br>
+          <span>
+            <i class="fa fa-envelope"></i>
+            <a href="mailto:goldlincschools@gmail.com" style="color:#ffe08a;text-decoration:underline;">goldlincschools@gmail.com</a>
+            &nbsp;|&nbsp;
+            <i class="fa fa-phone"></i>
+            <a href="tel:08034430941" style="color:#ffe08a;text-decoration:underline;">08034430941</a>
+          </span>
+        </div>
+      </div>
+      <!-- Right: Socials -->
+      <div style="flex:1 1 160px;min-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:10px;">
+        <div style="font-size:1.07rem;font-weight:600;color:#ffe08a;margin-bottom:7px;">Connect with us</div>
+        <div style="display:flex;gap:13px;justify-content:center;">
+          <a href="#" title="Facebook" style="color:#ffe08a;font-size:1.4rem;transition:color .15s;"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" title="Twitter" style="color:#ffe08a;font-size:1.4rem;transition:color .15s;"><i class="fab fa-twitter"></i></a>
+          <a href="#" title="Instagram" style="color:#ffe08a;font-size:1.4rem;transition:color .15s;"><i class="fab fa-instagram"></i></a>
+          <a href="#" title="LinkedIn" style="color:#ffe08a;font-size:1.4rem;transition:color .15s;"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
     </div>
-    <div class="footer-contact">
-      Address: Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State<br>
-      Email: <a href="mailto:goldlincschools@gmail.com" style="color:#ffe;">goldlincschools@gmail.com</a> &nbsp;|&nbsp; Phone: <a href="tel:08034430941" style="color:#ffe;">08034430941</a>
-    </div>
-    <div class="footer-copy">
+    <div class="footer-copy" style="color:#e0ede6;font-size:0.99rem;margin-top:22px;">
       &copy; 2025 Gold and Linc Schools. All rights reserved.
     </div>
   </footer>

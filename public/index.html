@@ -591,7 +591,7 @@
 }
 
 /* MOBILE */
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .gallery-grid {
     grid-template-columns: 1fr;
   }
@@ -599,6 +599,7 @@
   .gallery-img {
     height: auto;
     max-height: 250px;
+    width: 90%;
   }
 
   .gallery-title {
@@ -677,38 +678,70 @@
       color: var(--text-muted);
       font-size: 0.95rem;
     }
-    /* PARTNERS */
-    .partner-section {
-      background: #fafdff;
-      padding: 31px 7vw 28px 7vw;
-      border-bottom: 1.5px solid #e7f5ea;
-      text-align: center;
-    }
-    .partner-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.17rem;
-      color: var(--secondary);
-      font-weight: 700;
-      margin-bottom: 19px;
-    }
-    .partner-logos {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 7px;
-    }
-    .partner-logo {
-      width: 105px;
-      filter: grayscale(0.2) brightness(0.93);
-      opacity: 0.83;
-      transition: filter .16s, opacity .15s;
-    }
-    .partner-logo:hover {
-      filter: none;
-      opacity: 1;
-    }
+    /* VISION & MISSION SECTION */
+.vm-section {
+  padding: 60px 20px;
+  background: #f9fdfb;
+}
+
+.vm-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vm-box {
+  flex: 1 1 420px;
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease;
+}
+
+.vm-box:hover {
+  transform: translateY(-5px);
+}
+
+.vm-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #216f53;
+  margin-bottom: 16px;
+}
+
+.vm-text {
+  font-size: 1.05rem;
+  color: #444;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .vm-box {
+    padding: 24px;
+  }
+
+  .vm-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vm-container {
+    flex-direction: column;
+  }
+
+  .vm-box {
+    flex: 1 1 100%;
+  }
+}
+
     /* NEWS */
     .news-section {
       padding: 42px 7vw 40px 7vw;
@@ -1138,17 +1171,24 @@
       </div>
     </div>
   </section>
-  <!-- Partners Section -->
-  <section class="partner-section">
-    <div class="partner-title">Our Partners</div>
-    <div class="partner-logos">
-      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Googlelogo.png" alt="Google">
-      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft">
-      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple">
-      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/IBM_logo.svg" alt="IBM">
-      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_NIKE.svg" alt="Nike">
+  <!-- Vision & Mission Section -->
+<section class="vm-section">
+  <div class="vm-container">
+    <div class="vm-box vision">
+      <h2 class="vm-title">Vision Statement</h2>
+      <p class="vm-text">
+        To be a leading institution in fostering knowledge, innovation, and leadership — inspiring students to create a meaningful impact in the world through sound education and moral integrity.
+      </p>
     </div>
-  </section>
+    <div class="vm-box mission">
+      <h2 class="vm-title">Mission Statement</h2>
+      <p class="vm-text">
+        Our mission is to provide an inclusive and dynamic learning environment that nurtures intellectual growth, critical thinking, and a lifelong passion for learning while upholding values of integrity and excellence.
+      </p>
+    </div>
+  </div>
+          </section>
+          
   <!-- Faculty Section -->
 <section class="faculty-section" id="faculty">
   <h2 class="faculty-title">Meet Our Esteemed Faculty</h2>

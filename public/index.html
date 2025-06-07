@@ -217,7 +217,7 @@ body {
 .welcome-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
+  gap: 20px;
   align-items: center;
   justify-content: center;
   max-width: 1200px;
@@ -229,6 +229,34 @@ body {
   max-width: 340px;
   text-align: center;
   margin-bottom: 3px;
+}
+.welcome-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px; /* reduced from 40px */
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.welcome-image {
+  flex: 0 0 300px;
+  max-width: 300px;
+}
+
+.welcome-image img {
+  width: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-content {
+  flex: 1;
+  min-width: 280px;
+  max-width: 680px;
 }
 
 .welcome-image img {
@@ -258,26 +286,23 @@ body {
   text-align: justify;
 }
 
-/* RESPONSIVE DESIGN */
-@media (max-width: 768px) {
+
+    @media (max-width: 768px) {
   .welcome-container {
     flex-direction: column;
-    text-align: center;
+    align-items: center;
+    gap: 16px;
   }
 
   .welcome-content {
-    padding: 0 10px;
-  }
-
-  .welcome-title {
-    font-size: 1.5rem;
+    text-align: center;
+    padding: 0 6px;
   }
 
   .welcome-text {
     text-align: center;
-    font-size: 0.8rem;
   }
-}
+    }
     
     /* HERO */
 .hero {

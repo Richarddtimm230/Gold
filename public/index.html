@@ -1184,20 +1184,142 @@ body {
   </div>
 </section>
 
-  <!-- Carousel Section -->
-  <section class="carousel-section">
-    <div class="carousel-images" id="carouselImages">
+<!-- Carousel Section -->
+<section class="carousel-section">
+  <div class="carousel-images" id="carouselImages" style="position:relative;">
+    <div class="carousel-slide">
       <img class="carousel-image" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" alt="Campus 1">
+      <div class="carousel-caption">
+        <div class="caption-title">Gold and Linc Schools Welcomes New Students!</div>
+        <div class="caption-text">Orientation for the 2025/2026 Academic Year was a huge success.</div>
+      </div>
+    </div>
+    <div class="carousel-slide">
       <img class="carousel-image" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80" alt="Campus 2">
+      <div class="carousel-caption">
+        <div class="caption-title">Science Fair 2025</div>
+        <div class="caption-text">Students impress judges with innovative projects and experiments.</div>
+      </div>
+    </div>
+    <div class="carousel-slide">
       <img class="carousel-image" src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=1200&q=80" alt="Event 1">
-      <img class="carousel-image" src="https://images.unsplash.com/photo-1517520287167-4bbf64a00d66?auto=format&fit=crop&w=1200&q=80" alt="Graduate">
+      <div class="carousel-caption">
+        <div class="caption-title">Annual Sports Day Highlights</div>
+        <div class="caption-text">Inter-house competitions foster teamwork and school spirit.</div>
+      </div>
     </div>
-    <div class="carousel-controls">
-      <button class="carousel-btn" id="carouselPrev"><i class="fa fa-chevron-left"></i></button>
-      <button class="carousel-btn" id="carouselNext"><i class="fa fa-chevron-right"></i></button>
+    <div class="carousel-slide">
+      <img class="carousel-image" src="https://images.unsplash.com/photo-1517520287167-4bbf64a00d66?auto=format&fit=crop&w=1200&q=80" alt="Graduation">
+      <div class="carousel-caption">
+        <div class="caption-title">Congratulations to Our Graduates</div>
+        <div class="caption-text">Celebrating excellence and achievement in academics.</div>
+      </div>
     </div>
-    <div class="carousel-dots" id="carouselDots"></div>
-  </section>
+  </div>
+  <div class="carousel-controls">
+    <button class="carousel-btn" id="carouselPrev"><i class="fa fa-chevron-left"></i></button>
+    <button class="carousel-btn" id="carouselNext"><i class="fa fa-chevron-right"></i></button>
+  </div>
+  <div class="carousel-dots" id="carouselDots"></div>
+  <style>
+    .carousel-slide {
+      min-width: 100%;
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+    .carousel-caption {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(33, 115, 83, 0.77);
+      color: #fff;
+      text-align: center;
+      border-radius: 13px;
+      padding: 18px 22px 13px 22px;
+      box-shadow: 0 3px 22px #0004;
+      z-index: 2;
+      max-width: 89vw;
+      min-width: 180px;
+      width: 65vw;
+      animation: fadeInCaption .6s;
+    }
+    @keyframes fadeInCaption { from { opacity:0;transform:translate(-50%,-40%);} to{opacity:1;transform:translate(-50%,-50%);} }
+    .carousel-caption .caption-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.30rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+      color: #ffe08a;
+      letter-spacing: .01em;
+      text-shadow:0 1px 7px #0e3b1f77;
+    }
+    .carousel-caption .caption-text {
+      font-size: 1.01rem;
+      color: #fffce7;
+      font-weight: 500;
+      text-shadow:0 1px 5px #0e3b1f55;
+    }
+    @media (max-width: 700px) {
+      .carousel-caption { padding: 10px 6vw 8px 6vw; width: 89vw; font-size:.99rem; }
+      .carousel-caption .caption-title {font-size:1.08rem;}
+      .carousel-caption .caption-text {font-size:.97rem;}
+    }
+    @media (max-width:400px){
+      .carousel-caption{padding:6px 2vw 5px 2vw;}
+      .carousel-caption .caption-title {font-size:1rem;}
+    }
+  </style>
+  <script>
+    // Carousel logic with captions
+    const carouselImages = document.getElementById('carouselImages');
+    const slides = Array.from(carouselImages.querySelectorAll('.carousel-slide'));
+    const prevBtn = document.getElementById('carouselPrev');
+    const nextBtn = document.getElementById('carouselNext');
+    const dotsContainer = document.getElementById('carouselDots');
+    let current = 0, interval;
+
+    function showSlide(idx) {
+      if(idx < 0) idx = slides.length-1;
+      if(idx >= slides.length) idx = 0;
+      carouselImages.style.transform = `translateX(-${idx * 100}%)`;
+      dotsContainer.querySelectorAll('.carousel-dot').forEach((dot,i) => {
+        dot.classList.toggle('active', i===idx);
+      });
+      current = idx;
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    prevBtn.onclick = prevSlide;
+    nextBtn.onclick = nextSlide;
+    // Dots navigation
+    dotsContainer.innerHTML = '';
+    for(let i=0; i<slides.length; i++){
+      let dot = document.createElement('div');
+      dot.className = 'carousel-dot'+(i===0?' active':'');
+      dot.onclick = ()=>showSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+    // Auto-advance
+    function startCarousel(){ interval = setInterval(nextSlide, 5000);}
+    function stopCarousel(){ clearInterval(interval);}
+    carouselImages.addEventListener('mouseenter', stopCarousel);
+    carouselImages.addEventListener('mouseleave', startCarousel);
+    startCarousel();
+    // Swipe for mobile
+    let startX=0,endX=0;
+    carouselImages.addEventListener('touchstart',e=>startX = e.touches[0].clientX);
+    carouselImages.addEventListener('touchmove',e=>endX = e.touches[0].clientX);
+    carouselImages.addEventListener('touchend',()=>{
+      if(startX && endX){
+        if(startX-endX>50) nextSlide();
+        else if(endX-startX>50) prevSlide();
+      }
+      startX = endX = 0;
+    });
+  </script>
+</section>
   <!-- Stats Section -->
   <section class="stats-section">
     <div class="stat-card">

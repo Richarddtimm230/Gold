@@ -678,69 +678,86 @@
       color: var(--text-muted);
       font-size: 0.95rem;
     }
-    /* VISION & MISSION SECTION */
+/* VISION & MISSION SECTION */
 .vm-section {
-  padding: 60px 20px;
-  background: #f9fdfb;
+  background: linear-gradient(to right, #f4fbf7, #fdfefd);
+  padding: 80px 20px;
 }
 
-.vm-container {
+.vm-wrapper {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
-  max-width: 1200px;
+  gap: 40px;
+  max-width: 1100px;
   margin: 0 auto;
+  justify-content: center;
 }
 
-.vm-box {
-  flex: 1 1 420px;
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  transition: transform 0.3s ease;
+.vm-card {
+  flex: 1 1 460px;
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.vm-box:hover {
-  transform: translateY(-5px);
+.vm-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.vm-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  font-weight: 700;
+.vm-icon {
+  font-size: 2.8rem;
   color: #216f53;
   margin-bottom: 16px;
 }
 
+.vm-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1d5944;
+  margin-bottom: 18px;
+}
+
 .vm-text {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   color: #444;
-  line-height: 1.7;
+  line-height: 1.75;
   text-align: justify;
+  padding: 0 4px;
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .vm-box {
-    padding: 24px;
+  .vm-title {
+    font-size: 1.7rem;
   }
 
-  .vm-title {
-    font-size: 1.6rem;
+  .vm-text {
+    font-size: 1rem;
+  }
+
+  .vm-icon {
+    font-size: 2.4rem;
   }
 }
 
 @media (max-width: 480px) {
-  .vm-container {
+  .vm-wrapper {
     flex-direction: column;
+    gap: 28px;
   }
 
-  .vm-box {
-    flex: 1 1 100%;
+  .vm-card {
+    padding: 30px 20px;
   }
 }
+
 
     /* NEWS */
     .news-section {
@@ -1171,24 +1188,31 @@
       </div>
     </div>
   </section>
-  <!-- Vision & Mission Section -->
+
+          <!-- Vision & Mission Section -->
 <section class="vm-section">
-  <div class="vm-container">
-    <div class="vm-box vision">
+  <div class="vm-wrapper">
+    <div class="vm-card">
+      <div class="vm-icon"><i class="fas fa-eye"></i></div>
       <h2 class="vm-title">Vision Statement</h2>
       <p class="vm-text">
-        To be a leading institution in fostering knowledge, innovation, and leadership — inspiring students to create a meaningful impact in the world through sound education and moral integrity.
+        To be a beacon of excellence in education, cultivating innovative thinkers, ethical leaders, and global citizens prepared to shape the future with courage and compassion.
       </p>
     </div>
-    <div class="vm-box mission">
+
+    <div class="vm-card">
+      <div class="vm-icon"><i class="fas fa-bullseye"></i></div>
       <h2 class="vm-title">Mission Statement</h2>
       <p class="vm-text">
-        Our mission is to provide an inclusive and dynamic learning environment that nurtures intellectual growth, critical thinking, and a lifelong passion for learning while upholding values of integrity and excellence.
+        Our mission is to provide transformative education through critical inquiry, practical knowledge, and a commitment to service — empowering students to thrive in a complex, interconnected world.
       </p>
     </div>
   </div>
-          </section>
-          
+</section>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
   <!-- Faculty Section -->
 <section class="faculty-section" id="faculty">
   <h2 class="faculty-title">Meet Our Esteemed Faculty</h2>
@@ -1232,17 +1256,7 @@
           <a href="https://twitter.com/rinadas" target="_blank" class="fa fa-twitter"></a>
         </div>
       </div>
-      <div class="faculty-card" data-modal="modal3">
-        <img class="faculty-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Dr. Rina Das">
-        <h3 class="faculty-name">Dr. Rina Das</h3>
-        <p class="faculty-role">Associate Professor</p>
-        <p class="faculty-desc">Network Security Specialist</p>
-        <div class="faculty-social">
-          <a href="mailto:rina@example.com" class="fa fa-envelope"></a>
-          <a href="https://linkedin.com/in/rinadas" target="_blank" class="fa fa-linkedin"></a>
-          <a href="https://twitter.com/rinadas" target="_blank" class="fa fa-twitter"></a>
-        </div>
-      </div>
+      
       <!-- Add more faculty cards similarly -->
     </div>
     <button class="next">&#10095;</button>

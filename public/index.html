@@ -352,33 +352,58 @@
       flex-wrap: wrap;
     }
     .about-main {
-      flex: 2;
-      min-width: 280px;
-    }
-    .about-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: var(--primary);
-      margin-bottom: 13px;
-      font-weight: 700;
-    }
-    .about-text {
-      font-size: 1.09rem;
-      color: var(--text-main);
-      line-height: 1.8;
-      margin-bottom: 18px;
-      text-align: justify;
-    }
-    .about-list {
-      padding-left: 1.2em;
-      color: var(--primary);
-      font-weight: 600;
-    }
-    .about-list li {
-      margin-bottom: 7px;
-      font-weight: 400;
-      color: #1c4b2f;
-    }
+  flex: 2;
+  min-width: 280px;
+  padding: 40px 24px;
+  background-color: #f8fefb;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  max-width: 880px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.about-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  color: #216f53; /* Or var(--primary) if defined */
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-left: 4px solid #3bb78f;
+  padding-left: 14px;
+}
+
+.about-text {
+  font-size: 1.1rem;
+  color: #2d2d2d; /* Or var(--text-main) */
+  line-height: 1.8;
+  margin-bottom: 24px;
+  text-align: justify;
+}
+
+.about-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #334;
+}
+
+.about-list li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 12px;
+}
+
+.about-list li::before {
+  content: "✔️";
+  position: absolute;
+  left: 0;
+  color: #2e7d61;
+  font-size: 1.1rem;
+  top: 0;
+}
+
     .about-side {
       flex: 1;
       min-width: 220px;
@@ -759,18 +784,20 @@
   <!-- About Section & Quick Links -->
   <section class="about-section" id="about">
     <div class="about-main">
-      <div class="about-title">About Gold and Linc Schools</div>
-      <div class="about-text">
-        Gold and Linc Schools is committed to nurturing talent, fostering innovation, and advancing research in technology and the sciences. With a dynamic faculty, state-of-the-art facilities, and a vibrant student community, Gold and Linc Schools is at the forefront of education and scientific discovery.
-      </div>
-      <ul class="about-list">
-        <li>Cutting-edge Research Labs</li>
-        <li>Industry Partnerships &amp; Internships</li>
-        <li>Global Alumni Network</li>
-        <li>Student Clubs &amp; Societies</li>
-        <li>Scholarships &amp; Financial Aid</li>
-      </ul>
+  <h2 class="about-title">About Gold & Linc Schools</h2>
+  <p class="about-text">
+    Gold & Linc Schools is committed to nurturing talent, fostering innovation, and advancing research in technology and the sciences. 
+    With a dynamic faculty, state-of-the-art facilities, and a vibrant student community, Gold & Linc Schools is at the forefront of education and scientific discovery.
+  </p>
+  <ul class="about-list">
+    <li>Cutting-edge Research Labs</li>
+    <li>Industry Partnerships & Internships</li>
+    <li>Global Alumni Network</li>
+    <li>Student Clubs & Societies</li>
+    <li>Scholarships & Financial Aid</li>
+  </ul>
     </div>
+                                   
     <div class="about-side">
       <div class="quick-title"><i class="fa fa-bolt"></i> Quick Links</div>
       <div class="quick-links-grid">

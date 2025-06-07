@@ -206,6 +206,78 @@ body {
     margin: 10px auto;
   }
 }
+
+/* PROPRIETOR WELCOME SECTION */
+.welcome-section {
+  background-color: #fefdfc;
+  padding: 70px 20px;
+  border-top: 1px solid #edf2ef;
+}
+
+.welcome-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-image {
+  flex: 1 1 300px;
+  max-width: 340px;
+  text-align: center;
+}
+
+.welcome-image img {
+  width: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-content {
+  flex: 2 1 500px;
+  color: #2d2d2d;
+}
+
+.welcome-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216f53;
+  margin-bottom: 20px;
+}
+
+.welcome-text {
+  font-size: 1.07rem;
+  line-height: 1.8;
+  color: #444;
+  text-align: justify;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .welcome-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .welcome-content {
+    padding: 0 10px;
+  }
+
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+
+  .welcome-text {
+    text-align: center;
+    font-size: 1rem;
+  }
+}
+    
     /* HERO */
 .hero {
   background: url('https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1400&q=80') center center/cover no-repeat;
@@ -1107,6 +1179,29 @@ body {
       </div>
     </div>
   </section>
+
+  <!-- Proprietor's Welcome Message Section -->
+<section class="welcome-section">
+  <div class="welcome-container">
+    <div class="welcome-image">
+      <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80" alt="Proprietor" />
+    </div>
+    <div class="welcome-content">
+      <h2 class="welcome-title">A Welcome Message from the Proprietor</h2>
+      <p class="welcome-text">
+        Dear Students, Parents, and Visitors,<br /><br />
+        It is my great pleasure to welcome you to Gold and Linc Schools. We are more than just an institution — we are a community built on a foundation of integrity, academic excellence, and character development.
+        <br /><br />
+        As the proprietor, my commitment is to provide an inspiring environment where students are empowered to become forward-thinking leaders of tomorrow. Thank you for being part of our vision. We are honored to have you on this journey with us.
+        <br /><br />
+        Warm regards,<br />
+        <strong>Mr. Festus A. Adeniyi</strong><br />
+        Proprietor, Gold and Linc Schools
+      </p>
+    </div>
+  </div>
+        </section>
+        
   <!-- About Section & Quick Links -->
   <section class="about-section" id="about">
     <div class="about-main">

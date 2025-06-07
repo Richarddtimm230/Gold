@@ -648,6 +648,154 @@
       color: var(--text-main);
       font-size: 0.98rem;
     }
+/* Section styling */
+.faculty-section {
+  padding: 60px 20px;
+  background-color: #f4fbf7;
+  text-align: center;
+}
+
+.faculty-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem;
+  color: #216f53;
+  margin-bottom: 40px;
+  font-weight: 700;
+}
+
+/* Slider structure */
+.faculty-slider {
+  position: relative;
+  overflow: hidden;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.faculty-list {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px;
+}
+
+/* Card styles */
+.faculty-card {
+  flex: 0 0 250px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.faculty-card:hover {
+  transform: translateY(-6px);
+}
+
+.faculty-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 3px solid #2e7d61;
+}
+
+.faculty-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.faculty-role {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2e7d61;
+}
+
+.faculty-desc {
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+/* Social links */
+.faculty-social a {
+  margin: 0 6px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  color: #2e7d61;
+  transition: color 0.3s ease;
+}
+
+.faculty-social a:hover {
+  color: #1c5241;
+}
+
+/* Navigation buttons */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #2e7d61;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 10;
+}
+
+.prev {
+  left: 0;
+}
+
+.next {
+  right: 0;
+}
+
+/* Modal styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: auto;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 80%;
+  text-align: left;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}
+
+    
     /* FOOTER */
     .footer {
       background: var(--gradient);
@@ -875,35 +1023,64 @@
     </div>
   </section>
   <!-- Faculty Section -->
-  <section class="faculty-section" id="faculty">
-    <div class="faculty-title">Meet Our Esteemed Faculty</div>
+<section class="faculty-section" id="faculty">
+  <h2 class="faculty-title">Meet Our Esteemed Faculty</h2>
+
+  <div class="faculty-slider">
+    <button class="prev">&#10094;</button>
     <div class="faculty-list">
-      <div class="faculty-card">
-        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/65.jpg" alt="Faculty">
-        <div class="faculty-name">Prof. Dr. Anwar Hossain</div>
-        <div class="faculty-role">Director, Gold and Linc</div>
-        <div class="faculty-desc">Expert in Machine Learning &amp; Data Science</div>
+      <!-- Faculty Card 1 -->
+      <div class="faculty-card" data-modal="modal1">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/65.jpg" alt="Prof. Dr. Anwar Hossain">
+        <h3 class="faculty-name">Prof. Dr. Anwar Hossain</h3>
+        <p class="faculty-role">Director, Gold & Linc</p>
+        <p class="faculty-desc">Expert in Machine Learning & Data Science</p>
+        <div class="faculty-social">
+          <a href="mailto:anwar@example.com" class="fa fa-envelope"></a>
+          <a href="https://linkedin.com/in/anwarhossain" target="_blank" class="fa fa-linkedin"></a>
+          <a href="https://twitter.com/anwarhossain" target="_blank" class="fa fa-twitter"></a>
+        </div>
       </div>
-      <div class="faculty-card">
-        <img class="faculty-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Faculty">
-        <div class="faculty-name">Dr. Rina Das</div>
-        <div class="faculty-role">Associate Professor</div>
-        <div class="faculty-desc">Network Security Specialist</div>
+
+      <!-- Faculty Card 2 -->
+      <div class="faculty-card" data-modal="modal2">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Dr. Rina Das">
+        <h3 class="faculty-name">Dr. Rina Das</h3>
+        <p class="faculty-role">Associate Professor</p>
+        <p class="faculty-desc">Network Security Specialist</p>
+        <div class="faculty-social">
+          <a href="mailto:rina@example.com" class="fa fa-envelope"></a>
+          <a href="https://linkedin.com/in/rinadas" target="_blank" class="fa fa-linkedin"></a>
+          <a href="https://twitter.com/rinadas" target="_blank" class="fa fa-twitter"></a>
+        </div>
       </div>
-      <div class="faculty-card">
-        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/77.jpg" alt="Faculty">
-        <div class="faculty-name">Dr. Mahmudul Islam</div>
-        <div class="faculty-role">Assistant Professor</div>
-        <div class="faculty-desc">IoT &amp; Embedded Systems</div>
-      </div>
-      <div class="faculty-card">
-        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/34.jpg" alt="Faculty">
-        <div class="faculty-name">Dr. Saiful Azam</div>
-        <div class="faculty-role">Lecturer</div>
-        <div class="faculty-desc">Cloud Computing</div>
-      </div>
+
+      <!-- Add more faculty cards similarly -->
     </div>
-  </section>
+    <button class="next">&#10095;</button>
+  </div>
+</section>
+
+<!-- Modals -->
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <span class="close" data-modal="modal1">&times;</span>
+    <h2>Prof. Dr. Anwar Hossain</h2>
+    <p>Dr. Hossain has over 20 years of experience in AI and machine learning, mentoring hundreds of students worldwide and leading cutting-edge research in predictive modeling and smart systems.</p>
+  </div>
+</div>
+
+<div id="modal2" class="modal">
+  <div class="modal-content">
+    <span class="close" data-modal="modal2">&times;</span>
+    <h2>Dr. Rina Das</h2>
+    <p>Dr. Rina Das is a top cybersecurity scholar specializing in network security, cryptographic systems, and enterprise risk assessment. She’s also passionate about women in tech advocacy.</p>
+  </div>
+</div>
+
+<!-- FontAwesome (for icons) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+  
   <!-- News & Events Section -->
   <section class="news-section" id="news">
     <div class="news-title">News &amp; Events</div>
@@ -1000,6 +1177,34 @@
       }
       startX = endX = 0;
     });
+    document.addEventListener('DOMContentLoaded', () => {
+  // Modal handling
+  document.querySelectorAll('.faculty-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.modal;
+      document.getElementById(id).style.display = 'flex';
+    });
+  });
+
+  document.querySelectorAll('.close').forEach(close => {
+    close.addEventListener('click', () => {
+      const id = close.dataset.modal;
+      document.getElementById(id).style.display = 'none';
+    });
+  });
+
+  window.addEventListener('click', e => {
+    document.querySelectorAll('.modal').forEach(modal => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  });
+
+  // Slider navigation
+  const list = document.querySelector('.faculty-list');
+  document.querySelector('.prev').addEventListener('click', () => list.scrollBy({ left: -300, behavior: 'smooth' }));
+  document.querySelector('.next').addEventListener('click', () => list.scrollBy({ left: 300, behavior: 'smooth' }));
+});
+    
   </script>
 </body>
 </html>

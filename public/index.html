@@ -1271,54 +1271,7 @@ body {
       .carousel-caption .caption-title {font-size:1rem;}
     }
   </style>
-  <script>
-    // Carousel logic with captions
-    const carouselImages = document.getElementById('carouselImages');
-    const slides = Array.from(carouselImages.querySelectorAll('.carousel-slide'));
-    const prevBtn = document.getElementById('carouselPrev');
-    const nextBtn = document.getElementById('carouselNext');
-    const dotsContainer = document.getElementById('carouselDots');
-    let current = 0, interval;
-
-    function showSlide(idx) {
-      if(idx < 0) idx = slides.length-1;
-      if(idx >= slides.length) idx = 0;
-      carouselImages.style.transform = `translateX(-${idx * 100}%)`;
-      dotsContainer.querySelectorAll('.carousel-dot').forEach((dot,i) => {
-        dot.classList.toggle('active', i===idx);
-      });
-      current = idx;
-    }
-    function nextSlide() { showSlide(current + 1); }
-    function prevSlide() { showSlide(current - 1); }
-    prevBtn.onclick = prevSlide;
-    nextBtn.onclick = nextSlide;
-    // Dots navigation
-    dotsContainer.innerHTML = '';
-    for(let i=0; i<slides.length; i++){
-      let dot = document.createElement('div');
-      dot.className = 'carousel-dot'+(i===0?' active':'');
-      dot.onclick = ()=>showSlide(i);
-      dotsContainer.appendChild(dot);
-    }
-    // Auto-advance
-    function startCarousel(){ interval = setInterval(nextSlide, 5000);}
-    function stopCarousel(){ clearInterval(interval);}
-    carouselImages.addEventListener('mouseenter', stopCarousel);
-    carouselImages.addEventListener('mouseleave', startCarousel);
-    startCarousel();
-    // Swipe for mobile
-    let startX=0,endX=0;
-    carouselImages.addEventListener('touchstart',e=>startX = e.touches[0].clientX);
-    carouselImages.addEventListener('touchmove',e=>endX = e.touches[0].clientX);
-    carouselImages.addEventListener('touchend',()=>{
-      if(startX && endX){
-        if(startX-endX>50) nextSlide();
-        else if(endX-startX>50) prevSlide();
-      }
-      startX = endX = 0;
-    });
-  </script>
+  
 </section>
   <!-- Stats Section -->
   <section class="stats-section">
@@ -1773,6 +1726,52 @@ document.addEventListener('DOMContentLoaded', () => {
   animatedElements.forEach(el => observer.observe(el));
 });
     
+    // Carousel logic with captions
+    const carouselImages = document.getElementById('carouselImages');
+    const slides = Array.from(carouselImages.querySelectorAll('.carousel-slide'));
+    const prevBtn = document.getElementById('carouselPrev');
+    const nextBtn = document.getElementById('carouselNext');
+    const dotsContainer = document.getElementById('carouselDots');
+    let current = 0, interval;
+
+    function showSlide(idx) {
+      if(idx < 0) idx = slides.length-1;
+      if(idx >= slides.length) idx = 0;
+      carouselImages.style.transform = `translateX(-${idx * 100}%)`;
+      dotsContainer.querySelectorAll('.carousel-dot').forEach((dot,i) => {
+        dot.classList.toggle('active', i===idx);
+      });
+      current = idx;
+    }
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+    prevBtn.onclick = prevSlide;
+    nextBtn.onclick = nextSlide;
+    // Dots navigation
+    dotsContainer.innerHTML = '';
+    for(let i=0; i<slides.length; i++){
+      let dot = document.createElement('div');
+      dot.className = 'carousel-dot'+(i===0?' active':'');
+      dot.onclick = ()=>showSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+    // Auto-advance
+    function startCarousel(){ interval = setInterval(nextSlide, 5000);}
+    function stopCarousel(){ clearInterval(interval);}
+    carouselImages.addEventListener('mouseenter', stopCarousel);
+    carouselImages.addEventListener('mouseleave', startCarousel);
+    startCarousel();
+    // Swipe for mobile
+    let startX=0,endX=0;
+    carouselImages.addEventListener('touchstart',e=>startX = e.touches[0].clientX);
+    carouselImages.addEventListener('touchmove',e=>endX = e.touches[0].clientX);
+    carouselImages.addEventListener('touchend',()=>{
+      if(startX && endX){
+        if(startX-endX>50) nextSlide();
+        else if(endX-startX>50) prevSlide();
+      }
+      startX = endX = 0;
+    });
   </script>
 </body>
 </html>

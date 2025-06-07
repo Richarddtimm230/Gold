@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const ClassModel = require('../models/Class');
-const Subject = require('../models/Subject');
 
 // Firestore instance (adjust path as needed)
 const db = require('../firestore');

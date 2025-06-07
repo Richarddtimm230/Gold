@@ -549,7 +549,7 @@
 
 .gallery-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 700;
   color: #216f53;
   margin-bottom: 30px;
@@ -557,16 +557,16 @@
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 10px;
 }
 
 .gallery-img {
   width: 100%;
-  height: 220px;
+  height: 180px;
   object-fit: cover;
   border-radius: 10px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
@@ -575,9 +575,38 @@
 }
 
 .gallery-img:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
 }
+
+/* TABLET */
+@media (max-width: 768px) {
+  .gallery-title {
+    font-size: 2rem;
+  }
+
+  .gallery-img {
+    height: 160px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-img {
+    height: auto;
+    max-height: 250px;
+  }
+
+  .gallery-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+}
+
 
     /* TESTIMONIALS */
     .testimonial-section {

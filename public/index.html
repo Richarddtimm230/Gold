@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Institute of Information and Communication Technology (IICT)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter + Playfair Display for classic academic feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #217353;
+      --secondary: #0e4a30;
+      --accent: #f6b10a;
+      --bg: #f6f8f6;
+      --card: #fff;
+      --radius: 13px;
+      --shadow: 0 3px 16px 0 rgba(33,115,83,0.07);
+      --text-main: #133e27;
+      --text-muted: #666;
+      --gradient: linear-gradient(90deg, #217353 0%, #0e4a30 100%);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html,body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-main);
+      scroll-behavior: smooth;
+    }
+    /* HEADER BAR */
+    .topbar {
+      background: var(--gradient);
+      color: #fff;
+      padding: 16px 0 10px 0;
+      text-align: center;
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-bottom: 3px solid #f6b10a22;
+    }
+    /* NAVIGATION */
+    nav {
+      background: #fff;
+      box-shadow: 0 1px 9px 0 #e0ede6;
+      padding: 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1.5px solid #ecf7f1;
+      font-size: 1.01rem;
+    }
+    .nav-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.3em;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .nav-list li {
+      margin: 0;
+      padding: 0;
+    }
+    .nav-list a {
+      display: inline-block;
+      padding: 17px 7px 13px 7px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 2.5px solid transparent;
+      transition: color .16s, border .18s;
+      border-radius: 0 0 8px 8px;
+    }
+    .nav-list a:hover, .nav-list a.active {
+      color: var(--accent);
+      border-bottom: 2.5px solid var(--accent);
+      background: #f6f8f7;
+    }
+    /* HERO SECTION */
+    .hero {
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat;
+      min-height: 370px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(33, 115, 83, 0.38);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      padding: 38px 18px 34px 18px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+      text-shadow: 0 3px 12px #0e3b1f77;
+    }
+    .hero-subtitle {
+      font-size: 1.18rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 5px #143e275f;
+    }
+    /* STATS */
+    .stats-section {
+      display: flex;
+      justify-content: center;
+      gap: 3vw;
+      background: #f6f8f7;
+      padding: 33px 5vw 18px 5vw;
+      margin-top: -50px;
+      position: relative;
+      z-index: 3;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 23px 36px 17px 36px;
+      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow .16s;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 1.03rem;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    /* Our Pride Section */
+    .pride-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 44px 0 34px 0;
+      gap: 34px;
+      flex-wrap: wrap;
+      background: #fafdff;
+      border-top: 1.5px solid #e7f5ea;
+      border-bottom: 1.5px solid #e7f5ea;
+    }
+    .pride-img {
+      width: 140px; height: 170px;
+      border-radius: 22px;
+      background: #e7f5ea;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 3px 18px #cdebe1;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .pride-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .pride-title {
+      font-size: 1.7rem;
+      font-family: 'Playfair Display', serif;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .pride-name {
+      font-size: 1.19rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 3px;
+    }
+    .pride-text {
+      color: var(--text-muted);
+      font-size: 1.04rem;
+      max-width: 350px;
+      line-height: 1.6;
+    }
+    /* ABOUT SECTION */
+    .about-section {
+      padding: 48px 9vw 38px 9vw;
+      background: #fff;
+      display: flex;
+      gap: 45px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .about-main {
+      flex: 2;
+      min-width: 280px;
+    }
+    .about-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 13px;
+      font-weight: 700;
+    }
+    .about-text {
+      font-size: 1.09rem;
+      color: var(--text-main);
+      line-height: 1.8;
+      margin-bottom: 18px;
+      text-align: justify;
+    }
+    .about-list {
+      padding-left: 1.2em;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .about-list li {
+      margin-bottom: 7px;
+      font-weight: 400;
+      color: #1c4b2f;
+    }
+    .about-side {
+      flex: 1;
+      min-width: 220px;
+      background: #f6f8f7;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 14px 14px 19px;
+      margin-top: 11px;
+      margin-bottom: 9px;
+    }
+    /* FACULTY SECTION */
+    .faculty-section {
+      padding: 37px 5vw 33px 5vw;
+      background: #fafdff;
+      border-top: 1.5px solid #e7f5ea;
+    }
+    .faculty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .faculty-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+    }
+    .faculty-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 23px 14px 23px;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow .16s;
+      text-align: center;
+    }
+    .faculty-img {
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 7px;
+      box-shadow: 0 1px 8px #cdebe1;
+      border: 3px solid #fff;
+    }
+    .faculty-name {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.09rem;
+      margin-bottom: 2px;
+    }
+    .faculty-role {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      margin-bottom: 3px;
+    }
+    /* NEWS & EVENTS */
+    .news-section {
+      padding: 42px 7vw 40px 7vw;
+      background: #fff;
+      border-bottom: 1.5px solid #e7f5ea;
+    }
+    .news-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .news-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 29px;
+      justify-content: center;
+    }
+    .news-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 12px 11px 12px;
+      min-width: 210px;
+      max-width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: box-shadow .14s;
+    }
+    .news-img {
+      width: 100%;
+      max-width: 230px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 7px;
+    }
+    .news-headline {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.07rem;
+      margin-bottom: 3px;
+    }
+    .news-date {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+    .news-text {
+      color: var(--text-main);
+      font-size: 0.98rem;
+    }
+    /* FOOTER */
+    .footer {
+      background: var(--gradient);
+      color: #fff;
+      padding: 30px 0 16px 0;
+      text-align: center;
+      font-size: 1.11rem;
+      letter-spacing: 0.01em;
+      margin-top: 0;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+    }
+    .footer-links {
+      margin: 15px 0 6px 0;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+    .footer-links a {
+      color: #fff;
+      text-decoration: underline;
+      opacity: 0.83;
+      transition: color .12s;
+    }
+    .footer-links a:hover { color: var(--accent);}
+    .footer-copy {
+      font-size: 0.99rem;
+      color: #e0ede6;
+      margin-top: 7px;
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats-section, .faculty-list, .news-list, .about-section { flex-direction: column; align-items: center; gap: 21px;}
+      .pride-section { flex-direction: column; gap: 9px;}
+      .about-main, .about-side { width: 100%; min-width: unset; }
+      .about-section {padding: 36px 3vw;}
+      .faculty-section {padding-left: 2vw; padding-right: 2vw;}
+      .news-section {padding-left: 2vw; padding-right: 2vw;}
+    }
+    @media (max-width: 600px) {
+      .hero-title { font-size: 1.6rem;}
+      .hero-content { padding: 22px 8px;}
+      .stats-section { padding: 18px 3vw 12px 3vw;}
+      .stat-card { padding: 18px 10vw;}
+      .pride-section {padding: 18px 0;}
+      .faculty-section, .news-section, .about-section { padding: 18px 2vw;}
+      .footer { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- TopBar: Institute Name -->
+  <div class="topbar">
+    <span><i class="fa fa-university"></i> Institute of Information and Communication Technology (IICT)</span>
+  </div>
+  <!-- Navigation -->
+  <nav>
+    <ul class="nav-list">
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#">Admission</a></li>
+      <li><a href="#">Research</a></li>
+      <li><a href="#">Student</a></li>
+      <li><a href="#">Programs</a></li>
+      <li><a href="#">Administration</a></li>
+      <li><a href="#">Links</a></li>
+      <li><a href="#">Notice</a></li>
+      <li><a href="#">About Us</a></li>
+    </ul>
+  </nav>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-title">Khulna University of Engineering Technology (IICT)</div>
+      <div class="hero-subtitle">Empowering Future Innovators in Engineering &amp; Technology</div>
+    </div>
+  </section>
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stat-card">
+      <span class="stat-icon"><i class="fa fa-graduation-cap"></i></span>
+      <span class="stat-value">5,420</span>
+      <span class="stat-label">Total Passed</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><i class="fa fa-users"></i></span>
+      <span class="stat-value">2,840</span>
+      <span class="stat-label">Current Students</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><i class="fa fa-chalkboard-teacher"></i></span>
+      <span class="stat-value">185</span>
+      <span class="stat-label">Faculty</span>
+    </div>
+  </section>
+  <!-- Our Pride Section -->
+  <section class="pride-section">
+    <img class="pride-img" src="https://images.unsplash.com/photo-1517520287167-4bbf64a00d66?auto=format&fit=crop&w=400&q=80" alt="Graduate">
+    <div class="pride-info">
+      <div class="pride-title">Our Pride</div>
+      <div class="pride-name">Sheikh Sadiya Alo</div>
+      <div class="pride-text">
+        Awarded as the Best Graduate of 2025, Sheikh Sadiya Alo stands as a true symbol of the excellence and innovation IICT cultivates. Her research in Artificial Intelligence has made significant impact in the industry.
+      </div>
+    </div>
+  </section>
+  <!-- About Section -->
+  <section class="about-section" id="about">
+    <div class="about-main">
+      <div class="about-title">About IICT</div>
+      <div class="about-text">
+        The Institute of Information and Communication Technology (IICT) at Khulna University of Engineering Technology is committed to nurturing talent, fostering innovation, and advancing research in technology. With a dynamic faculty, state-of-the-art facilities, and a vibrant student community, IICT is at the forefront of education and scientific discovery.
+      </div>
+      <ul class="about-list">
+        <li>Cutting-edge Research Labs</li>
+        <li>Industry Partnerships &amp; Internships</li>
+        <li>Global Alumni Network</li>
+        <li>Student Clubs &amp; Societies</li>
+        <li>Scholarships &amp; Financial Aid</li>
+      </ul>
+    </div>
+    <div class="about-side">
+      <div style="font-weight:700; color: var(--primary); margin-bottom: 8px;">Quick Links</div>
+      <ul style="padding-left:1em; color:var(--secondary); font-weight:600; font-size:1.01rem;">
+        <li><a href="#" style="color:inherit; text-decoration:underline;">Academic Calendar</a></li>
+        <li><a href="#" style="color:inherit; text-decoration:underline;">Library</a></li>
+        <li><a href="#" style="color:inherit; text-decoration:underline;">Student Portal</a></li>
+        <li><a href="#" style="color:inherit; text-decoration:underline;">Faculty Directory</a></li>
+        <li><a href="#" style="color:inherit; text-decoration:underline;">Contact Us</a></li>
+      </ul>
+    </div>
+  </section>
+  <!-- Faculty Section -->
+  <section class="faculty-section" id="faculty">
+    <div class="faculty-title">Meet Our Esteemed Faculty</div>
+    <div class="faculty-list">
+      <div class="faculty-card">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/65.jpg" alt="Faculty">
+        <div class="faculty-name">Prof. Dr. Anwar Hossain</div>
+        <div class="faculty-role">Director, IICT</div>
+        <div class="faculty-desc">Expert in Machine Learning &amp; Data Science</div>
+      </div>
+      <div class="faculty-card">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Faculty">
+        <div class="faculty-name">Dr. Rina Das</div>
+        <div class="faculty-role">Associate Professor</div>
+        <div class="faculty-desc">Network Security Specialist</div>
+      </div>
+      <div class="faculty-card">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/77.jpg" alt="Faculty">
+        <div class="faculty-name">Dr. Mahmudul Islam</div>
+        <div class="faculty-role">Assistant Professor</div>
+        <div class="faculty-desc">IoT &amp; Embedded Systems</div>
+      </div>
+      <div class="faculty-card">
+        <img class="faculty-img" src="https://randomuser.me/api/portraits/men/34.jpg" alt="Faculty">
+        <div class="faculty-name">Dr. Saiful Azam</div>
+        <div class="faculty-role">Lecturer</div>
+        <div class="faculty-desc">Cloud Computing</div>
+      </div>
+    </div>
+  </section>
+  <!-- News & Events Section -->
+  <section class="news-section" id="news">
+    <div class="news-title">News &amp; Events</div>
+    <div class="news-list">
+      <div class="news-card">
+        <img class="news-img" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Event">
+        <div class="news-headline">AI Symposium 2025</div>
+        <div class="news-date">12 June 2025</div>
+        <div class="news-text">Join us for the annual AI Symposium featuring leading researchers and industry experts.</div>
+      </div>
+      <div class="news-card">
+        <img class="news-img" src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80" alt="Event">
+        <div class="news-headline">Student Hackathon</div>
+        <div class="news-date">30 May 2025</div>
+        <div class="news-text">Congratulations to all participants of the IICT Hackathon! Winners have been announced.</div>
+      </div>
+      <div class="news-card">
+        <img class="news-img" src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Event">
+        <div class="news-headline">New Research Grants</div>
+        <div class="news-date">25 May 2025</div>
+        <div class="news-text">IICT faculty received new funding for groundbreaking projects in cybersecurity.</div>
+      </div>
+    </div>
+  </section>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Contact</a>
+      <a href="#">FAQ</a>
+    </div>
+    <div class="footer-copy">
+      &copy; 2025 Institute of Information and Communication Technology (IICT). All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

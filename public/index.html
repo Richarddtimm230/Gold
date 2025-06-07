@@ -830,6 +830,28 @@ body {
     padding: 30px 20px;
   }
 }
+/* ANIMATION KEYFRAMES */
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* APPLY TO BOTH IMAGE + TEXT BLOCK */
+.animate-fade-slide {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-fade-slide.visible {
+  animation: fadeSlideUp 0.9s ease forwards;
+}
 
 
     /* NEWS */
@@ -1180,13 +1202,16 @@ body {
     </div>
   </section>
 
+  
+  
   <!-- Proprietor's Welcome Message Section -->
 <section class="welcome-section">
   <div class="welcome-container">
-    <div class="welcome-image">
+    <div class="welcome-image animate-fade-slide">
+    
       <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80" alt="Proprietor" />
     </div>
-    <div class="welcome-content">
+    <div class="welcome-content animate-fade-slide">
       <h2 class="welcome-title">A Welcome Message from the Proprietor</h2>
       <p class="welcome-text">
         Dear Students, Parents, and Visitors,<br /><br />
@@ -1585,7 +1610,21 @@ document.addEventListener('DOMContentLoaded', () => {
     navList.classList.toggle('show');
   });
 });
-  
+  // Scroll-triggered fade+slide animation
+document.addEventListener('DOMContentLoaded', () => {
+  const animatedElements = document.querySelectorAll('.animate-fade-slide');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  animatedElements.forEach(el => observer.observe(el));
+});
+    
   </script>
 </body>
 </html>

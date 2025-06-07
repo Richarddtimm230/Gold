@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs'); // Use bcryptjs for Node.js compatibility
 const jwt = require('jsonwebtoken');
-const Student = require('../models/Student');
 const studentAuthMiddleware = require('../middleware/studentAuth'); // Import BEFORE using!
+
+// Firestore DB instance (ensure you added it to app.locals or require db initialization here)
+const db = require('../firestore'); // You can create a firestore.js that exports your db instance, or use app.locals.firestoreDB
 
 // Multer setup for photo uploads
 const storage = multer.memoryStorage();
@@ -15,7 +17,12 @@ function generateStudentId() {
   return 'STU' + Math.floor(100000 + Math.random() * 900000);
 }
 
-// POST /api/students - enroll a new student
+// Utility: get students collection reference
+function studentsCollection() {
+  return db.collection('students');
+}
+
+// --- Enroll a new student ---
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     const data = req.body;
@@ -27,7 +34,6 @@ router.post('/', upload.single('photo'), async (req, res) => {
       'parentRelationship', 'parentPhone', 'password'
     ];
 
-    // Validate required fields
     for (const field of required) {
       if (
         !data[field] ||
@@ -38,14 +44,14 @@ router.post('/', upload.single('photo'), async (req, res) => {
     }
 
     // Ensure regNo and student_id are unique
-    const regNoExists = await Student.findOne({ regNo: data.regNo });
-    if (regNoExists) {
+    const regNoSnap = await studentsCollection().where('regNo', '==', data.regNo).limit(1).get();
+    if (!regNoSnap.empty) {
       return res.status(400).json({ error: 'A student with that registration number already exists.' });
     }
 
     let student_id = data.student_id || generateStudentId();
-    const studentIdExists = await Student.findOne({ student_id });
-    if (studentIdExists) {
+    const studentIdSnap = await studentsCollection().where('student_id', '==', student_id).limit(1).get();
+    if (!studentIdSnap.empty) {
       return res.status(400).json({ error: 'A student with that student ID already exists.' });
     }
 
@@ -61,66 +67,79 @@ router.post('/', upload.single('photo'), async (req, res) => {
       photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
-    // Create new student document
-    const student = new Student({
+    // Create student doc data
+    const studentDoc = {
       student_id,
       surname: data.surname,
       firstname: data.firstname,
-      othernames: data.othernames,
+      othernames: data.othernames || '',
       dob: data.dob,
       gender: data.gender,
-      nationality: data.nationality,
-      state: data.state,
-      lga: data.lga,
-      address: data.address,
-      photo,
+      nationality: data.nationality || '',
+      state: data.state || '',
+      lga: data.lga || '',
+      address: data.address || '',
+      photo: photo || '',
       regNo: data.regNo,
       class: data.class,
-      classArm: data.classArm,
-      previousSchool: data.previousSchool,
-      admissionDate,
-      academicSession: data.academicSession,
+      classArm: data.classArm || '',
+      previousSchool: data.previousSchool || '',
+      admissionDate: admissionDate || null,
+      academicSession: data.academicSession || '',
       parentName: data.parentName,
       parentRelationship: data.parentRelationship,
       parentPhone: data.parentPhone,
-      parentEmail: data.parentEmail,
-      parentAddress: data.parentAddress,
-      parentOccupation: data.parentOccupation,
-      studentEmail: data.studentEmail,
-      studentPhone: data.studentPhone,
-      religion: data.religion,
-      bloodGroup: data.bloodGroup,
-      genotype: data.genotype,
-      medical: data.medical,
+      parentEmail: data.parentEmail || '',
+      parentAddress: data.parentAddress || '',
+      parentOccupation: data.parentOccupation || '',
+      studentEmail: data.studentEmail || '',
+      studentPhone: data.studentPhone || '',
+      religion: data.religion || '',
+      bloodGroup: data.bloodGroup || '',
+      genotype: data.genotype || '',
+      medical: data.medical || '',
       password: hashedPassword
-    });
+    };
 
-    await student.save();
+    await studentsCollection().add(studentDoc);
     res.status(201).json({ message: 'Student enrolled successfully!' });
   } catch (error) {
     console.error('[ENROLL ERROR]', error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ error: error.message });
-    }
-    if (error.code === 11000) {
-      return res.status(400).json({ error: 'Duplicate unique field (student_id or regNo).' });
-    }
     res.status(500).json({ error: error.message || 'Unknown server error.' });
   }
 });
 
-// GET /api/students - retrieve all students with filters (summary fields only)
+// --- Retrieve all students with filters (summary fields only) ---
 router.get('/', async (req, res) => {
   try {
-    const filter = {};
-    if (req.query.class) filter.class = req.query.class;
-    if (req.query.classArm) filter.classArm = req.query.classArm;
-    if (req.query.academicSession) filter.academicSession = req.query.academicSession;
+    let query = studentsCollection();
+    if (req.query.class) query = query.where('class', '==', req.query.class);
+    if (req.query.classArm) query = query.where('classArm', '==', req.query.classArm);
+    if (req.query.academicSession) query = query.where('academicSession', '==', req.query.academicSession);
 
-    // Only summary fields returned for privacy
-    const students = await Student.find(filter)
-      .select('student_id surname firstname regNo class classArm photo academicSession')
-      .sort({ surname: 1, firstname: 1 });
+    const snap = await query.get();
+    const students = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      students.push({
+        student_id: d.student_id,
+        surname: d.surname,
+        firstname: d.firstname,
+        regNo: d.regNo,
+        class: d.class,
+        classArm: d.classArm,
+        photo: d.photo,
+        academicSession: d.academicSession
+      });
+    });
+
+    // Optionally sort by surname/firstname
+    students.sort((a, b) => {
+      if (a.surname === b.surname) {
+        return a.firstname.localeCompare(b.firstname);
+      }
+      return a.surname.localeCompare(b.surname);
+    });
 
     res.json(students);
   } catch (error) {
@@ -129,9 +148,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/students/me - get logged-in student profile for dashboard
+// --- Get logged-in student profile for dashboard ---
 router.get('/me', studentAuthMiddleware, async (req, res) => {
-  const student = req.student;
+  const student = req.student; // Your auth middleware must attach Firestore student doc data!
   res.json({
     name: `${student.firstname} ${student.surname}`,
     reg_no: student.regNo,
@@ -147,11 +166,10 @@ router.get('/me', studentAuthMiddleware, async (req, res) => {
       'Unread messages',
       'Happening now'
     ]
-    // Add other dashboard fields as needed
   });
 });
 
-// POST /api/students/login - student login (for AJAX login, not used in unified login)
+// --- Student login ---
 router.post('/login', async (req, res) => {
   const { regNo, studentEmail, password } = req.body;
   if ((!regNo && !studentEmail) || !password) {
@@ -159,16 +177,24 @@ router.post('/login', async (req, res) => {
   }
   try {
     // Find student by regNo or email
-    const query = regNo ? { regNo } : { studentEmail };
-    const student = await Student.findOne(query);
-    if (!student) return res.status(401).json({ error: 'Invalid credentials.' });
+    let query = studentsCollection();
+    if (regNo) {
+      query = query.where('regNo', '==', regNo);
+    } else {
+      query = query.where('studentEmail', '==', studentEmail);
+    }
+    const snap = await query.limit(1).get();
+    if (snap.empty) return res.status(401).json({ error: 'Invalid credentials.' });
+
+    const studentDoc = snap.docs[0];
+    const student = studentDoc.data();
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid credentials.' });
 
     // JWT
     const token = jwt.sign(
-      { id: student._id, regNo: student.regNo, role: 'student' },
+      { id: studentDoc.id, regNo: student.regNo, role: 'student' },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -176,7 +202,7 @@ router.post('/login', async (req, res) => {
     res.json({
       token,
       user: {
-        id: student._id,
+        id: studentDoc.id,
         name: `${student.firstname} ${student.surname}`,
         regNo: student.regNo,
         role: 'student',

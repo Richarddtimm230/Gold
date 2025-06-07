@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Institute of Information and Communication Technology (IICT)</title>
+  <title>Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Inter + Playfair Display for academic elegance -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
       --text-main: #133e27;
       --text-muted: #666;
       --gradient: linear-gradient(90deg, #217353 0%, #0e4a30 100%);
+      --quick-link-bg: linear-gradient(90deg, #f6b10a22 0%, #21735308 100%);
     }
     * { box-sizing: border-box; }
     html,body {
@@ -33,13 +34,50 @@
     .topbar {
       background: var(--gradient);
       color: #fff;
-      padding: 16px 0 10px 0;
+      padding: 0;
       text-align: center;
-      font-size: 1.12rem;
+      font-size: 1.14rem;
       font-weight: 700;
       letter-spacing: 0.02em;
       border-bottom: 3px solid #f6b10a22;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 74px;
     }
+    .school-logo {
+      position: absolute;
+      left: 2vw;
+      top: 9px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+    .school-logo img {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px #00000022;
+      background: #fff;
+      object-fit: cover;
+      border: 2px solid #fff;
+    }
+    .school-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.41rem;
+      color: #fff;
+      letter-spacing: 1.5px;
+      font-weight: 800;
+      text-shadow: 0 1px 5px #0e3b1f66;
+      margin-left: 68px;
+      margin-right: 68px;
+    }
+    @media (max-width: 700px) {
+      .school-logo img { width: 38px; height: 38px;}
+      .school-name { font-size: 1.06rem; margin-left: 48px; margin-right: 48px;}
+      .topbar { min-height: 48px; font-size: 1.01rem; }
+    }
+    /* NAVIGATION */
     nav {
       background: #fff;
       box-shadow: 0 1px 9px 0 #e0ede6;
@@ -92,15 +130,55 @@
       transition: background .18s;
     }
     .nav-portal:hover { background: var(--accent); color: var(--primary) !important; }
+    /* HERO */
+    .hero {
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat;
+      min-height: 360px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(33, 115, 83, 0.38);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      padding: 38px 18px 34px 18px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+      text-shadow: 0 3px 12px #0e3b1f77;
+    }
+    .hero-subtitle {
+      font-size: 1.18rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 5px #143e275f;
+    }
+    .motto {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-top: 10px;
+      letter-spacing: 0.04em;
+      text-shadow: 0 1px 7px #0e3b1f99;
+    }
     /* CAROUSEL */
     .carousel-section {
       width: 100%;
       max-width: 1100px;
-      margin: 0 auto;
+      margin: 35px auto 0 auto;
       position: relative;
       overflow: hidden;
       border-radius: 18px;
-      margin-top: 24px;
       box-shadow: 0 3px 22px #21735322;
       background: #fff;
     }
@@ -164,39 +242,6 @@
       background: var(--accent);
       opacity: 1;
       border: 2px solid var(--accent);
-    }
-    /* HERO */
-    .hero {
-      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat;
-      min-height: 360px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; position: relative;
-    }
-    .hero::after {
-      content: '';
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(33, 115, 83, 0.38);
-      z-index: 1;
-    }
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      color: #fff;
-      padding: 38px 18px 34px 18px;
-    }
-    .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.6rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-      letter-spacing: 0.02em;
-      text-shadow: 0 3px 12px #0e3b1f77;
-    }
-    .hero-subtitle {
-      font-size: 1.18rem;
-      font-weight: 500;
-      margin-bottom: 4px;
-      text-shadow: 0 2px 5px #143e275f;
     }
     /* STATS */
     .stats-section {
@@ -284,7 +329,7 @@
       max-width: 350px;
       line-height: 1.6;
     }
-    /* ABOUT */
+    /* ABOUT & QUICK LINKS */
     .about-section {
       padding: 48px 9vw 38px 9vw;
       background: #fff;
@@ -324,20 +369,64 @@
     .about-side {
       flex: 1;
       min-width: 220px;
-      background: #f6f8f7;
+      background: var(--quick-link-bg);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 4px 16px #e9c10a26;
       padding: 22px 14px 14px 19px;
       margin-top: 11px;
       margin-bottom: 9px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      animation: fadein .8s;
     }
-    /* FACULTY */
-    .faculty-section {
-      padding: 37px 5vw 33px 5vw;
+    @keyframes fadein { from { opacity:0; transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    .about-side .quick-title {
+      font-weight:700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.13rem;
+      letter-spacing: .04em;
+    }
+    .quick-links-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px 14px;
+      width: 100%;
+    }
+    .quick-link {
+      background: linear-gradient(90deg, #ffe8a2 70%, #fff9e4 100%);
+      color: #2d3d20;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      padding: 8px 13px;
+      box-shadow: 0 2px 7px #f6b10a11;
+      transition: background .15s, color .13s, box-shadow .18s;
+      border: 1.5px solid #f6b10a22;
+    }
+    .quick-link i {
+      color: var(--primary);
+      font-size: 1.2em;
+    }
+    .quick-link:hover {
+      background: var(--accent);
+      color: var(--primary);
+      box-shadow: 0 5px 15px #21735333;
+      text-decoration: underline;
+    }
+    /* GALLERY */
+    .gallery-section {
+      padding: 36px 7vw 24px 7vw;
       background: #fafdff;
       border-top: 1.5px solid #e7f5ea;
+      border-bottom: 1.5px solid #e7f5ea;
     }
-    .faculty-title {
+    .gallery-title {
       font-family: 'Playfair Display', serif;
       font-size: 1.5rem;
       color: var(--secondary);
@@ -345,42 +434,125 @@
       text-align: center;
       margin-bottom: 32px;
     }
-    .faculty-list {
+    .gallery-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 32px;
+      gap: 18px;
       justify-content: center;
     }
-    .faculty-card {
+    .gallery-img {
+      width: 170px; height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 10px #21735314;
+      transition: transform .16s, box-shadow .16s;
+      background: #e9f0eb;
+    }
+    .gallery-img:hover {
+      transform: scale(1.07) rotate(-1deg);
+      box-shadow: 0 8px 24px #21735342;
+    }
+    /* TESTIMONIALS */
+    .testimonial-section {
+      background: #fff;
+      padding: 42px 7vw 40px 7vw;
+      border-bottom: 1.5px solid #e7f5ea;
+    }
+    .testimonial-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .testimonial-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 29px;
+      justify-content: center;
+    }
+    .testimonial-card {
       background: var(--card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 18px 23px 14px 23px;
-      min-width: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: box-shadow .16s;
-      text-align: center;
+      padding: 20px 15px 17px 17px;
+      min-width: 210px;
+      max-width: 340px;
+      position: relative;
+      text-align: left;
+      transition: box-shadow .14s;
     }
-    .faculty-img {
-      width: 70px; height: 70px;
+    .testimonial-quote {
+      font-size: 1.07rem;
+      color: #256b42;
+      margin-bottom: 9px;
+      font-style: italic;
+      position: relative;
+      padding-left: 20px;
+    }
+    .testimonial-quote:before {
+      content: "“";
+      position: absolute;
+      left: 1px;
+      color: var(--accent);
+      font-size: 2.4em;
+      top: -14px;
+    }
+    .testimonial-person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .testimonial-avatar {
+      width: 36px; height: 36px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 7px;
-      box-shadow: 0 1px 8px #cdebe1;
-      border: 3px solid #fff;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 7px #21735333;
     }
-    .faculty-name {
+    .testimonial-name {
       font-weight: 700;
       color: var(--primary);
-      font-size: 1.09rem;
-      margin-bottom: 2px;
+      font-size: 1.01rem;
     }
-    .faculty-role {
+    .testimonial-role {
       color: var(--text-muted);
-      font-size: 0.98rem;
-      margin-bottom: 3px;
+      font-size: 0.95rem;
+    }
+    /* PARTNERS */
+    .partner-section {
+      background: #fafdff;
+      padding: 31px 7vw 28px 7vw;
+      border-bottom: 1.5px solid #e7f5ea;
+      text-align: center;
+    }
+    .partner-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.17rem;
+      color: var(--secondary);
+      font-weight: 700;
+      margin-bottom: 19px;
+    }
+    .partner-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-top: 7px;
+    }
+    .partner-logo {
+      width: 105px;
+      filter: grayscale(0.2) brightness(0.93);
+      opacity: 0.83;
+      transition: filter .16s, opacity .15s;
+    }
+    .partner-logo:hover {
+      filter: none;
+      opacity: 1;
     }
     /* NEWS */
     .news-section {
@@ -455,6 +627,7 @@
       display: flex;
       justify-content: center;
       gap: 24px;
+      flex-wrap: wrap;
     }
     .footer-links a {
       color: #fff;
@@ -468,31 +641,39 @@
       color: #e0ede6;
       margin-top: 7px;
     }
+    .footer-contact {
+      margin: 10px 0 0 0;
+      font-size: 0.98rem;
+      color: #ffe;
+    }
     @media (max-width: 900px) {
-      .stats-section, .faculty-list, .news-list, .about-section { flex-direction: column; align-items: center; gap: 21px;}
+      .stats-section, .faculty-list, .news-list, .about-section, .gallery-grid, .testimonial-list, .partner-logos { flex-direction: column; align-items: center; gap: 21px;}
       .pride-section { flex-direction: column; gap: 9px;}
       .about-main, .about-side { width: 100%; min-width: unset; }
       .about-section {padding: 36px 3vw;}
-      .faculty-section {padding-left: 2vw; padding-right: 2vw;}
-      .news-section {padding-left: 2vw; padding-right: 2vw;}
+      .faculty-section, .gallery-section, .news-section, .testimonial-section, .partner-section {padding-left: 2vw; padding-right: 2vw;}
     }
     @media (max-width: 600px) {
-      .hero-title { font-size: 1.6rem;}
+      .hero-title { font-size: 1.22rem;}
       .hero-content { padding: 22px 8px;}
       .stats-section { padding: 18px 3vw 12px 3vw;}
       .stat-card { padding: 18px 10vw;}
       .pride-section {padding: 18px 0;}
-      .faculty-section, .news-section, .about-section { padding: 18px 2vw;}
+      .faculty-section, .news-section, .about-section, .testimonial-section { padding: 18px 2vw;}
       .footer { font-size: 1rem; }
       .carousel-section {height: 170px;}
       .carousel-image {height: 170px;}
+      .gallery-img {width: 98vw; height: 28vw;}
     }
   </style>
 </head>
 <body>
   <!-- TopBar -->
   <div class="topbar">
-    <span><i class="fa fa-university"></i> Institute of Information and Communication Technology (IICT)</span>
+    <div class="school-logo">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Gold and Linc Schools Logo">
+    </div>
+    <span class="school-name">Gold and Linc Schools</span>
   </div>
   <!-- Navigation -->
   <nav>
@@ -509,6 +690,14 @@
       <li><a href="portal-login.html" class="nav-portal">Portal Login <i class="fa fa-sign-in-alt"></i></a></li>
     </ul>
   </nav>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-title">Gold and Linc Schools</div>
+      <div class="hero-subtitle">Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State</div>
+      <div class="motto">Motto: For sound learning.</div>
+    </div>
+  </section>
   <!-- Carousel Section -->
   <section class="carousel-section">
     <div class="carousel-images" id="carouselImages">
@@ -522,13 +711,6 @@
       <button class="carousel-btn" id="carouselNext"><i class="fa fa-chevron-right"></i></button>
     </div>
     <div class="carousel-dots" id="carouselDots"></div>
-  </section>
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <div class="hero-title">Khulna University of Engineering Technology (IICT)</div>
-      <div class="hero-subtitle">Empowering Future Innovators in Engineering &amp; Technology</div>
-    </div>
   </section>
   <!-- Stats Section -->
   <section class="stats-section">
@@ -555,16 +737,16 @@
       <div class="pride-title">Our Pride</div>
       <div class="pride-name">Sheikh Sadiya Alo</div>
       <div class="pride-text">
-        Awarded as the Best Graduate of 2025, Sheikh Sadiya Alo is a symbol of the excellence and innovation IICT cultivates. Her research in Artificial Intelligence has made a significant impact in the industry.
+        Awarded as the Best Graduate of 2025, Sheikh Sadiya Alo is a symbol of the excellence and innovation Gold and Linc Schools cultivates. Her research in Artificial Intelligence has made a significant impact in the industry.
       </div>
     </div>
   </section>
-  <!-- About Section -->
+  <!-- About Section & Quick Links -->
   <section class="about-section" id="about">
     <div class="about-main">
-      <div class="about-title">About IICT</div>
+      <div class="about-title">About Gold and Linc Schools</div>
       <div class="about-text">
-        The Institute of Information and Communication Technology (IICT) at Khulna University of Engineering Technology is committed to nurturing talent, fostering innovation, and advancing research in technology. With a dynamic faculty, state-of-the-art facilities, and a vibrant student community, IICT is at the forefront of education and scientific discovery.
+        Gold and Linc Schools is committed to nurturing talent, fostering innovation, and advancing research in technology and the sciences. With a dynamic faculty, state-of-the-art facilities, and a vibrant student community, Gold and Linc Schools is at the forefront of education and scientific discovery.
       </div>
       <ul class="about-list">
         <li>Cutting-edge Research Labs</li>
@@ -575,14 +757,79 @@
       </ul>
     </div>
     <div class="about-side">
-      <div style="font-weight:700; color: var(--primary); margin-bottom: 8px;">Quick Links</div>
-      <ul style="padding-left:1em; color:var(--secondary); font-weight:600; font-size:1.01rem;">
-        <li><a href="#" style="color:inherit; text-decoration:underline;">Academic Calendar</a></li>
-        <li><a href="#" style="color:inherit; text-decoration:underline;">Library</a></li>
-        <li><a href="#" style="color:inherit; text-decoration:underline;">Student Portal</a></li>
-        <li><a href="#" style="color:inherit; text-decoration:underline;">Faculty Directory</a></li>
-        <li><a href="#" style="color:inherit; text-decoration:underline;">Contact Us</a></li>
-      </ul>
+      <div class="quick-title"><i class="fa fa-bolt"></i> Quick Links</div>
+      <div class="quick-links-grid">
+        <a class="quick-link" href="#"><i class="fa fa-calendar-alt"></i> Academic Calendar</a>
+        <a class="quick-link" href="#"><i class="fa fa-book"></i> Library</a>
+        <a class="quick-link" href="#"><i class="fa fa-user-graduate"></i> Student Portal</a>
+        <a class="quick-link" href="#"><i class="fa fa-users-cog"></i> Faculty Directory</a>
+        <a class="quick-link" href="#"><i class="fa fa-phone"></i> Contact Us</a>
+        <a class="quick-link" href="#"><i class="fa fa-question-circle"></i> FAQ</a>
+      </div>
+    </div>
+  </section>
+  <!-- Gallery Section -->
+  <section class="gallery-section">
+    <div class="gallery-title">Gallery</div>
+    <div class="gallery-grid">
+      <img class="gallery-img" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Gallery">
+      <img class="gallery-img" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Gallery">
+      <img class="gallery-img" src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80" alt="Gallery">
+      <img class="gallery-img" src="https://images.unsplash.com/photo-1517520287167-4bbf64a00d66?auto=format&fit=crop&w=400&q=80" alt="Gallery">
+      <img class="gallery-img" src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Gallery">
+    </div>
+  </section>
+  <!-- Testimonials Section -->
+  <section class="testimonial-section">
+    <div class="testimonial-title">What Our Students &amp; Parents Say</div>
+    <div class="testimonial-list">
+      <div class="testimonial-card">
+        <div class="testimonial-quote">
+          Gold and Linc Schools gave my child the foundation for academic and personal success. The teachers are caring and the facilities are top-notch!
+        </div>
+        <div class="testimonial-person">
+          <img class="testimonial-avatar" src="https://randomuser.me/api/portraits/men/83.jpg" alt="Parent">
+          <div>
+            <div class="testimonial-name">Mr. John Adebayo</div>
+            <div class="testimonial-role">Parent</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-quote">
+          As a student, I enjoyed every moment at Gold and Linc Schools. The environment is motivating and the opportunities are endless.
+        </div>
+        <div class="testimonial-person">
+          <img class="testimonial-avatar" src="https://randomuser.me/api/portraits/women/55.jpg" alt="Student">
+          <div>
+            <div class="testimonial-name">Tosin Balogun</div>
+            <div class="testimonial-role">Alumnus</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-quote">
+          The science and tech programs at Gold and Linc are truly world class. I recommend this school to everyone!
+        </div>
+        <div class="testimonial-person">
+          <img class="testimonial-avatar" src="https://randomuser.me/api/portraits/men/59.jpg" alt="Parent">
+          <div>
+            <div class="testimonial-name">Chief Adeyemi</div>
+            <div class="testimonial-role">Parent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Partners Section -->
+  <section class="partner-section">
+    <div class="partner-title">Our Partners</div>
+    <div class="partner-logos">
+      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Googlelogo.png" alt="Google">
+      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft">
+      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple">
+      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/IBM_logo.svg" alt="IBM">
+      <img class="partner-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Logo_NIKE.svg" alt="Nike">
     </div>
   </section>
   <!-- Faculty Section -->
@@ -592,7 +839,7 @@
       <div class="faculty-card">
         <img class="faculty-img" src="https://randomuser.me/api/portraits/men/65.jpg" alt="Faculty">
         <div class="faculty-name">Prof. Dr. Anwar Hossain</div>
-        <div class="faculty-role">Director, IICT</div>
+        <div class="faculty-role">Director, Gold and Linc</div>
         <div class="faculty-desc">Expert in Machine Learning &amp; Data Science</div>
       </div>
       <div class="faculty-card">
@@ -629,13 +876,13 @@
         <img class="news-img" src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80" alt="Event">
         <div class="news-headline">Student Hackathon</div>
         <div class="news-date">30 May 2025</div>
-        <div class="news-text">Congratulations to all participants of the IICT Hackathon! Winners have been announced.</div>
+        <div class="news-text">Congratulations to all participants of the Gold and Linc Hackathon! Winners have been announced.</div>
       </div>
       <div class="news-card">
         <img class="news-img" src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Event">
         <div class="news-headline">New Research Grants</div>
         <div class="news-date">25 May 2025</div>
-        <div class="news-text">IICT faculty received new funding for groundbreaking projects in cybersecurity.</div>
+        <div class="news-text">Our faculty received new funding for groundbreaking projects in cybersecurity.</div>
       </div>
     </div>
   </section>
@@ -647,8 +894,12 @@
       <a href="#">Contact</a>
       <a href="#">FAQ</a>
     </div>
+    <div class="footer-contact">
+      Address: Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State<br>
+      Email: <a href="mailto:goldlincschools@gmail.com" style="color:#ffe;">goldlincschools@gmail.com</a> &nbsp;|&nbsp; Phone: <a href="tel:08034430941" style="color:#ffe;">08034430941</a>
+    </div>
     <div class="footer-copy">
-      &copy; 2025 Institute of Information and Communication Technology (IICT). All rights reserved.
+      &copy; 2025 Gold and Linc Schools. All rights reserved.
     </div>
   </footer>
   <!-- Carousel Script -->
@@ -696,7 +947,7 @@
     carouselImages.addEventListener('mouseleave', startCarousel);
     startCarousel();
 
-    // For responsive mobile swipe (optional, bonus)
+    // For responsive mobile swipe (bonus)
     let startX = 0, endX = 0;
     carouselImages.addEventListener('touchstart', e => startX = e.touches[0].clientX);
     carouselImages.addEventListener('touchmove', e => endX = e.touches[0].clientX);

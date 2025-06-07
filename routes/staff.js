@@ -2,34 +2,46 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-const Staff = require('../models/Staff');
+
+// Firestore DB instance (update the path if you use app.locals.firestoreDB or a different export)
+const db = require('../firestore'); // Or: req.app.locals.firestoreDB in each route handler
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+// Utility: get staff collection
+function staffCollection() {
+  return db.collection('staff');
+}
 
 /**
  * GET /api/staff - Return all staff (summary)
  */
 router.get('/', async (req, res) => {
   try {
-    const staffList = await Staff.find({}, {
-      first_name: 1,
-      last_name: 1,
-      designation: 1,
-      department: 1,
-      photo: 1
-    }).sort({ last_name: 1, first_name: 1 });
+    const snap = await staffCollection().get();
+    const staffList = [];
+    snap.forEach(doc => {
+      const s = doc.data();
+      staffList.push({
+        id: doc.id,
+        first_name: s.first_name,
+        last_name: s.last_name,
+        designation: s.designation,
+        department: s.department,
+        photo_url: s.photo || null
+      });
+    });
 
-    const mapped = staffList.map(s => ({
-      id: s._id,
-      first_name: s.first_name,
-      last_name: s.last_name,
-      designation: s.designation,
-      department: s.department,
-      photo_url: s.photo || null
-    }));
+    // Sort by last_name, then first_name
+    staffList.sort((a, b) => {
+      if (a.last_name === b.last_name) {
+        return a.first_name.localeCompare(b.first_name);
+      }
+      return a.last_name.localeCompare(b.last_name);
+    });
 
-    res.json(mapped);
+    res.json(staffList);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -40,16 +52,17 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const staff = await Staff.findById(req.params.id).lean();
-    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+    const doc = await staffCollection().doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Staff not found' });
 
+    const staff = doc.data();
     staff.photo_url = staff.photo || null;
     staff.id_upload_url = staff.id_upload || null;
     delete staff.photo;
     delete staff.id_upload;
     delete staff.login_password;
 
-    res.json(staff);
+    res.json({ id: doc.id, ...staff });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -86,19 +99,34 @@ router.post(
       const hashedPassword = await bcrypt.hash(data.login_password, 10);
 
       // Convert fields to correct types if necessary
-      if (data.date_joined) data.date_joined = new Date(data.date_joined);
-      if (data.dob) data.dob = new Date(data.dob);
-      if (data.experience) data.experience = Number(data.experience);
+      let date_joined = data.date_joined ? new Date(data.date_joined) : null;
+      let dob = data.dob ? new Date(data.dob) : null;
+      let experience = data.experience ? Number(data.experience) : null;
 
-      // Create staff document
-      const staff = new Staff({
+      // Check for duplicate email or account number
+      const emailSnap = await staffCollection().where('email', '==', data.email).limit(1).get();
+      if (!emailSnap.empty) {
+        return res.status(400).json({ error: 'Duplicate email.' });
+      }
+      if (data.account_number) {
+        const accSnap = await staffCollection().where('account_number', '==', data.account_number).limit(1).get();
+        if (!accSnap.empty) {
+          return res.status(400).json({ error: 'Duplicate account number.' });
+        }
+      }
+
+      // Prepare staff document
+      const staffDoc = {
         ...data,
         login_password: hashedPassword,
         photo,
-        id_upload
-      });
+        id_upload,
+        date_joined: date_joined || null,
+        dob: dob || null,
+        experience: experience || null
+      };
 
-      await staff.save();
+      await staffCollection().add(staffDoc);
       res.status(201).json({ message: 'Staff enrolled successfully!' });
     } catch (error) {
       console.error('[STAFF ENROLL ERROR]', error);

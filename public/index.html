@@ -7,6 +7,8 @@
   <!-- Inter + Playfair Display for academic elegance -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- FontAwesome (if not already included) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
   <style>
     :root {
       --primary: #217353;
@@ -77,59 +79,120 @@
       .school-name { font-size: 1.06rem; margin-left: 48px; margin-right: 48px;}
       .topbar { min-height: 48px; font-size: 1.01rem; }
     }
-    /* NAVIGATION */
-    nav {
-      background: #fff;
-      box-shadow: 0 1px 9px 0 #e0ede6;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-bottom: 1.5px solid #ecf7f1;
-      font-size: 1.01rem;
-      position: sticky;
-      top: 0;
-      z-index: 9;
-    }
-    .nav-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.3em;
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-    .nav-list a {
-      display: inline-block;
-      padding: 17px 7px 13px 7px;
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-      border-bottom: 2.5px solid transparent;
-      transition: color .16s, border .18s;
-      border-radius: 0 0 8px 8px;
-    }
-    .nav-list a:hover, .nav-list a.active {
-      color: var(--accent);
-      border-bottom: 2.5px solid var(--accent);
-      background: #f6f8f7;
-    }
-    .nav-portal {
-      margin-left: auto;
-      margin-right: 0;
-      background: var(--primary);
-      color: #fff !important;
-      padding: 10px 21px !important;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      margin-top: 7px;
-      margin-bottom: 7px;
-      box-shadow: 0 2px 8px #00000012;
-      border: none;
-      transition: background .18s;
-    }
-    .nav-portal:hover { background: var(--accent); color: var(--primary) !important; }
+    /* NAVIGATION STYLES */
+.navbar {
+  background: #fff;
+  box-shadow: 0 1px 9px #e0ede6;
+  border-bottom: 1.5px solid #ecf7f1;
+  font-size: 1.01rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: var(--primary);
+  padding: 14px 0;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primary);
+  cursor: pointer;
+  display: none;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.3em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-list a {
+  display: inline-block;
+  padding: 17px 7px 13px 7px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2.5px solid transparent;
+  transition: color .16s, border .18s;
+  border-radius: 0 0 8px 8px;
+}
+
+.nav-list a:hover,
+.nav-list a.active {
+  color: var(--accent);
+  border-bottom: 2.5px solid var(--accent);
+  background: #f6f8f7;
+}
+
+.nav-portal {
+  background: var(--primary);
+  color: #fff !important;
+  padding: 10px 21px !important;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  box-shadow: 0 2px 8px #00000012;
+  border: none;
+  transition: background .18s;
+}
+
+.nav-portal:hover {
+  background: var(--accent);
+  color: var(--primary) !important;
+}
+
+/* RESPONSIVE NAVIGATION */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-list {
+    position: absolute;
+    top: 65px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    border-top: 1px solid #e3f1ea;
+    display: none;
+    padding: 20px 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-list.show {
+    display: flex;
+  }
+
+  .nav-list li {
+    text-align: center;
+  }
+
+  .nav-portal {
+    width: 80%;
+    margin: 10px auto;
+  }
+}
     /* HERO */
 .hero {
   background: url('https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1400&q=80') center center/cover no-repeat;
@@ -862,8 +925,13 @@
     <span class="school-name">Gold and Linc Schools</span>
   </div>
   <!-- Navigation -->
-  <nav>
-    <ul class="nav-list">
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="brand">Gold & Linc</div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa fa-bars"></i>
+    </button>
+    <ul class="nav-list" id="navList">
       <li><a href="#" class="active">Home</a></li>
       <li><a href="#">Admission</a></li>
       <li><a href="#">Research</a></li>
@@ -875,7 +943,12 @@
       <li><a href="#">About Us</a></li>
       <li><a href="portal-login.html" class="nav-portal">Portal Login <i class="fa fa-sign-in-alt"></i></a></li>
     </ul>
-  </nav>
+  </div>
+</nav>
+
+
+  
+  
   <!-- Hero Section -->
 <section class="hero">
   <div class="hero-overlay"></div>
@@ -1204,7 +1277,16 @@
   document.querySelector('.prev').addEventListener('click', () => list.scrollBy({ left: -300, behavior: 'smooth' }));
   document.querySelector('.next').addEventListener('click', () => list.scrollBy({ left: 300, behavior: 'smooth' }));
 });
-    
+// Responsive Navigation Toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const menuBtn = document.getElementById('menuToggle');
+  const navList = document.getElementById('navList');
+
+  menuBtn.addEventListener('click', () => {
+    navList.classList.toggle('show');
+  });
+});
+  
   </script>
 </body>
 </html>

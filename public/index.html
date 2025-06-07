@@ -360,52 +360,71 @@
       font-weight: 600;
       margin-top: 2px;
     }
-    /* PRIDE */
-    .pride-section {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 44px 0 34px 0;
-      gap: 34px;
-      flex-wrap: wrap;
-      background: #fafdff;
-      border-top: 1.5px solid #e7f5ea;
-      border-bottom: 1.5px solid #e7f5ea;
-    }
-    .pride-img {
-      width: 150px; height: 170px;
-      border-radius: 22px;
-      background: #e7f5ea;
-      object-fit: cover;
-      border: 4px solid #fff;
-      box-shadow: 0 3px 18px #cdebe1;
-      margin-bottom: 10px;
-      display: block;
-    }
-    .pride-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .pride-title {
-      font-size: 1.7rem;
-      font-family: 'Playfair Display', serif;
-      color: var(--primary);
-      font-weight: 700;
-    }
-    .pride-name {
-      font-size: 1.19rem;
-      font-weight: 700;
-      color: var(--secondary);
-      margin-bottom: 3px;
-    }
-    .pride-text {
-      color: var(--text-muted);
-      font-size: 1.04rem;
-      max-width: 350px;
-      line-height: 1.6;
-    }
+/* OUR PRIDE SECTION */
+.pride-section {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  background-color: #f9fefc;
+  padding: 50px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.pride-img {
+  flex: 1 1 300px;
+  max-width: 350px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  object-fit: cover;
+}
+
+.pride-info {
+  flex: 2 1 400px;
+  color: #2e2e2e;
+}
+
+.pride-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #216f53;
+  margin-bottom: 10px;
+}
+
+.pride-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent, #f4b400);
+  margin-bottom: 12px;
+}
+
+.pride-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #444;
+  text-align: justify;
+  max-width: 700px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .pride-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pride-img {
+    margin-bottom: 20px;
+  }
+
+  .pride-text {
+    text-align: center;
+  }
+}
+
     /* ABOUT & QUICK LINKS */
     .about-section {
       padding: 48px 9vw 38px 9vw;

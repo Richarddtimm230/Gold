@@ -794,8 +794,6 @@
         return false;
       }
     }
-    // --- Save profile fields (add as needed) ---
-    // ...implement if you want editable profile fields...
 
     // --- Fill profile info from backend data ---
     let studentProfile = null;
@@ -828,57 +826,40 @@
         document.getElementById("profileAvatar").src =
           `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2647a6&color=fff`;
       }
+    // Utility: checks if a value is a non-empty array or object
+function isNonEmpty(val) {
+  if (Array.isArray(val)) return val.length > 0;
+  if (val && typeof val === 'object') return Object.keys(val).length > 0;
+  return false;
+}
 
-  // Academic
-  fillAcademic(profile.academic || []);
-  // Attendance
-  fillAttendance(profile.attendance || []);
-  // Guardians: fallback to parents if guardians missing/empty
-  if (isNonEmpty(profile.guardians)) {
-    fillGuardians(profile.guardians);
-  } else if (isNonEmpty(profile.parents)) {
-    fillGuardians(profile.parents);
-  } else {
-    fillGuardians([]);
-  }
-  // Hostel/Transport
-  fillHostelTransport(profile.hostel || {}, profile.transport || {});
-  // Fees
-  fillFees(profile.fees || []);
-  // Docs
-  fillDocs(profile.docs || []);
-    }
-    // --- Fillers (tabular) ---
-    function fillAcademic(arr) {
-      const tbody = document.getElementById("profileResultTable").querySelector("tbody");
-      if (!arr.length) return tbody.innerHTML = `<tr><td colspan="7">No records</td></tr>`;
-      tbody.innerHTML = arr.map(res => `
-        <tr>
-          <td>${res.session || ''}</td>
-          <td>${res.term || ''}</td>
-          <td>${res.class || ''}</td>
-          <td>${res.subject || ''}</td>
-          <td>${res.total || ''}</td>
-          <td class="${
-            res.grade === 'A' ? 'grade-high' :
-            res.grade === 'D' ? 'grade-low' : 'grade-mid'
-          }">${res.grade || ''}</td>
-          <td>${res.remark || ''}</td>
-        </tr>
-      `).join("");
-    }
-    function fillAttendance(arr) {
-      const el = document.getElementById("attendanceList");
-      if (!arr.length) return el.innerHTML = `<div>No attendance records.</div>`;
-      el.innerHTML = arr.map(a =>
-        `<div class="attendance-card">
-          <div><b>${a.session || ''}, ${a.term || ''}</b></div>
-          <div>Present: <b>${a.present || 0}</b> / ${a.total || 0}</div>
-          <div>Attendance: <b>${a.percentage || ''}%</b></div>
-        </div>`
-      ).join("");
-    }
-    // Fill guardians (or parents as fallback)
+// Fill academic info
+function fillAcademic(arr) {
+  const el = document.getElementById("academicList");
+  if (!arr || !arr.length) return el && (el.innerHTML = `<div>No academic info found.</div>`);
+  el.innerHTML = arr.map(a =>
+    `<div class="academic-card">
+      <div class="academic-label">${a.session || ''}</div>
+      <div class="academic-value">${a.class || ''}</div>
+      <div class="academic-label">Status:</div>
+      <div class="academic-value">${a.status || ''}</div>
+    </div>`
+  ).join("");
+}
+
+// Fill attendance info
+function fillAttendance(arr) {
+  const el = document.getElementById("attendanceList");
+  if (!arr || !arr.length) return el && (el.innerHTML = `<div>No attendance info found.</div>`);
+  el.innerHTML = arr.map(a =>
+    `<div class="attendance-card">
+      <div class="attendance-label">${a.date || ''}</div>
+      <div class="attendance-value">${a.status || ''}</div>
+    </div>`
+  ).join("");
+}
+
+// Fill guardians (or parents as fallback)
 function fillGuardians(arr) {
   const el = document.getElementById("guardianList");
   // Handle single object accidentally passed
@@ -900,39 +881,49 @@ function fillGuardians(arr) {
     </div>`
   ).join("");
 }
-    function fillHostelTransport(hostel, transport) {
-      const el = document.getElementById("hostelTransportList");
-      el.innerHTML = `
-        <div class="misc-card">
-          <div><b>Hostel:</b> ${hostel.name || ''}</div>
-          <div>Room: ${hostel.room || ''}, Bed: ${hostel.bed || ''}</div>
-          <div>Warden: ${hostel.warden || ''}</div>
-          <div>Session: ${hostel.session || ''}</div>
-        </div>
-        <div class="misc-card">
-          <div><b>Transport Route:</b> ${transport.route || ''}</div>
-          <div>Bus No: ${transport.busNo || ''}</div>
-          <div>Driver: ${transport.driver || ''}</div>
-          <div>Session: ${transport.session || ''}</div>
-        </div>
-      `;
-    }
-    function fillFees(arr) {
-      const tbody = document.getElementById("feesTable").querySelector("tbody");
-      if (!arr.length) return tbody.innerHTML = `<tr><td colspan="6">No fee records</td></tr>`;
-      tbody.innerHTML = arr.map(f =>
-        `<tr>
-          <td>${f.session || ''}</td>
-          <td>${f.term || ''}</td>
-          <td>${f.type || ''}</td>
-          <td>${f.amount || ''}</td>
-          <td class="${
-            f.status === 'Paid' ? 'paid' : (f.status === 'Pending' ? 'pending' : 'overdue')
-          }">${f.status || ''}</td>
-          <td>${f.date || ''}</td>
-        </tr>`
-      ).join("");
-    }
+
+// Fill hostel/transport info
+function fillHostelTransport(hostelObj, transportObj) {
+  const el = document.getElementById("hostelTransportList");
+  if (!el) return;
+  let html = "";
+  if (hostelObj && Object.keys(hostelObj).length > 0) {
+    html += `<div class="hostel-card">
+      <div class="hostel-label">Hostel:</div>
+      <div class="hostel-value">${hostelObj.name || ''}</div>
+      <div class="hostel-label">Room:</div>
+      <div class="hostel-value">${hostelObj.room || ''}</div>
+    </div>`;
+  }
+  if (transportObj && Object.keys(transportObj).length > 0) {
+    html += `<div class="transport-card">
+      <div class="transport-label">Route:</div>
+      <div class="transport-value">${transportObj.route || ''}</div>
+      <div class="transport-label">Bus No.:</div>
+      <div class="transport-value">${transportObj.busNo || ''}</div>
+    </div>`;
+  }
+  if (!html) html = `<div>No hostel/transport info found.</div>`;
+  el.innerHTML = html;
+}
+
+// Fill fees info
+function fillFees(arr) {
+  const el = document.getElementById("feesList");
+  if (!arr || !arr.length) return el && (el.innerHTML = `<div>No fees info found.</div>`);
+  el.innerHTML = arr.map(f =>
+    `<div class="fees-card">
+      <div class="fees-label">Fee Type:</div>
+      <div class="fees-value">${f.type || ''}</div>
+      <div class="fees-label">Amount:</div>
+      <div class="fees-value">${f.amount || ''}</div>
+      <div class="fees-label">Status:</div>
+      <div class="fees-value">${f.status || ''}</div>
+    </div>`
+  ).join("");
+}
+
+// Fill docs info
     function fillDocs(arr) {
       const el = document.getElementById("docsList");
       if (!arr.length) return el.innerHTML = `<div>No documents uploaded.</div>`;
@@ -962,6 +953,31 @@ function fillGuardians(arr) {
         }
       }).join("");
     }
+
+// Main profile fill function
+function fillProfile(profile = {}) {
+  // Academic
+  fillAcademic(profile.academic || []);
+  // Attendance
+  fillAttendance(profile.attendance || []);
+  // Guardians: fallback to parents if guardians missing/empty
+  if (isNonEmpty(profile.guardians)) {
+    fillGuardians(profile.guardians);
+  } else if (isNonEmpty(profile.parents)) {
+    fillGuardians(profile.parents);
+  } else {
+    fillGuardians([]);
+  }
+  // Hostel/Transport
+  fillHostelTransport(profile.hostel || {}, profile.transport || {});
+  // Fees
+  fillFees(profile.fees || []);
+  // Docs
+  fillDocs(profile.docs || []);
+}
+    }
+          
+
     // --- Avatar upload handler ---
     function changeAvatar(event) {
       const file = event.target.files[0];

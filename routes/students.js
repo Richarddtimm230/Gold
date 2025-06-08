@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const bcrypt = require('bcryptjs'); // Use bcryptjs for Node.js compatibility
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const studentAuthMiddleware = require('../middleware/studentAuth'); // Import BEFORE using!
-
-// Firestore DB instance (ensure you added it to app.locals or require db initialization here)
-const db = require('../firestore'); // You can create a firestore.js that exports your db instance, or use app.locals.firestoreDB
+const studentAuthMiddleware = require('../middleware/studentAuth');
+const db = require('../firestore');
 
 // Multer setup for photo uploads
 const storage = multer.memoryStorage();
@@ -98,7 +96,16 @@ router.post('/', upload.single('photo'), async (req, res) => {
       bloodGroup: data.bloodGroup || '',
       genotype: data.genotype || '',
       medical: data.medical || '',
-      password: hashedPassword
+      password: hashedPassword,
+      academic: [],
+      attendance: [],
+      guardians: [],
+      hostel: {},
+      transport: {},
+      fees: [],
+      docs: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     await studentsCollection().add(studentDoc);
@@ -148,25 +155,65 @@ router.get('/', async (req, res) => {
   }
 });
 
-// --- Get logged-in student profile for dashboard ---
+// --- Get logged-in student profile for dashboard/profile page ---
 router.get('/me', studentAuthMiddleware, async (req, res) => {
-  const student = req.student; // Your auth middleware must attach Firestore student doc data!
+  const student = req.student;
   res.json({
     name: `${student.firstname} ${student.surname}`,
+    surname: student.surname,
+    firstname: student.firstname,
+    othernames: student.othernames || '',
     reg_no: student.regNo,
+    regNo: student.regNo,
     class: student.class,
     classArm: student.classArm,
     session: student.academicSession,
     term: student.term || '-',
+    gender: student.gender || '',
+    dob: student.dob || '',
     photo_url: student.photo,
-    timetable: student.timetable || [],
-    news: student.news || [],
-    eclass_summary: [
-      'My Classrooms',
-      'Unread messages',
-      'Happening now'
-    ]
+    nationality: student.nationality || '',
+    state: student.state || '',
+    lga: student.lga || '',
+    address: student.address || '',
+    parentName: student.parentName,
+    parentRelationship: student.parentRelationship,
+    parentPhone: student.parentPhone,
+    parentEmail: student.parentEmail || '',
+    parentAddress: student.parentAddress || '',
+    parentOccupation: student.parentOccupation || '',
+    studentEmail: student.studentEmail || '',
+    studentPhone: student.studentPhone || '',
+    religion: student.religion || '',
+    bloodGroup: student.bloodGroup || '',
+    genotype: student.genotype || '',
+    medical: student.medical || '',
+    admissionDate: student.admissionDate || '',
+    previousSchool: student.previousSchool || '',
+    academic: student.academic || [],
+    attendance: student.attendance || [],
+    guardians: student.guardians || [],
+    hostel: student.hostel || {},
+    transport: student.transport || {},
+    fees: student.fees || [],
+    docs: student.docs || [],
+    createdAt: student.createdAt || '',
+    updatedAt: student.updatedAt || '',
   });
+});
+
+// --- Get a student profile by regNo (for admin/staff or direct lookup) ---
+router.get('/:regNo', async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const snapshot = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snapshot.empty) return res.status(404).json({ error: 'Student not found' });
+
+    const profile = snapshot.docs[0].data();
+    res.json(profile);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // --- Student login ---
@@ -212,6 +259,236 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// --- Update student profile (protected, student only) ---
+router.put('/me', studentAuthMiddleware, upload.single('photo'), async (req, res) => {
+  try {
+    const student = req.student;
+    const data = req.body;
+
+    // Only allow updating allowed fields
+    const updatableFields = [
+      'surname', 'firstname', 'othernames', 'dob', 'gender', 'nationality',
+      'state', 'lga', 'address', 'class', 'classArm', 'studentEmail',
+      'studentPhone', 'religion', 'bloodGroup', 'genotype', 'medical'
+    ];
+    let updates = {};
+    updatableFields.forEach(field => {
+      if (data[field]) updates[field] = data[field];
+    });
+
+    // Handle photo upload
+    if (req.file) {
+      updates.photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+
+    updates.updatedAt = new Date();
+
+    // Find student doc by regNo (from auth)
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    await studentsCollection().doc(docId).update(updates);
+
+    res.json({ message: 'Profile updated successfully!' });
+  } catch (err) {
+    console.error('[UPDATE PROFILE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Change password (protected, student only) ---
+router.post('/change-password', studentAuthMiddleware, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword)
+    return res.status(400).json({ error: 'Old and new password are required.' });
+  try {
+    const student = req.student;
+    const isMatch = await bcrypt.compare(oldPassword, student.password);
+    if (!isMatch) return res.status(400).json({ error: 'Old password incorrect.' });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    await studentsCollection().doc(docId).update({ password: hashed, updatedAt: new Date() });
+    res.json({ message: 'Password changed successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Upload a document for a student (protected, student only) ---
+router.post('/me/docs', studentAuthMiddleware, upload.single('document'), async (req, res) => {
+  try {
+    const student = req.student;
+    if (!req.file) return res.status(400).json({ error: 'No document uploaded.' });
+
+    const docMeta = {
+      label: req.body.label || req.file.originalname,
+      value: req.file.originalname,
+      url: `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+      uploadedAt: new Date()
+    };
+
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    const docData = snap.docs[0].data();
+    const docsArr = docData.docs || [];
+    docsArr.push(docMeta);
+
+    await studentsCollection().doc(docId).update({ docs: docsArr, updatedAt: new Date() });
+
+    res.json({ message: 'Document uploaded successfully!', doc: docMeta });
+  } catch (err) {
+    console.error('[UPLOAD DOC ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Update academic record for a student (admin/staff only, you can add admin middleware here) ---
+router.post('/:regNo/academic', async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const academicEntry = req.body; // should include session, term, class, subject, total, grade, remark
+    if (!academicEntry.session || !academicEntry.term || !academicEntry.class || !academicEntry.subject) {
+      return res.status(400).json({ error: 'Missing required academic fields.' });
+    }
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    const docData = snap.docs[0].data();
+    const academicArr = docData.academic || [];
+    academicArr.push(academicEntry);
+
+    await studentsCollection().doc(docId).update({ academic: academicArr, updatedAt: new Date() });
+
+    res.json({ message: 'Academic record updated!', academic: academicArr });
+  } catch (err) {
+    console.error('[ACADEMIC UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Add attendance record (admin/staff only, you can add admin middleware here) ---
+router.post('/:regNo/attendance', async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const attendanceEntry = req.body;
+    if (!attendanceEntry.session || !attendanceEntry.term || !attendanceEntry.present || !attendanceEntry.total) {
+      return res.status(400).json({ error: 'Missing required attendance fields.' });
+    }
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    const docData = snap.docs[0].data();
+    const attendanceArr = docData.attendance || [];
+    attendanceArr.push(attendanceEntry);
+
+    await studentsCollection().doc(docId).update({ attendance: attendanceArr, updatedAt: new Date() });
+
+    res.json({ message: 'Attendance record updated!', attendance: attendanceArr });
+  } catch (err) {
+    console.error('[ATTENDANCE UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Add/update guardian info (student or admin/staff) ---
+router.post('/me/guardians', studentAuthMiddleware, async (req, res) => {
+  try {
+    const student = req.student;
+    const guardians = req.body.guardians; // array
+
+    if (!Array.isArray(guardians)) return res.status(400).json({ error: 'Guardians must be array.' });
+
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+
+    await studentsCollection().doc(docId).update({ guardians: guardians, updatedAt: new Date() });
+
+    res.json({ message: 'Guardians info updated!' });
+  } catch (err) {
+    console.error('[GUARDIAN UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Add/update hostel info (student or admin/staff) ---
+router.post('/me/hostel', studentAuthMiddleware, async (req, res) => {
+  try {
+    const student = req.student;
+    const hostel = req.body.hostel; // object
+
+    if (typeof hostel !== 'object') return res.status(400).json({ error: 'Hostel must be an object.' });
+
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+
+    await studentsCollection().doc(docId).update({ hostel: hostel, updatedAt: new Date() });
+
+    res.json({ message: 'Hostel info updated!' });
+  } catch (err) {
+    console.error('[HOSTEL UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Add/update transport info (student or admin/staff) ---
+router.post('/me/transport', studentAuthMiddleware, async (req, res) => {
+  try {
+    const student = req.student;
+    const transport = req.body.transport; // object
+
+    if (typeof transport !== 'object') return res.status(400).json({ error: 'Transport must be an object.' });
+
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', student.regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+
+    await studentsCollection().doc(docId).update({ transport: transport, updatedAt: new Date() });
+
+    res.json({ message: 'Transport info updated!' });
+  } catch (err) {
+    console.error('[TRANSPORT UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// --- Add/update fees info (admin/staff only, you can add admin middleware here) ---
+router.post('/:regNo/fees', async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const feeEntry = req.body;
+    if (!feeEntry.session || !feeEntry.term || !feeEntry.type || !feeEntry.amount || !feeEntry.status) {
+      return res.status(400).json({ error: 'Missing required fee fields.' });
+    }
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    const docData = snap.docs[0].data();
+    const feesArr = docData.fees || [];
+    feesArr.push(feeEntry);
+
+    await studentsCollection().doc(docId).update({ fees: feesArr, updatedAt: new Date() });
+
+    res.json({ message: 'Fee record updated!', fees: feesArr });
+  } catch (err) {
+    console.error('[FEES UPDATE ERROR]', err);
+    res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
 

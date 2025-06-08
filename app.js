@@ -33,6 +33,7 @@ app.locals.firestoreDB = db;
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const subjectsRoute = require('./routes/subjects');
+const dashboardRoute = require('./routes/dashboard');
 const studentsRoute = require('./routes/students');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
 
@@ -41,6 +42,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/staff', require('./routes/staff'));
 app.use('/api/auth', authRoute);
+app.use('/api/dashboard', dashboardRoute);
 
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') return res.status(403).json({ error: "Forbidden" });

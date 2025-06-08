@@ -736,7 +736,8 @@
     </div>
   </div>
   <script>
-    // Collapsible sidebar
+
+    // Collapsible sidebar, tab logic, etc. (unchanged)
     function toggleSidebar() {
       var side = document.getElementById('sidebarNav');
       var icon = document.getElementById('sidebarToggleIcon');
@@ -749,189 +750,224 @@
         icon.classList.remove('fa-angle-right');
       }
     }
-
-    // DEMO DATA (replace with AJAX/backend as needed)
-    const studentProfile = {
-      name: "Janet Okafor",
-      regNo: "GLS/2024/001",
-      gender: "Female",
-      dob: "2008-05-17",
-      phone: "+2348012345678",
-      email: "janet.okafor@student.goldlincschools.com",
-      address: "12, Unity Lane, Victoria Island, Lagos",
-      nationality: "Nigerian",
-      state: "Lagos",
-      lga: "Eti-Osa",
-      religion: "Christianity",
-      avatar: "",
-      academic: [
-        {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Mathematics", total: 88, grade: "A", remark: "Excellent"},
-        {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "English", total: 82, grade: "A", remark: "Excellent"},
-        {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Biology", total: 72, grade: "B", remark: "Good"},
-        {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Chemistry", total: 62, grade: "C", remark: "Fair"},
-        {session: "2023/2024", term: "3rd Term", class: "SS2", subject: "Mathematics", total: 82, grade: "A", remark: "Excellent"},
-        {session: "2023/2024", term: "3rd Term", class: "SS2", subject: "English", total: 75, grade: "B", remark: "Good"}
-      ],
-      attendance: [
-        {session: "2024/2025", term: "2nd Term", present: 82, total: 90, percentage: 91},
-        {session: "2024/2025", term: "1st Term", present: 85, total: 90, percentage: 94},
-        {session: "2023/2024", term: "3rd Term", present: 70, total: 80, percentage: 88}
-      ],
-      guardians: [
-        {type: "Father", name: "Chinedu Okafor", phone: "+2348012349999", email: "chinedu.okafor@gmail.com", relationship: "Father"},
-        {type: "Mother", name: "Ngozi Okafor", phone: "+2348098765432", email: "ngozi.okafor@gmail.com", relationship: "Mother"},
-        {type: "Emergency", name: "Uncle Peter", phone: "+2348090032121", email: "peter.okafor@gmail.com", relationship: "Uncle"}
-      ],
-      hostel: {
-        name: "Ruby Hostel", room: "12B", bed: "Upper", warden: "Mrs. Odeyemi", session: "2024/2025"
-      },
-      transport: {
-        route: "Ajah", busNo: "BUS-04", driver: "Mr. Lawal", session: "2024/2025"
-      },
-      fees: [
-        {session: "2024/2025", term: "2nd Term", type: "Tuition", amount: "₦110,000", status: "Paid", date: "2025-04-04"},
-        {session: "2024/2025", term: "1st Term", type: "Tuition", amount: "₦110,000", status: "Paid", date: "2024-12-10"},
-        {session: "2023/2024", term: "3rd Term", type: "Transport", amount: "₦25,000", status: "Pending", date: "-"},
-        {session: "2023/2024", term: "2nd Term", type: "Hostel", amount: "₦40,000", status: "Overdue", date: "-"}
-      ],
-      docs: [
-        {label: "Birth Certificate", value: "birth-cert-janet.pdf", url: "#"},
-        {label: "Previous Result", value: "ss2-result.pdf", url: "#"},
-        {label: "Medical Report", value: "medical-janet.pdf", url: "#"},
-        {label: "ID Card", value: "janet-idcard.jpg", url: "#"}
-      ]
-    };
-    // Fill profile info
-    function fillProfileInfo() {
-      const p = studentProfile;
-      document.getElementById("profileName").textContent = p.name;
-      document.getElementById("profileReg").textContent = p.regNo;
-      document.getElementById("profileGender").textContent = p.gender;
-      document.getElementById("profileDOB").textContent = p.dob;
-      document.getElementById("profilePhone").textContent = p.phone;
-      document.getElementById("profileEmail").textContent = p.email;
-      document.getElementById("profileAddress").textContent = p.address;
-      document.getElementById("profileNationality").textContent = p.nationality;
-      document.getElementById("profileState").textContent = p.state;
-      document.getElementById("profileLGA").textContent = p.lga;
-      document.getElementById("profileReligion").textContent = p.religion;
-      document.getElementById("profileAvatar").src = p.avatar && p.avatar !== "" ?
-        p.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=2647a6&color=fff`;
-    }
-    // Academic result table
-    function fillAcademic() {
-      const tbody = document.getElementById("profileResultTable").querySelector("tbody");
-      tbody.innerHTML = studentProfile.academic.map(res => `
-        <tr>
-          <td>${res.session}</td>
-          <td>${res.term}</td>
-          <td>${res.class}</td>
-          <td>${res.subject}</td>
-          <td>${res.total}</td>
-          <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade}</td>
-          <td>${res.remark}</td>
-        </tr>
-      `).join("");
-    }
-    // Attendance
-    function fillAttendance() {
-      const el = document.getElementById("attendanceList");
-      el.innerHTML = studentProfile.attendance.map(a =>
-        `<div class="attendance-card">
-          <div><b>${a.session}, ${a.term}</b></div>
-          <div>Present: <b>${a.present}</b> / ${a.total}</div>
-          <div>Attendance: <b>${a.percentage}%</b></div>
-        </div>`
-      ).join("");
-    }
-    // Guardians
-    function fillGuardians() {
-      const el = document.getElementById("guardianList");
-      el.innerHTML = studentProfile.guardians.map(g =>
-        `<div class="guardian-card">
-          <div class="guardian-label">${g.type}</div>
-          <div class="guardian-value">${g.name}</div>
-          <div class="guardian-label">Phone:</div>
-          <div class="guardian-value">${g.phone}</div>
-          <div class="guardian-label">Email:</div>
-          <div class="guardian-value">${g.email}</div>
-          <div class="guardian-label">Relationship:</div>
-          <div class="guardian-value">${g.relationship}</div>
-        </div>`
-      ).join("");
-    }
-    // Hostel/Transport
-    function fillHostelTransport() {
-      const el = document.getElementById("hostelTransportList");
-      el.innerHTML = `
-        <div class="misc-card">
-          <div><b>Hostel:</b> ${studentProfile.hostel.name}</div>
-          <div>Room: ${studentProfile.hostel.room}, Bed: ${studentProfile.hostel.bed}</div>
-          <div>Warden: ${studentProfile.hostel.warden}</div>
-          <div>Session: ${studentProfile.hostel.session}</div>
-        </div>
-        <div class="misc-card">
-          <div><b>Transport Route:</b> ${studentProfile.transport.route}</div>
-          <div>Bus No: ${studentProfile.transport.busNo}</div>
-          <div>Driver: ${studentProfile.transport.driver}</div>
-          <div>Session: ${studentProfile.transport.session}</div>
-        </div>
-      `;
-    }
-    // Fees
-    function fillFees() {
-      const tbody = document.getElementById("feesTable").querySelector("tbody");
-      tbody.innerHTML = studentProfile.fees.map(f =>
-        `<tr>
-          <td>${f.session}</td>
-          <td>${f.term}</td>
-          <td>${f.type}</td>
-          <td>${f.amount}</td>
-          <td class="${
-            f.status === 'Paid' ? 'paid' : (f.status === 'Pending' ? 'pending' : 'overdue')
-          }">${f.status}</td>
-          <td>${f.date}</td>
-        </tr>`
-      ).join("");
-    }
-    // Docs
-    function fillDocs() {
-      const el = document.getElementById("docsList");
-      el.innerHTML = studentProfile.docs.map(d =>
-        `<div class="docs-card">
-          <div class="docs-label">${d.label}</div>
-          <div class="docs-value">${d.value}</div>
-          <button class="docs-download-btn" onclick="window.open('${d.url}','_blank')"><i class="fa fa-download"></i> Download</button>
-        </div>`
-      ).join("");
-    }
-    // Tab switch logic
     function showProfileTab(tab) {
       document.querySelectorAll('.profile-tab').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
       document.querySelector(`[onclick="showProfileTab('${tab}')"]`).classList.add('active');
       document.getElementById('tab-' + tab).classList.add('active');
     }
-    // Avatar upload (demo, not persistent)
+    // --- Helper: get token ---
+    function getToken() {
+      return localStorage.getItem('student_token') || sessionStorage.getItem('student_token');
+    }
+    // --- Fetch Student Profile ---
+    async function fetchStudentProfile() {
+      try {
+        const token = getToken();
+        if (!token) return null;
+        const res = await fetch('/api/students/me', { // Adjust base URL as needed
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+    // --- Update Profile Photo on server ---
+    async function updateProfilePhoto(file) {
+      const token = getToken();
+      if (!file || !token) return false;
+      const formData = new FormData();
+      formData.append('photo', file);
+      try {
+        const res = await fetch('/api/students/me', {
+          method: 'PUT',
+          headers: { Authorization: 'Bearer ' + token },
+          body: formData
+        });
+        return res.ok;
+      } catch (e) {
+        alert('Failed to update photo');
+        return false;
+      }
+    }
+    // --- Save profile fields (add as needed) ---
+    // ...implement if you want editable profile fields...
+
+    // --- Fill profile info from backend data ---
+    let studentProfile = null;
+    async function fillProfileFromBackend() {
+      const profile = await fetchStudentProfile();
+      if (!profile) {
+        alert('Could not load profile. Please login again.');
+        window.location.href = 'login.html';
+        return;
+      }
+      studentProfile = profile;
+      // Basic Info
+      document.getElementById("profileName").textContent = (profile.firstname || '') + " " + (profile.surname || '');
+      document.getElementById("profileReg").textContent = profile.regNo || '';
+      document.getElementById("profileGender").textContent = profile.gender || '';
+      document.getElementById("profileDOB").textContent = profile.dob || '';
+      document.getElementById("profilePhone").textContent = profile.studentPhone || '';
+      document.getElementById("profileEmail").textContent = profile.studentEmail || '';
+      document.getElementById("profileAddress").textContent = profile.address || '';
+      document.getElementById("profileNationality").textContent = profile.nationality || '';
+      document.getElementById("profileState").textContent = profile.state || '';
+      document.getElementById("profileLGA").textContent = profile.lga || '';
+      document.getElementById("profileReligion").textContent = profile.religion || '';
+      // Avatar
+      if (profile.photoBase64 && profile.photoBase64.startsWith('data:image')) {
+        document.getElementById("profileAvatar").src = profile.photoBase64;
+      } else {
+        const name = `${profile.firstname || ''} ${profile.surname || ''}`.trim() || "Student";
+        document.getElementById("profileAvatar").src =
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2647a6&color=fff`;
+      }
+      // Academic
+      fillAcademic(profile.academic || []);
+      // Attendance
+      fillAttendance(profile.attendance || []);
+      // Guardians
+      fillGuardians(profile.guardians || []);
+      // Hostel/Transport
+      fillHostelTransport(profile.hostel || {}, profile.transport || {});
+      // Fees
+      fillFees(profile.fees || []);
+      // Docs
+      fillDocs(profile.docs || []);
+    }
+    // --- Fillers (tabular) ---
+    function fillAcademic(arr) {
+      const tbody = document.getElementById("profileResultTable").querySelector("tbody");
+      if (!arr.length) return tbody.innerHTML = `<tr><td colspan="7">No records</td></tr>`;
+      tbody.innerHTML = arr.map(res => `
+        <tr>
+          <td>${res.session || ''}</td>
+          <td>${res.term || ''}</td>
+          <td>${res.class || ''}</td>
+          <td>${res.subject || ''}</td>
+          <td>${res.total || ''}</td>
+          <td class="${
+            res.grade === 'A' ? 'grade-high' :
+            res.grade === 'D' ? 'grade-low' : 'grade-mid'
+          }">${res.grade || ''}</td>
+          <td>${res.remark || ''}</td>
+        </tr>
+      `).join("");
+    }
+    function fillAttendance(arr) {
+      const el = document.getElementById("attendanceList");
+      if (!arr.length) return el.innerHTML = `<div>No attendance records.</div>`;
+      el.innerHTML = arr.map(a =>
+        `<div class="attendance-card">
+          <div><b>${a.session || ''}, ${a.term || ''}</b></div>
+          <div>Present: <b>${a.present || 0}</b> / ${a.total || 0}</div>
+          <div>Attendance: <b>${a.percentage || ''}%</b></div>
+        </div>`
+      ).join("");
+    }
+    function fillGuardians(arr) {
+      const el = document.getElementById("guardianList");
+      if (!arr.length) return el.innerHTML = `<div>No guardian info found.</div>`;
+      el.innerHTML = arr.map(g =>
+        `<div class="guardian-card">
+          <div class="guardian-label">${g.type || ''}</div>
+          <div class="guardian-value">${g.name || ''}</div>
+          <div class="guardian-label">Phone:</div>
+          <div class="guardian-value">${g.phone || ''}</div>
+          <div class="guardian-label">Email:</div>
+          <div class="guardian-value">${g.email || ''}</div>
+          <div class="guardian-label">Relationship:</div>
+          <div class="guardian-value">${g.relationship || ''}</div>
+        </div>`
+      ).join("");
+    }
+    function fillHostelTransport(hostel, transport) {
+      const el = document.getElementById("hostelTransportList");
+      el.innerHTML = `
+        <div class="misc-card">
+          <div><b>Hostel:</b> ${hostel.name || ''}</div>
+          <div>Room: ${hostel.room || ''}, Bed: ${hostel.bed || ''}</div>
+          <div>Warden: ${hostel.warden || ''}</div>
+          <div>Session: ${hostel.session || ''}</div>
+        </div>
+        <div class="misc-card">
+          <div><b>Transport Route:</b> ${transport.route || ''}</div>
+          <div>Bus No: ${transport.busNo || ''}</div>
+          <div>Driver: ${transport.driver || ''}</div>
+          <div>Session: ${transport.session || ''}</div>
+        </div>
+      `;
+    }
+    function fillFees(arr) {
+      const tbody = document.getElementById("feesTable").querySelector("tbody");
+      if (!arr.length) return tbody.innerHTML = `<tr><td colspan="6">No fee records</td></tr>`;
+      tbody.innerHTML = arr.map(f =>
+        `<tr>
+          <td>${f.session || ''}</td>
+          <td>${f.term || ''}</td>
+          <td>${f.type || ''}</td>
+          <td>${f.amount || ''}</td>
+          <td class="${
+            f.status === 'Paid' ? 'paid' : (f.status === 'Pending' ? 'pending' : 'overdue')
+          }">${f.status || ''}</td>
+          <td>${f.date || ''}</td>
+        </tr>`
+      ).join("");
+    }
+    function fillDocs(arr) {
+      const el = document.getElementById("docsList");
+      if (!arr.length) return el.innerHTML = `<div>No documents uploaded.</div>`;
+      el.innerHTML = arr.map(d => {
+        // Download: if base64, use download attribute, if url, open in new tab
+        if (d.base64 && d.value) {
+          return `<div class="docs-card">
+            <div class="docs-label">${d.label || d.value}</div>
+            <div class="docs-value">${d.value}</div>
+            <a class="docs-download-btn" download="${d.value}" href="${d.base64}">
+              <i class="fa fa-download"></i> Download
+            </a>
+          </div>`;
+        } else if (d.url) {
+          return `<div class="docs-card">
+            <div class="docs-label">${d.label || d.value}</div>
+            <div class="docs-value">${d.value}</div>
+            <button class="docs-download-btn" onclick="window.open('${d.url}','_blank')">
+              <i class="fa fa-download"></i> Download
+            </button>
+          </div>`;
+        } else {
+          return `<div class="docs-card">
+            <div class="docs-label">${d.label || d.value}</div>
+            <div class="docs-value">${d.value}</div>
+          </div>`;
+        }
+      }).join("");
+    }
+    // --- Avatar upload handler ---
     function changeAvatar(event) {
       const file = event.target.files[0];
       if (file) {
+        // Preview immediately
         const reader = new FileReader();
         reader.onload = function(ev) {
           document.getElementById("profileAvatar").src = ev.target.result;
         };
         reader.readAsDataURL(file);
+        // Send to backend
+        updateProfilePhoto(file).then(success => {
+          if (!success) alert('Failed to update photo!');
+          else fillProfileFromBackend(); // reload profile info
+        });
       }
     }
-    // On load
-    fillProfileInfo();
-    fillAcademic();
-    fillAttendance();
-    fillGuardians();
-    fillHostelTransport();
-    fillFees();
-    fillDocs();
-
+    // --- On page load ---
+    document.addEventListener('DOMContentLoaded', () => {
+      fillProfileFromBackend();
+    });
     // Highlight active menu on sidebar (for demo)
     (function(){
       if(window.innerWidth > 900) {
@@ -943,6 +979,7 @@
         }
       }
     })();
+                      
   </script>
 </body>
 </html>

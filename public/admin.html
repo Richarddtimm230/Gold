@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Gold and Linc Schools - Admin Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="dashboard.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
+    <meta charset="UTF-8">
+    <title>Gold and Linc Schools - Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
 body {
     margin: 0;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -166,7 +166,12 @@ header {
     font-size: 17px; box-shadow: 0 2px 9px rgba(0,0,0,0.12); cursor: pointer; z-index: 12;
     font-weight: 500;
 }
-</style>
+#dashboardLoading {
+    text-align: center;
+    margin: 2em;
+    color: #888;
+}
+    </style>
 </head>
 <body>
 <button class="menu-toggle" id="menuToggleBtn">&#9776;</button>
@@ -205,9 +210,8 @@ header {
             <span class="icon">🔍</span>
         </div>
     </header>
-    <div class="dashboard-cards" id="dashboardCards">
-        <!-- JS fills in cards -->
-    </div>
+    <div id="dashboardLoading">Loading dashboard data...</div>
+    <div class="dashboard-cards" id="dashboardCards"></div>
     <div class="finance-summary">
         <h3>Monthly Finance Summary | <span id="financeSummarySession">2024–2025</span></h3>
         <canvas id="financeChart" width="900" height="200"></canvas>
@@ -242,7 +246,6 @@ const menuToggleBtn = document.getElementById('menuToggleBtn');
 menuToggleBtn.onclick = function() {
     sidebar.classList.toggle('show');
 };
-
 // Hide sidebar when clicking outside on mobile
 document.addEventListener('click', function(e){
     if(window.innerWidth <= 900 && sidebar.classList.contains('show')) {
@@ -251,8 +254,6 @@ document.addEventListener('click', function(e){
         }
     }
 });
-
-// Prevent content shift when sidebar is hidden
 window.addEventListener('resize', function(){
     if(window.innerWidth > 900) {
         sidebar.classList.remove('show');
@@ -263,26 +264,43 @@ window.addEventListener('resize', function(){
 (async function(){
   const token = localStorage.getItem('token');
   if (!token) return window.location.href = 'login.html';
-  const res = await fetch('https://gold-1-z03x.onrender.com/api/auth/me', {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!res.ok) return window.location.href = 'login.html';
-  const user = await res.json();
-  if (user.role !== 'superadmin') window.location.href = 'login.html';
+  try {
+      const res = await fetch('https://gold-1-z03x.onrender.com/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return window.location.href = 'login.html';
+      const user = await res.json();
+      if (user.role !== 'superadmin') window.location.href = 'login.html';
+  } catch (e) {
+      window.location.href = 'login.html';
+  }
 })();
 
 // ====== Fetch Dashboard Data & Render ======
 async function fetchDashboardData() {
-    const token = localStorage.getItem('token');
-    const res = await fetch('https://gold-1-z03x.onrender.com/api/dashboard/summary', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    renderDashboardCards(data);
-    renderFinanceChart(data.financeSummary);
-    if (data.session) {
-        document.getElementById('financeSummarySession').textContent = data.session;
+    const loadingDiv = document.getElementById('dashboardLoading');
+    if (loadingDiv) loadingDiv.style.display = 'block';
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('https://gold-1-z03x.onrender.com/api/dashboard/summary', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            if (loadingDiv) loadingDiv.innerHTML = '❌ Failed to load data. Status: ' + res.status;
+            console.error('Dashboard API error', res.status, await res.text());
+            return;
+        }
+        const data = await res.json();
+        console.log('DASHBOARD DATA:', data);
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        renderDashboardCards(data);
+        renderFinanceChart(data.financeSummary);
+        if (data.session) {
+            document.getElementById('financeSummarySession').textContent = data.session;
+        }
+    } catch (e) {
+        if (loadingDiv) loadingDiv.innerHTML = '❌ Network or server error.';
+        console.error('Dashboard fetch error:', e);
     }
 }
 
@@ -291,15 +309,15 @@ function renderDashboardCards(data) {
         {
             class: 'green',
             icon: '💵',
-            count: `(${data.todayPayments.count}) Payments`,
-            amount: `₦${data.todayPayments.amount || 0}`,
+            count: `(${data.todayPayments?.count || 0}) Payments`,
+            amount: `₦${data.todayPayments?.amount || 0}`,
             desc: 'Received Today'
         },
         {
             class: 'green',
             icon: '💵',
-            count: `(${data.monthPayments.count}) Payments`,
-            amount: `₦${data.monthPayments.amount || 0}`,
+            count: `(${data.monthPayments?.count || 0}) Payments`,
+            amount: `₦${data.monthPayments?.amount || 0}`,
             desc: 'Received in Last 30 Days'
         },
         {

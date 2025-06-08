@@ -344,7 +344,7 @@
             transition: background 0.16s;
         }
         .results-table tr:hover td { background: #f1f9ff; }
-        .action-btn { text-decoration: none; margin: 0 2px; font-size: 1.13em; cursor: pointer;}
+        .action-btn { text-decoration: none; margin: 0 2px; font-size: 1.13em; cursor: pointer; border: none; background: none;}
         .action-btn.edit { color: #007bff; }
         .action-btn.delete { color: #dc3545; }
         .action-btn.publish { color: #20c997; }
@@ -367,11 +367,29 @@
             margin: 4% auto;
             padding: 20px 18px 27px 18px;
             width: 98vw;
-            max-width: 420px;
+            max-width: 460px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.16);
             position: relative;
         }
         .modal-content h3 { margin: 0 0 18px 0; font-size: 1.15em; }
+        .modal-content label {
+            display: block;
+            margin-bottom: 0.9em;
+            color: #333;
+            font-size: 1em;
+        }
+        .modal-content input[type='number'],
+        .modal-content input[type='text'] {
+            width: 100%;
+            padding: 8px 9px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #e3e8ee;
+            background: #fafcff;
+            margin-top: 5px;
+            box-sizing: border-box;
+            margin-bottom: 4px;
+        }
         .close {
             color: #aaa;
             position: absolute;
@@ -382,6 +400,26 @@
             transition: color 0.2s;
         }
         .close:hover { color: #007bff; }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background: #005ecb; }
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-danger:hover { background: #c82333; }
         /* Floating buttons */
         .support-tab, .eclass-fab {
             position: fixed;
@@ -425,7 +463,6 @@
                 font-size: 0.97em;
             }
         }
-        /* Compact Table on phones: stack cells for better reading */
         @media (max-width: 470px) {
             .results-table-container { padding: 0 0.5vw;}
             .results-table {
@@ -437,7 +474,6 @@
             .results-table thead th { font-size: 0.95em; }
             .modal-content { padding: 9px 2vw 11px 2vw; }
         }
-        /* Mobile - Horizontal scroll cue */
         .mobile-scroll-hint {
             display: none;
             font-size: 0.97em;
@@ -485,8 +521,8 @@
     <header>
       <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
       <div class="school-title">
-        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
-        
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+   
       </div>
       <div class="header-actions">
         <span class="icon" title="Notifications">🔔</span>
@@ -564,6 +600,58 @@
         <canvas id="resultsStatsChart" width="350" height="180"></canvas>
       </div>
     </div>
+    <!-- Edit Modal -->
+    <div id="editResultModal" class="modal" aria-modal="true" role="dialog">
+      <div class="modal-content" style="max-width: 460px">
+        <span class="close" id="closeEditModal" tabindex="0" role="button" aria-label="Close">&times;</span>
+        <h3>Edit Result</h3>
+        <form id="editResultForm">
+          <input type="hidden" name="resultId" id="editResultId">
+          <label>
+            Score
+            <input type="number" name="score" id="editScore" required min="0" max="100">
+          </label>
+          <label>
+            Grade
+            <input type="text" name="grade" id="editGrade" required maxlength="2">
+          </label>
+          <label>
+            Remarks
+            <input type="text" name="remarks" id="editRemarks" maxlength="64">
+          </label>
+          <div style="margin-top:1em;text-align:right;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+          <div id="editResultStatus" style="margin-top:0.7em;color:#dc3545;min-height:20px;"></div>
+        </form>
+      </div>
+    </div>
+    <!-- Delete Modal -->
+    <div id="deleteResultModal" class="modal" aria-modal="true" role="dialog">
+      <div class="modal-content" style="max-width: 380px">
+        <span class="close" id="closeDeleteModal" tabindex="0" role="button" aria-label="Close">&times;</span>
+        <h3>Delete Result</h3>
+        <p>Are you sure you want to delete this result?</p>
+        <div style="display:flex;justify-content:flex-end;gap:1em;">
+          <button id="confirmDeleteBtn" class="btn-danger" type="button">Delete</button>
+          <button id="cancelDeleteBtn" type="button">Cancel</button>
+        </div>
+        <div id="deleteResultStatus" style="margin-top:0.7em;color:#dc3545;min-height:20px;"></div>
+      </div>
+    </div>
+    <!-- Publish Modal -->
+    <div id="publishResultModal" class="modal" aria-modal="true" role="dialog">
+      <div class="modal-content" style="max-width: 380px">
+        <span class="close" id="closePublishModal" tabindex="0" role="button" aria-label="Close">&times;</span>
+        <h3>Publish Result</h3>
+        <p>Are you sure you want to publish this result?</p>
+        <div style="display:flex;justify-content:flex-end;gap:1em;">
+          <button id="confirmPublishBtn" class="btn-primary" type="button">Publish</button>
+          <button id="cancelPublishBtn" type="button">Cancel</button>
+        </div>
+        <div id="publishResultStatus" style="margin-top:0.7em;color:#dc3545;min-height:20px;"></div>
+      </div>
+    </div>
   </main>
   <button class="support-tab" aria-label="Open Support">Support</button>
   <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
@@ -599,7 +687,8 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeSidebar();
     });
-    // Table & filter logic
+
+    // Render and fetch logic
     async function fetchResultsAndRender() {
       const statusEl = document.getElementById('resultsStatus');
       try {
@@ -632,9 +721,9 @@
           <td>${result.remarks}</td>
           <td class="status-${(result.status || '').toLowerCase()}">${result.status}</td>
           <td>
-            <a class="action-btn edit" title="Edit" href="edit-result.html?id=${result._id}" aria-label="Edit result">✏️</a>
-            <a class="action-btn delete" title="Delete" href="delete-result.html?id=${result._id}" aria-label="Delete result">🗑️</a>
-            <a class="action-btn publish" title="Publish" href="publish-result.html?id=${result._id}" aria-label="Publish result">📢</a>
+            <button class="action-btn edit" title="Edit" data-id="${result._id}" aria-label="Edit result">✏️</button>
+            <button class="action-btn delete" title="Delete" data-id="${result._id}" aria-label="Delete result">🗑️</button>
+            <button class="action-btn publish" title="Publish" data-id="${result._id}" aria-label="Publish result">📢</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -659,7 +748,7 @@
         if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
         if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
         if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
-        const url = 'https://gold-1-z03x.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
+        const url = '/api/results' + (query.length ? '?' + query.join('&') : '');
         try {
           const response = await fetch(url);
           if (!response.ok) throw new Error('Network response was not ok');
@@ -696,6 +785,129 @@
         }
       });
     });
+
+    // Results actions: Edit, Delete, Publish
+    // Modal helpers
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Store current row data for modals
+    let _editResultData = null;
+    let _deleteResultData = null;
+    let _publishResultData = null;
+
+    // Delegated event handlers for action buttons
+    document.getElementById('resultsTbody').addEventListener('click', function(e) {
+      // Edit
+      if (e.target.classList.contains('edit')) {
+        e.preventDefault();
+        const tr = e.target.closest('tr');
+        const id = e.target.getAttribute('data-id');
+        _editResultData = { id, tr };
+        document.getElementById('editResultId').value = id;
+        document.getElementById('editScore').value = tr.children[5].textContent.trim();
+        document.getElementById('editGrade').value = tr.children[6].textContent.trim();
+        document.getElementById('editRemarks').value = tr.children[7].textContent.trim();
+        document.getElementById('editResultStatus').textContent = '';
+        openModal('editResultModal');
+      }
+      // Delete
+      if (e.target.classList.contains('delete')) {
+        e.preventDefault();
+        const tr = e.target.closest('tr');
+        const id = e.target.getAttribute('data-id');
+        _deleteResultData = { id, tr };
+        document.getElementById('deleteResultStatus').textContent = '';
+        openModal('deleteResultModal');
+      }
+      // Publish
+      if (e.target.classList.contains('publish')) {
+        e.preventDefault();
+        const tr = e.target.closest('tr');
+        const id = e.target.getAttribute('data-id');
+        _publishResultData = { id, tr };
+        document.getElementById('publishResultStatus').textContent = '';
+        openModal('publishResultModal');
+      }
+    });
+
+    // Edit form submit
+    document.getElementById('editResultForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editResultId').value;
+      const score = document.getElementById('editScore').value;
+      const grade = document.getElementById('editGrade').value;
+      const remarks = document.getElementById('editRemarks').value;
+      const statusDiv = document.getElementById('editResultStatus');
+      statusDiv.style.color = "#888";
+      statusDiv.textContent = "Saving...";
+      try {
+        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {
+          method: 'PATCH',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({score, grade, remarks})
+        });
+        if (!res.ok) throw new Error('Failed to update');
+        closeModal('editResultModal');
+        await fetchResultsAndRender();
+      } catch (err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
+      }
+    };
+
+    // Delete confirm
+    document.getElementById('confirmDeleteBtn').onclick = async function() {
+      const id = _deleteResultData && _deleteResultData.id;
+      const statusDiv = document.getElementById('deleteResultStatus');
+      statusDiv.style.color = "#888";
+      statusDiv.textContent = "Deleting...";
+      try {
+        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {method:'DELETE'});
+        if (!res.ok) throw new Error('Failed to delete');
+        closeModal('deleteResultModal');
+        await fetchResultsAndRender();
+      } catch(err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
+      }
+    };
+    document.getElementById('cancelDeleteBtn').onclick = function() {
+      closeModal('deleteResultModal');
+    };
+
+    // Publish confirm
+    document.getElementById('confirmPublishBtn').onclick = async function() {
+      const id = _publishResultData && _publishResultData.id;
+      const statusDiv = document.getElementById('publishResultStatus');
+      statusDiv.style.color = "#888";
+      statusDiv.textContent = "Publishing...";
+      try {
+        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}/publish`, {method:'POST'});
+        if (!res.ok) throw new Error('Failed to publish');
+        closeModal('publishResultModal');
+        await fetchResultsAndRender();
+      } catch(err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
+      }
+    };
+    document.getElementById('cancelPublishBtn').onclick = function() {
+      closeModal('publishResultModal');
+    };
+
+    // Modal close (add for all modals)
+    document.querySelectorAll('.modal .close').forEach(btn=>{
+      btn.onclick = function() {
+        closeModal(btn.closest('.modal').id);
+      };
+    });
+
+    // Chart
     function renderStatsChart(results) {
       // Calculate grade counts
       const gradeCounts = {};
@@ -710,8 +922,8 @@
         gradeCounts["No Data"] = 1;
       }
       if (window.resultsStatsChart && typeof window.resultsStatsChart.destroy === "function") {
-    window.resultsStatsChart.destroy();
-}
+        window.resultsStatsChart.destroy();
+      }
       const ctx = document.getElementById('resultsStatsChart').getContext('2d');
       window.resultsStatsChart = new Chart(ctx, {
         type: 'bar',

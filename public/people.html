@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Gold and Linc Schools - People</title>
-  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
   <style>
     :root {
@@ -19,46 +19,6 @@
       --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
       --font-main: 'Inter', Arial, sans-serif;
     }
-/* Sidebar should always be scrollable vertically */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-height: 100vh;
-  overflow-y: auto !important;
-  /* Prevent horizontal scroll */
-  overflow-x: hidden;
-}
-
-/* Make sure the search input and nav don't overflow */
-.sidebar .search {
-  padding: 0.7em 1.2em;
-  flex-shrink: 0;
-}
-.sidebar .search input {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin: 0;
-}
-
-/* Sidebar navigation should grow as needed but also scroll */
-.sidebar nav {
-  flex: 1 1 0%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25em;
-  min-height: 0; /* necessary for flexbox scrolling */
-}
-
-/* On mobile, sidebar still fills viewport and is scrollable */
-@media (max-width: 750px) {
-  .sidebar {
-    height: 100vh;
-    max-height: 100vh;
-    overflow-y: auto !important;
-  }
-}
     html, body {
       margin: 0;
       padding: 0;
@@ -69,7 +29,6 @@
       min-height: 100%;
       box-sizing: border-box;
     }
-
     #pageSpinnerOverlay {
       display: flex;
       align-items: center;
@@ -90,6 +49,7 @@
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
 
+    /* --- SIDEBAR --- */
     .sidebar {
       position: fixed;
       top: 0; left: 0;
@@ -97,20 +57,60 @@
       min-width: 180px;
       max-width: 320px;
       height: 100vh;
+      max-height: 100vh;
       background: var(--sidebar-bg);
       box-shadow: var(--shadow);
       z-index: 1050;
       padding: 0 0 2rem 0;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
       transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      /* border-bottom: 1px solid #ececec; */
+      z-index: 1;
+    }
+    .search input {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      display: block;
+      background: #fff;
     }
     .sidebar nav {
+      flex: 1 1 0%;
       display: flex;
       flex-direction: column;
       gap: 0.25em;
       margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      /* force scroll on nav, not on whole sidebar */
     }
     .sidebar a {
       display: flex;
@@ -130,28 +130,42 @@
       border-left: 4px solid var(--primary);
       color: var(--primary);
     }
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem 1.2rem 1rem 1.2rem;
-      border-bottom: 1px solid #ececec;
+
+    /* Sidebar should scroll as a whole on mobile (fixed header/search) */
+    @media (max-width: 750px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        box-shadow: 2px 0 18px rgba(0,0,0,0.13);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
     }
-    .avatar {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: 2px solid #e3e6ea;
+
+    /* Make sidebar scrollable as a whole, with fixed profile/search at the top */
+    .sidebar {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
-    .name { font-weight: 700; font-size: 1.13em; }
-    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
-    .search {
-      padding: 0.7em 1.2em;
-    }
-    .search input {
-      width: 100%; padding: 0.6em 0.9em;
-      border-radius: 6px; border: 1px solid #ddd;
-      font-size: 1em;
-    }
+
+    /* --- END SIDEBAR --- */
 
     .sidebar-toggle {
       display: none;
@@ -167,9 +181,6 @@
     }
     .sidebar-overlay {
       display: none;
-    }
-        .sidebar search {
-      width: 80vw;
     }
     .sidebar-overlay.active {
       display: block;
@@ -265,11 +276,14 @@
     }
     .sub-search {
       margin-bottom: 0.7em;
-      width: 90%;
+      width: 100%;
       padding: 0.66em 0.9em;
       border-radius: 6px;
       border: 1px solid #e0e6eb;
       font-size: 0.98em;
+      box-sizing: border-box;
+      max-width: 100%;
+      display: block;
     }
     .features-list {
       display: flex;
@@ -321,11 +335,13 @@
         width: var(--sidebar-width-mobile);
         min-width: 0;
         max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
         transform: translateX(-105%);
         box-shadow: 2px 0 18px rgba(0,0,0,0.13);
         position: fixed;
         z-index: 1050;
-        height: 100vh;
+        overflow: hidden;
       }
       .sidebar.active {
         transform: translateX(0);
@@ -340,7 +356,6 @@
         overflow: hidden;
       }
     }
-
     @media (max-width: 600px) {
       .main-content { padding: 0 2vw; }
       .people-card { padding: 1em 0.75em 0.7em 0.75em; }
@@ -404,7 +419,6 @@
         <span class="icon" title="Notifications">🔔</span>
         <span class="icon" title="Help">❓</span>
         <span class="icon" title="Settings">⚙️</span>
-        
       </div>
     </header>
     <h2 class="people-title"><span>👥</span> People Directory</h2>
@@ -468,7 +482,7 @@
           spinner.style.opacity = '0';
           setTimeout(() => { spinner.style.display = 'none'; }, 400);
         }
-      }, 4000); // 1.2 seconds for a snappy feel
+      }, 1200);
     });
 
     // Sidebar mobile toggle logic

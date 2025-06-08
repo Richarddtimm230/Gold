@@ -2,7 +2,7 @@
 (async function(){
   const token = localStorage.getItem('token');
   if (!token) return window.location.href = 'login.html';
-  const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+  const res = await fetch('https://gold-1-z03x.onrender.com/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
   if (!res.ok) return window.location.href = 'login.html';
   const user = await res.json();
   if (user.role !== 'superadmin') window.location.href = 'login.html';

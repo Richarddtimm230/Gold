@@ -28,7 +28,7 @@ function renderResultsTable(results) {
         tr.innerHTML = `
             <td><input type="checkbox" class="row-check" data-idx="${idx}"></td>
             <td>${result.student_id || (result.student && result.student.student_id) || ''}</td>
-            <td>${result.student_name || (result.student && result.student.name) || ''}</td>
+            <td>${result.student_name || (result.student && result.student.student_name) || ''}</td>
             <td>${result.class_name || (result.class && result.class.name) || ''}</td>
             <td>${result.subject_name || (result.subject && result.subject.name) || ''}</td>
             <td>${result.score}</td>

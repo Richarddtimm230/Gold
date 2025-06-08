@@ -29,7 +29,27 @@
             min-height: 100%;
             box-sizing: border-box;
         }
-        /* Sidebar */
+        #pageSpinnerOverlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.96);
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            transition: opacity 0.4s;
+        }
+        .spinner {
+            width: 46px;
+            height: 46px;
+            border: 5px solid #e3e6ea;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- SIDEBAR --- */
         .sidebar {
             position: fixed;
             top: 0; left: 0;
@@ -37,14 +57,15 @@
             min-width: 180px;
             max-width: 320px;
             height: 100vh;
+            max-height: 100vh;
             background: var(--sidebar-bg);
             box-shadow: var(--shadow);
             z-index: 1050;
             padding: 0 0 2rem 0;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
             transition: transform 0.25s ease;
+            overflow: hidden;
         }
         .profile {
             display: flex;
@@ -65,6 +86,7 @@
             padding: 0.7em 1.2em;
             flex-shrink: 0;
             background: var(--sidebar-bg);
+            z-index: 1;
         }
         .search input {
             width: 100%;
@@ -85,6 +107,8 @@
             gap: 0.25em;
             margin-top: 1.5em;
             min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
         .sidebar a {
             display: flex;
@@ -104,8 +128,59 @@
             border-left: 4px solid var(--primary);
             color: var(--primary);
         }
+        @media (max-width: 750px) {
+            .sidebar {
+                width: var(--sidebar-width-mobile);
+                min-width: 0;
+                max-width: 95vw;
+                height: 100vh;
+                max-height: 100vh;
+                transform: translateX(-105%);
+                box-shadow: 2px 0 18px rgba(0,0,0,0.13);
+                position: fixed;
+                z-index: 1050;
+                overflow: hidden;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-toggle {
+                display: inline-flex;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            body.sidebar-open {
+                overflow: hidden;
+            }
+        }
+        .sidebar {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-right: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            height: var(--header-height);
+        }
+        .sidebar-overlay {
+            display: none;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 1040;
+        }
+        /* --- END SIDEBAR --- */
 
-        /* Main content */
         .main-content {
             min-height: 100vh;
             margin-left: var(--sidebar-width);
@@ -148,7 +223,6 @@
         .header-actions .icon:hover {
             opacity: 1;
         }
-
         /* Students view section */
         .students-view-container {
             max-width: 1200px;
@@ -213,7 +287,6 @@
         .btn-view:hover {
             background: #005bc1;
         }
-
         .students-list-section {
             margin-top: 2em;
         }
@@ -230,6 +303,8 @@
             font-size: 1.01rem;
             background: #fff;
             box-shadow: 0 2px 8px 0 rgba(44,62,80,0.03);
+            width: 220px;
+            max-width: 98vw;
         }
         .students-table-wrapper {
             margin-top: 22px;
@@ -294,7 +369,6 @@
         .support-tab { bottom: 4.5em; }
         .eclass-fab { bottom: 1.5em; }
         .support-tab:hover, .eclass-fab:hover { background: #005ecb; }
-
         @media (max-width: 1100px) {
             .students-view-container { padding: 1.2em 0.5em 1.1em 0.5em; }
             .students-table { min-width: 800px; }
@@ -325,7 +399,10 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div id="pageSpinnerOverlay">
+        <div class="spinner"></div>
+    </div>
+    <aside class="sidebar" id="sidebar">
         <div class="profile">
             <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
             <div>
@@ -333,7 +410,7 @@
                 <div class="role">System Administrator</div>
             </div>
         </div>
-        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <div class="search"><input type="text" placeholder="Quick search..." aria-label="Quick search"></div>
         <nav>
             <a href="index.html"><span>🏠</span> Dashboard</a>
             <a href="admission"><span>🎓</span> Admission</a>
@@ -345,18 +422,20 @@
             <a href="attendance"><span>🗓️</span> Attendance</a>
             <a href="admin"><span>⚙️</span> Admin</a>
         </nav>
-    </div>
-    <div class="main-content main-content-students">
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <main class="main-content main-content-students">
         <header>
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
             <div class="school-title">
                 <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
                 <span>GOLD AND LINC SCHOOLS</span>
             </div>
             <div class="header-actions">
-                <span class="icon">🔔</span>
-                <span class="icon">❓</span>
-                <span class="icon">⚙️</span>
-                <span class="icon">🔍</span>
+                <span class="icon" title="Notifications">🔔</span>
+                <span class="icon" title="Help">❓</span>
+                <span class="icon" title="Settings">⚙️</span>
+                <span class="icon" title="Search">🔍</span>
             </div>
         </header>
         <div class="students-view-container">
@@ -415,7 +494,7 @@
             <div class="students-list-section">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7em;">
                     <h3 class="students-list-title">Students List</h3>
-                    <input type="text" id="search-student-input" class="sub-search" style="width:220px;max-width:98vw;" placeholder="Search by name, reg no...">
+                    <input type="text" id="search-student-input" class="sub-search" placeholder="Search by name, reg no...">
                 </div>
                 <div class="students-table-wrapper">
                     <table class="students-table" id="students-table">
@@ -444,10 +523,43 @@
                 <div class="students-pagination" id="students-pagination"></div>
             </div>
         </div>
-    </div>
-    <div class="support-tab">Support</div>
-    <div class="eclass-fab">e-Class</div>
+    </main>
+    <button class="support-tab" aria-label="Open Support">Support</button>
+    <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
     <script>
+        // Spinner overlay logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const spinner = document.getElementById('pageSpinnerOverlay');
+            if (spinner) spinner.style.display = 'flex';
+            setTimeout(() => {
+                if (spinner) {
+                    spinner.style.opacity = '0';
+                    setTimeout(() => { spinner.style.display = 'none'; }, 400);
+                }
+            }, 1200);
+        });
+
+        // Sidebar mobile toggle logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.classList.add('sidebar-open');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+        if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeSidebar();
+        });
+
+        // Students table logic (as before)
         let studentsData = [];
         let filteredData = [];
         let currentPage = 1;

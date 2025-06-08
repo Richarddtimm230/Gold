@@ -139,7 +139,7 @@
 
         // Fetch students from backend
         async function fetchStudents(filters = {}) {
-            let url = '/api/students?';
+            let url = '/api/students';
             Object.keys(filters).forEach(key => {
                 if(filters[key]) url += `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}&`;
             });

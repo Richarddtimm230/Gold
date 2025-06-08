@@ -307,27 +307,42 @@
     }
     /* Tabs */
     .profile-tabs {
-      display: flex;
-      gap: 27px;
-      border-bottom: 2px solid #e3eefd;
-      margin-bottom: 13px;
-      margin-top: 7px;
-    }
-    .profile-tab {
-      background: none;
-      border: none;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: #7a90b3;
-      padding: 8px 0;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: color var(--transition), border var(--transition);
-    }
-    .profile-tab.active {
-      color: var(--primary);
-      border-bottom: 3px solid var(--primary);
-    }
+.profile-tabs {
+  display: flex;
+  gap: 27px;
+  border-bottom: 2px solid #e3eefd;
+  margin-bottom: 13px;
+  margin-top: 7px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tab {
+  background: none;
+  border: none;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #7a90b3;
+  padding: 8px 0;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color var(--transition), border var(--transition);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.profile-tab.active {
+  color: var(--primary);
+  border-bottom: 3px solid var(--primary);
+}
     /* Tab contents */
     .tab-content { display: none; }
     .tab-content.active { display: block; }

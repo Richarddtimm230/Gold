@@ -748,7 +748,7 @@
         if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
         if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
         if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
-        const url = '/api/results' + (query.length ? '?' + query.join('&') : '');
+        const url = 'https://gold-1-z03x.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
         try {
           const response = await fetch(url);
           if (!response.ok) throw new Error('Network response was not ok');
@@ -846,18 +846,21 @@
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Saving...";
       try {
-        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {
-          method: 'PATCH',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({score, grade, remarks})
-        });
-        if (!res.ok) throw new Error('Failed to update');
-        closeModal('editResultModal');
-        await fetchResultsAndRender();
-      } catch (err) {
-        statusDiv.style.color = "#dc3545";
-        statusDiv.textContent = "❌ " + err.message;
-      }
+  const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({score, grade, remarks})
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Failed to update: ' + text);
+  }
+  closeModal('editResultModal');
+  await fetchResultsAndRender();
+} catch (err) {
+  statusDiv.style.color = "#dc3545";
+  statusDiv.textContent = "❌ " + err.message;
+}
     };
 
     // Delete confirm
@@ -866,14 +869,17 @@
       const statusDiv = document.getElementById('deleteResultStatus');
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Deleting...";
-      try {
-        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {method:'DELETE'});
-        if (!res.ok) throw new Error('Failed to delete');
-        closeModal('deleteResultModal');
-        await fetchResultsAndRender();
-      } catch(err) {
-        statusDiv.style.color = "#dc3545";
-        statusDiv.textContent = "❌ " + err.message;
+try {
+  const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}`, {method:'DELETE'});
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Failed to delete: ' + text);
+  }
+  closeModal('deleteResultModal');
+  await fetchResultsAndRender();
+} catch(err) {
+  statusDiv.style.color = "#dc3545";
+  statusDiv.textContent = "❌ " + err.message;
       }
     };
     document.getElementById('cancelDeleteBtn').onclick = function() {
@@ -887,13 +893,16 @@
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Publishing...";
       try {
-        const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}/publish`, {method:'POST'});
-        if (!res.ok) throw new Error('Failed to publish');
-        closeModal('publishResultModal');
-        await fetchResultsAndRender();
-      } catch(err) {
-        statusDiv.style.color = "#dc3545";
-        statusDiv.textContent = "❌ " + err.message;
+  const res = await fetch(`https://gold-1-z03x.onrender.com/api/results/${id}/publish`, {method:'POST'});
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Failed to publish: ' + text);
+  }
+  closeModal('publishResultModal');
+  await fetchResultsAndRender();
+} catch(err) {
+  statusDiv.style.color = "#dc3545";
+  statusDiv.textContent = "❌ " + err.message;
       }
     };
     document.getElementById('cancelPublishBtn').onclick = function() {

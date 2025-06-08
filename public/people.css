@@ -3,7 +3,30 @@ body {
     background: #f6f9fb;
     margin: 0;
 }
+#pageSpinnerOverlay {
+  position: fixed;
+  z-index: 99999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s;
+}
 
+.spinner {
+  border: 6px solid #ddeaff;
+  border-top: 6px solid #2647a6;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spinner-spin 1s linear infinite;
+}
+
+@keyframes spinner-spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
 .main-content-people {
     background: linear-gradient(135deg, #e8f0fe 0%, #f6f9fb 100%);
     min-height: 100vh;

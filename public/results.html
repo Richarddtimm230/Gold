@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Results Management - Admin Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -486,13 +486,13 @@
       <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
       <div class="school-title">
         <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
-        <span>GOLD AND LINC SCHOOLS</span>
+        
       </div>
       <div class="header-actions">
         <span class="icon" title="Notifications">🔔</span>
         <span class="icon" title="Help">❓</span>
         <span class="icon" title="Settings">⚙️</span>
-        <span class="icon" title="Search">🔍</span>
+        
       </div>
     </header>
     <div class="page-title">
@@ -659,7 +659,7 @@
         if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
         if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
         if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
-        const url = '/api/results' + (query.length ? '?' + query.join('&') : '');
+        const url = 'https://gold-1-z03x.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
         try {
           const response = await fetch(url);
           if (!response.ok) throw new Error('Network response was not ok');

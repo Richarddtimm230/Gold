@@ -172,6 +172,7 @@
     .join-btn:active, .join-btn:hover {
       background: #12ab7a;
     }
+
     /* Chat Section */
     .chat-section {
       background: var(--card);
@@ -331,65 +332,37 @@
     .chat-upload-input, .chat-audio-input {
       display: none;
     }
-    /* Maximize chat overlay */
-    .chat-fullscreen-overlay {
-      display: none;
-      position: fixed;
-      z-index: 3000;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100vw; height: 100vh;
-      background: var(--bg);
-      box-sizing: border-box;
-      animation: fadeinup 0.25s;
+    /* Private chat modal */
+    .modal-overlay {
+      display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(20,40,100,0.16); z-index: 2000;
+      align-items: center; justify-content: center;
+      transition: opacity 0.18s;
     }
-    .chat-fullscreen-overlay.active {
-      display: flex;
-      flex-direction: column;
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 40px #0c205d33;
+      max-width: 96vw; width: 420px;
+      padding: 30px 19px 25px 19px;
+      position: relative;
+      animation: fadeinup 0.3s;
     }
-    .chat-fullscreen-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--accent2);
-      border-bottom: 1px solid #e3eefd;
-      padding: 16px 18px;
-    }
-    .chat-fullscreen-header-title {
-      font-weight: 700;
-      font-size: 1.13rem;
-      color: var(--primary);
-    }
-    .chat-fullscreen-close {
+    .modal-close {
+      position: absolute;
+      top: 15px; right: 18px;
       background: none;
       border: none;
-      font-size: 1.45rem;
-      color: var(--primary);
+      font-size: 1.2rem;
+      color: var(--danger);
       cursor: pointer;
-      margin-left: 8px;
     }
-    .chat-fullscreen-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    @keyframes fadeinup {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: none;}
     }
-    .chat-fullscreen-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 19px 13px 10px 13px;
-      background: #f6f8fa;
-    }
-    .chat-fullscreen-input-panel {
-      display: flex;
-      align-items: center;
-      padding: 11px 10px;
-      border-top: 1px solid #e3eefd;
-      background: #f6f8fa;
-      gap: 10px;
-      width: 100%;
-      max-width: 100vw;
-    }
-    /* Materials, Attendance, Settings, etc */
+    /* Materials, Attendance, Settings, etc (same as before) */
     .material-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; margin-bottom: 10px; }
     .material-item { background: var(--accent2); border-radius: 8px; padding: 10px 13px; font-size: 0.99rem; color: var(--primary); display: flex; align-items: center; gap: 7px; box-shadow: 0 1px 5px #ddeaff60; margin-bottom: 3px; text-decoration: none; transition: background 0.1s; }
     .material-item:hover { background: var(--accent);}
@@ -405,13 +378,6 @@
     .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 2.5px; background: var(--primary); border-radius: 50%; transition: 0.2s;}
     .switch input:checked + .slider { background: var(--accent);}
     .switch input:checked + .slider:before { transform: translateX(15px); background: var(--success);}
-    @keyframes fadeinup {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: none;}
-    }
-    @media (max-width: 900px) {
-      .eclass-header, .eclass-main { max-width: 100vw; }
-    }
     @media (max-width: 650px) {
       .eclass-main { padding: 0 2vw 90px 2vw; }
       .eclass-header { flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -512,12 +478,9 @@
       <!-- Subject Group Chat Section -->
       <section class="chat-section" id="groupChatSection">
         <div class="chat-header">
-          <span>Class Group Chat</span>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="chat-users-list" id="chatUsers"></div>
-            <button class="chat-action-btn" title="Maximize Chat" type="button" onclick="maximizeChat()">
-              <i class="fa fa-expand"></i>
-            </button>
+          Class Group Chat
+          <div class="chat-users-list" id="chatUsers">
+            <!-- Avatars -->
           </div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
@@ -548,33 +511,7 @@
         <div class="attendance-records" id="attendanceRecords"></div>
       </section>
     </main>
-    <!-- Maximize Chat Fullscreen Overlay -->
-    <div class="chat-fullscreen-overlay" id="chatFullscreenOverlay">
-      <div class="chat-fullscreen-header">
-        <span class="chat-fullscreen-header-title">Class Group Chat</span>
-        <span style="display:flex;align-items:center;gap:10px;">
-          <div class="chat-users-list" id="chatUsersFullscreen"></div>
-          <button class="chat-fullscreen-close" title="Minimize Chat" onclick="minimizeChat()">
-            <i class="fa fa-compress"></i>
-          </button>
-        </span>
-      </div>
-      <div class="chat-fullscreen-body">
-        <div class="chat-fullscreen-messages" id="chatMessagesFullscreen"></div>
-        <form class="chat-fullscreen-input-panel" onsubmit="return sendMessageFullscreen(event)">
-          <label class="chat-audio-label" title="Send Audio">
-            <input type="file" class="chat-audio-input" accept="audio/*" onchange="uploadAudio(event)">
-            <i class="fa fa-microphone"></i>
-          </label>
-          <label class="chat-upload-label" title="Upload File">
-            <input type="file" class="chat-upload-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4,.mp3" onchange="uploadFile(event)">
-            <i class="fa fa-paperclip"></i>
-          </label>
-          <input type="text" class="chat-input" id="chatInputFullscreen" placeholder="Type a message..." autocomplete="off">
-          <button class="chat-action-btn" type="submit"><i class="fa fa-paper-plane"></i></button>
-        </form>
-      </div>
-    </div>
+
     <!-- Schedule Modal -->
     <div class="modal-overlay" id="scheduleModal">
       <div class="modal-card">
@@ -792,8 +729,8 @@
     // ===== Chat UI Logic =====
     function myUserId() { return 1; }
     function getUserById(id) { return demoUsers.find(u => u.id === id) || demoUsers[0]; }
-    function renderChatUsers(fullscreen) {
-      const el = fullscreen ? document.getElementById("chatUsersFullscreen") : document.getElementById("chatUsers");
+    function renderChatUsers() {
+      const el = document.getElementById("chatUsers");
       el.innerHTML = "";
       demoUsers.forEach(u => {
         const img = document.createElement("img");
@@ -804,8 +741,8 @@
         el.appendChild(img);
       });
     }
-    function renderChatMessages(fullscreen) {
-      const el = fullscreen ? document.getElementById("chatMessagesFullscreen") : document.getElementById("chatMessages");
+    function renderChatMessages() {
+      const el = document.getElementById("chatMessages");
       el.innerHTML = "";
       demoGroupMessages.forEach((msg, i) => {
         const div = document.createElement("div");
@@ -817,12 +754,12 @@
           if (!startX) return;
           let dx = e.touches[0].clientX - startX;
           if (Math.abs(dx) > 60) {
-            tagMessage(msg.id, fullscreen);
+            tagMessage(msg.id);
             startX = null;
           }
         });
         div.onclick = function(e) {
-          if (e.detail === 2) tagMessage(msg.id, fullscreen);
+          if (e.detail === 2) tagMessage(msg.id);
         };
         let taggedRef = msg.tagged ? `<div class="tagged-ref">@${msg.tagged.name}: ${msg.tagged.text}</div>` : "";
         div.innerHTML = `
@@ -838,40 +775,9 @@
       });
       el.scrollTop = el.scrollHeight;
     }
-    function tagMessage(id, fullscreen) {
+    function tagMessage(id) {
       taggedMessage = id;
-      renderChatMessages(fullscreen);
-    }
-    function sendMessageFullscreen(e) {
-      e.preventDefault();
-      const input = document.getElementById("chatInputFullscreen");
-      let text = input.value.trim();
-      if (!text && !pendingAudio && !pendingFile) return false;
-      let msgObj = {
-        id: demoGroupMessages.length + 1,
-        userId: myUserId(),
-        name: getUserById(myUserId()).name,
-        time: new Date().toLocaleTimeString().slice(0,5),
-        text: text,
-      };
-      if (taggedMessage) {
-        let taggedMsg = demoGroupMessages.find(m => m.id === taggedMessage);
-        if (taggedMsg) msgObj.tagged = {name: getUserById(taggedMsg.userId).name, text: taggedMsg.text};
-        taggedMessage = null;
-      }
-      if (pendingAudio) {
-        msgObj.audio = pendingAudio;
-        pendingAudio = null;
-      }
-      if (pendingFile) {
-        msgObj.file = pendingFile;
-        pendingFile = null;
-      }
-      demoGroupMessages.push(msgObj);
-      input.value = "";
-      renderChatMessages(true);
-      renderChatMessages(false);
-      return false;
+      renderChatMessages();
     }
     function sendMessage(e) {
       e.preventDefault();
@@ -901,7 +807,6 @@
       demoGroupMessages.push(msgObj);
       input.value = "";
       renderChatMessages();
-      renderChatMessages(true);
       return false;
     }
     // Audio/file upload
@@ -911,7 +816,6 @@
       if (file) {
         pendingAudio = URL.createObjectURL(file);
         document.getElementById("chatInput").value = "[Audio message ready]";
-        document.getElementById("chatInputFullscreen").value = "[Audio message ready]";
       }
     }
     function uploadFile(event) {
@@ -919,7 +823,6 @@
       if (file) {
         pendingFile = URL.createObjectURL(file);
         document.getElementById("chatInput").value = "[File ready]";
-        document.getElementById("chatInputFullscreen").value = "[File ready]";
       }
     }
     // Private chat
@@ -961,28 +864,13 @@
       renderPrivateChat();
       return false;
     }
-    // Maximize/minimize chat logic
-    function maximizeChat() {
-      document.getElementById('chatFullscreenOverlay').classList.add('active');
-      renderChatUsers(true);
-      renderChatMessages(true);
-      setTimeout(() => {
-        const el = document.getElementById("chatMessagesFullscreen");
-        el.scrollTop = el.scrollHeight;
-      }, 30);
-    }
-    function minimizeChat() {
-      document.getElementById('chatFullscreenOverlay').classList.remove('active');
-    }
 
-    // On load
+    // Run on load
     populateClasses();
     populateMaterials();
     populateAttendance();
     renderChatUsers();
     renderChatMessages();
-    renderChatUsers(true);
-    renderChatMessages(true);
   </script>
 </body>
 </html>

@@ -3,66 +3,103 @@ const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Joi = require('joi');
 const studentAuthMiddleware = require('../middleware/studentAuth');
+const adminAuth = require('../middleware/adminAuth');
 const db = require('../firestore');
+const { getStorage } = require('firebase-admin/storage');
 
-// Multer setup for photo uploads
+// Multer setup for photo uploads (limit size to 2MB, accept only images/docs)
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype.startsWith('image/') || 
+      file.mimetype === 'application/pdf' ||
+      file.mimetype === 'application/msword' ||
+      file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only images and documents (PDF/DOC/DOCX) are allowed.'));
+    }
+  }
+});
 
 // Utility: generate student_id
 function generateStudentId() {
   return 'STU' + Math.floor(100000 + Math.random() * 900000);
 }
+function studentsCollection() { return db.collection('students'); }
 
-// Utility: get students collection reference
-function studentsCollection() {
-  return db.collection('students');
-}
+// --- Joi validation schema for enrollment ---
+const studentSchema = Joi.object({
+  surname: Joi.string().required(),
+  firstname: Joi.string().required(),
+  dob: Joi.string().required(),
+  gender: Joi.string().required(),
+  regNo: Joi.string().required(),
+  class: Joi.string().required(),
+  parentName: Joi.string().required(),
+  parentRelationship: Joi.string().required(),
+  parentPhone: Joi.string().required(),
+  password: Joi.string().min(6).required(),
+  othernames: Joi.string().allow(''),
+  nationality: Joi.string().allow(''),
+  state: Joi.string().allow(''),
+  lga: Joi.string().allow(''),
+  address: Joi.string().allow(''),
+  classArm: Joi.string().allow(''),
+  previousSchool: Joi.string().allow(''),
+  admissionDate: Joi.string().allow(''),
+  academicSession: Joi.string().allow(''),
+  parentEmail: Joi.string().allow(''),
+  parentAddress: Joi.string().allow(''),
+  parentOccupation: Joi.string().allow(''),
+  studentEmail: Joi.string().allow(''),
+  studentPhone: Joi.string().allow(''),
+  religion: Joi.string().allow(''),
+  bloodGroup: Joi.string().allow(''),
+  genotype: Joi.string().allow(''),
+  medical: Joi.string().allow('')
+});
 
 // --- Enroll a new student ---
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
-    const data = req.body;
-
-    // Required field list
-    const required = [
-      'surname', 'firstname', 'dob', 'gender',
-      'regNo', 'class', 'parentName',
-      'parentRelationship', 'parentPhone', 'password'
-    ];
-
-    for (const field of required) {
-      if (
-        !data[field] ||
-        (typeof data[field] === 'string' && data[field].trim() === '')
-      ) {
-        return res.status(400).json({ error: `Missing required field: ${field}` });
-      }
-    }
+    const { error, value: data } = studentSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
     // Ensure regNo and student_id are unique
     const regNoSnap = await studentsCollection().where('regNo', '==', data.regNo).limit(1).get();
     if (!regNoSnap.empty) {
       return res.status(400).json({ error: 'A student with that registration number already exists.' });
     }
-
     let student_id = data.student_id || generateStudentId();
     const studentIdSnap = await studentsCollection().where('student_id', '==', student_id).limit(1).get();
     if (!studentIdSnap.empty) {
       return res.status(400).json({ error: 'A student with that student ID already exists.' });
     }
-
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // Convert admission date to Date object if provided
     const admissionDate = data.admissionDate ? new Date(data.admissionDate) : undefined;
 
-    // Handle photo
-    let photo;
+    // Handle photo (upload to Firebase Storage if provided)
+    let photoUrl = '';
     if (req.file) {
-      photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      const firebaseStorage = getStorage();
+      const bucket = firebaseStorage.bucket();
+      const filename = `photos/${Date.now()}_${req.file.originalname}`;
+      await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
+      const [url] = await bucket.file(filename).getSignedUrl({
+        action: 'read',
+        expires: '03-01-2030'
+      });
+      photoUrl = url;
     }
 
     // Create student doc data
@@ -77,7 +114,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       state: data.state || '',
       lga: data.lga || '',
       address: data.address || '',
-      photo: photo || '',
+      photo: photoUrl,
       regNo: data.regNo,
       class: data.class,
       classArm: data.classArm || '',
@@ -116,7 +153,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
-// --- Retrieve all students with filters (summary fields only) ---
+// --- Retrieve all students with filters (summary fields only, with pagination) ---
 router.get('/', async (req, res) => {
   try {
     let query = studentsCollection();
@@ -124,7 +161,14 @@ router.get('/', async (req, res) => {
     if (req.query.classArm) query = query.where('classArm', '==', req.query.classArm);
     if (req.query.academicSession) query = query.where('academicSession', '==', req.query.academicSession);
 
-    const snap = await query.get();
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    let snap;
+    if (req.query.startAfter) {
+      snap = await query.orderBy('surname').startAfter(req.query.startAfter).limit(pageSize).get();
+    } else {
+      snap = await query.orderBy('surname').limit(pageSize).get();
+    }
+
     const students = [];
     snap.forEach(doc => {
       const d = doc.data();
@@ -140,15 +184,10 @@ router.get('/', async (req, res) => {
       });
     });
 
-    // Optionally sort by surname/firstname
-    students.sort((a, b) => {
-      if (a.surname === b.surname) {
-        return a.firstname.localeCompare(b.firstname);
-      }
-      return a.surname.localeCompare(b.surname);
+    res.json({
+      students,
+      lastVisible: students.length ? students[students.length - 1].surname : null
     });
-
-    res.json(students);
   } catch (error) {
     console.error('[GET STUDENTS ERROR]', error);
     res.status(500).json({ error: error.message });
@@ -157,60 +196,26 @@ router.get('/', async (req, res) => {
 
 // --- Get logged-in student profile for dashboard/profile page ---
 router.get('/me', studentAuthMiddleware, async (req, res) => {
+  // Remove sensitive fields (e.g., password) before sending
   const student = req.student;
+  const { password, ...safeProfile } = student;
   res.json({
+    ...safeProfile,
     name: `${student.firstname} ${student.surname}`,
-    surname: student.surname,
-    firstname: student.firstname,
-    othernames: student.othernames || '',
-    reg_no: student.regNo,
-    regNo: student.regNo,
-    class: student.class,
-    classArm: student.classArm,
-    session: student.academicSession,
-    term: student.term || '-',
-    gender: student.gender || '',
-    dob: student.dob || '',
-    photo_url: student.photo,
-    nationality: student.nationality || '',
-    state: student.state || '',
-    lga: student.lga || '',
-    address: student.address || '',
-    parentName: student.parentName,
-    parentRelationship: student.parentRelationship,
-    parentPhone: student.parentPhone,
-    parentEmail: student.parentEmail || '',
-    parentAddress: student.parentAddress || '',
-    parentOccupation: student.parentOccupation || '',
-    studentEmail: student.studentEmail || '',
-    studentPhone: student.studentPhone || '',
-    religion: student.religion || '',
-    bloodGroup: student.bloodGroup || '',
-    genotype: student.genotype || '',
-    medical: student.medical || '',
-    admissionDate: student.admissionDate || '',
-    previousSchool: student.previousSchool || '',
-    academic: student.academic || [],
-    attendance: student.attendance || [],
-    guardians: student.guardians || [],
-    hostel: student.hostel || {},
-    transport: student.transport || {},
-    fees: student.fees || [],
-    docs: student.docs || [],
-    createdAt: student.createdAt || '',
-    updatedAt: student.updatedAt || '',
+    photo_url: student.photo
   });
 });
 
-// --- Get a student profile by regNo (for admin/staff or direct lookup) ---
-router.get('/:regNo', async (req, res) => {
+// --- Get a student profile by regNo (for admin/staff or direct lookup, admin only) ---
+router.get('/:regNo', adminAuth, async (req, res) => {
   try {
     const regNo = req.params.regNo;
     const snapshot = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
     if (snapshot.empty) return res.status(404).json({ error: 'Student not found' });
 
     const profile = snapshot.docs[0].data();
-    res.json(profile);
+    const { password, ...safeProfile } = profile;
+    res.json(safeProfile);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -263,25 +268,45 @@ router.post('/login', async (req, res) => {
 });
 
 // --- Update student profile (protected, student only) ---
+const updateSchema = Joi.object({
+  surname: Joi.string(),
+  firstname: Joi.string(),
+  othernames: Joi.string().allow(''),
+  dob: Joi.string(),
+  gender: Joi.string(),
+  nationality: Joi.string().allow(''),
+  state: Joi.string().allow(''),
+  lga: Joi.string().allow(''),
+  address: Joi.string().allow(''),
+  class: Joi.string(),
+  classArm: Joi.string().allow(''),
+  studentEmail: Joi.string().allow(''),
+  studentPhone: Joi.string().allow(''),
+  religion: Joi.string().allow(''),
+  bloodGroup: Joi.string().allow(''),
+  genotype: Joi.string().allow(''),
+  medical: Joi.string().allow('')
+});
+
 router.put('/me', studentAuthMiddleware, upload.single('photo'), async (req, res) => {
   try {
-    const student = req.student;
-    const data = req.body;
+    const { error, value: data } = updateSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
-    // Only allow updating allowed fields
-    const updatableFields = [
-      'surname', 'firstname', 'othernames', 'dob', 'gender', 'nationality',
-      'state', 'lga', 'address', 'class', 'classArm', 'studentEmail',
-      'studentPhone', 'religion', 'bloodGroup', 'genotype', 'medical'
-    ];
-    let updates = {};
-    updatableFields.forEach(field => {
-      if (data[field]) updates[field] = data[field];
-    });
+    const student = req.student;
+    let updates = { ...data };
 
     // Handle photo upload
     if (req.file) {
-      updates.photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      const firebaseStorage = getStorage();
+      const bucket = firebaseStorage.bucket();
+      const filename = `photos/${Date.now()}_${req.file.originalname}`;
+      await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
+      const [url] = await bucket.file(filename).getSignedUrl({
+        action: 'read',
+        expires: '03-01-2030'
+      });
+      updates.photo = url;
     }
 
     updates.updatedAt = new Date();
@@ -321,16 +346,25 @@ router.post('/change-password', studentAuthMiddleware, async (req, res) => {
   }
 });
 
-// --- Upload a document for a student (protected, student only) ---
+// --- Upload a document for a student (protected, student only, use storage) ---
 router.post('/me/docs', studentAuthMiddleware, upload.single('document'), async (req, res) => {
   try {
     const student = req.student;
     if (!req.file) return res.status(400).json({ error: 'No document uploaded.' });
 
+    const firebaseStorage = getStorage();
+    const bucket = firebaseStorage.bucket();
+    const filename = `docs/${Date.now()}_${req.file.originalname}`;
+    await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
+    const [url] = await bucket.file(filename).getSignedUrl({
+      action: 'read',
+      expires: '03-01-2030'
+    });
+
     const docMeta = {
       label: req.body.label || req.file.originalname,
       value: req.file.originalname,
-      url: `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`,
+      url,
       uploadedAt: new Date()
     };
 
@@ -351,11 +385,11 @@ router.post('/me/docs', studentAuthMiddleware, upload.single('document'), async 
   }
 });
 
-// --- Update academic record for a student (admin/staff only, you can add admin middleware here) ---
-router.post('/:regNo/academic', async (req, res) => {
+// --- Update academic record for a student (admin/staff only) ---
+router.post('/:regNo/academic', adminAuth, async (req, res) => {
   try {
     const regNo = req.params.regNo;
-    const academicEntry = req.body; // should include session, term, class, subject, total, grade, remark
+    const academicEntry = req.body;
     if (!academicEntry.session || !academicEntry.term || !academicEntry.class || !academicEntry.subject) {
       return res.status(400).json({ error: 'Missing required academic fields.' });
     }
@@ -376,8 +410,8 @@ router.post('/:regNo/academic', async (req, res) => {
   }
 });
 
-// --- Add attendance record (admin/staff only, you can add admin middleware here) ---
-router.post('/:regNo/attendance', async (req, res) => {
+// --- Add attendance record (admin/staff only) ---
+router.post('/:regNo/attendance', adminAuth, async (req, res) => {
   try {
     const regNo = req.params.regNo;
     const attendanceEntry = req.body;
@@ -405,8 +439,7 @@ router.post('/:regNo/attendance', async (req, res) => {
 router.post('/me/guardians', studentAuthMiddleware, async (req, res) => {
   try {
     const student = req.student;
-    const guardians = req.body.guardians; // array
-
+    const guardians = req.body.guardians;
     if (!Array.isArray(guardians)) return res.status(400).json({ error: 'Guardians must be array.' });
 
     // Find student doc by regNo
@@ -427,8 +460,7 @@ router.post('/me/guardians', studentAuthMiddleware, async (req, res) => {
 router.post('/me/hostel', studentAuthMiddleware, async (req, res) => {
   try {
     const student = req.student;
-    const hostel = req.body.hostel; // object
-
+    const hostel = req.body.hostel;
     if (typeof hostel !== 'object') return res.status(400).json({ error: 'Hostel must be an object.' });
 
     // Find student doc by regNo
@@ -449,8 +481,7 @@ router.post('/me/hostel', studentAuthMiddleware, async (req, res) => {
 router.post('/me/transport', studentAuthMiddleware, async (req, res) => {
   try {
     const student = req.student;
-    const transport = req.body.transport; // object
-
+    const transport = req.body.transport;
     if (typeof transport !== 'object') return res.status(400).json({ error: 'Transport must be an object.' });
 
     // Find student doc by regNo
@@ -467,8 +498,8 @@ router.post('/me/transport', studentAuthMiddleware, async (req, res) => {
   }
 });
 
-// --- Add/update fees info (admin/staff only, you can add admin middleware here) ---
-router.post('/:regNo/fees', async (req, res) => {
+// --- Add/update fees info (admin/staff only) ---
+router.post('/:regNo/fees', adminAuth, async (req, res) => {
   try {
     const regNo = req.params.regNo;
     const feeEntry = req.body;

@@ -3,10 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <title>Manual Upload Results - Admin Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="result.css">
-    <link rel="stylesheet" href="upload-results.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
     <style>
+        :root {
+            --primary: #007bff;
+            --sidebar-bg: #fff;
+            --sidebar-width: 260px;
+            --sidebar-width-mobile: 90vw;
+            --header-height: 64px;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.05);
+            --neutral: #f8f9fa;
+            --card-bg: #fff;
+            --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+            --font-main: 'Inter', Arial, sans-serif;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background: var(--neutral);
+            color: #222;
+            min-height: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        body { min-width: 0; }
+
+        /* Spinner Overlay */
+        #pageSpinnerOverlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.96);
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            transition: opacity 0.4s;
+        }
+        .spinner {
+            width: 46px;
+            height: 46px;
+            border: 5px solid #e3e6ea;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            min-width: 180px;
+            max-width: 320px;
+            height: 100vh;
+            max-height: 100vh;
+            background: var(--sidebar-bg);
+            box-shadow: var(--shadow);
+            z-index: 1050;
+            padding: 0 0 2rem 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease;
+            overflow: hidden;
+        }
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 1.2rem 1rem 1.2rem;
+            border-bottom: 1px solid #ececec;
+            flex-shrink: 0;
+        }
+        .avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 2px solid #e3e6ea;
+        }
+        .name { font-weight: 700; font-size: 1.13em; }
+        .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+        .search {
+            padding: 0.7em 1.2em;
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            z-index: 1;
+        }
+        .search input {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0.6em 0.9em;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 1em;
+            display: block;
+            background: #fff;
+        }
+        .sidebar nav {
+            flex: 1 1 0%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25em;
+            margin-top: 1.5em;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            padding: 0.85em 1.3em;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            border-radius: 0 6px 6px 0;
+            transition: background 0.16s, border-color 0.16s;
+            font-size: 1.05em;
+        }
+        .sidebar a.active, .sidebar a:hover {
+            background: #f1f6fd;
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+        /* Responsive Sidebar Toggle and Overlay */
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-right: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            height: var(--header-height);
+        }
+        .sidebar-overlay {
+            display: none;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 1040;
+        }
+        @media (max-width: 750px) {
+            .sidebar {
+                width: var(--sidebar-width-mobile);
+                min-width: 0;
+                max-width: 95vw;
+                height: 100vh;
+                max-height: 100vh;
+                transform: translateX(-105%);
+                box-shadow: 2px 0 18px rgba(0,0,0,0.13);
+                position: fixed;
+                z-index: 1050;
+                overflow: hidden;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-toggle {
+                display: inline-flex;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            body.sidebar-open {
+                overflow: hidden;
+            }
+        }
+        .sidebar {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Main content */
+        .main-content {
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+            padding: 0 2.5vw 2vw 2.5vw;
+            transition: margin-left 0.25s;
+            box-sizing: border-box;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            height: var(--header-height);
+            gap: 1.8em;
+            padding-top: 1.5vw;
+            padding-bottom: 1.5vw;
+        }
+        .school-title {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+        .logo {
+            width: 32px; height: 32px;
+            border-radius: 6px;
+        }
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1.03em;
+        }
+        .header-actions .icon {
+            font-size: 1.43em;
+            cursor: pointer;
+            opacity: 0.88;
+            transition: opacity 0.2s;
+        }
+        .header-actions .icon:hover {
+            opacity: 1;
+        }
+        .page-title {
+            margin: 1.4em 0 1em 0;
+        }
+        .page-title h2 {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #222;
+        }
+        .admin-badge {
+            display: inline-block;
+            background: #eee;
+            color: #007bff;
+            font-weight: 600;
+            font-size: 0.9em;
+            border-radius: 8px;
+            padding: 0.15em 0.7em;
+            margin-left: .7em;
+        }
+        .results-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1em;
+            margin-bottom: 18px;
+            align-items: flex-end;
+        }
+        .results-filters label {
+            font-size: 1em;
+            color: #333;
+            font-weight: 500;
+            margin-right: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+        .results-filters select {
+            margin-top: 3px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            border: 1px solid #e3e8ee;
+            background: #fafcff;
+            font-size: 1em;
+        }
         .manual-upload-table-container {
             background: #fff;
             border-radius: 12px;
@@ -14,6 +280,25 @@
             padding: 14px;
             margin-bottom: 28px;
             overflow-x: auto;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 670px;
+        }
+        .results-table th, .results-table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid #e3e8ee;
+            text-align: left;
+            font-size: 1.01rem;
+        }
+        .results-table th {
+            background: #e3e8ee;
+            color: #273c75;
+            font-weight: 700;
+        }
+        .results-table tr:hover td {
+            background: #eaf6fa;
         }
         #manualResultsTable input[type="text"],
         #manualResultsTable input[type="number"] {
@@ -36,10 +321,55 @@
         .results-actions-btn:hover {
             background: #157a6e;
         }
+        .support-tab, .eclass-fab {
+            position: fixed;
+            right: 1.3em;
+            border-radius: 50px;
+            background: var(--primary);
+            color: #fff;
+            padding: 0.7em 1.4em;
+            font-size: 1.1em;
+            z-index: 200;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+            border: none;
+            outline: none;
+            transition: background 0.2s;
+        }
+        .support-tab { bottom: 4.5em; }
+        .eclass-fab { bottom: 1.5em; }
+        .support-tab:hover, .eclass-fab:hover { background: #005ecb; }
+        @media (max-width: 900px) {
+            .main-content { margin-left: 0 !important; }
+            .sidebar {
+                position: fixed;
+                width: var(--sidebar-width-mobile);
+                min-width: 0;
+                max-width: 98vw;
+                height: 100vh;
+                z-index: 1050;
+                overflow-y: auto;
+            }
+            .manual-upload-table-container { min-width: 0; }
+        }
+        @media (max-width: 750px) {
+            .main-content { margin-left: 0; padding: 0 3vw; }
+            .manual-upload-table-container { padding: 8px 2px; }
+            .results-filters { flex-direction: column; gap: 0.5em; }
+        }
+        @media (max-width: 500px) {
+            .results-table { min-width: 400px; }
+            .manual-upload-table-container { padding: 4px 0.5vw; }
+        }
+        ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+        ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div id="pageSpinnerOverlay">
+        <div class="spinner"></div>
+    </div>
+    <aside class="sidebar" id="sidebar">
         <div class="profile">
             <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
             <div>
@@ -47,7 +377,7 @@
                 <div class="role">System Administrator</div>
             </div>
         </div>
-        <div class="search"><input type="text" placeholder="Quick search..."></div>
+        <div class="search"><input type="text" placeholder="Quick search..." aria-label="Quick search"></div>
         <nav>
             <a href="index.html"><span>🏠</span> Dashboard</a>
             <a href="#"><span>🎓</span> Admission</a>
@@ -60,18 +390,20 @@
             <a href="#"><span>🗓️</span> Attendance</a>
             <a href="#"><span>⚙️</span> Admin</a>
         </nav>
-    </div>
-    <div class="main-content">
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <main class="main-content">
         <header>
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
             <div class="school-title">
                 <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
                 <span>GOLD AND LINC SCHOOLS</span>
             </div>
             <div class="header-actions">
-                <span class="icon">🔔</span>
-                <span class="icon">❓</span>
-                <span class="icon">⚙️</span>
-                <span class="icon">🔍</span>
+                <span class="icon" title="Notifications">🔔</span>
+                <span class="icon" title="Help">❓</span>
+                <span class="icon" title="Settings">⚙️</span>
+                <span class="icon" title="Search">🔍</span>
             </div>
         </header>
         <div class="page-title">
@@ -138,96 +470,127 @@
                 <span id="uploadStatus" style="margin-left:16px;"></span>
             </div>
         </form>
-    </div>
-    
-    <div class="support-tab">Support</div>
-    <div class="eclass-fab">e-Class</div>
+    </main>
+    <button class="support-tab" aria-label="Open Support">Support</button>
+    <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
     <script>
-    // Fetch students for the selected class and render table rows
-    document.getElementById('fetchStudentsBtn').addEventListener('click', async function() {
-        const className = document.getElementById('classSelect').value;
-        const tbody = document.getElementById('manualResultsTbody');
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
-        try {
-            const res = await fetch(`/api/students?class=${encodeURIComponent(className)}`);
-const data = await res.json();
-const students = data.students || [];
-if (!Array.isArray(students) || students.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No students found for this class.</td></tr>';
-    return;
-}
-            tbody.innerHTML = '';
-            students.forEach(st => {
-                tbody.innerHTML += `
-                <tr>
-                    <td><input type="text" name="student_id[]" value="${st.student_id}" readonly></td>
-                    <td><input type="text" name="student_name[]" value="${st.firstname ? st.firstname : ''} ${st.surname ? st.surname : ''}" readonly></td>
-                    <td><input type="number" name="score[]" min="0" max="100" required></td>
-                    <td><input type="text" name="grade[]" required></td>
-                    <td><input type="text" name="remarks[]"></td>
-                </tr>
-                `;
-            });
-        } catch (err) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Failed to load students.</td></tr>';
+        // Spinner overlay logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const spinner = document.getElementById('pageSpinnerOverlay');
+            if (spinner) spinner.style.display = 'flex';
+            setTimeout(() => {
+                if (spinner) {
+                    spinner.style.opacity = '0';
+                    setTimeout(() => { spinner.style.display = 'none'; }, 400);
+                }
+            }, 1200);
+        });
+
+        // Sidebar mobile toggle logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.classList.add('sidebar-open');
         }
-    });
-
-    // Submit results
-    document.getElementById('manualUploadForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const session = form.session.value;
-        const term = form.term.value;
-        const className = form.class.value;
-        const subject = form.subject.value;
-
-        // Gather student results
-        const studentIds = Array.from(form.querySelectorAll('input[name="student_id[]"]')).map(inp => inp.value);
-        const studentNames = Array.from(form.querySelectorAll('input[name="student_name[]"]')).map(inp => inp.value);
-        const scores = Array.from(form.querySelectorAll('input[name="score[]"]')).map(inp => inp.value);
-        const grades = Array.from(form.querySelectorAll('input[name="grade[]"]')).map(inp => inp.value);
-        const remarks = Array.from(form.querySelectorAll('input[name="remarks[]"]')).map(inp => inp.value);
-
-        const results = [];
-        for (let i = 0; i < studentIds.length; i++) {
-            results.push({
-                student_id: studentIds[i],
-                student_name: studentNames[i],
-                score: scores[i],
-                grade: grades[i],
-                remarks: remarks[i]
-            });
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
         }
+        if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeSidebar();
+        });
 
-        // Disable submit button and show loading
-        const submitBtn = form.querySelector('.results-actions-btn');
-        submitBtn.disabled = true;
-        document.getElementById('uploadStatus').innerHTML = 'Uploading...';
-
-        try {
-            const res = await fetch('/api/results/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    session,
-                    term,
-                    class: className,
-                    subject,
-                    results
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById('uploadStatus').innerHTML = `<span style="color:#20c997;">Success! Uploaded results for ${data.inserted} students.</span>`;
-            } else {
-                document.getElementById('uploadStatus').innerHTML = `<span style="color:#dc3545;">Error: ${data.error || 'Unknown error.'}</span>`;
+        // Fetch students for the selected class and render table rows
+        document.getElementById('fetchStudentsBtn').addEventListener('click', async function() {
+            const className = document.getElementById('classSelect').value;
+            const tbody = document.getElementById('manualResultsTbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+            try {
+                const res = await fetch(`/api/students?class=${encodeURIComponent(className)}`);
+                const data = await res.json();
+                const students = data.students || [];
+                if (!Array.isArray(students) || students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No students found for this class.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                students.forEach(st => {
+                    tbody.innerHTML += `
+                    <tr>
+                        <td><input type="text" name="student_id[]" value="${st.student_id || st._id || ''}" readonly></td>
+                        <td><input type="text" name="student_name[]" value="${(st.firstname ? st.firstname : '') + ' ' + (st.surname ? st.surname : '')}" readonly></td>
+                        <td><input type="number" name="score[]" min="0" max="100" required></td>
+                        <td><input type="text" name="grade[]" required></td>
+                        <td><input type="text" name="remarks[]"></td>
+                    </tr>
+                    `;
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Failed to load students.</td></tr>';
             }
-        } catch (err) {
-            document.getElementById('uploadStatus').innerHTML = `<span style="color:#dc3545;">Failed to upload results.</span>`;
-        }
-        submitBtn.disabled = false;
-    });
+        });
+
+        // Submit results
+        document.getElementById('manualUploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const session = form.session.value;
+            const term = form.term.value;
+            const className = form.class.value;
+            const subject = form.subject.value;
+
+            // Gather student results
+            const studentIds = Array.from(form.querySelectorAll('input[name="student_id[]"]')).map(inp => inp.value);
+            const studentNames = Array.from(form.querySelectorAll('input[name="student_name[]"]')).map(inp => inp.value);
+            const scores = Array.from(form.querySelectorAll('input[name="score[]"]')).map(inp => inp.value);
+            const grades = Array.from(form.querySelectorAll('input[name="grade[]"]')).map(inp => inp.value);
+            const remarks = Array.from(form.querySelectorAll('input[name="remarks[]"]')).map(inp => inp.value);
+
+            const results = [];
+            for (let i = 0; i < studentIds.length; i++) {
+                results.push({
+                    student_id: studentIds[i],
+                    student_name: studentNames[i],
+                    score: scores[i],
+                    grade: grades[i],
+                    remarks: remarks[i]
+                });
+            }
+
+            // Disable submit button and show loading
+            const submitBtn = form.querySelector('.results-actions-btn');
+            submitBtn.disabled = true;
+            document.getElementById('uploadStatus').innerHTML = 'Uploading...';
+
+            try {
+                const res = await fetch('/api/results/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session,
+                        term,
+                        class: className,
+                        subject,
+                        results
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('uploadStatus').innerHTML = `<span style="color:#20c997;">Success! Uploaded results for ${data.inserted} students.</span>`;
+                } else {
+                    document.getElementById('uploadStatus').innerHTML = `<span style="color:#dc3545;">Error: ${data.error || 'Unknown error.'}</span>`;
+                }
+            } catch (err) {
+                document.getElementById('uploadStatus').innerHTML = `<span style="color:#dc3545;">Failed to upload results.</span>`;
+            }
+            submitBtn.disabled = false;
+        });
     </script>
 </body>
 </html>

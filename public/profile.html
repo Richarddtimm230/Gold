@@ -626,6 +626,7 @@
               <div class="profile-detail-row"><span class="profile-detail-label">State of Origin:</span> <span class="profile-detail-value" id="profileState"></span></div>
               <div class="profile-detail-row"><span class="profile-detail-label">LGA:</span> <span class="profile-detail-value" id="profileLGA"></span></div>
               <div class="profile-detail-row"><span class="profile-detail-label">Religion:</span> <span class="profile-detail-value" id="profileReligion"></span></div>
+              <div class="profile-detail-row"><span class="profile-detail-label">Class:</span> <span class="profile-detail-value" id="profileClass"></span></div>
             </div>
           </div>
         </section>
@@ -818,6 +819,7 @@
       document.getElementById("profileState").textContent = profile.state || '';
       document.getElementById("profileLGA").textContent = profile.lga || '';
       document.getElementById("profileReligion").textContent = profile.religion || '';
+      document.getElementById("profileClass").textContent = profile.class || '';
       // Avatar
       if (profile.photoBase64 && profile.photoBase64.startsWith('data:image')) {
         document.getElementById("profileAvatar").src = profile.photoBase64;

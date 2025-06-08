@@ -139,21 +139,28 @@
 
         // Fetch students from backend
         async function fetchStudents(filters = {}) {
-            let url = '/api/students';
-            Object.keys(filters).forEach(key => {
-                if(filters[key]) url += `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}&`;
-            });
-            const res = await fetch(url);
-            if(res.ok) {
-                studentsData = await res.json();
-                filteredData = studentsData;
-                renderStudentsTable();
-            } else {
-                studentsData = [];
-                filteredData = [];
-                renderStudentsTable();
-            }
-        }
+    let url = '/api/students';
+    const params = Object.keys(filters)
+        .filter(key => filters[key])
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`)
+        .join('&');
+    if (params) url += '?' + params;
+
+    const token = localStorage.getItem('student_token');
+    const res = await fetch(url, {
+      headers: token ? { Authorization: 'Bearer ' + token } : {}
+    });
+    if(res.ok) {
+        const data = await res.json();
+        studentsData = data.students || [];
+        filteredData = studentsData;
+        renderStudentsTable();
+    } else {
+        studentsData = [];
+        filteredData = [];
+        renderStudentsTable();
+    }
+}
 
         function renderStudentsTable() {
             const tbody = document.getElementById('students-table-body');
@@ -180,7 +187,7 @@
                 for(const stu of pageData) {
                     tbody.innerHTML += `
                         <tr>
-                            <td><img src="${stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
+                            <td><img src="${stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
                             <td>${stu.surname || ''}</td>
                             <td>${stu.firstname || ''}</td>
                             <td>${stu.othernames || ''}</td>

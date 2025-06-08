@@ -7,7 +7,6 @@ const Joi = require('joi');
 const studentAuthMiddleware = require('../middleware/studentAuth');
 const adminAuth = require('../middleware/adminAuth');
 const db = require('../firestore');
-const { getStorage } = require('firebase-admin/storage');
 
 // Multer setup for photo uploads (limit size to 2MB, accept only images/docs)
 const storage = multer.memoryStorage();
@@ -88,18 +87,11 @@ router.post('/', upload.single('photo'), async (req, res) => {
     // Convert admission date to Date object if provided
     const admissionDate = data.admissionDate ? new Date(data.admissionDate) : undefined;
 
-    // Handle photo (upload to Firebase Storage if provided)
-    let photoUrl = '';
+    // Handle photo (convert to Base64 and store directly)
+    let photoBase64 = '';
     if (req.file) {
-      const firebaseStorage = getStorage();
-      const bucket = firebaseStorage.bucket();
-      const filename = `photos/${Date.now()}_${req.file.originalname}`;
-      await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
-      const [url] = await bucket.file(filename).getSignedUrl({
-        action: 'read',
-        expires: '03-01-2030'
-      });
-      photoUrl = url;
+      // Convert uploaded file buffer to base64 string and prefix with mimetype
+      photoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
     // Create student doc data
@@ -114,7 +106,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       state: data.state || '',
       lga: data.lga || '',
       address: data.address || '',
-      photo: photoUrl,
+      photoBase64: photoBase64,
       regNo: data.regNo,
       class: data.class,
       classArm: data.classArm || '',
@@ -179,7 +171,7 @@ router.get('/', async (req, res) => {
         regNo: d.regNo,
         class: d.class,
         classArm: d.classArm,
-        photo: d.photo,
+        photoBase64: d.photoBase64 || '',
         academicSession: d.academicSession
       });
     });
@@ -202,7 +194,7 @@ router.get('/me', studentAuthMiddleware, async (req, res) => {
   res.json({
     ...safeProfile,
     name: `${student.firstname} ${student.surname}`,
-    photo_url: student.photo
+    photo_url: student.photoBase64 || ''
   });
 });
 
@@ -259,7 +251,7 @@ router.post('/login', async (req, res) => {
         regNo: student.regNo,
         role: 'student',
         class: student.class,
-        photo_url: student.photo
+        photo_url: student.photoBase64 || ''
       }
     });
   } catch (err) {
@@ -298,15 +290,7 @@ router.put('/me', studentAuthMiddleware, upload.single('photo'), async (req, res
 
     // Handle photo upload
     if (req.file) {
-      const firebaseStorage = getStorage();
-      const bucket = firebaseStorage.bucket();
-      const filename = `photos/${Date.now()}_${req.file.originalname}`;
-      await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
-      const [url] = await bucket.file(filename).getSignedUrl({
-        action: 'read',
-        expires: '03-01-2030'
-      });
-      updates.photo = url;
+      updates.photoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
     updates.updatedAt = new Date();
@@ -346,25 +330,17 @@ router.post('/change-password', studentAuthMiddleware, async (req, res) => {
   }
 });
 
-// --- Upload a document for a student (protected, student only, use storage) ---
+// --- Upload a document for a student (protected, student only, as base64) ---
 router.post('/me/docs', studentAuthMiddleware, upload.single('document'), async (req, res) => {
   try {
     const student = req.student;
     if (!req.file) return res.status(400).json({ error: 'No document uploaded.' });
 
-    const firebaseStorage = getStorage();
-    const bucket = firebaseStorage.bucket();
-    const filename = `docs/${Date.now()}_${req.file.originalname}`;
-    await bucket.file(filename).save(req.file.buffer, { contentType: req.file.mimetype });
-    const [url] = await bucket.file(filename).getSignedUrl({
-      action: 'read',
-      expires: '03-01-2030'
-    });
-
+    const docBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const docMeta = {
       label: req.body.label || req.file.originalname,
       value: req.file.originalname,
-      url,
+      base64: docBase64,
       uploadedAt: new Date()
     };
 

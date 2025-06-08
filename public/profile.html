@@ -758,8 +758,8 @@
     }
     // --- Helper: get token ---
     function getToken() {
-      return localStorage.getItem('student_token') || sessionStorage.getItem('student_token');
-    }
+  return localStorage.getItem('student_token');
+}
     // --- Fetch Student Profile ---
     async function fetchStudentProfile() {
       try {

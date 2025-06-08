@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Results | Gold and Linc Schools</title>
+  <title>Check Results | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
@@ -81,7 +81,7 @@
       gap: 14px;
       flex-wrap: wrap;
     }
-    .results-actions button, .results-actions a {
+    .results-actions a {
       background: var(--primary);
       color: #fff;
       border: none;
@@ -97,7 +97,7 @@
       align-items: center;
       gap: 7px;
     }
-    .results-actions button:hover, .results-actions a:hover {
+    .results-actions a:hover {
       background: #18308b;
     }
     .results-section {
@@ -119,26 +119,70 @@
       margin-bottom: 7px;
       letter-spacing: 0.02em;
     }
-    /* Term/Session Selector */
-    .result-filter-bar {
+    /* Search Form */
+    .result-search-form {
       display: flex;
-      gap: 13px;
-      align-items: center;
-      margin-bottom: 8px;
       flex-wrap: wrap;
+      gap: 17px 18px;
+      align-items: flex-end;
+      margin-bottom: 12px;
+      background: var(--accent2);
+      border-radius: 13px;
+      padding: 18px 14px 10px 14px;
+      box-shadow: 0 2px 12px #ddeaff33;
     }
-    .result-filter-bar select {
-      padding: 7px 18px;
-      border-radius: 8px;
+    .result-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 140px;
+      flex: 1 1 160px;
+    }
+    .result-form-label {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .result-form-input, .result-form-select {
+      padding: 8px 13px;
+      border-radius: 7px;
       border: 1.4px solid #dbe2ee;
-      background: #f6f8fa;
+      background: #fff;
       font-size: 1rem;
       color: var(--primary);
       outline: none;
       transition: border var(--transition);
     }
-    .result-filter-bar select:focus { border: 1.5px solid var(--primary);}
-    /* Result Table */
+    .result-form-input:focus, .result-form-select:focus { border: 1.5px solid var(--primary);}
+    .result-search-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 10px 28px;
+      font-size: 1.04rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 18px;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .result-search-btn:active, .result-search-btn:hover {
+      background: #18308b;
+    }
+    .result-form-hint {
+      font-size: 0.94em;
+      color: #7a90b3;
+      margin-top: 2px;
+    }
+    .result-search-error {
+      color: var(--danger);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 7px;
+    }
+    /* Result Table & Cards */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -183,44 +227,14 @@
       display: inline-flex; align-items: center; gap: 7px;
     }
     .download-btn:hover { background: #18308b; }
-    /* Performance Summary */
-    .performance-summary {
-      background: var(--accent2);
-      border-radius: 12px;
-      padding: 13px 18px;
-      font-size: 1.05rem;
-      color: var(--primary);
-      font-weight: 600;
-      margin: 11px 0 6px 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      justify-content: flex-start;
-    }
-    .perf-item {
-      margin-right: 20px;
-    }
-    /* Chart/Graph */
-    .result-chart-area {
-      width: 100%;
-      max-width: 650px;
-      margin: 0 auto;
-      margin-top: 16px;
-      margin-bottom: 9px;
-      background: var(--accent2);
-      border-radius: 14px;
-      box-shadow: 0 1px 6px #ddeaff33;
-      padding: 18px 15px 9px 15px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    /* Recent Results Cards */
-    .recent-results-list {
+    /* Previous Results */
+    .previous-results-list {
       display: flex;
       flex-wrap: wrap;
       gap: 17px;
       margin-top: 8px;
     }
-    .recent-result-card {
+    .previous-result-card {
       background: var(--card);
       border-radius: 10px;
       box-shadow: 0 2px 10px #ddeaff33;
@@ -234,26 +248,58 @@
       transition: border var(--transition), box-shadow var(--transition);
       cursor: pointer;
     }
-    .recent-result-card:hover, .recent-result-card.selected {
+    .previous-result-card:hover, .previous-result-card.selected {
       border: 1.5px solid var(--primary);
       box-shadow: var(--shadow-hover);
       background: var(--accent2);
     }
-    .recent-result-title {
+    .previous-result-title {
       font-weight: 700;
       color: var(--primary);
       font-size: 1.08rem;
       margin-bottom: 3px;
       letter-spacing: 0.01em;
     }
-    .recent-result-meta {
+    .previous-result-meta {
       color: #7a90b3;
       font-size: 0.96rem;
+    }
+    /* News */
+    .news-section {
+      background: var(--accent2);
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #ddeaff22;
+      padding: 16px 17px 13px 17px;
+      margin-bottom: 11px;
+      margin-top: 13px;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+    }
+    .news-title {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 7px;
+    }
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .news-item {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.99rem;
+      color: #22305a;
+      box-shadow: 0 1px 3px #ddeaff33;
+      border-left: 4px solid var(--primary);
+      margin-bottom: 3px;
     }
     /* Responsive */
     @media (max-width: 900px) {
       .results-header, .results-main { max-width: 100vw; }
-      .result-chart-area { max-width: 99vw;}
     }
     @media (max-width: 650px) {
       .results-main { padding: 0 2vw 90px 2vw; }
@@ -262,8 +308,7 @@
       .results-section { padding: 16px 7px 14px 7px;}
       .section-title { font-size: 1.01rem;}
       .results-table th, .results-table td { font-size: 0.95rem;}
-      .result-chart-area { padding: 7px 1vw 7px 1vw;}
-      .recent-result-card { min-width: 110px; }
+      .previous-result-card { min-width: 110px; }
     }
     @media (max-width: 430px) {
       .results-main { padding: 0 0 80px 0; }
@@ -323,38 +368,68 @@
   <div class="results-root">
     <!-- Header & Main Actions -->
     <div class="results-header">
-      <div class="results-title">Results & Performance</div>
+      <div class="results-title">Check Results</div>
       <div class="results-actions">
-        <button onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
         <a href="dashboard.html"><i class="fa fa-arrow-left"></i> Dashboard</a>
       </div>
     </div>
     <main class="results-main">
-      <!-- Summary & Filters -->
+      <!-- Search Section -->
       <section class="results-section">
-        <div class="section-title"><i class="fa fa-filter"></i> View Your Results</div>
-        <div class="result-filter-bar">
-          <select id="sessionSelect" onchange="refreshResults()">
-            <!-- JS fills session options -->
-          </select>
-          <select id="termSelect" onchange="refreshResults()">
-            <!-- JS fills term options -->
-          </select>
-          <select id="recentResultSelect" onchange="selectRecentResult()">
-            <option value="">Recent Results</option>
-            <!-- JS fills recent results -->
-          </select>
-        </div>
-        <!-- Performance summary -->
-        <div class="performance-summary" id="performanceSummary"></div>
-        <!-- Chart/graph area -->
-        <div class="result-chart-area">
-          <canvas id="resultChart" height="110"></canvas>
-        </div>
+        <div class="section-title"><i class="fa fa-search"></i> Check Your Result</div>
+        <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
+          <div class="result-form-group">
+            <label class="result-form-label" for="regNoInput">Registration Number</label>
+            <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" required>
+          </div>
+          <div class="result-form-group">
+            <label class="result-form-label" for="scratchCardInput">Scratch Card PIN</label>
+            <input id="scratchCardInput" class="result-form-input" placeholder="Enter Scratch Card PIN" required>
+            <span class="result-form-hint">Get from admin or card vendor.</span>
+          </div>
+          <div class="result-form-group">
+            <label class="result-form-label" for="classInput">Class</label>
+            <select id="classInput" class="result-form-select" required>
+              <option value="">Select Class</option>
+              <option>JSS1</option>
+              <option>JSS2</option>
+              <option>JSS3</option>
+              <option>SS1</option>
+              <option>SS2</option>
+              <option>SS3</option>
+            </select>
+          </div>
+          <div class="result-form-group">
+            <label class="result-form-label" for="sessionInput">Session</label>
+            <select id="sessionInput" class="result-form-select" required>
+              <option value="">Select Session</option>
+              <option>2024/2025</option>
+              <option>2023/2024</option>
+              <option>2022/2023</option>
+            </select>
+          </div>
+          <div class="result-form-group">
+            <label class="result-form-label" for="termInput">Term</label>
+            <select id="termInput" class="result-form-select" required>
+              <option value="">Select Term</option>
+              <option>1st Term</option>
+              <option>2nd Term</option>
+              <option>3rd Term</option>
+            </select>
+          </div>
+          <button class="result-search-btn" type="submit"><i class="fa fa-search"></i> View Result</button>
+        </form>
+        <div class="result-search-error" id="searchError" style="display:none;"></div>
       </section>
-      <!-- Results Table -->
-      <section class="results-section">
-        <div class="section-title"><i class="fa fa-table"></i> Detailed Subject Breakdown</div>
+      <!-- Results Display Section (hidden by default until search) -->
+      <section class="results-section" id="resultsDisplaySection" style="display:none;">
+        <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
+        <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:18px;">
+          <span><b>Reg. No:</b> <span id="dispRegNo"></span></span>
+          <span><b>Class:</b> <span id="dispClass"></span></span>
+          <span><b>Session:</b> <span id="dispSession"></span></span>
+          <span><b>Term:</b> <span id="dispTerm"></span></span>
+        </div>
         <table class="results-table" id="resultsTable">
           <thead>
             <tr>
@@ -370,11 +445,21 @@
             <!-- JS fills rows -->
           </tbody>
         </table>
+        <button class="download-btn" onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
       </section>
-      <!-- Recent Results Cards -->
+      <!-- Previously Viewed Results -->
       <section class="results-section">
-        <div class="section-title"><i class="fa fa-history"></i> Recent Results</div>
-        <div class="recent-results-list" id="recentResultsList"></div>
+        <div class="section-title"><i class="fa fa-clock-rotate-left"></i> Previously Viewed Results</div>
+        <div class="previous-results-list" id="previousResultsList"></div>
+      </section>
+      <!-- News Section -->
+      <section class="news-section">
+        <div class="news-title"><i class="fa fa-newspaper"></i> Result News & Announcements</div>
+        <div class="news-list" id="newsList">
+          <div class="news-item"><b>2024/2025 2nd Term Results Released!</b> Check your results now using your registration number and scratch card.</div>
+          <div class="news-item"><b>All 2023/2024 Results Archived</b> – You can still access them by searching with your details.</div>
+          <div class="news-item"><b>New Online Scratch Card Sales</b> – Cards are now available at the school portal and accredited vendors.</div>
+        </div>
       </section>
     </main>
     <!-- Sticky Bottom Nav (matches dashboard) -->
@@ -400,15 +485,11 @@
         <div class="bottom-nav-label">Me</div>
       </button>
     </nav>
-    <!-- Chart.js CDN for chart rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       // Demo result data
-      const resultData = [
+      const demoResultsDB = [
         {
-          session: "2024/2025",
-          term: "1st Term",
-          date: "2024-12-15",
+          regNo: "GLS/2024/001", scratchCard: "ABCD1234", class: "SS3", session: "2024/2025", term: "2nd Term",
           results: [
             { subject: "Mathematics", ca: 18, exam: 70, total: 88, grade: "A", remark: "Excellent" },
             { subject: "English", ca: 16, exam: 66, total: 82, grade: "A", remark: "Excellent" },
@@ -417,9 +498,7 @@
           ]
         },
         {
-          session: "2024/2025",
-          term: "2nd Term",
-          date: "2025-03-28",
+          regNo: "GLS/2024/002", scratchCard: "XYZ9876", class: "SS2", session: "2024/2025", term: "2nd Term",
           results: [
             { subject: "Mathematics", ca: 17, exam: 65, total: 82, grade: "A", remark: "Excellent" },
             { subject: "English", ca: 15, exam: 60, total: 75, grade: "B", remark: "Good" },
@@ -428,9 +507,7 @@
           ]
         },
         {
-          session: "2023/2024",
-          term: "3rd Term",
-          date: "2024-07-18",
+          regNo: "GLS/2023/045", scratchCard: "OLDCARD99", class: "SS3", session: "2023/2024", term: "3rd Term",
           results: [
             { subject: "Mathematics", ca: 17, exam: 63, total: 80, grade: "A", remark: "Excellent" },
             { subject: "English", ca: 14, exam: 60, total: 74, grade: "B", remark: "Good" },
@@ -439,87 +516,87 @@
           ]
         }
       ];
-
-      // For demo sessions/terms
-      const sessions = [...new Set(resultData.map(r => r.session))];
-      const terms = [...new Set(resultData.map(r => r.term))];
-
-      // State
-      let selectedSession = sessions[0];
-      let selectedTerm = terms[0];
-
-      // Fill selectors
-      function fillSelectors() {
-        const ses = document.getElementById("sessionSelect");
-        ses.innerHTML = sessions.map(s => `<option value="${s}">${s}</option>`).join("");
-        ses.value = selectedSession;
-
-        const ter = document.getElementById("termSelect");
-        ter.innerHTML = terms.map(t => `<option value="${t}">${t}</option>`).join("");
-        ter.value = selectedTerm;
-
-        // Recent results dropdown
-        const recentSel = document.getElementById("recentResultSelect");
-        recentSel.innerHTML = `<option value="">Recent Results</option>` +
-          resultData.map((r, i) =>
-            `<option value="${i}">${r.session}, ${r.term} (${r.date})</option>`
-          ).join("");
+      // Previous viewed results (simulate persistence with localStorage)
+      function getViewedResults() {
+        let arr = [];
+        try { arr = JSON.parse(localStorage.getItem("viewedResults")) || []; } catch {}
+        return arr;
       }
-      // Fill recent result cards
-      function fillRecentResultsList() {
-        const list = document.getElementById("recentResultsList");
-        list.innerHTML = resultData.map((r, i) => `
-          <div class="recent-result-card" onclick="selectRecentResultCard(${i})">
-            <div class="recent-result-title">${r.session}, ${r.term}</div>
-            <div class="recent-result-meta">${r.date}</div>
+      function saveViewedResult(entry) {
+        let arr = getViewedResults();
+        // Remove duplicate
+        arr = arr.filter(x => !(
+          x.regNo === entry.regNo && x.session === entry.session && x.term === entry.term && x.class === entry.class
+        ));
+        arr.unshift(entry);
+        if (arr.length > 6) arr = arr.slice(0,6);
+        localStorage.setItem("viewedResults", JSON.stringify(arr));
+      }
+      function renderPreviousResults() {
+        const arr = getViewedResults();
+        const el = document.getElementById("previousResultsList");
+        if (!arr.length) {
+          el.innerHTML = `<div style="color:#888;">No previously viewed results.</div>`;
+          return;
+        }
+        el.innerHTML = arr.map((r,i) => `
+          <div class="previous-result-card" onclick="viewPreviousResult(${i})">
+            <div class="previous-result-title">${r.regNo}</div>
+            <div class="previous-result-meta">${r.class} • ${r.session} • ${r.term}</div>
           </div>
         `).join("");
       }
-      // Select recent from card or dropdown
-      function selectRecentResultCard(index) {
-        const r = resultData[index];
-        selectedSession = r.session;
-        selectedTerm = r.term;
-        refreshResults();
-        document.getElementById("sessionSelect").value = selectedSession;
-        document.getElementById("termSelect").value = selectedTerm;
-        document.getElementById("recentResultSelect").value = index;
+      function viewPreviousResult(idx) {
+        const arr = getViewedResults();
+        if (arr[idx]) displayResult(arr[idx]);
       }
-      function selectRecentResult() {
-        const idx = document.getElementById("recentResultSelect").value;
-        if (idx !== "") selectRecentResultCard(idx);
-      }
-      // Performance summary (average, best, etc)
-      function fillPerformanceSummary() {
-        const r = getCurrentResult();
-        if (!r) return;
-        const totals = r.results.map(x => x.total);
-        const average = totals.reduce((a,b) => a+b, 0) / totals.length;
-        const best = Math.max(...totals);
-        const worst = Math.min(...totals);
-        const grades = r.results.map(x => x.grade);
-        let gradeCounts = {};
-        grades.forEach(g => gradeCounts[g] = (gradeCounts[g]||0)+1);
-        const summary = document.getElementById("performanceSummary");
-        summary.innerHTML = `
-          <span class="perf-item">Average: <b>${average.toFixed(1)}</b></span>
-          <span class="perf-item">Best: <b>${best}</b></span>
-          <span class="perf-item">Lowest: <b>${worst}</b></span>
-          <span class="perf-item">Grade: <b>${grades[0]}</b></span>
-        `;
-      }
-      // Get currently selected result
-      function getCurrentResult() {
-        return resultData.find(r => r.session === selectedSession && r.term === selectedTerm);
-      }
-      // Fill results table
-      function fillResultsTable() {
-        const r = getCurrentResult();
-        const tbody = document.getElementById("resultsTable").querySelector("tbody");
-        if (!r) {
-          tbody.innerHTML = `<tr><td colspan="6">No result found for selected session/term.</td></tr>`;
-          return;
+      // Handle result search
+      function handleResultSearch(e) {
+        e.preventDefault();
+        const regNo = document.getElementById("regNoInput").value.trim().toUpperCase();
+        const scratch = document.getElementById("scratchCardInput").value.trim().toUpperCase();
+        const klass = document.getElementById("classInput").value;
+        const session = document.getElementById("sessionInput").value;
+        const term = document.getElementById("termInput").value;
+        const errorBox = document.getElementById("searchError");
+        errorBox.style.display = "none";
+        // Validation
+        if (!regNo || !scratch || !klass || !session || !term) {
+          errorBox.textContent = "All fields are required!";
+          errorBox.style.display = "block";
+          return false;
         }
+        // Simulate backend search
+        const result = demoResultsDB.find(r =>
+          r.regNo === regNo &&
+          r.scratchCard === scratch &&
+          r.class === klass &&
+          r.session === session &&
+          r.term === term
+        );
+        if (!result) {
+          errorBox.textContent = "No result found! Please check your details or contact the school.";
+          errorBox.style.display = "block";
+          document.getElementById("resultsDisplaySection").style.display = "none";
+          return false;
+        }
+        // Save to previous results
+        saveViewedResult({
+          regNo, scratchCard: scratch, class: klass, session, term, results: result.results
+        });
+        // Display
+        displayResult({regNo, class: klass, session, term, results: result.results});
+        renderPreviousResults();
+        return false;
+      }
+      // Display result in table and details
+      function displayResult(r) {
+        document.getElementById("resultsDisplaySection").style.display = "";
+        document.getElementById("dispRegNo").textContent = r.regNo;
+        document.getElementById("dispClass").textContent = r.class;
+        document.getElementById("dispSession").textContent = r.session;
+        document.getElementById("dispTerm").textContent = r.term;
+        const tbody = document.getElementById("resultsTable").querySelector("tbody");
         tbody.innerHTML = r.results.map(res => `
           <tr>
             <td>${res.subject}</td>
@@ -531,54 +608,11 @@
           </tr>
         `).join("");
       }
-      // Render chart
-      let chart;
-      function renderResultChart() {
-        const r = getCurrentResult();
-        if (!r) return;
-        const ctx = document.getElementById("resultChart").getContext("2d");
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels: r.results.map(x => x.subject),
-            datasets: [{
-              label: 'Total Score',
-              data: r.results.map(x => x.total),
-              backgroundColor: r.results.map(x =>
-                x.grade === "A" ? "#18ba89" : x.grade === "D" ? "#e74c3c" : "#f39c12"
-              ),
-              borderRadius: 8,
-              barPercentage: 0.6
-            }]
-          },
-          options: {
-            plugins: { legend: { display: false }},
-            scales: {
-              y: { beginAtZero: true, max: 100, grid: {color: "#ddeaff"} },
-              x: { grid: {color: "#e3eefd"} }
-            }
-          }
-        });
-      }
-      // Download as PDF (demo: just alert, real: call PDF service)
       function downloadCurrentResult() {
-        const r = getCurrentResult();
-        if (!r) { alert("No result to download!"); return; }
-        alert(`Download initiated for ${r.session}, ${r.term} result! (Integrate PDF generation here)`);
-      }
-      // Main refresh
-      function refreshResults() {
-        selectedSession = document.getElementById("sessionSelect").value;
-        selectedTerm = document.getElementById("termSelect").value;
-        fillPerformanceSummary();
-        fillResultsTable();
-        renderResultChart();
+        alert("Download as PDF coming soon!");
       }
       // On load
-      fillSelectors();
-      fillRecentResultsList();
-      refreshResults();
+      renderPreviousResults();
     </script>
   </div>
 </body>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2647a6;
+      --bg: #f6f8fa;
+      --card: #fff;
+      --radius: 18px;
+      --shadow: 0 4px 32px 0 rgba(38,71,166,0.10);
+      --shadow-hover: 0 8px 44px 0 rgba(38,71,166,0.15);
+      --accent: #ddeaff;
+      --accent2: #e3eefd;
+      --danger: #e74c3c;
+      --success: #18ba89;
+      --text-main: #22305a;
+      --text-muted: #a6b1d0;
+      --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    body { width: 100vw; }
+    .profile-root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      box-sizing: border-box;
+    }
+    .profile-main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 2vw 90px 2vw;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .profile-header {
+      padding: 18px 0 0 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .profile-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.03em;
+      margin-bottom: 0;
+      margin-right: 12px;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .profile-actions button, .profile-actions a {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 9px 23px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .profile-actions button:hover, .profile-actions a:hover {
+      background: #18308b;
+    }
+    .profile-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 20px 20px 20px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .section-title {
+      font-size: 1.16rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 7px;
+      letter-spacing: 0.02em;
+    }
+    /* Profile Info */
+    .profile-info-wrap {
+      display: flex;
+      gap: 26px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .profile-avatar-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 170px;
+    }
+    .profile-avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+      background: #ddeaff;
+      box-shadow: 0 2px 18px #ddeaff66;
+      margin-bottom: 7px;
+    }
+    .profile-upload-btn {
+      background: var(--accent2);
+      color: var(--primary);
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 18px;
+      cursor: pointer;
+      font-size: 0.98rem;
+      transition: background var(--transition);
+      box-shadow: 0 2px 6px #ddeaff66;
+    }
+    .profile-upload-btn:hover { background: var(--accent);}
+    .profile-basic-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-width: 190px;
+    }
+    .profile-detail-row {
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    }
+    .profile-detail-label {
+      color: #7a90b3;
+      font-weight: 700;
+      min-width: 90px;
+      font-size: 1.03rem;
+    }
+    .profile-detail-value {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 1.09rem;
+      word-break: break-word;
+    }
+    .profile-edit-btn {
+      background: none;
+      color: var(--primary);
+      border: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: color var(--transition);
+    }
+    .profile-edit-btn:hover { color: #18308b;}
+    /* Tabs */
+    .profile-tabs {
+      display: flex;
+      gap: 27px;
+      border-bottom: 2px solid #e3eefd;
+      margin-bottom: 13px;
+      margin-top: 7px;
+    }
+    .profile-tab {
+      background: none;
+      border: none;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #7a90b3;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color var(--transition), border var(--transition);
+    }
+    .profile-tab.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+    /* Tab contents */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    /* Academic Records */
+    .profile-result-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 9px;
+      font-size: 1.01rem;
+    }
+    .profile-result-table th, .profile-result-table td {
+      padding: 11px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e3eefd;
+    }
+    .profile-result-table th {
+      color: var(--primary);
+      background: var(--accent2);
+      font-weight: 700;
+    }
+    .profile-result-table tr:last-child td {
+      border-bottom: none;
+    }
+    .grade-high { color: var(--success); font-weight: bold;}
+    .grade-low { color: var(--danger); font-weight: bold;}
+    .grade-mid { color: #f39c12; font-weight: bold;}
+    /* Attendance */
+    .profile-attendance-list {
+      display: flex; flex-wrap: wrap; gap: 19px;
+      margin-top: 9px; margin-bottom: 7px;
+    }
+    .attendance-card {
+      background: var(--accent2);
+      border-radius: 8px;
+      padding: 11px 17px;
+      min-width: 120px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.02rem;
+      box-shadow: 0 1px 4px #ddeaff44;
+      margin-bottom: 2px;
+    }
+    /* Guardians/Emergency */
+    .guardian-list {
+      display: flex; flex-wrap: wrap; gap: 19px;
+    }
+    .guardian-card {
+      background: var(--accent2);
+      border-radius: 10px;
+      padding: 11px 17px;
+      min-width: 170px;
+      box-shadow: 0 1px 4px #ddeaff44;
+      display: flex; flex-direction: column; gap: 7px;
+      margin-bottom: 4px;
+    }
+    .guardian-label {
+      color: #7a90b3;
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+    .guardian-value {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.03rem;
+      word-break: break-word;
+    }
+    /* Hostel/Transport */
+    .misc-list {
+      display: flex; flex-wrap: wrap; gap: 17px;
+      margin-bottom: 7px;
+      margin-top: 7px;
+    }
+    .misc-card {
+      background: var(--accent2);
+      border-radius: 10px;
+      padding: 11px 17px;
+      min-width: 150px;
+      box-shadow: 0 1px 4px #ddeaff44;
+      display: flex; flex-direction: column; gap: 6px;
+      font-size: 1rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    /* Documents */
+    .docs-list {
+      display: flex; flex-wrap: wrap; gap: 13px;
+      margin-bottom: 7px; margin-top: 7px;
+    }
+    .docs-card {
+      background: #fff;
+      border-radius: 9px;
+      box-shadow: 0 1px 6px #ddeaff33;
+      padding: 13px 16px;
+      min-width: 120px;
+      display: flex; flex-direction: column; gap: 5px;
+      align-items: flex-start;
+    }
+    .docs-label {
+      color: #7a90b3; font-size: 0.97rem; font-weight: 600;
+    }
+    .docs-value {
+      color: var(--primary); font-size: 1.03rem; font-weight: 700; word-break: break-word;
+    }
+    .docs-download-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 15px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      margin-top: 2px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px #ddeaff73;
+      transition: background var(--transition);
+    }
+    .docs-download-btn:hover { background: #18308b; }
+    /* Account/Security */
+    .account-actions-list {
+      display: flex; flex-wrap: wrap; gap: 17px;
+      margin-bottom: 7px;
+    }
+    .account-action-btn {
+      background: var(--accent2);
+      color: var(--primary);
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: background var(--transition), color var(--transition);
+      box-shadow: 0 2px 7px #ddeaff33;
+    }
+    .account-action-btn:hover { background: var(--accent); color: #18308b;}
+    /* Fees */
+    .fees-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 9px;
+      font-size: 1.01rem;
+    }
+    .fees-table th, .fees-table td {
+      padding: 11px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e3eefd;
+    }
+    .fees-table th {
+      color: var(--primary);
+      background: var(--accent2);
+      font-weight: 700;
+    }
+    .fees-table tr:last-child td {
+      border-bottom: none;
+    }
+    .paid { color: var(--success); font-weight: bold;}
+    .pending { color: #f39c12; font-weight: bold;}
+    .overdue { color: var(--danger); font-weight: bold;}
+    /* Responsive */
+    @media (max-width: 900px) {
+      .profile-header, .profile-main { max-width: 100vw; }
+      .profile-info-wrap { flex-direction: column; gap: 17px;}
+    }
+    @media (max-width: 650px) {
+      .profile-main { padding: 0 2vw 90px 2vw; }
+      .profile-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .profile-title { font-size: 1.13rem;}
+      .profile-section { padding: 16px 7px 14px 7px;}
+      .section-title { font-size: 1.01rem;}
+      .profile-avatar-area { min-width: 95px;}
+    }
+    @media (max-width: 430px) {
+      .profile-main { padding: 0 0 80px 0; }
+      .profile-section { padding: 10px 2vw 8px 2vw;}
+    }
+    @media (max-width: 700px) {
+      body { padding-bottom: 68px !important; }
+      .bottom-nav {
+        display: flex !important;
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        width: 100vw; height: 53px;
+        background: var(--primary);
+        box-shadow: 0 -2px 12px #ddeaff;
+        z-index: 9999;
+        align-items: center;
+        justify-content: space-evenly;
+        border-radius: 18px 18px 0 0;
+        max-width: 100vw;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+      .bottom-nav-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-size: 1.33rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.85;
+        transition: color var(--transition), opacity var(--transition);
+        height: 100%;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .bottom-nav-btn.active, .bottom-nav-btn:active, .bottom-nav-btn:focus {
+        color: var(--accent2);
+        opacity: 1;
+      }
+      .bottom-nav-label {
+        font-size: 0.71rem;
+        margin-top: 1px;
+        color: #e4ecff;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-root">
+    <!-- Header & Main Actions -->
+    <div class="profile-header">
+      <div class="profile-title">My Profile</div>
+      <div class="profile-actions">
+        <a href="dashboard.html"><i class="fa fa-arrow-left"></i> Dashboard</a>
+      </div>
+    </div>
+    <main class="profile-main">
+      <!-- Profile Info -->
+      <section class="profile-section">
+        <div class="section-title"><i class="fa fa-user"></i> Personal Information</div>
+        <div class="profile-info-wrap">
+          <div class="profile-avatar-area">
+            <img class="profile-avatar" id="profileAvatar" src="https://ui-avatars.com/api/?name=Janet+Okafor&background=2647a6&color=fff" alt="Avatar">
+            <label class="profile-upload-btn">
+              <input type="file" style="display:none;" onchange="changeAvatar(event)">
+              <i class="fa fa-upload"></i> Change Photo
+            </label>
+          </div>
+          <div class="profile-basic-details">
+            <div class="profile-detail-row"><span class="profile-detail-label">Name:</span> <span class="profile-detail-value" id="profileName"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Reg. Number:</span> <span class="profile-detail-value" id="profileReg"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Gender:</span> <span class="profile-detail-value" id="profileGender"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Date of Birth:</span> <span class="profile-detail-value" id="profileDOB"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Phone:</span> <span class="profile-detail-value" id="profilePhone"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Email:</span> <span class="profile-detail-value" id="profileEmail"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Address:</span> <span class="profile-detail-value" id="profileAddress"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Nationality:</span> <span class="profile-detail-value" id="profileNationality"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">State of Origin:</span> <span class="profile-detail-value" id="profileState"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">LGA:</span> <span class="profile-detail-value" id="profileLGA"></span></div>
+            <div class="profile-detail-row"><span class="profile-detail-label">Religion:</span> <span class="profile-detail-value" id="profileReligion"></span></div>
+          </div>
+        </div>
+      </section>
+      <!-- Profile Tabs -->
+      <nav class="profile-tabs">
+        <button class="profile-tab active" onclick="showProfileTab('academic')"><i class="fa fa-graduation-cap"></i> Academic</button>
+        <button class="profile-tab" onclick="showProfileTab('attendance')"><i class="fa fa-calendar-check"></i> Attendance</button>
+        <button class="profile-tab" onclick="showProfileTab('guardian')"><i class="fa fa-users"></i> Guardians</button>
+        <button class="profile-tab" onclick="showProfileTab('hostel')"><i class="fa fa-bed"></i> Hostel/Transport</button>
+        <button class="profile-tab" onclick="showProfileTab('fees')"><i class="fa fa-wallet"></i> Fees</button>
+        <button class="profile-tab" onclick="showProfileTab('docs')"><i class="fa fa-file-alt"></i> Documents</button>
+        <button class="profile-tab" onclick="showProfileTab('account')"><i class="fa fa-user-shield"></i> Account</button>
+      </nav>
+      <!-- Tab Contents -->
+      <!-- Academic Records -->
+      <section class="profile-section tab-content active" id="tab-academic">
+        <div class="section-title"><i class="fa fa-graduation-cap"></i> Academic Records</div>
+        <table class="profile-result-table" id="profileResultTable">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Term</th>
+              <th>Class</th>
+              <th>Subject</th>
+              <th>Total</th>
+              <th>Grade</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS fills rows -->
+          </tbody>
+        </table>
+      </section>
+      <!-- Attendance -->
+      <section class="profile-section tab-content" id="tab-attendance">
+        <div class="section-title"><i class="fa fa-calendar-check"></i> Attendance</div>
+        <div class="profile-attendance-list" id="attendanceList"></div>
+      </section>
+      <!-- Guardians/Emergency -->
+      <section class="profile-section tab-content" id="tab-guardian">
+        <div class="section-title"><i class="fa fa-users"></i> Parent/Guardians & Emergency</div>
+        <div class="guardian-list" id="guardianList"></div>
+      </section>
+      <!-- Hostel/Transport -->
+      <section class="profile-section tab-content" id="tab-hostel">
+        <div class="section-title"><i class="fa fa-bed"></i> Hostel & Transport</div>
+        <div class="misc-list" id="hostelTransportList"></div>
+      </section>
+      <!-- Fees/Payments -->
+      <section class="profile-section tab-content" id="tab-fees">
+        <div class="section-title"><i class="fa fa-wallet"></i> Fees & Payments</div>
+        <table class="fees-table" id="feesTable">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Term</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS fills rows -->
+          </tbody>
+        </table>
+      </section>
+      <!-- Documents -->
+      <section class="profile-section tab-content" id="tab-docs">
+        <div class="section-title"><i class="fa fa-file-alt"></i> Uploaded Documents</div>
+        <div class="docs-list" id="docsList"></div>
+      </section>
+      <!-- Account/Security -->
+      <section class="profile-section tab-content" id="tab-account">
+        <div class="section-title"><i class="fa fa-user-shield"></i> Account & Security</div>
+        <div class="account-actions-list">
+          <button class="account-action-btn" onclick="alert('Change password coming soon!')"><i class="fa fa-key"></i> Change Password</button>
+          <button class="account-action-btn" onclick="alert('Update email coming soon!')"><i class="fa fa-envelope"></i> Update Email</button>
+          <button class="account-action-btn" onclick="alert('Configure 2FA coming soon!')"><i class="fa fa-shield-alt"></i> 2FA Security</button>
+          <button class="account-action-btn" onclick="alert('Download profile as PDF coming soon!')"><i class="fa fa-download"></i> Download Profile</button>
+        </div>
+      </section>
+    </main>
+    <!-- Sticky Bottom Nav (matches dashboard) -->
+    <nav class="bottom-nav">
+      <button class="bottom-nav-btn" title="Home" onclick="window.location.href='dashboard.html'">
+        <i class="fa fa-home"></i>
+        <div class="bottom-nav-label">Home</div>
+      </button>
+      <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='e-class.html'">
+        <i class="fa fa-laptop"></i>
+        <div class="bottom-nav-label">E-Class</div>
+      </button>
+      <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
+        <i class="fa fa-file-alt"></i>
+        <div class="bottom-nav-label">Tasks</div>
+      </button>
+      <button class="bottom-nav-btn" title="Results" onclick="window.location.href='results.html'">
+        <i class="fa fa-chart-bar"></i>
+        <div class="bottom-nav-label">Results</div>
+      </button>
+      <button class="bottom-nav-btn active" title="Profile" onclick="window.location.href='profile.html'">
+        <i class="fa fa-user"></i>
+        <div class="bottom-nav-label">Me</div>
+      </button>
+    </nav>
+    <script>
+      // DEMO DATA (replace with AJAX/backend as needed)
+      const studentProfile = {
+        name: "Janet Okafor",
+        regNo: "GLS/2024/001",
+        gender: "Female",
+        dob: "2008-05-17",
+        phone: "+2348012345678",
+        email: "janet.okafor@student.goldlincschools.com",
+        address: "12, Unity Lane, Victoria Island, Lagos",
+        nationality: "Nigerian",
+        state: "Lagos",
+        lga: "Eti-Osa",
+        religion: "Christianity",
+        avatar: "",
+        academic: [
+          {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Mathematics", total: 88, grade: "A", remark: "Excellent"},
+          {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "English", total: 82, grade: "A", remark: "Excellent"},
+          {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Biology", total: 72, grade: "B", remark: "Good"},
+          {session: "2024/2025", term: "2nd Term", class: "SS3", subject: "Chemistry", total: 62, grade: "C", remark: "Fair"},
+          {session: "2023/2024", term: "3rd Term", class: "SS2", subject: "Mathematics", total: 82, grade: "A", remark: "Excellent"},
+          {session: "2023/2024", term: "3rd Term", class: "SS2", subject: "English", total: 75, grade: "B", remark: "Good"}
+        ],
+        attendance: [
+          {session: "2024/2025", term: "2nd Term", present: 82, total: 90, percentage: 91},
+          {session: "2024/2025", term: "1st Term", present: 85, total: 90, percentage: 94},
+          {session: "2023/2024", term: "3rd Term", present: 70, total: 80, percentage: 88}
+        ],
+        guardians: [
+          {type: "Father", name: "Chinedu Okafor", phone: "+2348012349999", email: "chinedu.okafor@gmail.com", relationship: "Father"},
+          {type: "Mother", name: "Ngozi Okafor", phone: "+2348098765432", email: "ngozi.okafor@gmail.com", relationship: "Mother"},
+          {type: "Emergency", name: "Uncle Peter", phone: "+2348090032121", email: "peter.okafor@gmail.com", relationship: "Uncle"}
+        ],
+        hostel: {
+          name: "Ruby Hostel", room: "12B", bed: "Upper", warden: "Mrs. Odeyemi", session: "2024/2025"
+        },
+        transport: {
+          route: "Ajah", busNo: "BUS-04", driver: "Mr. Lawal", session: "2024/2025"
+        },
+        fees: [
+          {session: "2024/2025", term: "2nd Term", type: "Tuition", amount: "₦110,000", status: "Paid", date: "2025-04-04"},
+          {session: "2024/2025", term: "1st Term", type: "Tuition", amount: "₦110,000", status: "Paid", date: "2024-12-10"},
+          {session: "2023/2024", term: "3rd Term", type: "Transport", amount: "₦25,000", status: "Pending", date: "-"},
+          {session: "2023/2024", term: "2nd Term", type: "Hostel", amount: "₦40,000", status: "Overdue", date: "-"}
+        ],
+        docs: [
+          {label: "Birth Certificate", value: "birth-cert-janet.pdf", url: "#"},
+          {label: "Previous Result", value: "ss2-result.pdf", url: "#"},
+          {label: "Medical Report", value: "medical-janet.pdf", url: "#"},
+          {label: "ID Card", value: "janet-idcard.jpg", url: "#"}
+        ]
+      };
+      // Fill profile info
+      function fillProfileInfo() {
+        const p = studentProfile;
+        document.getElementById("profileName").textContent = p.name;
+        document.getElementById("profileReg").textContent = p.regNo;
+        document.getElementById("profileGender").textContent = p.gender;
+        document.getElementById("profileDOB").textContent = p.dob;
+        document.getElementById("profilePhone").textContent = p.phone;
+        document.getElementById("profileEmail").textContent = p.email;
+        document.getElementById("profileAddress").textContent = p.address;
+        document.getElementById("profileNationality").textContent = p.nationality;
+        document.getElementById("profileState").textContent = p.state;
+        document.getElementById("profileLGA").textContent = p.lga;
+        document.getElementById("profileReligion").textContent = p.religion;
+        // Avatar
+        document.getElementById("profileAvatar").src = p.avatar && p.avatar !== "" ?
+          p.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=2647a6&color=fff`;
+      }
+      // Academic result table
+      function fillAcademic() {
+        const tbody = document.getElementById("profileResultTable").querySelector("tbody");
+        tbody.innerHTML = studentProfile.academic.map(res => `
+          <tr>
+            <td>${res.session}</td>
+            <td>${res.term}</td>
+            <td>${res.class}</td>
+            <td>${res.subject}</td>
+            <td>${res.total}</td>
+            <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade}</td>
+            <td>${res.remark}</td>
+          </tr>
+        `).join("");
+      }
+      // Attendance
+      function fillAttendance() {
+        const el = document.getElementById("attendanceList");
+        el.innerHTML = studentProfile.attendance.map(a =>
+          `<div class="attendance-card">
+            <div><b>${a.session}, ${a.term}</b></div>
+            <div>Present: <b>${a.present}</b> / ${a.total}</div>
+            <div>Attendance: <b>${a.percentage}%</b></div>
+          </div>`
+        ).join("");
+      }
+      // Guardians
+      function fillGuardians() {
+        const el = document.getElementById("guardianList");
+        el.innerHTML = studentProfile.guardians.map(g =>
+          `<div class="guardian-card">
+            <div class="guardian-label">${g.type}</div>
+            <div class="guardian-value">${g.name}</div>
+            <div class="guardian-label">Phone:</div>
+            <div class="guardian-value">${g.phone}</div>
+            <div class="guardian-label">Email:</div>
+            <div class="guardian-value">${g.email}</div>
+            <div class="guardian-label">Relationship:</div>
+            <div class="guardian-value">${g.relationship}</div>
+          </div>`
+        ).join("");
+      }
+      // Hostel/Transport
+      function fillHostelTransport() {
+        const el = document.getElementById("hostelTransportList");
+        el.innerHTML = `
+          <div class="misc-card">
+            <div><b>Hostel:</b> ${studentProfile.hostel.name}</div>
+            <div>Room: ${studentProfile.hostel.room}, Bed: ${studentProfile.hostel.bed}</div>
+            <div>Warden: ${studentProfile.hostel.warden}</div>
+            <div>Session: ${studentProfile.hostel.session}</div>
+          </div>
+          <div class="misc-card">
+            <div><b>Transport Route:</b> ${studentProfile.transport.route}</div>
+            <div>Bus No: ${studentProfile.transport.busNo}</div>
+            <div>Driver: ${studentProfile.transport.driver}</div>
+            <div>Session: ${studentProfile.transport.session}</div>
+          </div>
+        `;
+      }
+      // Fees
+      function fillFees() {
+        const tbody = document.getElementById("feesTable").querySelector("tbody");
+        tbody.innerHTML = studentProfile.fees.map(f =>
+          `<tr>
+            <td>${f.session}</td>
+            <td>${f.term}</td>
+            <td>${f.type}</td>
+            <td>${f.amount}</td>
+            <td class="${
+              f.status === 'Paid' ? 'paid' : (f.status === 'Pending' ? 'pending' : 'overdue')
+            }">${f.status}</td>
+            <td>${f.date}</td>
+          </tr>`
+        ).join("");
+      }
+      // Docs
+      function fillDocs() {
+        const el = document.getElementById("docsList");
+        el.innerHTML = studentProfile.docs.map(d =>
+          `<div class="docs-card">
+            <div class="docs-label">${d.label}</div>
+            <div class="docs-value">${d.value}</div>
+            <button class="docs-download-btn" onclick="window.open('${d.url}','_blank')"><i class="fa fa-download"></i> Download</button>
+          </div>`
+        ).join("");
+      }
+      // Tab switch logic
+      function showProfileTab(tab) {
+        document.querySelectorAll('.profile-tab').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+        document.querySelector(`[onclick="showProfileTab('${tab}')"]`).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+      }
+      // Avatar upload (demo, not persistent)
+      function changeAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            document.getElementById("profileAvatar").src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+      // On load
+      fillProfileInfo();
+      fillAcademic();
+      fillAttendance();
+      fillGuardians();
+      fillHostelTransport();
+      fillFees();
+      fillDocs();
+    </script>
+  </div>
+</body>
+</html>

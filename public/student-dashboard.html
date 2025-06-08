@@ -28,7 +28,6 @@
       --success: #18ba89;
       --danger: #e74c3c;
     }
-
     html, body {
       margin: 0; padding: 0;
       background: var(--bg);
@@ -103,6 +102,11 @@
     }
     .sidebar-bottom {
       margin-bottom: 12px; margin-top: 20px;
+    }
+
+    /* BOTTOM NAV FOR MOBILE */
+    .bottom-nav {
+      display: none;
     }
     /* MAIN CONTENT */
     .dashboard-main {
@@ -364,6 +368,7 @@
       flex-direction: column;
       gap: 7px;
       align-items: flex-start;
+      width: 100%;
     }
     .news-title {
       font-size: 1.13rem;
@@ -405,19 +410,54 @@
     }
     @media (max-width: 700px) {
       .dashboard-root { flex-direction: column;}
-      .sidebar { flex-direction: row; width: 100vw; height: 52px; min-height: 0; padding: 0; border-radius: 0; box-shadow: 0 2px 12px #ddeaff;}
-      .sidebar-logo { margin: 0 23px 0 11px; width: 35px; height: 35px;}
-      .sidebar-nav { flex-direction: row; gap: 6px; width: auto; }
-      .sidebar-link { width: 41px; height: 41px; border-radius: 9px; font-size: 1.13rem;}
-      .sidebar-bottom { display: none;}
+      .sidebar { display: none !important; }
       .dashboard-main {padding-top: 9px;}
-      .topbar {flex-direction: column; align-items: stretch; gap: 9px; padding: 10px 6vw 15px 6vw; border-radius: 0 0 17px 17px;}
-      .main-content { padding: 0 2vw 0 2vw;}
+      .topbar {flex-direction: column; align-items: stretch; gap: 9px; padding: 10px 5vw 13px 5vw; border-radius: 0 0 17px 17px;}
+      .main-content { padding: 0 1vw 0 1vw;}
       .dashboard-widgets { flex-wrap: wrap; gap: 11px;}
-      .widget-card { min-width: 120px; min-height: 75px; padding: 16px 0 14px 0;}
+      .widget-card { min-width: 45vw; min-height: 68px; padding: 15px 0 14px 0; font-size: 0.97em;}
       .courses-list { flex-direction: column; gap: 7px;}
-      .course-card { min-width: 99vw; }
-      .participant-panel { max-width: 99vw; min-width: 0; padding: 14px 7vw 10px 7vw;}
+      .course-card { min-width: 97vw; }
+      .participant-panel { display: none !important;}
+      .news-card { padding: 13px 7px 13px 7px; }
+      .bottom-nav {
+        display: flex !important;
+        position: fixed;
+        left: 0; bottom: 0; width: 100vw; height: 53px;
+        background: var(--sidebar-dark);
+        box-shadow: 0 -2px 12px #ddeaff;
+        z-index: 100;
+        align-items: center;
+        justify-content: space-evenly;
+        border-radius: 18px 18px 0 0;
+      }
+      .bottom-nav-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--sidebar-icon);
+        font-size: 1.33rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.85;
+        transition: color var(--transition), opacity var(--transition);
+        height: 100%;
+        cursor: pointer;
+      }
+      .bottom-nav-btn.active, .bottom-nav-btn:active, .bottom-nav-btn:focus {
+        color: var(--primary);
+        opacity: 1;
+      }
+      .bottom-nav-label {
+        font-size: 0.71rem;
+        margin-top: 1px;
+        color: #e4ecff;
+        font-weight: 500;
+      }
+      body { padding-bottom: 63px !important; }
     }
     @media (max-width: 480px) {
       .main-content { padding: 0 2vw 0 2vw;}
@@ -428,7 +468,7 @@
 </head>
 <body>
 <div class="dashboard-root">
-  <!-- Sidebar -->
+  <!-- Sidebar (desktop) -->
   <nav class="sidebar">
     <div class="sidebar-logo">
       <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo">
@@ -548,6 +588,29 @@
       <!-- JS: Avatars -->
     </div>
   </aside>
+  <!-- Bottom Nav (mobile) -->
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn active" title="Home" onclick="window.location.href='dashboard.html'">
+      <i class="fa fa-home"></i>
+      <div class="bottom-nav-label">Home</div>
+    </button>
+    <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='e-class.html'">
+      <i class="fa fa-laptop"></i>
+      <div class="bottom-nav-label">E-Class</div>
+    </button>
+    <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
+      <i class="fa fa-file-alt"></i>
+      <div class="bottom-nav-label">Tasks</div>
+    </button>
+    <button class="bottom-nav-btn" title="Fees" onclick="window.location.href='fees.html'">
+      <i class="fa fa-wallet"></i>
+      <div class="bottom-nav-label">Fees</div>
+    </button>
+    <button class="bottom-nav-btn" title="Profile" onclick="window.location.href='profile.html'">
+      <i class="fa fa-user"></i>
+      <div class="bottom-nav-label">Me</div>
+    </button>
+  </nav>
 </div>
 <script>
   // Responsive: participant panel only on wide screens

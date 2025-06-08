@@ -828,18 +828,25 @@
         document.getElementById("profileAvatar").src =
           `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2647a6&color=fff`;
       }
-      // Academic
-      fillAcademic(profile.academic || []);
-      // Attendance
-      fillAttendance(profile.attendance || []);
-      // Guardians
-      fillGuardians(profile.guardians || []);
-      // Hostel/Transport
-      fillHostelTransport(profile.hostel || {}, profile.transport || {});
-      // Fees
-      fillFees(profile.fees || []);
-      // Docs
-      fillDocs(profile.docs || []);
+
+  // Academic
+  fillAcademic(profile.academic || []);
+  // Attendance
+  fillAttendance(profile.attendance || []);
+  // Guardians: fallback to parents if guardians missing/empty
+  if (isNonEmpty(profile.guardians)) {
+    fillGuardians(profile.guardians);
+  } else if (isNonEmpty(profile.parents)) {
+    fillGuardians(profile.parents);
+  } else {
+    fillGuardians([]);
+  }
+  // Hostel/Transport
+  fillHostelTransport(profile.hostel || {}, profile.transport || {});
+  // Fees
+  fillFees(profile.fees || []);
+  // Docs
+  fillDocs(profile.docs || []);
     }
     // --- Fillers (tabular) ---
     function fillAcademic(arr) {
@@ -871,22 +878,28 @@
         </div>`
       ).join("");
     }
-    function fillGuardians(arr) {
-      const el = document.getElementById("guardianList");
-      if (!arr.length) return el.innerHTML = `<div>No guardian info found.</div>`;
-      el.innerHTML = arr.map(g =>
-        `<div class="guardian-card">
-          <div class="guardian-label">${g.type || ''}</div>
-          <div class="guardian-value">${g.name || ''}</div>
-          <div class="guardian-label">Phone:</div>
-          <div class="guardian-value">${g.phone || ''}</div>
-          <div class="guardian-label">Email:</div>
-          <div class="guardian-value">${g.email || ''}</div>
-          <div class="guardian-label">Relationship:</div>
-          <div class="guardian-value">${g.relationship || ''}</div>
-        </div>`
-      ).join("");
-    }
+    // Fill guardians (or parents as fallback)
+function fillGuardians(arr) {
+  const el = document.getElementById("guardianList");
+  // Handle single object accidentally passed
+  if (arr && !Array.isArray(arr)) arr = [arr];
+  if (!arr || !arr.length) {
+    el.innerHTML = `<div>No guardian info found.</div>`;
+    return;
+  }
+  el.innerHTML = arr.map(g =>
+    `<div class="guardian-card">
+      <div class="guardian-label">${g.type || ''}</div>
+      <div class="guardian-value">${g.name || ''}</div>
+      <div class="guardian-label">Phone:</div>
+      <div class="guardian-value">${g.phone || ''}</div>
+      <div class="guardian-label">Email:</div>
+      <div class="guardian-value">${g.email || ''}</div>
+      <div class="guardian-label">Relationship:</div>
+      <div class="guardian-value">${g.relationship || ''}</div>
+    </div>`
+  ).join("");
+}
     function fillHostelTransport(hostel, transport) {
       const el = document.getElementById("hostelTransportList");
       el.innerHTML = `
@@ -985,3 +998,4 @@
   </script>
 </body>
 </html>
+

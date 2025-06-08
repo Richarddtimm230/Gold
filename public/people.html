@@ -19,7 +19,29 @@
       --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
       --font-main: 'Inter', Arial, sans-serif;
     }
+/* Fix Quick Search input width */
+.sidebar .search input {
+  width: 100%;
+  box-sizing: border-box;
+  /* Add a max-width if the sidebar has excessive padding */
+  max-width: 100%;
+}
 
+/* Make sidebar scrollable on mobile */
+.sidebar {
+  overflow-y: auto;
+  /* Prevent the sidebar from extending out of viewport on mobile */
+  max-height: 100vh;
+  -webkit-overflow-scrolling: touch; /* for momentum scrolling on iOS */
+}
+
+/* Optional: Make sure the sidebar takes the full height on mobile */
+@media (max-width: 750px) {
+  .sidebar {
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
     html, body {
       margin: 0;
       padding: 0;

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Results | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2647a6;
+      --bg: #f6f8fa;
+      --card: #fff;
+      --radius: 18px;
+      --shadow: 0 4px 32px 0 rgba(38,71,166,0.10);
+      --shadow-hover: 0 8px 44px 0 rgba(38,71,166,0.15);
+      --accent: #ddeaff;
+      --accent2: #e3eefd;
+      --danger: #e74c3c;
+      --success: #18ba89;
+      --text-main: #22305a;
+      --text-muted: #a6b1d0;
+      --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    body { width: 100vw; }
+    .results-root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      box-sizing: border-box;
+    }
+    .results-main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 2vw 90px 2vw;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .results-header {
+      padding: 18px 0 0 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .results-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.03em;
+      margin-bottom: 0;
+      margin-right: 12px;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .results-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .results-actions button, .results-actions a {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 9px 23px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .results-actions button:hover, .results-actions a:hover {
+      background: #18308b;
+    }
+    .results-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 20px 20px 20px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .section-title {
+      font-size: 1.16rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 7px;
+      letter-spacing: 0.02em;
+    }
+    /* Term/Session Selector */
+    .result-filter-bar {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .result-filter-bar select {
+      padding: 7px 18px;
+      border-radius: 8px;
+      border: 1.4px solid #dbe2ee;
+      background: #f6f8fa;
+      font-size: 1rem;
+      color: var(--primary);
+      outline: none;
+      transition: border var(--transition);
+    }
+    .result-filter-bar select:focus { border: 1.5px solid var(--primary);}
+    /* Result Table */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 9px;
+    }
+    .results-table th, .results-table td {
+      padding: 12px 9px;
+      text-align: center;
+      border-bottom: 1px solid #e3eefd;
+      font-size: 1.03rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .results-table th {
+      color: var(--primary);
+      background: var(--accent2);
+      font-weight: 700;
+    }
+    .results-table tr:last-child td {
+      border-bottom: none;
+    }
+    .grade-high { color: var(--success); font-weight: bold;}
+    .grade-low { color: var(--danger); font-weight: bold;}
+    .grade-mid { color: #f39c12; font-weight: bold;}
+    .download-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 19px;
+      font-size: 0.99rem;
+      font-weight: 600;
+      margin-top: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+      display: inline-flex; align-items: center; gap: 7px;
+    }
+    .download-btn:hover { background: #18308b; }
+    /* Performance Summary */
+    .performance-summary {
+      background: var(--accent2);
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 1.05rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin: 11px 0 6px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: flex-start;
+    }
+    .perf-item {
+      margin-right: 20px;
+    }
+    /* Chart/Graph */
+    .result-chart-area {
+      width: 100%;
+      max-width: 650px;
+      margin: 0 auto;
+      margin-top: 16px;
+      margin-bottom: 9px;
+      background: var(--accent2);
+      border-radius: 14px;
+      box-shadow: 0 1px 6px #ddeaff33;
+      padding: 18px 15px 9px 15px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Recent Results Cards */
+    .recent-results-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 17px;
+      margin-top: 8px;
+    }
+    .recent-result-card {
+      background: var(--card);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px #ddeaff33;
+      padding: 13px 16px 10px 16px;
+      min-width: 140px;
+      flex: 1 1 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      border: 1.5px solid transparent;
+      transition: border var(--transition), box-shadow var(--transition);
+      cursor: pointer;
+    }
+    .recent-result-card:hover, .recent-result-card.selected {
+      border: 1.5px solid var(--primary);
+      box-shadow: var(--shadow-hover);
+      background: var(--accent2);
+    }
+    .recent-result-title {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.08rem;
+      margin-bottom: 3px;
+      letter-spacing: 0.01em;
+    }
+    .recent-result-meta {
+      color: #7a90b3;
+      font-size: 0.96rem;
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .results-header, .results-main { max-width: 100vw; }
+      .result-chart-area { max-width: 99vw;}
+    }
+    @media (max-width: 650px) {
+      .results-main { padding: 0 2vw 90px 2vw; }
+      .results-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .results-title { font-size: 1.13rem;}
+      .results-section { padding: 16px 7px 14px 7px;}
+      .section-title { font-size: 1.01rem;}
+      .results-table th, .results-table td { font-size: 0.95rem;}
+      .result-chart-area { padding: 7px 1vw 7px 1vw;}
+      .recent-result-card { min-width: 110px; }
+    }
+    @media (max-width: 430px) {
+      .results-main { padding: 0 0 80px 0; }
+      .results-section { padding: 10px 2vw 8px 2vw;}
+    }
+    @media (max-width: 700px) {
+      body { padding-bottom: 68px !important; }
+      .bottom-nav {
+        display: flex !important;
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        width: 100vw; height: 53px;
+        background: var(--primary);
+        box-shadow: 0 -2px 12px #ddeaff;
+        z-index: 9999;
+        align-items: center;
+        justify-content: space-evenly;
+        border-radius: 18px 18px 0 0;
+        max-width: 100vw;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+      .bottom-nav-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-size: 1.33rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.85;
+        transition: color var(--transition), opacity var(--transition);
+        height: 100%;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .bottom-nav-btn.active, .bottom-nav-btn:active, .bottom-nav-btn:focus {
+        color: var(--accent2);
+        opacity: 1;
+      }
+      .bottom-nav-label {
+        font-size: 0.71rem;
+        margin-top: 1px;
+        color: #e4ecff;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="results-root">
+    <!-- Header & Main Actions -->
+    <div class="results-header">
+      <div class="results-title">Results & Performance</div>
+      <div class="results-actions">
+        <button onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
+        <a href="dashboard.html"><i class="fa fa-arrow-left"></i> Dashboard</a>
+      </div>
+    </div>
+    <main class="results-main">
+      <!-- Summary & Filters -->
+      <section class="results-section">
+        <div class="section-title"><i class="fa fa-filter"></i> View Your Results</div>
+        <div class="result-filter-bar">
+          <select id="sessionSelect" onchange="refreshResults()">
+            <!-- JS fills session options -->
+          </select>
+          <select id="termSelect" onchange="refreshResults()">
+            <!-- JS fills term options -->
+          </select>
+          <select id="recentResultSelect" onchange="selectRecentResult()">
+            <option value="">Recent Results</option>
+            <!-- JS fills recent results -->
+          </select>
+        </div>
+        <!-- Performance summary -->
+        <div class="performance-summary" id="performanceSummary"></div>
+        <!-- Chart/graph area -->
+        <div class="result-chart-area">
+          <canvas id="resultChart" height="110"></canvas>
+        </div>
+      </section>
+      <!-- Results Table -->
+      <section class="results-section">
+        <div class="section-title"><i class="fa fa-table"></i> Detailed Subject Breakdown</div>
+        <table class="results-table" id="resultsTable">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>CA</th>
+              <th>Exam</th>
+              <th>Total</th>
+              <th>Grade</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS fills rows -->
+          </tbody>
+        </table>
+      </section>
+      <!-- Recent Results Cards -->
+      <section class="results-section">
+        <div class="section-title"><i class="fa fa-history"></i> Recent Results</div>
+        <div class="recent-results-list" id="recentResultsList"></div>
+      </section>
+    </main>
+    <!-- Sticky Bottom Nav (matches dashboard) -->
+    <nav class="bottom-nav">
+      <button class="bottom-nav-btn" title="Home" onclick="window.location.href='dashboard.html'">
+        <i class="fa fa-home"></i>
+        <div class="bottom-nav-label">Home</div>
+      </button>
+      <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='e-class.html'">
+        <i class="fa fa-laptop"></i>
+        <div class="bottom-nav-label">E-Class</div>
+      </button>
+      <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
+        <i class="fa fa-file-alt"></i>
+        <div class="bottom-nav-label">Tasks</div>
+      </button>
+      <button class="bottom-nav-btn active" title="Results" onclick="window.location.href='results.html'">
+        <i class="fa fa-chart-bar"></i>
+        <div class="bottom-nav-label">Results</div>
+      </button>
+      <button class="bottom-nav-btn" title="Profile" onclick="window.location.href='profile.html'">
+        <i class="fa fa-user"></i>
+        <div class="bottom-nav-label">Me</div>
+      </button>
+    </nav>
+    <!-- Chart.js CDN for chart rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Demo result data
+      const resultData = [
+        {
+          session: "2024/2025",
+          term: "1st Term",
+          date: "2024-12-15",
+          results: [
+            { subject: "Mathematics", ca: 18, exam: 70, total: 88, grade: "A", remark: "Excellent" },
+            { subject: "English", ca: 16, exam: 66, total: 82, grade: "A", remark: "Excellent" },
+            { subject: "Biology", ca: 14, exam: 58, total: 72, grade: "B", remark: "Good" },
+            { subject: "Chemistry", ca: 12, exam: 50, total: 62, grade: "C", remark: "Fair" }
+          ]
+        },
+        {
+          session: "2024/2025",
+          term: "2nd Term",
+          date: "2025-03-28",
+          results: [
+            { subject: "Mathematics", ca: 17, exam: 65, total: 82, grade: "A", remark: "Excellent" },
+            { subject: "English", ca: 15, exam: 60, total: 75, grade: "B", remark: "Good" },
+            { subject: "Biology", ca: 13, exam: 57, total: 70, grade: "B", remark: "Good" },
+            { subject: "Chemistry", ca: 13, exam: 56, total: 69, grade: "C", remark: "Fair" }
+          ]
+        },
+        {
+          session: "2023/2024",
+          term: "3rd Term",
+          date: "2024-07-18",
+          results: [
+            { subject: "Mathematics", ca: 17, exam: 63, total: 80, grade: "A", remark: "Excellent" },
+            { subject: "English", ca: 14, exam: 60, total: 74, grade: "B", remark: "Good" },
+            { subject: "Biology", ca: 12, exam: 50, total: 62, grade: "C", remark: "Fair" },
+            { subject: "Chemistry", ca: 10, exam: 48, total: 58, grade: "D", remark: "Pass" }
+          ]
+        }
+      ];
+
+      // For demo sessions/terms
+      const sessions = [...new Set(resultData.map(r => r.session))];
+      const terms = [...new Set(resultData.map(r => r.term))];
+
+      // State
+      let selectedSession = sessions[0];
+      let selectedTerm = terms[0];
+
+      // Fill selectors
+      function fillSelectors() {
+        const ses = document.getElementById("sessionSelect");
+        ses.innerHTML = sessions.map(s => `<option value="${s}">${s}</option>`).join("");
+        ses.value = selectedSession;
+
+        const ter = document.getElementById("termSelect");
+        ter.innerHTML = terms.map(t => `<option value="${t}">${t}</option>`).join("");
+        ter.value = selectedTerm;
+
+        // Recent results dropdown
+        const recentSel = document.getElementById("recentResultSelect");
+        recentSel.innerHTML = `<option value="">Recent Results</option>` +
+          resultData.map((r, i) =>
+            `<option value="${i}">${r.session}, ${r.term} (${r.date})</option>`
+          ).join("");
+      }
+      // Fill recent result cards
+      function fillRecentResultsList() {
+        const list = document.getElementById("recentResultsList");
+        list.innerHTML = resultData.map((r, i) => `
+          <div class="recent-result-card" onclick="selectRecentResultCard(${i})">
+            <div class="recent-result-title">${r.session}, ${r.term}</div>
+            <div class="recent-result-meta">${r.date}</div>
+          </div>
+        `).join("");
+      }
+      // Select recent from card or dropdown
+      function selectRecentResultCard(index) {
+        const r = resultData[index];
+        selectedSession = r.session;
+        selectedTerm = r.term;
+        refreshResults();
+        document.getElementById("sessionSelect").value = selectedSession;
+        document.getElementById("termSelect").value = selectedTerm;
+        document.getElementById("recentResultSelect").value = index;
+      }
+      function selectRecentResult() {
+        const idx = document.getElementById("recentResultSelect").value;
+        if (idx !== "") selectRecentResultCard(idx);
+      }
+      // Performance summary (average, best, etc)
+      function fillPerformanceSummary() {
+        const r = getCurrentResult();
+        if (!r) return;
+        const totals = r.results.map(x => x.total);
+        const average = totals.reduce((a,b) => a+b, 0) / totals.length;
+        const best = Math.max(...totals);
+        const worst = Math.min(...totals);
+        const grades = r.results.map(x => x.grade);
+        let gradeCounts = {};
+        grades.forEach(g => gradeCounts[g] = (gradeCounts[g]||0)+1);
+        const summary = document.getElementById("performanceSummary");
+        summary.innerHTML = `
+          <span class="perf-item">Average: <b>${average.toFixed(1)}</b></span>
+          <span class="perf-item">Best: <b>${best}</b></span>
+          <span class="perf-item">Lowest: <b>${worst}</b></span>
+          <span class="perf-item">Grade: <b>${grades[0]}</b></span>
+        `;
+      }
+      // Get currently selected result
+      function getCurrentResult() {
+        return resultData.find(r => r.session === selectedSession && r.term === selectedTerm);
+      }
+      // Fill results table
+      function fillResultsTable() {
+        const r = getCurrentResult();
+        const tbody = document.getElementById("resultsTable").querySelector("tbody");
+        if (!r) {
+          tbody.innerHTML = `<tr><td colspan="6">No result found for selected session/term.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = r.results.map(res => `
+          <tr>
+            <td>${res.subject}</td>
+            <td>${res.ca}</td>
+            <td>${res.exam}</td>
+            <td>${res.total}</td>
+            <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade}</td>
+            <td>${res.remark}</td>
+          </tr>
+        `).join("");
+      }
+      // Render chart
+      let chart;
+      function renderResultChart() {
+        const r = getCurrentResult();
+        if (!r) return;
+        const ctx = document.getElementById("resultChart").getContext("2d");
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: r.results.map(x => x.subject),
+            datasets: [{
+              label: 'Total Score',
+              data: r.results.map(x => x.total),
+              backgroundColor: r.results.map(x =>
+                x.grade === "A" ? "#18ba89" : x.grade === "D" ? "#e74c3c" : "#f39c12"
+              ),
+              borderRadius: 8,
+              barPercentage: 0.6
+            }]
+          },
+          options: {
+            plugins: { legend: { display: false }},
+            scales: {
+              y: { beginAtZero: true, max: 100, grid: {color: "#ddeaff"} },
+              x: { grid: {color: "#e3eefd"} }
+            }
+          }
+        });
+      }
+      // Download as PDF (demo: just alert, real: call PDF service)
+      function downloadCurrentResult() {
+        const r = getCurrentResult();
+        if (!r) { alert("No result to download!"); return; }
+        alert(`Download initiated for ${r.session}, ${r.term} result! (Integrate PDF generation here)`);
+      }
+      // Main refresh
+      function refreshResults() {
+        selectedSession = document.getElementById("sessionSelect").value;
+        selectedTerm = document.getElementById("termSelect").value;
+        fillPerformanceSummary();
+        fillResultsTable();
+        renderResultChart();
+      }
+      // On load
+      fillSelectors();
+      fillRecentResultsList();
+      refreshResults();
+    </script>
+  </div>
+</body>
+</html>

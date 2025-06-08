@@ -585,8 +585,7 @@
         let filteredData = [];
         let currentPage = 1;
         const pageSize = 15;
-
-        // Fetch students from backend
+// Fetch students from backend
         async function fetchStudents(filters = {}) {
             let url = '/api/students';
             const params = Object.keys(filters)
@@ -596,15 +595,28 @@
             if (params) url += '?' + params;
 
             const token = localStorage.getItem('student_token');
-            const res = await fetch(url, {
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
-            if(res.ok) {
-                const data = await res.json();
-                studentsData = data.students || [];
-                filteredData = studentsData;
-                renderStudentsTable();
-            } else {
+            try {
+                const res = await fetch(url, {
+                    headers: token ? { Authorization: 'Bearer ' + token } : {}
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    // FIX: Support backend {"students":{"student_id":[...]}}
+                    let studentsList = [];
+                    if (Array.isArray(data.students)) {
+                        studentsList = data.students;
+                    } else if (data.students && Array.isArray(data.students.student_id)) {
+                        studentsList = data.students.student_id;
+                    }
+                    studentsData = studentsList;
+                    filteredData = studentsData;
+                    renderStudentsTable();
+                } else {
+                    studentsData = [];
+                    filteredData = [];
+                    renderStudentsTable();
+                }
+            } catch (err) {
                 studentsData = [];
                 filteredData = [];
                 renderStudentsTable();

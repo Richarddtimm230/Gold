@@ -603,7 +603,7 @@
     async function fetchResultsAndRender() {
       const statusEl = document.getElementById('resultsStatus');
       try {
-        const response = await fetch('/api/results');
+        const response = await fetch('https://gold-1-z03x.onrender.com/api/results');
         if (!response.ok) throw new Error('Network response was not ok');
         const results = await response.json();
         renderResultsTable(results);
@@ -709,9 +709,9 @@
       if (!Object.keys(gradeCounts).length) {
         gradeCounts["No Data"] = 1;
       }
-      if (window.resultsStatsChart) {
-        window.resultsStatsChart.destroy();
-      }
+      if (window.resultsStatsChart && typeof window.resultsStatsChart.destroy === "function") {
+    window.resultsStatsChart.destroy();
+}
       const ctx = document.getElementById('resultsStatsChart').getContext('2d');
       window.resultsStatsChart = new Chart(ctx, {
         type: 'bar',

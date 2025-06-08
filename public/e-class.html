@@ -46,7 +46,7 @@
       max-width: 900px;
       width: 100%;
       margin: 0 auto;
-      padding: 0 2vw 80px 2vw;
+      padding: 0 2vw 90px 2vw;
       display: flex;
       flex-direction: column;
       gap: 30px;
@@ -172,7 +172,167 @@
     .join-btn:active, .join-btn:hover {
       background: #12ab7a;
     }
-    /* Class info/modal */
+
+    /* Chat Section */
+    .chat-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 0 0 0 0;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      min-height: 410px;
+      height: 410px;
+      overflow: hidden;
+      position: relative;
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--accent2);
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom: 1px solid #e3eefd;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .chat-users-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      max-width: 60vw;
+    }
+    .chat-user-avatar {
+      width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #ddeaff;
+      border: 2px solid #e3eefd; cursor: pointer;
+      transition: border 0.15s;
+    }
+    .chat-user-avatar:hover {
+      border: 2px solid var(--primary);
+    }
+    .chat-messages {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 19px 13px 10px 13px;
+      background: #f6f8fa;
+      min-height: 0;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100vw;
+    }
+    .chat-message {
+      display: flex;
+      align-items: flex-end;
+      margin-bottom: 10px;
+      position: relative;
+      max-width: 95%;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .chat-message.sent { flex-direction: row-reverse; }
+    .chat-message .chat-bubble {
+      background: #ddeaff;
+      color: #22305a;
+      border-radius: 12px 12px 3px 12px;
+      padding: 9px 14px;
+      margin: 0 8px;
+      max-width: 70vw;
+      min-width: 30px;
+      font-size: 1.02rem;
+      word-break: break-word;
+      transition: background 0.16s;
+      box-shadow: 0 1px 6px #ddeaff55;
+      position: relative;
+    }
+    .chat-message.sent .chat-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 12px 12px 12px 3px;
+    }
+    .chat-message .chat-meta {
+      font-size: 0.83rem;
+      color: #a6b1d0;
+      margin: 0 6px;
+    }
+    .chat-message.tagged {
+      background: #fffbe8;
+    }
+    .chat-bubble .audio-msg {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .chat-bubble .audio-msg .fa-play {
+      font-size: 1.2rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .chat-bubble .attached-file {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--primary);
+      font-size: 0.98rem;
+    }
+    .chat-bubble .tagged-ref {
+      background: #fff6c2;
+      color: #856404;
+      border-radius: 7px;
+      padding: 3px 7px;
+      margin-bottom: 5px;
+      font-size: 0.92rem;
+      display: inline-block;
+    }
+    .chat-input-panel {
+      display: flex;
+      align-items: center;
+      padding: 11px 10px;
+      border-top: 1px solid #e3eefd;
+      background: #f6f8fa;
+      gap: 10px;
+      width: 100%;
+      max-width: 100vw;
+    }
+    .chat-input {
+      flex: 1;
+      border-radius: 8px;
+      padding: 9px 12px;
+      border: 1.4px solid #dbe2ee;
+      background: #fff;
+      font-size: 1.02rem;
+      outline: none;
+      margin-right: 6px;
+      min-width: 0;
+    }
+    .chat-action-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .chat-action-btn:active, .chat-action-btn:hover {
+      background: #18308b;
+    }
+    .chat-upload-label, .chat-audio-label {
+      cursor: pointer;
+      margin: 0 6px;
+    }
+    .chat-upload-input, .chat-audio-input {
+      display: none;
+    }
+    /* Private chat modal */
     .modal-overlay {
       display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
       background: rgba(20,40,100,0.16); z-index: 2000;
@@ -202,117 +362,39 @@
       from { opacity: 0; transform: translateY(30px);}
       to { opacity: 1; transform: none;}
     }
-    /* Materials */
-    .material-list {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      margin-top: 6px;
-      margin-bottom: 10px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .material-item {
-      background: var(--accent2);
-      border-radius: 8px;
-      padding: 10px 13px;
-      font-size: 0.99rem;
-      color: var(--primary);
-      display: flex; align-items: center; gap: 7px;
-      box-shadow: 0 1px 5px #ddeaff60;
-      margin-bottom: 3px;
-      text-decoration: none;
-      transition: background 0.1s;
-      max-width: 100%;
-      box-sizing: border-box;
-      overflow-x: auto;
-    }
-    .material-item:hover {
-      background: var(--accent);
-    }
-    /* Attendance */
-    .attendance-summary {
-      font-size: 1.07rem;
-      color: var(--primary);
-      font-weight: 600;
-      margin-bottom: 7px;
-    }
-    .attendance-records {
-      max-height: 140px;
-      overflow-y: auto;
-      border-radius: 7px;
-      background: var(--accent2);
-      padding: 9px 7px;
-      font-size: 0.99rem;
-      box-shadow: 0 1px 4px #ddeaff60;
-      margin-bottom: 7px;
-    }
-    .attendance-record {
-      padding: 3px 0;
-      color: #3a4a80;
-      border-bottom: 1px solid #e3eefd;
-    }
+    /* Materials, Attendance, Settings, etc (same as before) */
+    .material-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; margin-bottom: 10px; }
+    .material-item { background: var(--accent2); border-radius: 8px; padding: 10px 13px; font-size: 0.99rem; color: var(--primary); display: flex; align-items: center; gap: 7px; box-shadow: 0 1px 5px #ddeaff60; margin-bottom: 3px; text-decoration: none; transition: background 0.1s; }
+    .material-item:hover { background: var(--accent);}
+    .attendance-summary { font-size: 1.07rem; color: var(--primary); font-weight: 600; margin-bottom: 7px; }
+    .attendance-records { max-height: 140px; overflow-y: auto; border-radius: 7px; background: var(--accent2); padding: 9px 7px; font-size: 0.99rem; box-shadow: 0 1px 4px #ddeaff60; margin-bottom: 7px; }
+    .attendance-record { padding: 3px 0; color: #3a4a80; border-bottom: 1px solid #e3eefd; }
     .attendance-record:last-child { border-bottom: none; }
-    /* Settings */
-    .settings-list {
-      display: flex; flex-direction: column; gap: 12px;
-      margin-bottom: 10px;
-    }
-    .settings-item {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--accent2);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 1.05rem;
-      color: var(--primary);
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 22px;
-    }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #ccd8ee;
-      border-radius: 22px;
-      transition: 0.2s;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 17px; width: 17px; left: 3px; bottom: 2.5px;
-      background: var(--primary);
-      border-radius: 50%;
-      transition: 0.2s;
-    }
-    .switch input:checked + .slider {
-      background: var(--accent);
-    }
-    .switch input:checked + .slider:before {
-      transform: translateX(15px);
-      background: var(--success);
-    }
-    /* Responsive */
-    @media (max-width: 900px) {
-      .eclass-header, .eclass-main { max-width: 100vw; }
-    }
+    .settings-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
+    .settings-item { display: flex; justify-content: space-between; align-items: center; background: var(--accent2); border-radius: 8px; padding: 12px 16px; font-size: 1.05rem; color: var(--primary);}
+    .switch { position: relative; display: inline-block; width: 38px; height: 22px;}
+    .switch input { opacity: 0; width: 0; height: 0;}
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccd8ee; border-radius: 22px; transition: 0.2s;}
+    .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 2.5px; background: var(--primary); border-radius: 50%; transition: 0.2s;}
+    .switch input:checked + .slider { background: var(--accent);}
+    .switch input:checked + .slider:before { transform: translateX(15px); background: var(--success);}
     @media (max-width: 650px) {
       .eclass-main { padding: 0 2vw 90px 2vw; }
       .eclass-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .eclass-title { font-size: 1.13rem; }
-      .eclass-section { padding: 16px 7px 14px 7px; }
-      .section-title { font-size: 1.01rem; }
+      .eclass-title { font-size: 1.13rem;}
+      .eclass-section { padding: 16px 7px 14px 7px;}
+      .section-title { font-size: 1.01rem;}
       .class-table th, .class-table td { font-size: 0.95rem; max-width: 90px;}
       .modal-card { width: 97vw; max-width: 99vw; padding: 19px 3vw 17px 3vw;}
+      .chat-section { min-height: 300px; height: 320px;}
+      .chat-messages { max-width: 99vw;}
+      .chat-bubble { max-width: 80vw;}
     }
     @media (max-width: 430px) {
       .eclass-main { padding: 0 0 80px 0; }
-      .eclass-section { padding: 10px 2vw 8px 2vw;}
+      .eclass-section, .chat-section { padding: 10px 2vw 8px 2vw;}
       .modal-card { padding: 10px 2vw 8px 2vw;}
     }
-    /* Bottom nav sticky for mobile */
     @media (max-width: 700px) {
       body { padding-bottom: 68px !important; }
       .bottom-nav {
@@ -393,6 +475,28 @@
           </tbody>
         </table>
       </section>
+      <!-- Subject Group Chat Section -->
+      <section class="chat-section" id="groupChatSection">
+        <div class="chat-header">
+          Class Group Chat
+          <div class="chat-users-list" id="chatUsers">
+            <!-- Avatars -->
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <form class="chat-input-panel" onsubmit="return sendMessage(event)">
+          <label class="chat-audio-label" title="Send Audio">
+            <input type="file" class="chat-audio-input" accept="audio/*" onchange="uploadAudio(event)">
+            <i class="fa fa-microphone"></i>
+          </label>
+          <label class="chat-upload-label" title="Upload File">
+            <input type="file" class="chat-upload-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4,.mp3" onchange="uploadFile(event)">
+            <i class="fa fa-paperclip"></i>
+          </label>
+          <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." autocomplete="off">
+          <button class="chat-action-btn" type="submit"><i class="fa fa-paper-plane"></i></button>
+        </form>
+      </section>
       <!-- Class Materials Section -->
       <section class="eclass-section">
         <div class="section-title"><i class="fa fa-book"></i> Class Materials & Resources</div>
@@ -407,6 +511,7 @@
         <div class="attendance-records" id="attendanceRecords"></div>
       </section>
     </main>
+
     <!-- Schedule Modal -->
     <div class="modal-overlay" id="scheduleModal">
       <div class="modal-card">
@@ -443,6 +548,18 @@
             </label>
           </div>
         </div>
+      </div>
+    </div>
+    <!-- Private Chat Modal -->
+    <div class="modal-overlay" id="privateChatModal">
+      <div class="modal-card" style="width:98vw;max-width:430px;">
+        <button class="modal-close" onclick="closeModal('privateChatModal')"><i class="fa fa-times"></i></button>
+        <div class="section-title" id="privateChatTitle"><i class="fa fa-user"></i> Private Chat</div>
+        <div class="chat-messages" id="privateChatMessages" style="height:220px;min-height:150px;"></div>
+        <form class="chat-input-panel" onsubmit="return sendPrivateMessage(event)">
+          <input type="text" class="chat-input" id="privateChatInput" placeholder="Type a message..." autocomplete="off">
+          <button class="chat-action-btn" type="submit"><i class="fa fa-paper-plane"></i></button>
+        </form>
       </div>
     </div>
     <!-- Sticky Bottom Nav (matches dashboard) -->
@@ -495,6 +612,27 @@
       {day: "Thursday", classes: [ {time: "10:00", subject: "English"} ]},
       {day: "Friday", classes: [ {time: "09:00", subject: "Mathematics"} ]}
     ];
+    const demoUsers = [
+      {id: 1, name: "Janet", avatar: "https://ui-avatars.com/api/?name=Janet&background=2647a6&color=fff"},
+      {id: 2, name: "Ali", avatar: "https://ui-avatars.com/api/?name=Ali&background=2647a6&color=fff"},
+      {id: 3, name: "Blessing", avatar: "https://ui-avatars.com/api/?name=Blessing&background=2647a6&color=fff"},
+      {id: 4, name: "Teacher", avatar: "https://ui-avatars.com/api/?name=Teacher&background=2647a6&color=fff"}
+    ];
+    // Demo group chat messages
+    let demoGroupMessages = [
+      {id: 1, userId: 1, name: "Janet", time: "09:10", text: "Good morning everyone! 😊"},
+      {id: 2, userId: 2, name: "Ali", time: "09:11", text: "Morning Janet!", audio: null, file: null},
+      {id: 3, userId: 3, name: "Blessing", time: "09:12", text: "Please, where do I find the Maths notes?", file: null, audio: null},
+      {id: 4, userId: 4, name: "Teacher", time: "09:13", text: "Check the materials section. I'll upload the new one after class.", file: null, audio: null}
+    ];
+    let taggedMessage = null;
+
+    // Demo private chat store (per user)
+    let demoPrivateChats = {
+      2: [{from: 1, to: 2, time: "09:15", text: "Hi Ali, can you help with homework?"}]
+    };
+    let privateChatUser = null;
+
     // Populate classes table
     function populateClasses() {
       const tbody = document.querySelector("#classTable tbody");
@@ -543,7 +681,7 @@
           ${a.date}: <span style="color:${a.status === "Present" ? "green" : "red"};font-weight:600">${a.status}</span>
         </div>`).join("");
     }
-    // Modal functions
+    // Schedule modal
     function openScheduleModal() {
       document.getElementById("scheduleModal").classList.add("active");
       const el = document.getElementById("scheduleContent");
@@ -587,10 +725,152 @@
     }
     window.addEventListener('resize', showBottomNav);
     showBottomNav();
+
+    // ===== Chat UI Logic =====
+    function myUserId() { return 1; }
+    function getUserById(id) { return demoUsers.find(u => u.id === id) || demoUsers[0]; }
+    function renderChatUsers() {
+      const el = document.getElementById("chatUsers");
+      el.innerHTML = "";
+      demoUsers.forEach(u => {
+        const img = document.createElement("img");
+        img.className = "chat-user-avatar";
+        img.src = u.avatar;
+        img.title = u.name;
+        img.onclick = () => openPrivateChat(u.id, u.name);
+        el.appendChild(img);
+      });
+    }
+    function renderChatMessages() {
+      const el = document.getElementById("chatMessages");
+      el.innerHTML = "";
+      demoGroupMessages.forEach((msg, i) => {
+        const div = document.createElement("div");
+        div.className = "chat-message" + (msg.userId === myUserId() ? " sent" : "") + (msg.id === taggedMessage ? " tagged" : "");
+        // Swipe-to-tag (WhatsApp style)
+        let startX;
+        div.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; });
+        div.addEventListener('touchmove', function(e) {
+          if (!startX) return;
+          let dx = e.touches[0].clientX - startX;
+          if (Math.abs(dx) > 60) {
+            tagMessage(msg.id);
+            startX = null;
+          }
+        });
+        div.onclick = function(e) {
+          if (e.detail === 2) tagMessage(msg.id);
+        };
+        let taggedRef = msg.tagged ? `<div class="tagged-ref">@${msg.tagged.name}: ${msg.tagged.text}</div>` : "";
+        div.innerHTML = `
+          <div class="chat-bubble">
+            ${taggedRef}
+            ${msg.audio ? `<div class="audio-msg"><i class="fa fa-play"></i><audio src="${msg.audio}" controls style="display:none"></audio>Audio Message</div>` : ""}
+            ${msg.file ? `<div class="attached-file"><i class="fa fa-paperclip"></i> <a href="${msg.file}" target="_blank">File</a></div>` : ""}
+            ${msg.text}
+          </div>
+          <div class="chat-meta">${getUserById(msg.userId).name} • ${msg.time}</div>
+        `;
+        el.appendChild(div);
+      });
+      el.scrollTop = el.scrollHeight;
+    }
+    function tagMessage(id) {
+      taggedMessage = id;
+      renderChatMessages();
+    }
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("chatInput");
+      let text = input.value.trim();
+      if (!text && !pendingAudio && !pendingFile) return false;
+      let msgObj = {
+        id: demoGroupMessages.length + 1,
+        userId: myUserId(),
+        name: getUserById(myUserId()).name,
+        time: new Date().toLocaleTimeString().slice(0,5),
+        text: text,
+      };
+      if (taggedMessage) {
+        let taggedMsg = demoGroupMessages.find(m => m.id === taggedMessage);
+        if (taggedMsg) msgObj.tagged = {name: getUserById(taggedMsg.userId).name, text: taggedMsg.text};
+        taggedMessage = null;
+      }
+      if (pendingAudio) {
+        msgObj.audio = pendingAudio;
+        pendingAudio = null;
+      }
+      if (pendingFile) {
+        msgObj.file = pendingFile;
+        pendingFile = null;
+      }
+      demoGroupMessages.push(msgObj);
+      input.value = "";
+      renderChatMessages();
+      return false;
+    }
+    // Audio/file upload
+    let pendingAudio = null, pendingFile = null;
+    function uploadAudio(event) {
+      const file = event.target.files[0];
+      if (file) {
+        pendingAudio = URL.createObjectURL(file);
+        document.getElementById("chatInput").value = "[Audio message ready]";
+      }
+    }
+    function uploadFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        pendingFile = URL.createObjectURL(file);
+        document.getElementById("chatInput").value = "[File ready]";
+      }
+    }
+    // Private chat
+    function openPrivateChat(userId, userName) {
+      privateChatUser = userId;
+      document.getElementById("privateChatModal").classList.add("active");
+      document.getElementById("privateChatTitle").innerHTML = `<i class="fa fa-user"></i> Chat with ${userName}`;
+      renderPrivateChat();
+    }
+    function renderPrivateChat() {
+      const msgs = demoPrivateChats[privateChatUser] || [];
+      const el = document.getElementById("privateChatMessages");
+      el.innerHTML = "";
+      msgs.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "chat-message" + (msg.from === myUserId() ? " sent" : "");
+        div.innerHTML = `
+          <div class="chat-bubble">${msg.text}</div>
+          <div class="chat-meta">${getUserById(msg.from).name} • ${msg.time}</div>
+        `;
+        el.appendChild(div);
+      });
+      el.scrollTop = el.scrollHeight;
+    }
+    function sendPrivateMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("privateChatInput");
+      let text = input.value.trim();
+      if (!text) return false;
+      let msgObj = {
+        from: myUserId(),
+        to: privateChatUser,
+        time: new Date().toLocaleTimeString().slice(0,5),
+        text: text
+      };
+      if (!demoPrivateChats[privateChatUser]) demoPrivateChats[privateChatUser] = [];
+      demoPrivateChats[privateChatUser].push(msgObj);
+      input.value = "";
+      renderPrivateChat();
+      return false;
+    }
+
     // Run on load
     populateClasses();
     populateMaterials();
     populateAttendance();
+    renderChatUsers();
+    renderChatMessages();
   </script>
 </body>
 </html>

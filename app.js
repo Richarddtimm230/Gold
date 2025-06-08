@@ -42,7 +42,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/staff', require('./routes/staff'));
 app.use('/api/auth', authRoute);
-app.use('/api/dashboard', dashboardRoute);
+app.use('/api', dashboardRoute);
 
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') return res.status(403).json({ error: "Forbidden" });

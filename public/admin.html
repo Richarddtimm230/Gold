@@ -13,6 +13,31 @@ body {
     background: #f7f9fc;
     color: #333;
 }
+
+#pageSpinnerOverlay {
+  position: fixed;
+  z-index: 99999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s;
+}
+
+.spinner {
+  border: 6px solid #ddeaff;
+  border-top: 6px solid #2647a6;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spinner-spin 1s linear infinite;
+}
+
+@keyframes spinner-spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}        
 .sidebar {
     position: fixed;
     left: 0; top: 0; bottom: 0; width: 240px;
@@ -174,6 +199,9 @@ header {
     </style>
 </head>
 <body>
+    <div id="pageSpinnerOverlay">
+  <div class="spinner"></div>
+    </div>
 <button class="menu-toggle" id="menuToggleBtn">&#9776;</button>
 <div class="sidebar" id="sidebarNav">
     <div class="profile">
@@ -240,6 +268,20 @@ header {
 <div class="support-tab">Support</div>
 <div class="eclass-fab">e-Class</div>
 <script>
+    // Spinner overlay logic
+document.addEventListener('DOMContentLoaded', () => {
+  // Show overlay immediately (in case of fast-loading browsers)
+  const spinner = document.getElementById('pageSpinnerOverlay');
+  if (spinner) spinner.style.display = 'flex';
+
+  // Minimum spinner time (5 seconds), then hide
+  setTimeout(() => {
+    if (spinner) {
+      spinner.style.opacity = '0';
+      setTimeout(() => { spinner.style.display = 'none'; }, 400); // wait for fade
+    }
+  }, 5000);
+});
 // Responsive sidebar toggle
 const sidebar = document.getElementById('sidebarNav');
 const menuToggleBtn = document.getElementById('menuToggleBtn');

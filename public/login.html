@@ -510,7 +510,9 @@
 
           if (res.ok && data?.token) {
             // Store JWT token
-            localStorage.setItem('student_token', data.token);
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('student_token', data.token); // Add this line
+
 
             // Role-based redirect (robust and extensible)
             const role = data.user?.role?.toLowerCase();

@@ -24,6 +24,9 @@
       --accent: #ddeaff;
       --accent2: #e3eefd;
       --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
+      --highlight: #f9f5e3;
+      --success: #18ba89;
+      --danger: #e74c3c;
     }
 
     html, body {
@@ -101,7 +104,6 @@
     .sidebar-bottom {
       margin-bottom: 12px; margin-top: 20px;
     }
-
     /* MAIN CONTENT */
     .dashboard-main {
       flex: 1;
@@ -152,8 +154,18 @@
       color: #a6b1d0;
       cursor: pointer;
       transition: color var(--transition);
+      position: relative;
     }
     .topbar-actions .icon:hover { color: var(--primary);}
+    .topbar-actions .notif-dot {
+      position: absolute;
+      right: 2px; top: 2px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+      border: 2px solid #fff;
+      display: inline-block;
+    }
     .topbar-profile {
       display: flex; align-items: center; gap: 11px;
       background: var(--accent2);
@@ -163,6 +175,12 @@
       font-weight: 600;
       min-width: 0;
       box-shadow: 0 3px 12px #eaf3ff73;
+      cursor: pointer;
+      transition: box-shadow var(--transition), background var(--transition);
+    }
+    .topbar-profile:hover {
+      background: var(--accent);
+      box-shadow: 0 6px 15px #eaf3ff66;
     }
     .topbar-profile-img {
       width: 36px; height: 36px;
@@ -208,15 +226,17 @@
       cursor: pointer;
       transition: box-shadow var(--transition), transform var(--transition), border var(--transition);
       border: 2px solid transparent;
+      position: relative;
     }
     .widget-card:hover, .widget-card:focus-visible {
       box-shadow: var(--shadow-hover);
       border: 2px solid var(--primary);
       transform: scale(1.045);
       outline: none;
+      z-index: 2;
     }
     .widget-card .icon {
-      font-size: 1.35rem;
+      font-size: 1.55rem;
       margin-bottom: 10px;
       color: var(--primary);
     }
@@ -224,18 +244,20 @@
       font-weight: 700;
       color: #2f365a;
       margin-bottom: 2px;
-      font-size: 1.04rem;
+      font-size: 1.08rem;
+      letter-spacing: 0.02em;
     }
     /* My Courses/Groups */
     .courses-section {
       margin-top: 12px;
     }
     .section-title {
-      font-size: 1.14rem;
+      font-size: 1.18rem;
       font-weight: 800;
       color: var(--primary);
       margin-bottom: 12px;
       margin-top: 7px;
+      letter-spacing: 0.02em;
     }
     .courses-list {
       display: flex;
@@ -264,13 +286,15 @@
       background: var(--accent);
       box-shadow: var(--shadow-hover);
       transform: scale(1.04);
+      z-index: 1;
     }
     .course-title {
-      font-weight: 700; font-size: 1.02rem; margin-bottom: 2px;
+      font-weight: 700; font-size: 1.08rem; margin-bottom: 2px;
       color: var(--primary);
+      letter-spacing: 0.01em;
     }
     .course-meta {
-      color: #7a90b3; font-size: 0.94rem; margin-bottom: 3px;
+      color: #7a90b3; font-size: 0.96rem; margin-bottom: 3px;
     }
     .course-users {
       display: flex; align-items: center; gap: 0.2em; font-size: 1.1rem; margin-top: 2px;
@@ -328,6 +352,46 @@
       width: 31px; height: 31px; border-radius: 50%; object-fit: cover; background: #ddeaff;
       border: 2px solid #e3eefd;
     }
+    /* NEWS CARD */
+    .news-card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(38,71,166,0.10);
+      padding: 20px 22px 18px 22px;
+      margin-top: 8px;
+      margin-bottom: 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: flex-start;
+    }
+    .news-title {
+      font-size: 1.13rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .news-item {
+      padding: 7px 0 7px 0;
+      font-size: 1.02rem;
+      border-bottom: 1px solid #e3eefd;
+      margin-bottom: 5px;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 19px;
+      font-size: 0.99rem;
+      font-weight: 600;
+      margin-top: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+    .news-btn:hover { background: #18308b; }
     /* Responsive */
     @media (max-width: 1100px) {
       .main-content { padding: 0 13px 0 13px; }
@@ -358,6 +422,7 @@
     @media (max-width: 480px) {
       .main-content { padding: 0 2vw 0 2vw;}
       .topbar {padding-left: 2vw; padding-right: 2vw;}
+      .news-card { padding: 12px 5px 10px 5px; }
     }
   </style>
 </head>
@@ -392,9 +457,12 @@
         <i class="fa fa-search"></i>
       </div>
       <div class="topbar-actions">
-        <span class="icon" title="Notifications"><i class="fa fa-bell"></i></span>
+        <span class="icon" title="Notifications">
+          <i class="fa fa-bell"></i>
+          <span class="notif-dot" id="notifDot" style="display:none;"></span>
+        </span>
       </div>
-      <div class="topbar-profile">
+      <div class="topbar-profile" tabindex="0" onclick="window.location.href='profile.html'">
         <img class="topbar-profile-img" id="profileAvatar" src="https://ui-avatars.com/api/?name=Student&background=2647a6&color=fff" alt="Student">
         <div class="topbar-profile-info">
           <div class="topbar-profile-name" id="profileName">Student Name</div>
@@ -482,8 +550,6 @@
   </aside>
 </div>
 <script>
-  // Demo/mock fill for dynamic dashboard parts, wire these up to your backend as before
-
   // Responsive: participant panel only on wide screens
   function toggleParticipantPanel() {
     const panel = document.getElementById('participantPanel');
@@ -524,7 +590,8 @@
       news: [
         { title: "Midterm Exams", date: "2025-06-05", summary: "Midterm exams start next week. Study hard!" },
         { title: "New Library Books", date: "2025-06-04", summary: "Check out the new science fiction collection." }
-      ]
+      ],
+      unread_notifications: 2
     };
 
     let data = defaultData;
@@ -543,6 +610,13 @@
       document.getElementById('profileAvatar').src = data.photo_url;
     } else if (data.name) {
       document.getElementById('profileAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name) + '&background=2647a6&color=fff';
+    }
+
+    // Notification dot
+    if (data.unread_notifications && data.unread_notifications > 0) {
+      document.getElementById('notifDot').style.display = 'inline-block';
+    } else {
+      document.getElementById('notifDot').style.display = 'none';
     }
 
     // Timetable (today)

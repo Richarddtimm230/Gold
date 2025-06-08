@@ -165,7 +165,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/results/:id - Update a result
+// PUT /api/results/:id - Update a result (full update)
 router.put('/:id', async (req, res) => {
   try {
     const update = req.body;
@@ -192,6 +192,43 @@ router.put('/:id', async (req, res) => {
     updated.class = classDoc && classDoc.exists ? { id: classDoc.id, ...classDoc.data() } : null;
     updated.subject = subjectDoc && subjectDoc.exists ? { id: subjectDoc.id, ...subjectDoc.data() } : null;
 
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/results/:id - Partial update (edit)
+router.patch('/:id', async (req, res) => {
+  try {
+    const update = req.body;
+    const docRef = resultCollection().doc(req.params.id);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: 'Result not found' });
+    }
+    await docRef.update(update);
+    const updated = (await docRef.get()).data();
+    updated.id = req.params.id;
+
+    // (Optional: Populate references if you want, or return raw)
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/results/:id/publish - Set status = "Published"
+router.patch('/:id/publish', async (req, res) => {
+  try {
+    const docRef = resultCollection().doc(req.params.id);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: 'Result not found' });
+    }
+    await docRef.update({ status: 'Published' });
+    const updated = (await docRef.get()).data();
+    updated.id = req.params.id;
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

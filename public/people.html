@@ -19,27 +19,44 @@
       --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
       --font-main: 'Inter', Arial, sans-serif;
     }
-/* Fix Quick Search input width */
+/* Sidebar should always be scrollable vertically */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto !important;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+}
+
+/* Make sure the search input and nav don't overflow */
+.sidebar .search {
+  padding: 0.7em 1.2em;
+  flex-shrink: 0;
+}
 .sidebar .search input {
   width: 100%;
-  box-sizing: border-box;
-  /* Add a max-width if the sidebar has excessive padding */
   max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
-/* Make sidebar scrollable on mobile */
-.sidebar {
-  overflow-y: auto;
-  /* Prevent the sidebar from extending out of viewport on mobile */
-  
-  -webkit-overflow-scrolling: touch; /* for momentum scrolling on iOS */
+/* Sidebar navigation should grow as needed but also scroll */
+.sidebar nav {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  min-height: 0; /* necessary for flexbox scrolling */
 }
 
-/* Optional: Make sure the sidebar takes the full height on mobile */
+/* On mobile, sidebar still fills viewport and is scrollable */
 @media (max-width: 750px) {
   .sidebar {
     height: 100vh;
     max-height: 100vh;
+    overflow-y: auto !important;
   }
 }
     html, body {

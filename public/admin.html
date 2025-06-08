@@ -7,6 +7,259 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f9fc;
+    color: #333;
+}
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    background: #fff;
+    border-right: 1px solid #e3e8ee;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+.profile {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e3e8ee;
+}
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+.name { font-weight: bold; }
+.role { color: #888; font-size: 13px; }
+.search {
+    padding: 8px 16px;
+}
+.search input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e3e8ee;
+    border-radius: 4px;
+    font-size: 15px;
+}
+.sidebar nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+}
+.sidebar nav a {
+    padding: 12px 20px;
+    color: #455a64;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    border-left: 4px solid transparent;
+    transition: background 0.2s, border 0.2s;
+}
+.sidebar nav a.active, .sidebar nav a:hover {
+    background: #e3e8ee;
+    border-left: 4px solid #007bff;
+    color: #007bff;
+}
+.main-content {
+    margin-left: 240px;
+    padding: 0 32px 32px 32px;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0 16px 0;
+    border-bottom: 1px solid #e3e8ee;
+    margin-bottom: 16px;
+}
+.school-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 23px;
+    font-weight: 600;
+}
+.logo {
+    width: 36px;
+    height: 36px;
+}
+.header-actions .icon {
+    margin-left: 22px;
+    font-size: 22px;
+    cursor: pointer;
+}
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+.card {
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 16px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    gap: 13px;
+}
+.card .icon {
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #eaf3fb;
+}
+.green { border-left: 5px solid #20c997;}
+.teal { border-left: 5px solid #17a2b8;}
+.red { border-left: 5px solid #dc3545;}
+.blue { border-left: 5px solid #007bff;}
+.purple { border-left: 5px solid #6f42c1;}
+.maroon { border-left: 5px solid #b22234;}
+.orange { border-left: 5px solid #ff9800;}
+.grey { border-left: 5px solid #757575;}
+.card .amount {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 2px 0;
+}
+.card .count {
+    font-size: 15px;
+    font-weight: 500;
+}
+.card .desc, .card .desc.small {
+    color: #888;
+    font-size: 13px;
+}
+.card .desc.small {
+    font-size: 12px;
+}
+.finance-summary {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    margin-bottom: 24px;
+    padding: 18px;
+}
+.finance-summary h3 {
+    margin: 0 0 13px 0;
+    font-weight: 600;
+}
+.fees-section {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+}
+.fees-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 19px 20px;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 250px;
+}
+.fees-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 7px;
+}
+.fees-card select {
+    margin-bottom: 5px;
+    padding: 6px;
+    border: 1px solid #e3e8ee;
+    border-radius: 4px;
+    font-size: 15px;
+}
+.install-app {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    background: #fff;
+    border-radius: 9px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+    padding: 18px 22px;
+    z-index: 10;
+    font-size: 15px;
+    max-width: 290px;
+}
+.install-app button {
+    background: #007bff;
+    color: #fff;
+    padding: 7px 17px;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    margin-top: 8px;
+    cursor: pointer;
+}
+.install-app button:hover {
+    background: #0069d9;
+}
+.support-tab {
+    position: fixed;
+    right: 0;
+    top: 40%;
+    background: #007bff;
+    color: #fff;
+    padding: 9px 18px;
+    border-radius: 7px 0 0 7px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 9;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    writing-mode: vertical-lr;
+    letter-spacing: 2px;
+    font-size: 15px;
+}
+.eclass-fab {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    background: #232c33;
+    color: #fff;
+    border-radius: 50%;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    box-shadow: 0 2px 9px rgba(0,0,0,0.12);
+    cursor: pointer;
+    z-index: 12;
+    font-weight: 500;
+}
+@media (max-width: 900px) {
+    .main-content { margin-left: 0; padding: 0 8px;}
+    .sidebar { position: static; width: 100%; }
+    .dashboard-cards, .fees-section {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .fees-section { flex-direction: column; }
+}
+    </style>
 </head>
 <body>
     <div class="sidebar">

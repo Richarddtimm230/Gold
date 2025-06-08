@@ -96,5 +96,21 @@
     </div>
     <div class="support-tab">Support</div>
     <div class="eclass-fab">e-Class</div>
+    <script>
+        // Spinner overlay logic
+document.addEventListener('DOMContentLoaded', () => {
+  // Show overlay immediately (in case of fast-loading browsers)
+  const spinner = document.getElementById('pageSpinnerOverlay');
+  if (spinner) spinner.style.display = 'flex';
+
+  // Minimum spinner time (5 seconds), then hide
+  setTimeout(() => {
+    if (spinner) {
+      spinner.style.opacity = '0';
+      setTimeout(() => { spinner.style.display = 'none'; }, 400); // wait for fade
+    }
+  }, 5000);
+});
+    </script>
 </body>
                     </html>

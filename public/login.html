@@ -5,7 +5,7 @@
   <title>Gold and Linc Schools | Portal Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Google Fonts: Inter for body, Montserrat for headings -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
@@ -162,127 +162,123 @@
       to   { opacity:1; transform:none;}
     }
     .glass-card .icon {
-      font-size: 2.1rem;
+      font-size: 2.6rem;
       color: var(--primary);
-      margin-bottom: 2px;
+      margin-bottom: 8px;
+      margin-top: 2px;
       text-align: center;
       width: 100%;
       display: block;
-      opacity: 0.95;
+      opacity: 0.97;
     }
     .glass-card h2 {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
-      font-size: 1.18rem;
+      font-size: 1.32rem;
       letter-spacing: 1px;
       margin-bottom: 23px;
       color: #1b2330;
       text-align: center;
     }
-    .login-form {
+    .glass-card label {
+      font-size: 1.06rem;
+      font-weight: 600;
+      color: #1657a6;
+      margin-bottom: 2px;
+      margin-top: 10px;
+      display: block;
+    }
+    .glass-card input[type="text"], .glass-card input[type="password"] {
       width: 100%;
-      display: flex;
-      flex-direction: column;
+      font-size: 1.09rem;
+      border-radius: 10px;
+      border: 1.5px solid #dbe2ee;
+      padding: 13px 12px;
+      background: #f3f6fc;
+      margin-bottom: 14px;
+      margin-top: 2px;
+      box-sizing: border-box;
+      transition: border .16s;
     }
-    .login-form label {
-      font-size: 0.99rem;
-      font-weight: 500;
-      margin-bottom: 4px;
-      color: #244;
-      letter-spacing: 0.3px;
-    }
-    .login-form input[type="email"], .login-form input[type="text"], .login-form input[type="password"] {
-      padding: 12px 13px;
-      border-radius: 8px;
-      border: 1.4px solid #dbe2ee;
-      font-size: 1.05rem;
-      margin-bottom: 18px;
-      background: rgba(247,250,255,0.93);
-      transition: border .16s, box-shadow .22s;
-    }
-    .login-form input:focus {
+    .glass-card input:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: #1657a6;
       background: #f0f5fd;
-      box-shadow: 0 0 0 2px rgba(22,87,166,0.11);
     }
     .input-group {
       position: relative;
-      display: flex;
-      flex-direction: column;
+      width: 100%;
     }
     .input-group .toggle-pw {
       position: absolute;
       right: 13px;
-      top: 39px;
+      top: 50%;
+      transform: translateY(-50%);
       background: none;
       border: none;
       color: #a3b7ce;
-      font-size: 1.08rem;
+      font-size: 1.13rem;
       cursor: pointer;
       padding: 2px 6px;
       z-index: 2;
       outline: none;
     }
-    .login-form .form-check {
+    .form-check {
       margin-bottom: 18px;
-      margin-left: 2px;
-      font-size: 0.97rem;
       display: flex;
       align-items: center;
       gap: 7px;
-    }
-    .login-form .form-check-input[type="checkbox"] {
-      width: 17px;
-      height: 17px;
-      border-radius: 4px;
-    }
-    .login-form .btn-primary {
-      padding: 11px 0;
-      background: var(--primary);
-      border-radius: 9px;
-      border: none;
-      font-size: 1.09rem;
-      font-weight: 700;
-      margin-bottom: 13px;
-      margin-top: 6px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 6px rgba(22,87,166,0.13);
-      transition: background .18s, box-shadow .18s;
+      font-size: 1.01rem;
       width: 100%;
     }
-    .login-form .btn-primary:hover, .login-form .btn-primary:focus {
-      background: #174e8b;
-      box-shadow: 0 5px 18px rgba(22,87,166,0.10);
+    .form-check-input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
     }
-    .login-form .row-links {
+    .btn-primary {
+      padding: 13px 0;
+      background: #1657a6;
+      border-radius: 9px;
+      border: none;
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+      margin-bottom: 13px;
+      margin-top: 6px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(22,87,166,0.13);
+      transition: background .18s, box-shadow .18s;
+      cursor: pointer;
+    }
+    .btn-primary:active, .btn-primary:focus { background: #174e8b; }
+    .row-links {
       display: flex;
       justify-content: space-between;
       margin-bottom: 13px;
-      font-size: 0.99rem;
-      gap: 12px;
-      flex-wrap: wrap;
+      font-size: 1.02rem;
+      gap: 16px;
+      width: 100%;
     }
-    .login-form .row-links a {
-      color: var(--primary);
+    .row-links a {
+      color: #1657a6;
       text-decoration: none;
       font-weight: 500;
-      opacity: 0.87;
+      opacity: 0.93;
       transition: opacity .15s;
     }
-    .login-form .row-links a:hover {
-      opacity: 1;
-      text-decoration: underline;
-    }
+    .row-links a:hover { opacity: 1; text-decoration: underline; }
     .or-divider {
       display: flex;
       align-items: center;
-      margin: 22px 0 13px 0;
+      margin: 18px 0 12px 0;
+      width: 100%;
     }
     .or-divider span {
-      margin: 0 14px;
+      margin: 0 10px;
       color: #aaa;
-      font-size: 0.98rem;
+      font-size: 1.01rem;
       font-weight: 600;
     }
     .or-divider:before, .or-divider:after {
@@ -297,12 +293,12 @@
       border: 1.3px solid #d1d8e0;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 1.03rem;
+      font-size: 1.05rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding: 9px 0;
+      padding: 11px 0;
       margin-bottom: 12px;
       cursor: pointer;
       transition: background .15s, box-shadow .18s;
@@ -315,32 +311,26 @@
     }
     .support-link {
       text-align: center;
-      margin-top: 18px;
-      font-size: 0.98rem;
-      color: #878787;
+      margin-top: 13px;
+      font-size: 1.02rem;
+      color: #1657a6;
+      width: 100%;
+      font-weight: 500;
     }
     .support-link a {
-      color: var(--primary);
+      color: #1657a6;
       text-decoration: none;
       font-weight: 500;
       transition: text-decoration .15s;
     }
-    .support-link a:hover {
-      text-decoration: underline;
+    .support-link a:hover { text-decoration: underline; }
+    #spinner {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      width: 100%;
     }
-
-    /* Responsive improvements */
-    @media (max-width: 900px) {
-      .login-page { flex-direction: column; width: 97vw; min-height: unset; }
-      .login-page .side { border-radius: 0; min-height: 160px; align-items: flex-start; }
-      .login-page .form-section { border-radius: 0; min-height: 430px; }
-      .login-card { margin: 30px auto 0 auto; }
-      .login-page .side .logo { width: 70px; height: 70px; }
-      .login-page .side .admission-btn { position: static; margin-bottom: 15px; }
-      .login-page .side .socials, .login-page .side .recaptcha { position: static; margin-top: 15px; }
-      .login-page .side .art { display: none; }
-    }
-    /* ======= FIXED: Header and side card cut-in-half on mobile ======= */
+    /* Side is hidden on mobile, only the card is shown and larger */
     @media (max-width: 700px) {
       .login-page {
         flex-direction: column;
@@ -348,81 +338,44 @@
         min-height: 100vh;
         box-shadow: none;
         border-radius: 0;
+        align-items: center;
+        justify-content: center;
       }
-      .login-page .side,
+      .login-page .side {
+        display: none !important;
+      }
       .login-page .form-section {
         width: 100vw;
         min-width: 0;
         border-radius: 0;
         box-shadow: none;
-        padding-left: 0;
-        padding-right: 0;
-      }
-      .login-page .side {
-        min-height: unset;
-        padding: 24px 0 10px 0;
+        padding: 0;
         align-items: center;
-        justify-content: flex-start;
-        position: static;
-      }
-      .login-page .side .admission-btn {
-        position: static;
-        margin: 0 0 12px 0;
-        width: 90vw;
-        max-width: 360px;
-        font-size: 1.05rem;
-      }
-      .login-page .side .logo {
-        width: 55px;
-        height: 55px;
-        margin-bottom: 10px;
-      }
-      .login-page .side h1 {
-        font-size: 1.03rem;
-        margin-bottom: 10px;
-        text-align: center;
-        width: 100%;
-      }
-      .login-page .side .info-row {
-        font-size: 0.96rem;
-        margin-bottom: 6px;
-        gap: 6px;
-        width: 100%;
         justify-content: center;
-      }
-      .login-page .side .socials {
-        position: static;
-        margin-top: 12px;
-        gap: 10px;
-        width: 100vw;
-        justify-content: center;
-      }
-      .login-page .side .art { display: none; }
-      .login-page .form-section {
-        padding-top: 10px;
-        padding-bottom: 20px;
-        align-items: flex-start;
-        justify-content: center;
+        display: flex;
       }
       .glass-card {
         max-width: 99vw;
         width: 97vw;
-        padding: 16px 2vw 10px 2vw;
-        box-shadow: none;
-        border-radius: 13px;
+        padding: 32px 5vw 28px 5vw;
+        box-shadow: 0 8px 32px 0 rgba(16, 57, 128, 0.10);
+        border-radius: 22px;
         margin: 0 auto;
       }
     }
     @media (max-width: 430px) {
-      .glass-card { padding: 10vw 2vw 6vw 2vw; }
-      .login-page .side .logo { width: 36px; height: 36px; }
-      .login-form input, .login-form button, .google-btn { font-size: 0.98rem; }
+      .glass-card { padding: 8vw 2vw 8vw 2vw; }
+      .glass-card h2 { font-size: 1.09rem; }
+    }
+    @media (max-width: 340px) {
+      .glass-card { padding: 5vw 1vw 5vw 1vw; }
+      .glass-card h2 { font-size: 0.98rem; }
     }
   </style>
 </head>
 <body>
   <div class="login-page">
-    <!-- Side Information -->
+    <!-- Side Information (hidden on mobile) -->
     <div class="side">
       <button class="admission-btn" onclick="window.location.href='admission.html'">Admission</button>
       <div class="logo">
@@ -451,14 +404,12 @@
           <i class="fa fa-user-shield"></i>
         </div>
         <h2>Portal Login</h2>
-        <form class="login-form">
-          <div class="mb-2">
-            <label for="email">E-Mail or Reg. No.</label>
-            <input type="text" id="email" name="email" placeholder="Enter your email or registration number" required>
-          </div>
+        <form class="login-form" autocomplete="on">
+          <label for="email">E-Mail or Reg. No.</label>
+          <input type="text" id="email" name="email" autocomplete="username" placeholder="Enter your email or registration number" required>
           <div class="input-group mb-2">
             <label for="password">Password / Access Code</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" required>
             <button type="button" class="toggle-pw" tabindex="-1" onclick="togglePw()"><i class="fa fa-eye"></i></button>
           </div>
           <div class="form-check mb-2">
@@ -467,18 +418,18 @@
               Keep me logged on
             </label>
           </div>
-          <button type="submit" class="btn btn-primary w-100">SIGN IN</button>
+          <button type="submit" class="btn-primary">SIGN IN</button>
           <div class="row-links">
             <a href="#">Forgot Password?</a>
             <a href="#">Don't Have Account?</a>
           </div>
           <div class="or-divider"><span>OR</span></div>
-          <button type="button" class="google-btn w-100" onclick="alert('Coming soon!')">
+          <button type="button" class="google-btn" onclick="alert('Coming soon!')">
             <img src="https://www.google.com/images/branding/googleg/2x/googleg_standard_color_18dp.png" alt="Google" style="height:20px;margin-bottom:2px;">
             Sign in with Google
           </button>
-          <div id="spinner" style="display:none; text-align:center; margin-top:10px;">
-            <i class="fa fa-spinner fa-spin" style="font-size: 1.5rem; color: var(--primary);"></i>
+          <div id="spinner">
+            <i class="fa fa-spinner fa-spin" style="font-size: 1.5rem; color: #1657a6;"></i>
           </div>
         </form>
         <div class="support-link">
@@ -488,107 +439,108 @@
     </div>
   </div>
   <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Toggle password visibility
-  window.togglePw = function() {
-    const pwInput = document.getElementById('password');
-    const pwToggle = document.querySelector('.toggle-pw i');
-    if (pwInput.type === "password") {
-      pwInput.type = "text";
-      pwToggle.classList.remove('fa-eye');
-      pwToggle.classList.add('fa-eye-slash');
-    } else {
-      pwInput.type = "password";
-      pwToggle.classList.remove('fa-eye-slash');
-      pwToggle.classList.add('fa-eye');
-    }
-  };
+    // Password toggle
+    window.togglePw = function() {
+      const pwInput = document.getElementById('password');
+      const pwToggle = document.querySelector('.toggle-pw i');
+      if (pwInput.type === "password") {
+        pwInput.type = "text";
+        pwToggle.classList.remove('fa-eye');
+        pwToggle.classList.add('fa-eye-slash');
+      } else {
+        pwInput.type = "password";
+        pwToggle.classList.remove('fa-eye-slash');
+        pwToggle.classList.add('fa-eye');
+      }
+    };
 
-  const loginForm = document.querySelector('.login-form');
-  if (!loginForm) {
-    console.error('No form with class .login-form found!');
-    return;
-  }
-
-  loginForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const emailOrReg = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const spinner = document.getElementById('spinner');
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
-
-    // Reset UI states
-    if (spinner) spinner.style.display = 'none';
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '1';
-    }
-
-    if (!emailOrReg || !password) {
-      alert('Please fill in all fields.');
-      return;
-    }
-
-    const isEmail = emailOrReg.includes('@');
-    const body = isEmail
-      ? { email: emailOrReg, password }
-      : { regNo: emailOrReg, password };
-
-    if (spinner) spinner.style.display = 'block';
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.6';
-    }
-
-    try {
-      const res = await fetch('https://gold-1-z03x.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      let data = {};
-      try {
-        data = await res.json();
-      } catch (err) {
-        alert('Server error: Invalid JSON response');
+    // Login logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.querySelector('.login-form');
+      if (!loginForm) {
+        console.error('No form with class .login-form found!');
         return;
       }
 
-      if (res.ok && data?.token) {
-        // Store JWT token
-        localStorage.setItem('token', data.token);
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-        // Role-based redirect (robust and extensible)
-        const role = data.user?.role?.toLowerCase();
-        if (role === 'superadmin') {
-          window.location.href = 'admin.html';
-        } else if (role === 'admin') {
-          window.location.href = 'admin-dashboard.html';
-        } else if (role === 'teacher') {
-          window.location.href = 'teacher-dashboard.html';
-        } else if (role === 'student') {
-          window.location.href = 'student-dashboard.html';
-        } else {
-          // Fallback: redirect to a general dashboard or error page
-          window.location.href = 'index.html';
+        const emailOrReg = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const spinner = document.getElementById('spinner');
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+        // Reset UI states
+        if (spinner) spinner.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
         }
-      } else {
-        alert(data?.error || 'Invalid login credentials');
-      }
-    } catch (err) {
-      console.error('[Login Error]', err);
-      alert('Network or server error');
-    } finally {
-      if (spinner) spinner.style.display = 'none';
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-      }
-    }
-  });
-});
-</script>
+
+        if (!emailOrReg || !password) {
+          alert('Please fill in all fields.');
+          return;
+        }
+
+        const isEmail = emailOrReg.includes('@');
+        const body = isEmail
+          ? { email: emailOrReg, password }
+          : { regNo: emailOrReg, password };
+
+        if (spinner) spinner.style.display = 'block';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.6';
+        }
+
+        try {
+          const res = await fetch('https://gold-1-z03x.onrender.com/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+
+          let data = {};
+          try {
+            data = await res.json();
+          } catch (err) {
+            alert('Server error: Invalid JSON response');
+            return;
+          }
+
+          if (res.ok && data?.token) {
+            // Store JWT token
+            localStorage.setItem('token', data.token);
+
+            // Role-based redirect (robust and extensible)
+            const role = data.user?.role?.toLowerCase();
+            if (role === 'superadmin') {
+              window.location.href = 'admin.html';
+            } else if (role === 'admin') {
+              window.location.href = 'admin-dashboard.html';
+            } else if (role === 'teacher') {
+              window.location.href = 'teacher-dashboard.html';
+            } else if (role === 'student') {
+              window.location.href = 'student-dashboard.html';
+            } else {
+              // Fallback: redirect to a general dashboard or error page
+              window.location.href = 'index.html';
+            }
+          } else {
+            alert(data?.error || 'Invalid login credentials');
+          }
+        } catch (err) {
+          console.error('[Login Error]', err);
+          alert('Network or server error');
+        } finally {
+          if (spinner) spinner.style.display = 'none';
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>

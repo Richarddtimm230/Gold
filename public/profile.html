@@ -23,6 +23,7 @@
       --text-muted: #a6b1d0;
       --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
       --sidebar-width: 220px;
+      --sidebar-collapsed-width: 60px;
     }
     html, body {
       margin: 0; padding: 0;
@@ -43,8 +44,7 @@
       background: var(--bg);
       box-sizing: border-box;
     }
-
-    /* --- SIDEBAR --- */
+    /* SIDEBAR */
     .sidebar-nav {
       display: flex;
       flex-direction: column;
@@ -58,6 +58,12 @@
       height: 100vh;
       position: sticky;
       top: 0;
+      transition: width 0.2s, min-width 0.2s;
+    }
+    .sidebar-nav.collapsed {
+      width: var(--sidebar-collapsed-width);
+      min-width: var(--sidebar-collapsed-width);
+      box-shadow: 1px 0 8px #ddeaff33;
     }
     .sidebar-logo {
       padding: 0 0 22px 0;
@@ -66,6 +72,13 @@
       font-weight: bold;
       color: #fff;
       letter-spacing: 0.02em;
+      transition: opacity 0.2s;
+    }
+    .sidebar-nav.collapsed .sidebar-logo {
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      padding: 0;
     }
     .sidebar-links {
       display: flex;
@@ -85,11 +98,26 @@
       background: none;
       border: none;
       outline: none;
-      transition: background 0.14s;
+      transition: background 0.14s, color 0.14s;
       cursor: pointer;
       text-align: left;
       width: 100%;
       border-radius: 10px 0 0 10px;
+      white-space: nowrap;
+    }
+    .sidebar-link i {
+      font-size: 1.18em;
+      width: 24px;
+      text-align: center;
+    }
+    .sidebar-link .sidebar-link-label {
+      transition: opacity 0.2s;
+    }
+    .sidebar-nav.collapsed .sidebar-link .sidebar-link-label {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      display: inline-block;
     }
     .sidebar-link.active, .sidebar-link:active, .sidebar-link:hover {
       background: var(--accent2);
@@ -101,9 +129,37 @@
       font-size: 0.95rem;
       color: #ddeaff;
       opacity: 0.7;
+      transition: opacity 0.2s;
     }
-
-    /* --- MAIN CONTENT --- */
+    .sidebar-nav.collapsed .sidebar-footer {
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar-toggle-btn {
+      position: absolute;
+      top: 16px;
+      right: -20px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px #ddeaff44;
+      width: 38px; height: 38px;
+      cursor: pointer;
+      font-size: 1.18rem;
+      z-index: 102;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .sidebar-toggle-btn:hover {
+      background: #18308b;
+    }
+    /* MAIN CONTENT */
     .profile-root {
       flex: 1;
       display: flex;
@@ -111,6 +167,7 @@
       min-height: 100vh;
       width: 100%;
       box-sizing: border-box;
+      transition: margin-left 0.2s;
     }
     .profile-header {
       padding: 22px 0 0 0;
@@ -190,15 +247,261 @@
       margin-bottom: 7px;
       letter-spacing: 0.02em;
     }
-
-    /* (same as previous profile page: avatar, info, tabs, tab content, tables, etc.) */
-    /* ... copy all profile-section and tab styles from previous versions ... */
-    /* (For brevity, see previous completions for all .profile-info-wrap, .profile-tabs, .tab-content, etc.) */
-
-    /* --- RESPONSIVE --- */
+    /* Profile Info */
+    .profile-info-wrap {
+      display: flex;
+      gap: 26px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .profile-avatar-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 170px;
+    }
+    .profile-avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+      background: #ddeaff;
+      box-shadow: 0 2px 18px #ddeaff66;
+      margin-bottom: 7px;
+    }
+    .profile-upload-btn {
+      background: var(--accent2);
+      color: var(--primary);
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 18px;
+      cursor: pointer;
+      font-size: 0.98rem;
+      transition: background var(--transition);
+      box-shadow: 0 2px 6px #ddeaff66;
+    }
+    .profile-upload-btn:hover { background: var(--accent);}
+    .profile-basic-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-width: 190px;
+    }
+    .profile-detail-row {
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    }
+    .profile-detail-label {
+      color: #7a90b3;
+      font-weight: 700;
+      min-width: 90px;
+      font-size: 1.03rem;
+    }
+    .profile-detail-value {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 1.09rem;
+      word-break: break-word;
+    }
+    /* Tabs */
+    .profile-tabs {
+      display: flex;
+      gap: 27px;
+      border-bottom: 2px solid #e3eefd;
+      margin-bottom: 13px;
+      margin-top: 7px;
+    }
+    .profile-tab {
+      background: none;
+      border: none;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #7a90b3;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color var(--transition), border var(--transition);
+    }
+    .profile-tab.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+    /* Tab contents */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    /* Academic Records */
+    .profile-result-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 9px;
+      font-size: 1.01rem;
+    }
+    .profile-result-table th, .profile-result-table td {
+      padding: 11px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e3eefd;
+    }
+    .profile-result-table th {
+      color: var(--primary);
+      background: var(--accent2);
+      font-weight: 700;
+    }
+    .profile-result-table tr:last-child td {
+      border-bottom: none;
+    }
+    .grade-high { color: var(--success); font-weight: bold;}
+    .grade-low { color: var(--danger); font-weight: bold;}
+    .grade-mid { color: #f39c12; font-weight: bold;}
+    /* Attendance */
+    .profile-attendance-list {
+      display: flex; flex-wrap: wrap; gap: 19px;
+      margin-top: 9px; margin-bottom: 7px;
+    }
+    .attendance-card {
+      background: var(--accent2);
+      border-radius: 8px;
+      padding: 11px 17px;
+      min-width: 120px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.02rem;
+      box-shadow: 0 1px 4px #ddeaff44;
+      margin-bottom: 2px;
+    }
+    /* Guardians */
+    .guardian-list {
+      display: flex; flex-wrap: wrap; gap: 19px;
+    }
+    .guardian-card {
+      background: var(--accent2);
+      border-radius: 10px;
+      padding: 11px 17px;
+      min-width: 170px;
+      box-shadow: 0 1px 4px #ddeaff44;
+      display: flex; flex-direction: column; gap: 7px;
+      margin-bottom: 4px;
+    }
+    .guardian-label {
+      color: #7a90b3;
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+    .guardian-value {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.03rem;
+      word-break: break-word;
+    }
+    /* Hostel/Transport */
+    .misc-list {
+      display: flex; flex-wrap: wrap; gap: 17px;
+      margin-bottom: 7px;
+      margin-top: 7px;
+    }
+    .misc-card {
+      background: var(--accent2);
+      border-radius: 10px;
+      padding: 11px 17px;
+      min-width: 150px;
+      box-shadow: 0 1px 4px #ddeaff44;
+      display: flex; flex-direction: column; gap: 6px;
+      font-size: 1rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    /* Documents */
+    .docs-list {
+      display: flex; flex-wrap: wrap; gap: 13px;
+      margin-bottom: 7px; margin-top: 7px;
+    }
+    .docs-card {
+      background: #fff;
+      border-radius: 9px;
+      box-shadow: 0 1px 6px #ddeaff33;
+      padding: 13px 16px;
+      min-width: 120px;
+      display: flex; flex-direction: column; gap: 5px;
+      align-items: flex-start;
+    }
+    .docs-label {
+      color: #7a90b3; font-size: 0.97rem; font-weight: 600;
+    }
+    .docs-value {
+      color: var(--primary); font-size: 1.03rem; font-weight: 700; word-break: break-word;
+    }
+    .docs-download-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 15px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      margin-top: 2px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px #ddeaff73;
+      transition: background var(--transition);
+    }
+    .docs-download-btn:hover { background: #18308b; }
+    /* Account/Security */
+    .account-actions-list {
+      display: flex; flex-wrap: wrap; gap: 17px;
+      margin-bottom: 7px;
+    }
+    .account-action-btn {
+      background: var(--accent2);
+      color: var(--primary);
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: background var(--transition), color var(--transition);
+      box-shadow: 0 2px 7px #ddeaff33;
+    }
+    .account-action-btn:hover { background: var(--accent); color: #18308b;}
+    /* Fees */
+    .fees-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 9px;
+      font-size: 1.01rem;
+    }
+    .fees-table th, .fees-table td {
+      padding: 11px 8px;
+      text-align: center;
+      border-bottom: 1px solid #e3eefd;
+    }
+    .fees-table th {
+      color: var(--primary);
+      background: var(--accent2);
+      font-weight: 700;
+    }
+    .fees-table tr:last-child td {
+      border-bottom: none;
+    }
+    .paid { color: var(--success); font-weight: bold;}
+    .pending { color: #f39c12; font-weight: bold;}
+    .overdue { color: var(--danger); font-weight: bold;}
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .profile-main { max-width: 98vw; }
+      .profile-header { max-width: 98vw;}
+    }
     @media (max-width: 900px) {
       .sidebar-nav { display: none; }
       .profile-header, .profile-main { max-width: 100vw; }
+      .profile-layout { flex-direction: column;}
     }
     @media (max-width: 650px) {
       .profile-main { padding: 0 2vw 90px 2vw; }
@@ -206,6 +509,7 @@
       .profile-title { font-size: 1.13rem;}
       .profile-section { padding: 16px 7px 14px 7px;}
       .section-title { font-size: 1.01rem;}
+      .profile-avatar-area { min-width: 95px;}
     }
     @media (max-width: 430px) {
       .profile-main { padding: 0 0 80px 0; }
@@ -264,20 +568,23 @@
 <body>
   <div class="profile-layout">
     <!-- SIDEBAR NAV (Desktop/tablet only) -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Collapse/Expand Menu">
+        <i class="fa fa-angle-left" id="sidebarToggleIcon"></i>
+      </button>
       <div class="sidebar-logo"><i class="fa fa-graduation-cap"></i> Gold & Linc</div>
       <div class="sidebar-links">
-        <button class="sidebar-link" onclick="window.location.href='dashboard.html'"><i class="fa fa-home"></i> Dashboard</button>
-        <button class="sidebar-link" onclick="window.location.href='e-class.html'"><i class="fa fa-laptop"></i> E-Class</button>
-        <button class="sidebar-link" onclick="window.location.href='assignments.html'"><i class="fa fa-file-alt"></i> Assignments</button>
-        <button class="sidebar-link" onclick="window.location.href='results.html'"><i class="fa fa-chart-bar"></i> Results</button>
-        <button class="sidebar-link active" onclick="window.location.href='profile.html'"><i class="fa fa-user"></i> My Profile</button>
+        <button class="sidebar-link" onclick="window.location.href='dashboard.html'"><i class="fa fa-home"></i> <span class="sidebar-link-label">Dashboard</span></button>
+        <button class="sidebar-link" onclick="window.location.href='e-class.html'"><i class="fa fa-laptop"></i> <span class="sidebar-link-label">E-Class</span></button>
+        <button class="sidebar-link" onclick="window.location.href='assignments.html'"><i class="fa fa-file-alt"></i> <span class="sidebar-link-label">Assignments</span></button>
+        <button class="sidebar-link" onclick="window.location.href='results.html'"><i class="fa fa-chart-bar"></i> <span class="sidebar-link-label">Results</span></button>
+        <button class="sidebar-link active" onclick="window.location.href='profile.html'"><i class="fa fa-user"></i> <span class="sidebar-link-label">My Profile</span></button>
       </div>
       <div class="sidebar-footer">
         &copy; 2025 Gold & Linc Schools
       </div>
     </nav>
-    <div class="profile-root">
+    <div class="profile-root" id="mainContent">
       <!-- Header & Main Actions -->
       <div class="profile-header">
         <div class="profile-title">My Profile</div>
@@ -419,6 +726,20 @@
     </div>
   </div>
   <script>
+    // Collapsible sidebar
+    function toggleSidebar() {
+      var side = document.getElementById('sidebarNav');
+      var icon = document.getElementById('sidebarToggleIcon');
+      side.classList.toggle('collapsed');
+      if (side.classList.contains('collapsed')) {
+        icon.classList.remove('fa-angle-left');
+        icon.classList.add('fa-angle-right');
+      } else {
+        icon.classList.add('fa-angle-left');
+        icon.classList.remove('fa-angle-right');
+      }
+    }
+
     // DEMO DATA (replace with AJAX/backend as needed)
     const studentProfile = {
       name: "Janet Okafor",
@@ -484,7 +805,6 @@
       document.getElementById("profileState").textContent = p.state;
       document.getElementById("profileLGA").textContent = p.lga;
       document.getElementById("profileReligion").textContent = p.religion;
-      // Avatar
       document.getElementById("profileAvatar").src = p.avatar && p.avatar !== "" ?
         p.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=2647a6&color=fff`;
     }
@@ -605,7 +925,6 @@
     // Highlight active menu on sidebar (for demo)
     (function(){
       if(window.innerWidth > 900) {
-        // Highlight current sidebar link
         var links = document.querySelectorAll('.sidebar-link');
         for(var i=0;i<links.length;i++) {
           if(links[i].href && links[i].href.endsWith(location.pathname)) {

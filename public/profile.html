@@ -765,7 +765,7 @@
       try {
         const token = getToken();
         if (!token) return null;
-        const res = await fetch('/api/students/me', { // Adjust base URL as needed
+        const res = await fetch('https://gold-1-z03x.onrender.com/api/students/me', { // Adjust base URL as needed
           headers: { Authorization: 'Bearer ' + token }
         });
         if (!res.ok) throw new Error('Failed to fetch profile');
@@ -782,7 +782,7 @@
       const formData = new FormData();
       formData.append('photo', file);
       try {
-        const res = await fetch('/api/students/me', {
+        const res = await fetch('https://gold-1-z03x.onrender.com/api/students/me', {
           method: 'PUT',
           headers: { Authorization: 'Bearer ' + token },
           body: formData

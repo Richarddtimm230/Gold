@@ -1112,7 +1112,8 @@ function renderStudentsBlock() {
   block.innerHTML = html;
 }
 
-// --- Attendance (Daily with Calendar) ---
+import { apiGet, apiPost } from './utils/api.js'; // adjust the path as needed
+
 function getDateString(date) { return date.toISOString().slice(0, 10); }
 function isWeekday(date) { const day = date.getDay(); return day >= 1 && day <= 5; }
 function addWeekday(date, dir = 1) {
@@ -1120,14 +1121,50 @@ function addWeekday(date, dir = 1) {
   do { d.setDate(d.getDate() + dir); } while (!isWeekday(d));
   return d;
 }
-let dailyAttendanceRecords = {}; // { 'YYYY-MM-DD': [{classId, studentId, present}] }
 function getTodayWeekday() {
   const now = new Date();
   if (isWeekday(now)) return now;
   let d = new Date(now); while (!isWeekday(d)) d.setDate(d.getDate() - 1);
   return d;
 }
+
 let selectedAttendanceDate = getTodayWeekday();
+let attendanceCache = {}; // { 'classId|YYYY-MM-DD': [ {studentId, present}, ... ] }
+
+// Fetch attendance from backend for classId/date
+async function fetchAttendance(classId, dateStr) {
+  const cacheKey = `${classId}|${dateStr}`;
+  if (attendanceCache[cacheKey]) return attendanceCache[cacheKey];
+  try {
+    const rec = await apiGet(`/attendance/${classId}/${dateStr}`);
+    attendanceCache[cacheKey] = rec.students || [];
+    return rec.students || [];
+  } catch (err) {
+    attendanceCache[cacheKey] = [];
+    return [];
+  }
+}
+
+// Save attendance to backend for classId/date
+async function saveAttendanceDay() {
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  const dateStr = getDateString(selectedAttendanceDate);
+  let records = [];
+  students.forEach(stu => {
+    const cb = document.querySelector(`[name="present_${stu.id}"]`);
+    records.push({ studentId: stu.id, present: !!(cb && cb.checked) });
+  });
+  try {
+    await apiPost(`/attendance/${classId}/${dateStr}`, { students: records });
+    attendanceCache[`${classId}|${dateStr}`] = records;
+    return true;
+  } catch (err) {
+    alert('Error saving attendance: ' + err.message);
+    return false;
+  }
+}
+
 function renderAttendanceCalendar() {
   const calDivId = 'attendance-calendar';
   let calDiv = document.getElementById(calDivId);
@@ -1147,7 +1184,11 @@ function renderAttendanceCalendar() {
   calDiv.innerHTML = '';
   const prevBtn = document.createElement('button');
   prevBtn.textContent = "←"; prevBtn.className = "btn";
-  prevBtn.onclick = () => { selectedAttendanceDate = addWeekday(week[0], -1); renderAttendanceCalendar(); renderAttendance(); };
+  prevBtn.onclick = async () => {
+    selectedAttendanceDate = addWeekday(week[0], -1); 
+    renderAttendanceCalendar();
+    await renderAttendance();
+  };
   calDiv.appendChild(prevBtn);
   week.forEach(day => {
     const btn = document.createElement('button');
@@ -1156,28 +1197,26 @@ function renderAttendanceCalendar() {
     btn.style.fontWeight = getDateString(day) === getDateString(selectedAttendanceDate) ? "700" : "400";
     btn.style.background = getDateString(day) === getDateString(selectedAttendanceDate) ? "var(--accent)" : "#f0f6fa";
     btn.style.color = getDateString(day) === getDateString(selectedAttendanceDate) ? "#fff" : "var(--primary)";
-    btn.onclick = () => { saveAttendanceDay(); selectedAttendanceDate = day; renderAttendanceCalendar(); renderAttendance(); };
+    btn.onclick = async () => {
+      await saveAttendanceDay();
+      selectedAttendanceDate = day;
+      renderAttendanceCalendar();
+      await renderAttendance();
+    };
     calDiv.appendChild(btn);
   });
   const nextBtn = document.createElement('button');
   nextBtn.textContent = "→"; nextBtn.className = "btn";
-  nextBtn.onclick = () => { selectedAttendanceDate = addWeekday(week[4], 1); renderAttendanceCalendar(); renderAttendance(); };
+  nextBtn.onclick = async () => {
+    selectedAttendanceDate = addWeekday(week[4], 1);
+    renderAttendanceCalendar();
+    await renderAttendance();
+  };
   calDiv.appendChild(nextBtn);
 }
-function saveAttendanceDay() {
-  const classId = document.getElementById('attendance-class').value;
-  const students = studentsByClass[classId] || [];
-  const dateStr = getDateString(selectedAttendanceDate);
-  let records = [];
-  students.forEach(stu => {
-    const cb = document.querySelector(`[name="present_${stu.id}"]`);
-    records.push({ classId, studentId: stu.id, present: !!(cb && cb.checked) });
-  });
-  if (!dailyAttendanceRecords[dateStr]) dailyAttendanceRecords[dateStr] = [];
-  dailyAttendanceRecords[dateStr] = dailyAttendanceRecords[dateStr].filter(r => r.classId !== classId);
-  dailyAttendanceRecords[dateStr].push(...records);
-}
-function renderAttendance() {
+
+// Render class dropdown and students for attendance
+async function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');
   attendanceClassSel.innerHTML = '';
   teacher.classes.forEach(cls => {
@@ -1185,14 +1224,16 @@ function renderAttendance() {
     opt.value = cls.id; opt.innerText = cls.name;
     attendanceClassSel.appendChild(opt);
   });
-  attendanceClassSel.onchange = renderAttendanceStudents;
-  renderAttendanceStudents();
+  attendanceClassSel.onchange = () => renderAttendanceStudents();
+  await renderAttendanceStudents();
 }
-function renderAttendanceStudents() {
+
+async function renderAttendanceStudents() {
   const classId = document.getElementById('attendance-class').value;
   const students = studentsByClass[classId] || [];
   const dateStr = getDateString(selectedAttendanceDate);
-  let todaysRecords = (dailyAttendanceRecords[dateStr] || []).filter(r => r.classId === classId);
+  document.getElementById('attendance-students').innerHTML = `<div class="spinner"></div>`;
+  let todaysRecords = await fetchAttendance(classId, dateStr);
   let html = `<table>
       <thead><tr><th>Student</th><th>Present</th><th>Absent</th></tr></thead>
       <tbody>`;
@@ -1207,44 +1248,20 @@ function renderAttendanceStudents() {
   html += `</tbody></table>`;
   document.getElementById('attendance-students').innerHTML = html;
 }
-document.getElementById('attendance-form').onsubmit = function(e){
+
+// Save attendance on form submit
+document.getElementById('attendance-form').onsubmit = async function(e){
   e.preventDefault();
-  saveAttendanceDay();
-  alert('Attendance saved for ' + selectedAttendanceDate.toLocaleDateString());
+  const ok = await saveAttendanceDay();
+  if (ok) alert('Attendance saved for ' + selectedAttendanceDate.toLocaleDateString());
 };
 
-// --- Gradebook ---
-function renderGradebook() {
-  const gradebookClassSel = document.getElementById('gradebook-class');
-  gradebookClassSel.innerHTML = '';
-  teacher.classes.forEach(cls => {
-    let opt = document.createElement('option');
-    opt.value = cls.id;
-    opt.innerText = cls.name;
-    gradebookClassSel.appendChild(opt);
-  });
-  gradebookClassSel.onchange = renderGradebookTable;
-  renderGradebookTable();
-}
-function renderGradebookTable() {
-  const classId = document.getElementById('gradebook-class').value;
-  const students = studentsByClass[classId] || [];
-  const subjects = subjectsByClass[classId] || [];
-  let html = `<table>
-      <thead><tr><th>Student</th>`;
-  subjects.forEach(subj => html += `<th>${subj.name}</th>`);
-  html += `</tr></thead><tbody>`;
-  students.forEach(stu => {
-    html += `<tr><td data-label="Student">${stu.name}</td>`;
-    subjects.forEach(subj => {
-      const gb = (gradebookData[classId] && gradebookData[classId][stu.id] && gradebookData[classId][stu.id][subj.id]) || '-';
-      html += `<td data-label="${subj.name}">${gb}</td>`;
-    });
-    html += `</tr>`;
-  });
-  html += `</tbody></table>`;
-  document.getElementById('gradebook-table').innerHTML = html;
-}
+// Export functions for initialization
+export {
+  renderAttendanceCalendar,
+  renderAttendance,
+  renderAttendanceStudents
+};
 
 // --- Assignments ---
 function renderAssignments() {

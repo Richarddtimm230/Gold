@@ -969,7 +969,8 @@ const sections = {
   draftResults: document.getElementById('section-draftResults'),
   notifications: document.getElementById('section-notifications'),
   profile: document.getElementById('section-profile'),
-  eclassroom: document.getElementById('section-eclassroom')
+  eclassroom: document.getElementById('section-eclassroom'),
+  academics: document.getElementById('section-academics')
 };
 sidebarBtns.forEach(btn => {
   btn.onclick = function() {
@@ -984,6 +985,7 @@ sidebarBtns.forEach(btn => {
     if (sec === 'gradebook') renderGradebook();
     if (sec === 'assignments') renderAssignments();
     if (sec === 'eclassroom') renderEclassroom();
+    if (sec === 'academics') renderAcademics();
   }
 });
 

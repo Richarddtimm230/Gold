@@ -29,31 +29,55 @@ const ensureSuperAdmin = require('./utils/ensureSuperAdmin'); // Adjust path if 
 const app = express();
 app.locals.firestoreDB = db;
 
-// --- ROUTES ---
+// --- ROUTER IMPORTS ---
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
-const subjectsRoute = require('./routes/subjects');
-const dashboardRoute = require('./routes/dashboard');
 const studentsRoute = require('./routes/students');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
 
+// NEW: Modular routes for all dashboard features
+const academicsRoute = require('./routes/academics');
+const examsRoute = require('./routes/exams');
+const cbtRoute = require('./routes/cbt');
+const assignmentsRoute = require('./routes/assignments');
+const attendanceRoute = require('./routes/attendance');
+const notificationsRoute = require('./routes/notifications');
+const profileRoute = require('./routes/profile');
+
+// Legacy/combined dashboard route if needed
+const dashboardRoute = require('./routes/dashboard');
+
+// --- APP MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/api/staff', require('./routes/staff'));
-app.use('/api/auth', authRoute);
-app.use('/api', dashboardRoute);
 
+// --- API ROUTES ---
+app.use('/api/auth', authRoute);
+app.use('/api/staff', require('./routes/staff'));
+app.use('/api', dashboardRoute); // legacy/combined routes
+
+// Modular REST endpoints for dashboard features
+app.use('/api/academics', academicsRoute);
+app.use('/api/exams', examsRoute);
+app.use('/api/cbt', cbtRoute);
+app.use('/api/assignments', assignmentsRoute);
+app.use('/api/attendance', attendanceRoute);
+app.use('/api/notifications', notificationsRoute);
+app.use('/api/profile', profileRoute);
+
+app.use('/api/results', resultsRoute);
+app.use('/api/classes', classesRoute);
+app.use('/api/subjects', require('./routes/subjects'));
+app.use('/api/students', studentsRoute);
+
+// Example: Super Admin protected dashboard endpoint
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') return res.status(403).json({ error: "Forbidden" });
   res.json({ message: "Welcome, Super Admin!" });
 });
 
-app.use('/api/results', resultsRoute);
-app.use('/api/classes', classesRoute);
-app.use('/api/subjects', subjectsRoute);
-app.use('/api/students', studentsRoute);
-
+// Serve SPA entry point
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

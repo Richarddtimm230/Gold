@@ -1122,6 +1122,192 @@ document.getElementById('profile-form').onsubmit = function(e){
 // --- Initial Render ---
 renderClassesList();
 renderStudentsBlock();
+
+// ----- Attendance Calendar and Daily Logic -----
+
+// Helper: get week day string (YYYY-MM-DD)
+function getDateString(date) {
+  return date.toISOString().slice(0, 10);
+}
+// Helper: is weekday (Mon-Fri)
+function isWeekday(date) {
+  const day = date.getDay();
+  return day >= 1 && day <= 5;
+}
+// Helper: get next weekday (forwards or backwards)
+function addWeekday(date, dir = 1) {
+  let d = new Date(date);
+  do {
+    d.setDate(d.getDate() + dir);
+  } while (!isWeekday(d));
+  return d;
+}
+
+// Attendance data: { 'YYYY-MM-DD': [{classId, studentId, present}] }
+let dailyAttendanceRecords = {}; // key: dateStr
+
+// Get today's date (if weekday; else previous Friday)
+function getTodayWeekday() {
+  const now = new Date();
+  if (isWeekday(now)) return now;
+  // If Saturday/Sunday, return previous Friday
+  let d = new Date(now);
+  while (!isWeekday(d)) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+// --- Calendar UI ---
+let selectedAttendanceDate = getTodayWeekday();
+
+// Render calendar above attendance table
+function renderAttendanceCalendar() {
+  const calDivId = 'attendance-calendar';
+  let calDiv = document.getElementById(calDivId);
+  if (!calDiv) {
+    calDiv = document.createElement('div');
+    calDiv.id = calDivId;
+    calDiv.style.display = 'flex';
+    calDiv.style.justifyContent = 'center';
+    calDiv.style.alignItems = 'center';
+    calDiv.style.gap = '10px';
+    calDiv.style.marginBottom = '15px';
+    document.querySelector('#section-attendance .card').insertBefore(calDiv, document.getElementById('attendance-form'));
+  }
+
+  // Find week (Mon-Fri) of selected date
+  const week = [];
+  const d = new Date(selectedAttendanceDate);
+  const thisMonday = new Date(d);
+  thisMonday.setDate(d.getDate() - (d.getDay() - 1));
+  for (let i=0; i<5; i++) {
+    const day = new Date(thisMonday);
+    day.setDate(thisMonday.getDate() + i);
+    week.push(day);
+  }
+
+  // Calendar navigation
+  calDiv.innerHTML = '';
+  // Prev week button
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = "←";
+  prevBtn.className = "btn";
+  prevBtn.style.minWidth = "32px";
+  prevBtn.onclick = () => {
+    selectedAttendanceDate = addWeekday(week[0], -1); // prev Monday
+    renderAttendanceCalendar();
+    renderAttendance();
+  };
+  calDiv.appendChild(prevBtn);
+
+  // Days (Mon-Fri)
+  week.forEach(day => {
+    const btn = document.createElement('button');
+    btn.className = "btn";
+    btn.style.padding = "6px 11px";
+    btn.textContent = day.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+    btn.style.fontWeight = getDateString(day) === getDateString(selectedAttendanceDate) ? "700" : "400";
+    btn.style.background = getDateString(day) === getDateString(selectedAttendanceDate) ? "var(--accent)" : "#f0f6fa";
+    btn.style.color = getDateString(day) === getDateString(selectedAttendanceDate) ? "#fff" : "var(--primary)";
+    btn.onclick = () => {
+      saveAttendanceDay();
+      selectedAttendanceDate = day;
+      renderAttendanceCalendar();
+      renderAttendance();
+    };
+    calDiv.appendChild(btn);
+  });
+
+  // Next week button
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = "→";
+  nextBtn.className = "btn";
+  nextBtn.style.minWidth = "32px";
+  nextBtn.onclick = () => {
+    selectedAttendanceDate = addWeekday(week[4], 1); // next Monday
+    renderAttendanceCalendar();
+    renderAttendance();
+  };
+  calDiv.appendChild(nextBtn);
+}
+
+// Save current attendance (all checked are present, unchecked are absent)
+function saveAttendanceDay() {
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  const dateStr = getDateString(selectedAttendanceDate);
+
+  // Build attendance for all students in class
+  let records = [];
+  students.forEach(stu => {
+    const cb = document.querySelector(`[name="present_${stu.id}"]`);
+    records.push({
+      classId,
+      studentId: stu.id,
+      present: !!(cb && cb.checked)
+    });
+  });
+
+  // Save for this day/class
+  if (!dailyAttendanceRecords[dateStr]) dailyAttendanceRecords[dateStr] = [];
+  // Remove this class' old records for this day
+  dailyAttendanceRecords[dateStr] = dailyAttendanceRecords[dateStr].filter(r => r.classId !== classId);
+  // Add new records
+  dailyAttendanceRecords[dateStr].push(...records);
+}
+
+// --- Attendance Form + Table ---
+function renderAttendance() {
+  renderAttendanceCalendar();
+
+  const attendanceClassSel = document.getElementById('attendance-class');
+  attendanceClassSel.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    attendanceClassSel.appendChild(opt);
+  });
+  attendanceClassSel.onchange = renderAttendanceStudents;
+  renderAttendanceStudents();
+}
+
+function renderAttendanceStudents() {
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  const dateStr = getDateString(selectedAttendanceDate);
+
+  // Get saved for this day/class, or empty
+  let todaysRecords = (dailyAttendanceRecords[dateStr] || []).filter(r => r.classId === classId);
+
+  let html = `<table>
+      <thead><tr><th>Student</th><th>Present</th><th>Absent</th></tr></thead>
+      <tbody>`;
+  students.forEach(stu => {
+    const record = todaysRecords.find(a => a.studentId === stu.id);
+    html += `<tr>
+      <td data-label="Student">${stu.name}</td>
+      <td data-label="Present"><input type="checkbox" name="present_${stu.id}" ${record && record.present ? 'checked' : ''}></td>
+      <td data-label="Absent">${!(record && record.present) ? '✔️' : ''}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('attendance-students').innerHTML = html;
+}
+
+document.getElementById('attendance-form').onsubmit = function(e){
+  e.preventDefault();
+  saveAttendanceDay();
+  alert('Attendance saved for ' + selectedAttendanceDate.toLocaleDateString());
+};
+
+// When switching days, save current, load next, and mark unmarked as absent
+function autoSaveOnDaySwitch() {
+  // Save attendance for previous day, marking all unchecked as absent
+  saveAttendanceDay();
+}
+
+// --- Initial Render ---
+renderAttendanceCalendar && renderAttendanceCalendar();    
   </script>
 </body>
 </html>

@@ -218,8 +218,8 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// PATCH /api/results/:id/publish - Set status = "Published"
-router.patch('/:id/publish', async (req, res) => {
+// POST /api/results/:id/publish - Set status = "Published"
+router.post('/:id/publish', async (req, res) => {
   try {
     const docRef = resultCollection().doc(req.params.id);
     const docSnap = await docRef.get();

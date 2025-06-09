@@ -4,99 +4,166 @@
   <meta charset="UTF-8">
   <title>Teacher Dashboard - Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #003366;
+      --primary-light: #f0f6fa;
+      --accent: #10b981;
+      --sidebar-bg: #16213e;
+      --sidebar-active: #20305f;
+      --border: #e5e7eb;
+      --box-shadow: 0 2px 12px rgba(30,60,80,0.13), 0 1.5px 5px rgba(30,60,80,0.06);
+      --radius: 14px;
+      --radius-sm: 7px;
+      --transition: 0.17s cubic-bezier(.4,0,.2,1);
+      --font: 'Inter', 'Segoe UI', Arial, sans-serif;
+      --text: #222b45;
+      --muted: #6b7280;
+      --table-header: #eaf1fa;
+      --danger: #e74c3c;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      margin: 0; padding: 0;
-      background: #f7f7f7;
+      font-family: var(--font);
+      background: var(--primary-light);
+      color: var(--text);
+      min-height: 100vh;
+      letter-spacing: 0.02em;
+      font-size: 16px;
     }
     .dashboard-container {
       display: flex;
       min-height: 100vh;
     }
     .sidebar {
-      width: 230px;
-      background: #0c4e8c;
-      color: #fff;
+      width: 270px;
+      background: var(--sidebar-bg);
       display: flex;
       flex-direction: column;
-      padding: 25px 0 0 0;
+      padding: 0 0 0 0;
+      box-shadow: 2px 0 14px rgba(0,0,0,0.07);
+      z-index: 2;
+      position: relative;
     }
     .school-logo {
       text-align: center;
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 30px;
-      letter-spacing: 1.5px;
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 32px 0 25px 0;
+      letter-spacing: 2px;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
     }
     .sidebar nav {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 0 10px;
+      gap: 7px;
+      padding: 0 22px;
     }
     .sidebar nav button {
       background: none;
       border: none;
-      color: #fff;
-      font-size: 1.1em;
-      padding: 12px 18px;
+      color: #c7d5ed;
+      font-size: 1.08em;
       text-align: left;
+      padding: 14px 0 14px 16px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.12s;
+      outline: none;
+      position: relative;
+      transition: background var(--transition), color var(--transition);
+      font-weight: 500;
+      letter-spacing: 0.05em;
     }
     .sidebar nav button.active,
     .sidebar nav button:hover {
-      background: #194d6c;
+      background: var(--sidebar-active);
+      color: var(--accent);
+    }
+    .sidebar nav button.active:before {
+      content: '';
+      position: absolute;
+      left: -12px; top: 12px;
+      width: 5px; height: 24px;
+      border-radius: 4px;
+      background: var(--accent);
     }
     .sidebar .profile-section {
       margin-top: auto;
-      padding: 15px 18px;
-      border-top: 1px solid #2b5e99;
+      background: var(--sidebar-active);
+      padding: 24px 24px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      color: #dde8f8;
+      box-shadow: 0 -1px 8px rgba(16,24,40,0.09);
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 4px;
     }
     .sidebar .profile-section small {
-      color: #e7f0fa;
+      color: #a9b7d3;
+      font-size: 0.96em;
     }
 
     .main-content {
       flex: 1;
-      padding: 34px 32px;
-      background: #f7f7f7;
+      padding: 38px 3vw 28px 3vw;
+      background: var(--primary-light);
       overflow-y: auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 32px;
     }
     header h1 {
-      color: #0c4e8c;
-      font-size: 1.7em;
-      font-weight: 600;
+      color: var(--primary);
+      font-size: 2rem;
+      font-weight: 700;
       margin: 0;
+      letter-spacing: 0.03em;
     }
     .avatar {
-      width: 46px;
-      height: 46px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: #d2e5fa;
-      color: #0c4e8c;
+      background: #e0f3f2;
+      color: var(--primary);
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2em;
+      font-size: 1.3em;
+      border: 2px solid var(--accent);
+      box-shadow: 0 2px 8px rgba(16,24,40,0.07);
     }
 
-    .classes-list, .students-table, .draft-results-table {
+    .card {
       background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
-      padding: 18px;
+      border-radius: var(--radius);
+      box-shadow: var(--box-shadow);
+      padding: 28px 28px 22px 28px;
       margin-bottom: 30px;
+      transition: box-shadow var(--transition);
     }
+    .card h2 {
+      color: var(--primary);
+      font-size: 1.23em;
+      margin: 0 0 19px 0;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
     .classes-list ul {
       list-style: none;
       padding: 0;
@@ -109,165 +176,246 @@
       margin: 0;
     }
     .class-btn {
-      background: #e7f0fa;
-      color: #0c4e8c;
-      border: 1px solid #c2d3e0;
-      border-radius: 6px;
-      padding: 10px 24px;
-      font-size: 1.05em;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 28px;
+      font-size: 1.08em;
       cursor: pointer;
       margin-bottom: 5px;
-      transition: background 0.15s;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: background var(--transition), color var(--transition), border var(--transition);
+      box-shadow: 0 1px 2px rgba(20,36,60,0.02);
+      outline: none;
     }
     .class-btn.active,
     .class-btn:hover {
-      background: #0c4e8c;
+      background: var(--accent);
       color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(16,185,129,0.07);
     }
 
-    h2 {
-      color: #095188;
-      font-size: 1.25em;
-      margin-bottom: 12px;
+    .students-table, .draft-results-table, .notification-list, .profile-settings {
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--box-shadow);
+      padding: 26px 22px;
+      margin-bottom: 34px;
+      overflow-x: auto;
     }
-
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       background: #fff;
+      border-radius: var(--radius);
+      box-shadow: none;
+      margin-bottom: 0;
     }
     th, td {
-      padding: 10px 7px;
-      border: 1px solid #c2d3e0;
+      padding: 12px 11px;
+      border-bottom: 1.5px solid var(--border);
       text-align: left;
     }
     th {
-      background: #e7f0fa;
-      color: #0c4e8c;
-      font-weight: bold;
+      background: var(--table-header);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.01em;
+      border-bottom: 2.5px solid var(--border);
+    }
+    tr:last-child td {
+      border-bottom: none;
     }
     td.actions {
       text-align: center;
     }
     .btn {
-      padding: 6px 12px;
-      border-radius: 5px;
+      padding: 6px 18px;
+      border-radius: var(--radius-sm);
       border: none;
-      background: #0c4e8c;
+      background: var(--primary);
       color: #fff;
       cursor: pointer;
-      font-size: 0.98em;
-      margin-right: 5px;
+      font-size: 1.01em;
+      margin-right: 7px;
       margin-bottom: 2px;
-      transition: background 0.13s;
+      font-weight: 600;
+      transition: background var(--transition);
+      letter-spacing: 0.02em;
     }
     .btn:hover {
-      background: #194d6c;
+      background: var(--accent);
+      color: #fff;
     }
+    .btn.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn.danger:hover {
+      background: #b13a29;
+    }
+
+    /* Modal */
     .form-modal-bg {
-      position: fixed; z-index: 10; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(60,80,110,0.21);
+      position: fixed; z-index: 1000; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(28,36,54,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.15s;
     }
     .form-modal {
       background: #fff;
-      border-radius: 8px;
-      padding: 28px 24px 20px 24px;
-      min-width: 340px;
-      max-width: 90vw;
-      box-shadow: 0 2px 25px rgba(0,0,0,0.11);
+      border-radius: var(--radius);
+      padding: 38px 34px 22px 34px;
+      min-width: 349px;
+      max-width: 95vw;
+      box-shadow: 0 2px 32px rgba(0,0,0,0.12);
       position: relative;
+      animation: modalIn 0.23s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(38px);}
+      to { opacity: 1; transform: translateY(0);}
     }
     .form-modal h3 {
       margin-top: 0;
-      color: #0c4e8c;
-      margin-bottom: 16px;
-      font-size: 1.18em;
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-size: 1.29em;
+      font-weight: 700;
     }
     .form-modal label {
       display: block;
-      margin-bottom: 4px;
-      color: #2c3e50;
+      margin-bottom: 5px;
+      color: var(--primary);
       font-size: 0.99em;
+      font-weight: 500;
+      margin-top: 12px;
     }
     .form-modal input[type="number"],
-    .form-modal input[type="text"] {
+    .form-modal input[type="text"],
+    .form-modal input[type="email"],
+    .form-modal input[type="password"],
+    .form-modal input[type="date"],
+    .form-modal select {
       width: 100%;
-      padding: 7px;
-      margin-bottom: 12px;
-      border-radius: 4px;
-      border: 1px solid #c2d3e0;
+      padding: 9px 8px;
+      margin-bottom: 5px;
+      border-radius: var(--radius-sm);
+      border: 1.2px solid var(--border);
       font-size: 1em;
+      background: #f7fafc;
+      font-family: var(--font);
+      box-sizing: border-box;
+      transition: border var(--transition);
+    }
+    .form-modal input:focus, .form-modal select:focus {
+      border-color: var(--accent);
+      outline: none;
     }
     .form-modal .modal-actions {
       text-align: right;
-      margin-top: 15px;
+      margin-top: 19px;
     }
     .form-modal .close-btn {
       position: absolute;
-      top: 9px;
-      right: 12px;
+      top: 13px;
+      right: 17px;
       background: none;
       border: none;
-      font-size: 1.4em;
+      font-size: 1.6em;
       color: #bbb;
       cursor: pointer;
+      transition: color var(--transition);
     }
-    .form-modal .close-btn:hover { color: #0c4e8c; }
+    .form-modal .close-btn:hover { color: var(--primary); }
 
-    .notification-list {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
-      padding: 18px;
-    }
+    /* Notification */
     .notification {
-      border-bottom: 1px solid #e7f0fa;
-      padding: 10px 0;
-      color: #333;
+      border-bottom: 1.2px solid var(--border);
+      padding: 13px 0;
+      color: var(--text);
+      font-size: 1.05em;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-weight: 500;
     }
     .notification:last-child {
       border-bottom: none;
     }
-    .profile-settings {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
-      padding: 18px;
-      max-width: 400px;
+    .notification .date {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 2px 11px;
+      font-size: 0.97em;
+      font-weight: 600;
+      margin-right: 7px;
+      letter-spacing: 0.04em;
     }
-    .profile-settings input[type="text"], .profile-settings input[type="email"], .profile-settings input[type="password"] {
+
+    .profile-settings label {
+      font-weight: 500;
+      color: var(--primary);
+      margin-top: 9px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .profile-settings input[type="text"],
+    .profile-settings input[type="email"],
+    .profile-settings input[type="password"] {
       width: 100%;
-      padding: 7px;
-      margin-bottom: 12px;
-      border-radius: 4px;
-      border: 1px solid #c2d3e0;
+      padding: 8px 8px;
+      border-radius: var(--radius-sm);
+      border: 1.2px solid var(--border);
       font-size: 1em;
+      background: #f7fafc;
+      font-family: var(--font);
+      margin-bottom: 12px;
+      transition: border var(--transition);
+    }
+    .profile-settings input:focus {
+      border-color: var(--accent);
+      outline: none;
     }
     .profile-settings button {
-      background: #0c4e8c;
+      background: var(--primary);
       color: #fff;
       border: none;
-      border-radius: 5px;
-      padding: 7px 18px;
+      border-radius: var(--radius-sm);
+      padding: 9px 28px;
       font-size: 1em;
+      font-weight: 600;
       cursor: pointer;
+      transition: background var(--transition);
+      margin-top: 7px;
     }
-    .profile-settings button:hover { background: #194d6c; }
+    .profile-settings button:hover { background: var(--accent); }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
+      .main-content { padding: 18px 2vw; }
+      .form-modal { min-width: 90vw; }
+      .sidebar { width: 200px; }
+    }
+    @media (max-width: 800px) {
       .dashboard-container { flex-direction: column; }
-      .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 0 0;}
-      .sidebar nav { flex-direction: row; gap: 2px; padding: 0 2px; }
+      .sidebar { width: 100%; flex-direction: row; align-items: start; justify-content: space-between; }
+      .sidebar nav { flex-direction: row; gap: 2px; padding: 0 7px; }
       .sidebar .profile-section { display: none; }
-      .main-content { padding: 14px 4vw; }
+      .main-content { padding: 12px 2vw; }
     }
     @media (max-width: 600px) {
-      .main-content { padding: 9px 2vw; }
-      .classes-list ul { flex-direction: column; gap: 5px; }
-      .form-modal { min-width: 98vw; padding: 11vw 2vw 6vw 2vw; }
+      .main-content { padding: 7px 2vw; }
+      .form-modal { min-width: 98vw; padding: 7vw 2vw 6vw 2vw; }
+      header h1 { font-size: 1.1em;}
+      .avatar { width: 38px; height: 38px; font-size: 1em;}
+      .card { padding: 14px 4vw 8px 4vw;}
     }
   </style>
 </head>
@@ -278,12 +426,15 @@
     <nav>
       <button class="active" data-section="dashboard">Dashboard</button>
       <button data-section="classes">My Classes</button>
+      <button data-section="attendance">Attendance</button>
+      <button data-section="gradebook">Gradebook</button>
+      <button data-section="assignments">Assignments</button>
       <button data-section="draftResults">Draft Results</button>
       <button data-section="notifications">Notifications</button>
       <button data-section="profile">Profile/Settings</button>
     </nav>
     <div class="profile-section">
-      <div><strong>Mr. John Doe</strong></div>
+      <div style="font-size:1.1em;"><strong>Mr. John Doe</strong></div>
       <small>Mathematics Teacher</small>
     </div>
   </aside>
@@ -295,18 +446,50 @@
 
     <!-- Dashboard Section -->
     <section id="section-dashboard">
-      <div class="classes-list">
+      <div class="card classes-list">
         <h2>My Classes</h2>
-        <ul id="class-list">
-          <!-- Classes will be loaded here -->
-        </ul>
+        <ul id="class-list"></ul>
       </div>
       <div id="students-block"></div>
     </section>
 
+    <!-- Attendance Section -->
+    <section id="section-attendance" style="display:none;">
+      <div class="card students-table">
+        <h2>Attendance</h2>
+        <form id="attendance-form">
+          <label>Select Class:</label>
+          <select id="attendance-class"></select>
+          <div id="attendance-students"></div>
+          <button type="submit" class="btn" style="margin-top:12px;">Save Attendance</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Gradebook Section -->
+    <section id="section-gradebook" style="display:none;">
+      <div class="card students-table">
+        <h2>Gradebook</h2>
+        <label>Select Class:</label>
+        <select id="gradebook-class"></select>
+        <div id="gradebook-table"></div>
+      </div>
+    </section>
+
+    <!-- Assignments Section -->
+    <section id="section-assignments" style="display:none;">
+      <div class="card students-table">
+        <h2 style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Assignments</span>
+          <button class="btn" onclick="openAssignmentModal()">+ Create Assignment</button>
+        </h2>
+        <div id="assignment-list"></div>
+      </div>
+    </section>
+
     <!-- Draft Results Section -->
     <section id="section-draftResults" style="display:none;">
-      <div class="draft-results-table">
+      <div class="card draft-results-table">
         <h2>Draft Results</h2>
         <table id="draft-results-table">
           <thead>
@@ -328,15 +511,14 @@
 
     <!-- Notifications Section -->
     <section id="section-notifications" style="display:none;">
-      <div class="notification-list" id="notification-list">
+      <div class="card notification-list" id="notification-list">
         <h2>Notifications</h2>
-        <!-- Notifications will appear here -->
       </div>
     </section>
 
     <!-- Profile/Settings Section -->
     <section id="section-profile" style="display:none;">
-      <div class="profile-settings">
+      <div class="card profile-settings">
         <h2>Profile / Settings</h2>
         <form id="profile-form">
           <label>Name</label>
@@ -350,15 +532,34 @@
       </div>
     </section>
 
+    <!-- Assignment Modal -->
+    <div id="assignmentModalBg" class="form-modal-bg" style="display:none;">
+      <div class="form-modal">
+        <button class="close-btn" onclick="closeAssignmentModal()">&times;</button>
+        <h3>Create Assignment</h3>
+        <form id="assignmentForm">
+          <label>Class</label>
+          <select id="assignment-class"></select>
+          <label>Title</label>
+          <input type="text" name="title" required>
+          <label>Description</label>
+          <input type="text" name="desc" required>
+          <label>Due Date</label>
+          <input type="date" name="due" required>
+          <div class="modal-actions">
+            <button type="submit" class="btn">Save Assignment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Modal for Result Entry -->
     <div id="resultModalBg" class="form-modal-bg" style="display:none;">
       <div class="form-modal">
         <button class="close-btn" onclick="closeResultModal()">&times;</button>
         <h3>Enter/Update Result</h3>
         <form id="resultForm">
-          <div id="resultFormFields">
-            <!-- Dynamic fields will be injected here -->
-          </div>
+          <div id="resultFormFields"></div>
           <div class="modal-actions">
             <button type="submit" class="btn">Save Draft</button>
           </div>
@@ -416,12 +617,18 @@ let draftResults = [
     }
   }
 ];
+let attendanceRecords = [];
+let gradebookData = {};
+let assignments = [];
 
 // --- UI Logic ---
 const sidebarBtns = document.querySelectorAll('.sidebar nav button');
 const sections = {
   dashboard: document.getElementById('section-dashboard'),
   classes: document.getElementById('section-dashboard'),
+  attendance: document.getElementById('section-attendance'),
+  gradebook: document.getElementById('section-gradebook'),
+  assignments: document.getElementById('section-assignments'),
   draftResults: document.getElementById('section-draftResults'),
   notifications: document.getElementById('section-notifications'),
   profile: document.getElementById('section-profile')
@@ -430,17 +637,17 @@ sidebarBtns.forEach(btn => {
   btn.onclick = function() {
     sidebarBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    // Hide all
     Object.values(sections).forEach(s => s.style.display = 'none');
-    // Show selected
     const sec = btn.getAttribute('data-section');
     sections[sec].style.display = '';
     if (sec === 'draftResults') renderDraftResults();
     if (sec === 'notifications') renderNotifications();
+    if (sec === 'attendance') renderAttendance();
+    if (sec === 'gradebook') renderGradebook();
+    if (sec === 'assignments') renderAssignments();
   }
 });
 
-// --- Classes List and Students ---
 let selectedClassId = null;
 function renderClassesList() {
   const classList = document.getElementById('class-list');
@@ -466,10 +673,10 @@ function renderStudentsBlock() {
   if (!selectedClassId) return;
   const students = studentsByClass[selectedClassId] || [];
   if (students.length === 0) {
-    block.innerHTML = '<div class="students-table"><em>No students found in this class.</em></div>';
+    block.innerHTML = '<div class="card students-table"><em>No students found in this class.</em></div>';
     return;
   }
-  let html = `<div class="students-table"><h2>Students in ${teacher.classes.find(c=>c.id===selectedClassId).name}</h2>
+  let html = `<div class="card students-table"><h2>Students in ${teacher.classes.find(c=>c.id===selectedClassId).name}</h2>
     <table>
       <thead><tr>
         <th>Name</th><th>Reg. No.</th><th>Email</th><th>Actions</th>
@@ -490,17 +697,143 @@ function renderStudentsBlock() {
   block.innerHTML = html;
 }
 
+// --- Attendance ---
+function renderAttendance() {
+  const attendanceClassSel = document.getElementById('attendance-class');
+  attendanceClassSel.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    attendanceClassSel.appendChild(opt);
+  });
+  attendanceClassSel.onchange = renderAttendanceStudents;
+  renderAttendanceStudents();
+}
+function renderAttendanceStudents() {
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  let html = `<table>
+      <thead><tr><th>Student</th><th>Present</th></tr></thead>
+      <tbody>`;
+  students.forEach(stu => {
+    const record = (attendanceRecords.find(a => a.classId === classId && a.studentId === stu.id) || { present: false });
+    html += `<tr>
+      <td>${stu.name}</td>
+      <td><input type="checkbox" name="present_${stu.id}" ${record.present ? 'checked' : ''}></td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('attendance-students').innerHTML = html;
+}
+document.getElementById('attendance-form').onsubmit = function(e){
+  e.preventDefault();
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  students.forEach(stu => {
+    const cb = document.querySelector(`[name="present_${stu.id}"]`);
+    let record = attendanceRecords.find(a => a.classId === classId && a.studentId === stu.id);
+    if (!record) {
+      record = { classId, studentId: stu.id, present: cb.checked };
+      attendanceRecords.push(record);
+    } else {
+      record.present = cb.checked;
+    }
+  });
+  alert('Attendance saved!');
+};
+
+// --- Gradebook ---
+function renderGradebook() {
+  const gradebookClassSel = document.getElementById('gradebook-class');
+  gradebookClassSel.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    gradebookClassSel.appendChild(opt);
+  });
+  gradebookClassSel.onchange = renderGradebookTable;
+  renderGradebookTable();
+}
+function renderGradebookTable() {
+  const classId = document.getElementById('gradebook-class').value;
+  const students = studentsByClass[classId] || [];
+  const subjects = subjectsByClass[classId] || [];
+  let html = `<table>
+      <thead><tr><th>Student</th>`;
+  subjects.forEach(subj => html += `<th>${subj.name}</th>`);
+  html += `</tr></thead><tbody>`;
+  students.forEach(stu => {
+    html += `<tr><td>${stu.name}</td>`;
+    subjects.forEach(subj => {
+      const gb = (gradebookData[classId] && gradebookData[classId][stu.id] && gradebookData[classId][stu.id][subj.id]) || '-';
+      html += `<td>${gb}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('gradebook-table').innerHTML = html;
+}
+
+// --- Assignments ---
+function renderAssignments() {
+  const assignmentClassSel = document.getElementById('assignment-class');
+  assignmentClassSel.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    assignmentClassSel.appendChild(opt);
+  });
+  renderAssignmentList();
+}
+function renderAssignmentList() {
+  const div = document.getElementById('assignment-list');
+  if (!assignments.length) {
+    div.innerHTML = '<em>No assignments yet.</em>';
+    return;
+  }
+  let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
+  assignments.forEach(a => {
+    const cls = teacher.classes.find(c=>c.id===a.classId) || {};
+    html += `<tr><td>${a.title}</td><td>${cls.name||a.classId}</td><td>${a.due}</td><td>${a.desc}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  div.innerHTML = html;
+}
+function openAssignmentModal() {
+  document.getElementById('assignmentModalBg').style.display = 'flex';
+}
+function closeAssignmentModal() {
+  document.getElementById('assignmentModalBg').style.display = 'none';
+}
+document.getElementById('assignmentForm').onsubmit = function(e){
+  e.preventDefault();
+  const classId = document.getElementById('assignment-class').value;
+  const fd = new FormData(this);
+  assignments.push({
+    classId,
+    title: fd.get('title'),
+    desc: fd.get('desc'),
+    due: fd.get('due')
+  });
+  alert('Assignment created!');
+  closeAssignmentModal();
+  renderAssignmentList();
+};
+window.openAssignmentModal = openAssignmentModal;
+window.closeAssignmentModal = closeAssignmentModal;
+
 // --- Result Modal ---
 let currentResultStudentId = null;
 let currentResultClassId = null;
 function openResultModal(studentId, classId) {
   currentResultStudentId = studentId;
   currentResultClassId = classId;
-  // Find existing draft result for this student/class
   let result = draftResults.find(r => r.studentId === studentId && r.classId === classId) || {};
-  // Build dynamic fields
   const subjects = subjectsByClass[classId] || [];
-  let html = '<h4>Subjects & Scores</h4>';
+  let html = '<h4 style="margin:10px 0 7px 0;">Subjects & Scores</h4>';
   subjects.forEach(subj => {
     const data = (result.data && result.data[subj.id]) || {};
     html += `
@@ -514,21 +847,19 @@ function openResultModal(studentId, classId) {
       <input type="text" name="comment_${subj.id}" value="${data.comment||''}">
     `;
   });
-  // Skill Ratings
-  html += `<h4 style="margin-top:12px;">Affective Skills (1-5)</h4>`;
+  html += `<h4 style="margin-top:15px;">Affective Skills (1-5)</h4>`;
   const affectiveSkills = ['Punctuality','Attentiveness','Neatness','Honesty','Politeness','Perseverance','Relationship with Others','Organization Ability'];
   affectiveSkills.forEach(skill => {
     html += `<label>${skill}</label>
       <input type="number" min="1" max="5" name="affective_${skill.toLowerCase().replace(/ /g,'_')}" value="${(result.affectiveRatings && result.affectiveRatings[skill])||''}">`;
   });
-  html += `<h4 style="margin-top:12px;">Psychomotor Skills (1-5)</h4>`;
+  html += `<h4 style="margin-top:15px;">Psychomotor Skills (1-5)</h4>`;
   const psychomotorSkills = ['Hand Writing','Drawing and Painting','Speech / Verbal Fluency','Quantitative Reasoning','Processing Speed','Retentiveness','Visual Memory','Public Speaking','Sports and Games'];
   psychomotorSkills.forEach(skill => {
     html += `<label>${skill}</label>
       <input type="number" min="1" max="5" name="psychomotor_${skill.toLowerCase().replace(/ |\\//g,'_')}" value="${(result.psychomotorRatings && result.psychomotorRatings[skill])||''}">`;
   });
-  // Attendance
-  html += `<h4 style="margin-top:12px;">Attendance</h4>
+  html += `<h4 style="margin-top:15px;">Attendance</h4>
     <label>No. of School Days</label>
     <input type="number" min="0" name="attendance_total" value="${result.attendanceTotal||''}">
     <label>No. of Days Present</label>
@@ -547,7 +878,6 @@ function closeResultModal() {
 }
 document.getElementById('resultForm').onsubmit = function(e) {
   e.preventDefault();
-  // Read form data
   const fd = new FormData(e.target);
   const subjects = subjectsByClass[currentResultClassId] || [];
   let resultData = {};
@@ -569,7 +899,6 @@ document.getElementById('resultForm').onsubmit = function(e) {
   let attendancePresent = Number(fd.get('attendance_present'));
   let attendanceAbsent = Number(fd.get('attendance_absent'));
   let attendancePercent = Number(fd.get('attendance_percent'));
-  // Save to draftResults (simulate API)
   let draft = draftResults.find(r => r.studentId===currentResultStudentId && r.classId===currentResultClassId);
   if (!draft) {
     draft = {
@@ -594,7 +923,6 @@ document.getElementById('resultForm').onsubmit = function(e) {
   closeResultModal();
   renderDraftResults();
 };
-
 window.openResultModal = openResultModal;
 window.closeResultModal = closeResultModal;
 
@@ -613,7 +941,7 @@ function renderDraftResults() {
       <td>${dr.updated}</td>
       <td>
         <button class="btn" onclick="openResultModal('${dr.studentId}','${dr.classId}')">Edit</button>
-        <button class="btn" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
+        <button class="btn danger" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -627,7 +955,7 @@ function renderNotifications() {
   notifications.forEach(note => {
     const div = document.createElement('div');
     div.className = 'notification';
-    div.innerHTML = `<strong>${note.date}:</strong> ${note.message}`;
+    div.innerHTML = `<span class="date">${note.date}</span> <span>${note.message}</span>`;
     list.appendChild(div);
   });
 }
@@ -641,6 +969,7 @@ document.getElementById('profile-form').onsubmit = function(e){
 // --- Initial Render ---
 renderClassesList();
 renderStudentsBlock();
+
 </script>
 </body>
 </html>

@@ -65,7 +65,7 @@ router.post('/upload', async (req, res) => {
       const resultRef = await resultCollection().add(newResult);
       insertedResults.push({ id: resultRef.id, ...newResult });
     }
-    res.json({ success: true, inserted: insertedResults.length });
+    res.json({ success: true, inserted: insertedResults.length, results: insertedResults });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: err.message });
@@ -211,7 +211,7 @@ router.patch('/:id', async (req, res) => {
     const updated = (await docRef.get()).data();
     updated.id = req.params.id;
 
-    // (Optional: Populate references if you want, or return raw)
+    // Optionally populate references
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

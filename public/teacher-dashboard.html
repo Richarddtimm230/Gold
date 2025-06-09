@@ -611,6 +611,8 @@ td.actions {
     <button class="hamburger" aria-label="Open navigation" onclick="toggleSidebarMenu()" style="display:none;">&#9776;</button>
     <nav>
       <button class="active" data-section="dashboard">Dashboard</button>
+      <button data-section="academics">Academics</button>
+
       <button data-section="classes">My Classes</button>
       <button data-section="attendance">Attendance</button>
       <button data-section="gradebook">Gradebook</button>
@@ -639,8 +641,72 @@ td.actions {
       </div>
       <div id="students-block"></div>
     </section>
+<!-- Add to your sidebar navigation -->
 
-    <!-- E-Classroom Section -->
+<!-- Add this section after your other <section>s in <main> -->
+<section id="section-academics" style="display:none;">
+  <div class="card academics-panel" style="padding:0;">
+    <!-- Panel Header -->
+    <div class="academics-header" style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px 18px;border-bottom:1px solid var(--border);">
+      <div style="font-size: 1.13em; font-weight: 700;">Academics / Learning</div>
+      <button class="btn academics-close-btn" style="font-size:1.2em;background:none;color:var(--primary);padding:2px 8px;" onclick="sections['dashboard'].style.display='';sections['academics'].style.display='none';">×</button>
+    </div>
+    <!-- Search Bar -->
+    <div style="padding:10px 18px 6px 18px;">
+      <input type="text" class="academics-search" placeholder="Quick search . . ." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);">
+    </div>
+    <!-- Academics Left Menu + Right Content -->
+    <div style="display:flex;align-items:flex-start;gap:0;">
+      <!-- Left - Menu -->
+      <nav class="academics-menu" style="min-width: 160px; max-width: 220px; width:40vw; background: #f9fafb; border-right:1px solid var(--border);">
+        <ul style="margin:0;padding:0;list-style:none;">
+          <li>
+            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('learning')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
+              📚 Academics / Learning
+              <span style="float:right;font-size:1.1em;">▸</span>
+            </button>
+            <ul id="academics-menu-learning" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('subjects')">Subjects</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('schemes')">Schemes</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('topics')">Topics</button></li>
+            </ul>
+          </li>
+          <li>
+            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('exams')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
+              📝 Exams
+              <span style="float:right;font-size:1.1em;">▸</span>
+            </button>
+            <ul id="academics-menu-exams" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('exam-list')">Exam List</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('exam-timetable')">Exam Timetable</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('exam-results')">Exam Results</button></li>
+            </ul>
+          </li>
+          <li>
+            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('cbt')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
+              💻 CBT
+              <span style="float:right;font-size:1.1em;">▸</span>
+            </button>
+            <ul id="academics-menu-cbt" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('question-bank')">Question Bank</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('instruction-sets')">Instruction Sets</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-schedules')">CBT Schedules</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-scores')">CBT Scores</button></li>
+              <li><button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-practice')">CBT Practice</button></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- Right - Content -->
+      <div id="academics-content" style="padding:20px 14px;flex:1 1 0;min-width:0;">
+        <!-- Placeholder: will show section content here -->
+        <div style="color:var(--muted);font-size:1.08em;">Select an item from the menu to view details.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+ 
     <section id="section-eclassroom" style="display:none;">
       <div class="card" style="display: flex; flex-wrap: wrap; gap: 34px; justify-content: space-between;">
         <!-- Video Class -->
@@ -1259,6 +1325,46 @@ document.getElementById('resultForm').onsubmit = function(e) {
 };
 window.openResultModal = openResultModal;
 window.closeResultModal = closeResultModal;
+
+// --- Academics menu toggle logic ---
+function toggleAcademicsMenu(section) {
+  ['learning','exams','cbt'].forEach(id=>{
+    document.getElementById('academics-menu-'+id).style.display = (id===section && document.getElementById('academics-menu-'+id).style.display==='none')?'block':'none';
+  });
+}
+
+// --- Academics sub-section content logic ---
+function showAcademicsSubSection(sub) {
+  const content = document.getElementById('academics-content');
+  let html = '';
+  switch(sub) {
+    case 'subjects':
+      html = '<h3>Subjects</h3><div>List of subjects for your school and class. (Demo content)</div>'; break;
+    case 'schemes':
+      html = '<h3>Schemes</h3><div>Download or view termly/weekly schemes of work.</div>'; break;
+    case 'topics':
+      html = '<h3>Topics</h3><div>Browse topics and learning objectives.</div>'; break;
+    case 'exam-list':
+      html = '<h3>Exam List</h3><div>See all scheduled exams.</div>'; break;
+    case 'exam-timetable':
+      html = '<h3>Exam Timetable</h3><div>View exam timetables for your class.</div>'; break;
+    case 'exam-results':
+      html = '<h3>Exam Results</h3><div>Check published exam results.</div>'; break;
+    case 'question-bank':
+      html = '<h3>Question Bank</h3><div>Browse or add CBT questions.</div>'; break;
+    case 'instruction-sets':
+      html = '<h3>Instruction Sets</h3><div>View CBT instruction sets for exams.</div>'; break;
+    case 'cbt-schedules':
+      html = '<h3>CBT Schedules</h3><div>Scheduled CBT tests and exams.</div>'; break;
+    case 'cbt-scores':
+      html = '<h3>CBT Scores</h3><div>Scores from completed CBT exams.</div>'; break;
+    case 'cbt-practice':
+      html = '<h3>CBT Practice</h3><div>Practice questions for students.</div>'; break;
+    default:
+      html = '<div style="color:var(--muted);">Select an item from the menu to view details.</div>';
+  }
+  content.innerHTML = html;
+}
 
 // --- Draft Results ---
 function renderDraftResults() {

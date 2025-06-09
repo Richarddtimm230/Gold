@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gold and Linc Schools - Report Card</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+    }
+
+    .report-container {
+      background: #fff;
+      max-width: 950px;
+      margin: 30px auto;
+      border: 1.5px solid #0c4e8c;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
+      padding: 30px 30px 15px 30px;
+    }
+
+    .school-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .school-logo, .coat-of-arms {
+      height: 75px;
+      width: 75px;
+      object-fit: contain;
+    }
+
+    .school-info {
+      flex: 1;
+      text-align: center;
+    }
+
+    .school-info h1 {
+      color: #0c4e8c;
+      margin: 0;
+      font-size: 2.1rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .school-info p {
+      margin: 6px 0 0 0;
+      font-size: 1.02rem;
+      line-height: 1.5;
+    }
+
+    .term-title {
+      background: #0c4e8c;
+      margin-top: 18px;
+      margin-bottom: 16px;
+      padding: 10px 0;
+      border-radius: 5px;
+    }
+
+    .term-title h2 {
+      color: #fff;
+      margin: 0;
+      font-size: 1.14rem;
+      letter-spacing: 1.2px;
+    }
+
+    .student-info-section {
+      margin-bottom: 18px;
+    }
+
+    .student-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+    }
+
+    .student-info-table td {
+      padding: 4px 8px;
+      border: none;
+    }
+
+    .results-section {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+      font-size: 0.97rem;
+    }
+
+    .results-table th, .results-table td {
+      border: 1px solid #d2dce6;
+      padding: 7px 5px;
+      text-align: center;
+    }
+
+    .results-table thead th {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      font-size: 0.97rem;
+      font-weight: bold;
+    }
+
+    .results-table tbody tr td:first-child {
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .skills-tables-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .skills-table {
+      width: 31.5%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 0.96rem;
+      background: #fafcff;
+      border: 1px solid #b6c8db;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .skills-table th {
+      background: #0c4e8c;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 6px 0;
+      border: none;
+    }
+
+    .skills-table td {
+      border: 1px solid #d2dce6;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .skills-table tr td:last-child {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .grades-key-section {
+      margin: 8px 0 12px 0;
+    }
+
+    .grades-key-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.97rem;
+    }
+
+    .grades-key-table th, .grades-key-table td {
+      border: 1px solid #b6c8db;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .grades-key-table th {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      font-size: 1.04rem;
+      font-weight: bold;
+    }
+
+    .comments-section {
+      margin: 14px 0;
+    }
+
+    .principal-comment {
+      font-size: 1.07rem;
+      font-weight: 500;
+      color: #0c4e8c;
+    }
+
+    .principal-sign {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.03rem;
+      color: #222;
+    }
+
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 22px;
+      font-size: 0.98rem;
+      color: #212121;
+    }
+
+    .next-term {
+      font-weight: bold;
+      color: #0c4e8c;
+    }
+
+    .next-term-date {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-left: 5px;
+      color: #0a3a6c;
+    }
+
+    .footer-meta {
+      text-align: right;
+      font-size: 0.92rem;
+    }
+
+    .powered-by {
+      margin-left: 14px;
+    }
+
+    .powered-by a {
+      color: #0c4e8c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .report-container {
+        padding: 8px;
+      }
+      .skills-tables-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .skills-table {
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .footer-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <header>
+      <div class="school-header">
+        <img src="https://i.imgur.com/9n2gX1I.png" alt="Golding Schools Logo" class="school-logo">
+        <div class="school-info">
+          <h1>GOLD AND LINC SCHOOLS</h1>
+          <p>
+            <span class="address">BEHIND IRENITEMI HOTEL, TESTING GROUND AREA, OFF OSOGBO ROAD, ILESA.</span><br>
+            <span class="web">Website: goldlincschools.com</span>
+            <span class="phone">Phone : 08034430941</span><br>
+            <span class="email">Email : goldlincschool@gmail.com</span><br>
+            <span class="motto">Motto : FOR A SOLID BEGINNING...</span>
+          </p>
+        </div>
+        <img src="https://i.imgur.com/XQ4VwFQ.png" alt="Nigeria Coat of Arms" class="coat-of-arms">
+      </div>
+      <div class="term-title">
+        <h2>FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
+      </div>
+    </header>
+
+    <section class="student-info-section">
+      <table class="student-info-table">
+        <tr>
+          <td><strong>Name:</strong> OLAREWAJU TESTIMONY</td>
+          <td><strong>Performance Grade:</strong> A (Excellent)</td>
+        </tr>
+        <tr>
+          <td><strong>Reg. No:</strong> 2024/000838</td>
+          <td><strong>Class Size:</strong> 17</td>
+        </tr>
+        <tr>
+          <td><strong>Gender:</strong> F</td>
+          <td><strong>No. of Subjects:</strong> 13</td>
+        </tr>
+        <tr>
+          <td><strong>Age:</strong> 11</td>
+          <td><strong>Student Total Score:</strong> 911 / 1300</td>
+        </tr>
+        <tr>
+          <td><strong>DOB:</strong> 17-03-2013</td>
+          <td><strong>Student Average (%):</strong> 70.08%</td>
+        </tr>
+        <tr>
+          <td><strong>Class:</strong> JSS2 - A</td>
+          <td><strong>Grade Point Average:</strong> 4.38</td>
+        </tr>
+        <tr>
+          <td><strong>Email:</strong> testimony.olarewaju@goldlincschools.com</td>
+          <td><strong>Result Summary:</strong> Excellent</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="results-section">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Continuous Assessment</th>
+            <th>Mid Term Test</th>
+            <th>Examination</th>
+            <th>Total Score</th>
+            <th>Score Grade</th>
+            <th>Grade Remark</th>
+            <th>Grade Points</th>
+            <th>Teacher's Comment / Progress Report</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PRE-VOCATIONAL STUDIES</td>
+            <td>10.0</td>
+            <td>12.0</td>
+            <td>45.0</td>
+            <td>67.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>N.V.E</td>
+            <td>7.0</td>
+            <td>7.0</td>
+            <td>48.0</td>
+            <td>62.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>BASIC SCIENCE AND TECHNOLOGY</td>
+            <td>10.0</td>
+            <td>12.0</td>
+            <td>46.0</td>
+            <td>68.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Basic Science</td>
+            <td>10.0</td>
+            <td>13.0</td>
+            <td>44.0</td>
+            <td>67.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Computer</td>
+            <td>8.0</td>
+            <td>12.0</td>
+            <td>40.0</td>
+            <td>60.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Physical And Health Education</td>
+            <td>7.0</td>
+            <td>10.0</td>
+            <td>50.0</td>
+            <td>67.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Yoruba</td>
+            <td>12.0</td>
+            <td>12.0</td>
+            <td>45.0</td>
+            <td>69.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Mathematics</td>
+            <td>15.0</td>
+            <td>15.0</td>
+            <td>52.0</td>
+            <td>82.0</td>
+            <td>A</td>
+            <td>Excellent</td>
+            <td>5.00</td>
+            <td>EXCELLENT</td>
+          </tr>
+          <tr>
+            <td>English Language</td>
+            <td>8.0</td>
+            <td>9.0</td>
+            <td>51.0</td>
+            <td>68.0</td>
+            <td>B</td>
+            <td>Very Good</td>
+            <td>4.00</td>
+            <td>VERY GOOD</td>
+          </tr>
+          <tr>
+            <td>Christian Religious Studies</td>
+            <td>12.0</td>
+            <td>11.0</td>
+            <td>47.0</td>
+            <td>70.0</td>
+            <td>A</td>
+            <td>Excellent</td>
+            <td>5.00</td>
+            <td>EXCELLENT</td>
+          </tr>
+          <tr>
+            <td>Business Studies</td>
+            <td>10.0</td>
+            <td>10.0</td>
+            <td>61.0</td>
+            <td>81.0</td>
+            <td>A</td>
+            <td>Excellent</td>
+            <td>5.00</td>
+            <td>EXCELLENT</td>
+          </tr>
+          <tr>
+            <td>Music</td>
+            <td>15.0</td>
+            <td>15.0</td>
+            <td>50.0</td>
+            <td>80.0</td>
+            <td>A</td>
+            <td>Excellent</td>
+            <td>5.00</td>
+            <td>EXCELLENT</td>
+          </tr>
+          <tr>
+            <td>Cultural and Creative Art</td>
+            <td>7.0</td>
+            <td>7.0</td>
+            <td>56.0</td>
+            <td>70.0</td>
+            <td>A</td>
+            <td>Excellent</td>
+            <td>5.00</td>
+            <td>EXCELLENT</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="skills-tables-section">
+      <table class="skills-table affective-skills">
+        <thead>
+          <tr>
+            <th colspan="2">Affective Skills Rating (5)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Punctuality</td><td>3</td></tr>
+          <tr><td>Attentiveness</td><td>3</td></tr>
+          <tr><td>Neatness</td><td>3</td></tr>
+          <tr><td>Honesty</td><td>3</td></tr>
+          <tr><td>Politeness</td><td>3</td></tr>
+          <tr><td>Perseverance</td><td>3</td></tr>
+          <tr><td>Relationship with Others</td><td>3</td></tr>
+          <tr><td>Organization Ability</td><td>3</td></tr>
+        </tbody>
+      </table>
+      <table class="skills-table psychomotor-skills">
+        <thead>
+          <tr>
+            <th colspan="2">Psychomotor Skills Rating (5)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Hand Writing</td><td>3</td></tr>
+          <tr><td>Drawing and Painting</td><td>3</td></tr>
+          <tr><td>Speech / Verbal Fluency</td><td>3</td></tr>
+          <tr><td>Quantitative Reasoning</td><td>3</td></tr>
+          <tr><td>Processing Speed</td><td>3</td></tr>
+          <tr><td>Retentiveness</td><td>3</td></tr>
+          <tr><td>Visual Memory</td><td>3</td></tr>
+          <tr><td>Public Speaking</td><td>3</td></tr>
+          <tr><td>Sports and Games</td><td>3</td></tr>
+        </tbody>
+      </table>
+      <table class="skills-table attendance">
+        <thead>
+          <tr>
+            <th colspan="2">Attendance Report</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>No. of School Days</td><td>126</td></tr>
+          <tr><td>No. of Days Present</td><td>122</td></tr>
+          <tr><td>No. of Days Absent</td><td>4</td></tr>
+          <tr><td>% Attendance</td><td>96.83%</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="grades-key-section">
+      <table class="grades-key-table">
+        <tr>
+          <th>Key to Grades</th>
+          <td>70-100: <strong>A</strong></td>
+          <td>60-69: <strong>B</strong></td>
+          <td>50-59: <strong>C</strong></td>
+          <td>45-49: <strong>D</strong></td>
+          <td>40-44: <strong>E</strong></td>
+          <td>0-39: <strong>F</strong></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Excellent<br>5 Grade Points.</td>
+          <td>Very Good<br>4 Grade Points.</td>
+          <td>Good<br>3 Grade Points.</td>
+          <td>Pass<br>2 Grade Points.</td>
+          <td>Poor<br>1 Grade Point.</td>
+          <td>Fail<br>0 Grade Points.</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="comments-section">
+      <p class="principal-comment">
+        <strong>Principal's Comment :</strong> This is an excellent result, do not rest on your oars.
+      </p>
+      <div class="principal-sign">
+        <span><strong>Principal:</strong> ABIODUN FESTUS ADENIYI</span>
+        <span><strong>Principal's Signature :</strong> ____________________</span>
+      </div>
+    </section>
+
+    <section class="footer-section">
+      <div class="next-term">
+        <strong>Next Term Begins:</strong> <span class="next-term-date">Monday 6th of January 2025.</span>
+      </div>
+      <div class="footer-meta">
+        <span>Printed : 18-12-2024 02:53 pm</span>
+        <span class="powered-by">Powered By : <a href="https://schoolsfocus.net">SchoolsFocus</a></span>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

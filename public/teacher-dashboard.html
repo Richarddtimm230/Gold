@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Dashboard - Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f7f7f7;
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 230px;
+      background: #0c4e8c;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 25px 0 0 0;
+    }
+    .school-logo {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 30px;
+      letter-spacing: 1.5px;
+    }
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0 10px;
+    }
+    .sidebar nav button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.1em;
+      padding: 12px 18px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.12s;
+    }
+    .sidebar nav button.active,
+    .sidebar nav button:hover {
+      background: #194d6c;
+    }
+    .sidebar .profile-section {
+      margin-top: auto;
+      padding: 15px 18px;
+      border-top: 1px solid #2b5e99;
+    }
+    .sidebar .profile-section small {
+      color: #e7f0fa;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 34px 32px;
+      background: #f7f7f7;
+      overflow-y: auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    header h1 {
+      color: #0c4e8c;
+      font-size: 1.7em;
+      font-weight: 600;
+      margin: 0;
+    }
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #d2e5fa;
+      color: #0c4e8c;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+    }
+
+    .classes-list, .students-table, .draft-results-table {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+      padding: 18px;
+      margin-bottom: 30px;
+    }
+    .classes-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .classes-list li {
+      margin: 0;
+    }
+    .class-btn {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      border: 1px solid #c2d3e0;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 1.05em;
+      cursor: pointer;
+      margin-bottom: 5px;
+      transition: background 0.15s;
+    }
+    .class-btn.active,
+    .class-btn:hover {
+      background: #0c4e8c;
+      color: #fff;
+    }
+
+    h2 {
+      color: #095188;
+      font-size: 1.25em;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px 7px;
+      border: 1px solid #c2d3e0;
+      text-align: left;
+    }
+    th {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      font-weight: bold;
+    }
+    td.actions {
+      text-align: center;
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 5px;
+      border: none;
+      background: #0c4e8c;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.98em;
+      margin-right: 5px;
+      margin-bottom: 2px;
+      transition: background 0.13s;
+    }
+    .btn:hover {
+      background: #194d6c;
+    }
+    .form-modal-bg {
+      position: fixed; z-index: 10; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(60,80,110,0.21);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .form-modal {
+      background: #fff;
+      border-radius: 8px;
+      padding: 28px 24px 20px 24px;
+      min-width: 340px;
+      max-width: 90vw;
+      box-shadow: 0 2px 25px rgba(0,0,0,0.11);
+      position: relative;
+    }
+    .form-modal h3 {
+      margin-top: 0;
+      color: #0c4e8c;
+      margin-bottom: 16px;
+      font-size: 1.18em;
+    }
+    .form-modal label {
+      display: block;
+      margin-bottom: 4px;
+      color: #2c3e50;
+      font-size: 0.99em;
+    }
+    .form-modal input[type="number"],
+    .form-modal input[type="text"] {
+      width: 100%;
+      padding: 7px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #c2d3e0;
+      font-size: 1em;
+    }
+    .form-modal .modal-actions {
+      text-align: right;
+      margin-top: 15px;
+    }
+    .form-modal .close-btn {
+      position: absolute;
+      top: 9px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.4em;
+      color: #bbb;
+      cursor: pointer;
+    }
+    .form-modal .close-btn:hover { color: #0c4e8c; }
+
+    .notification-list {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+      padding: 18px;
+    }
+    .notification {
+      border-bottom: 1px solid #e7f0fa;
+      padding: 10px 0;
+      color: #333;
+    }
+    .notification:last-child {
+      border-bottom: none;
+    }
+    .profile-settings {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+      padding: 18px;
+      max-width: 400px;
+    }
+    .profile-settings input[type="text"], .profile-settings input[type="email"], .profile-settings input[type="password"] {
+      width: 100%;
+      padding: 7px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #c2d3e0;
+      font-size: 1em;
+    }
+    .profile-settings button {
+      background: #0c4e8c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 7px 18px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .profile-settings button:hover { background: #194d6c; }
+
+    @media (max-width: 900px) {
+      .dashboard-container { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 0 0;}
+      .sidebar nav { flex-direction: row; gap: 2px; padding: 0 2px; }
+      .sidebar .profile-section { display: none; }
+      .main-content { padding: 14px 4vw; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 9px 2vw; }
+      .classes-list ul { flex-direction: column; gap: 5px; }
+      .form-modal { min-width: 98vw; padding: 11vw 2vw 6vw 2vw; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="school-logo">GLS</div>
+    <nav>
+      <button class="active" data-section="dashboard">Dashboard</button>
+      <button data-section="classes">My Classes</button>
+      <button data-section="draftResults">Draft Results</button>
+      <button data-section="notifications">Notifications</button>
+      <button data-section="profile">Profile/Settings</button>
+    </nav>
+    <div class="profile-section">
+      <div><strong>Mr. John Doe</strong></div>
+      <small>Mathematics Teacher</small>
+    </div>
+  </aside>
+  <main class="main-content">
+    <header>
+      <h1>Welcome, Mr. John Doe</h1>
+      <div class="avatar">JD</div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="section-dashboard">
+      <div class="classes-list">
+        <h2>My Classes</h2>
+        <ul id="class-list">
+          <!-- Classes will be loaded here -->
+        </ul>
+      </div>
+      <div id="students-block"></div>
+    </section>
+
+    <!-- Draft Results Section -->
+    <section id="section-draftResults" style="display:none;">
+      <div class="draft-results-table">
+        <h2>Draft Results</h2>
+        <table id="draft-results-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Term</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Draft results will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Notifications Section -->
+    <section id="section-notifications" style="display:none;">
+      <div class="notification-list" id="notification-list">
+        <h2>Notifications</h2>
+        <!-- Notifications will appear here -->
+      </div>
+    </section>
+
+    <!-- Profile/Settings Section -->
+    <section id="section-profile" style="display:none;">
+      <div class="profile-settings">
+        <h2>Profile / Settings</h2>
+        <form id="profile-form">
+          <label>Name</label>
+          <input type="text" id="profile-name" value="Mr. John Doe">
+          <label>Email</label>
+          <input type="email" id="profile-email" value="john.doe@goldlincschools.com">
+          <label>Password</label>
+          <input type="password" id="profile-password" placeholder="Change password">
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Modal for Result Entry -->
+    <div id="resultModalBg" class="form-modal-bg" style="display:none;">
+      <div class="form-modal">
+        <button class="close-btn" onclick="closeResultModal()">&times;</button>
+        <h3>Enter/Update Result</h3>
+        <form id="resultForm">
+          <div id="resultFormFields">
+            <!-- Dynamic fields will be injected here -->
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn">Save Draft</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+// --- Demo Data ---
+const teacher = {
+  id: 'teach001',
+  name: 'Mr. John Doe',
+  email: 'john.doe@goldlincschools.com',
+  classes: [
+    { id: 'jss2a', name: 'JSS2 - A' },
+    { id: 'jss2b', name: 'JSS2 - B' }
+  ]
+};
+const studentsByClass = {
+  'jss2a': [
+    { id: 'stu1', name: 'Olarewaju Testimony', regNo: '2024/000838', email: 'testimony.olarewaju@goldlincschools.com' },
+    { id: 'stu2', name: 'Jane Adekunle', regNo: '2024/000839', email: 'jane.adekunle@goldlincschools.com' }
+  ],
+  'jss2b': [
+    { id: 'stu3', name: 'James Okoro', regNo: '2024/000840', email: 'james.okoro@goldlincschools.com' }
+  ]
+};
+const subjectsByClass = {
+  'jss2a': [
+    { id: 'math', name: 'Mathematics' },
+    { id: 'eng', name: 'English Language' },
+    { id: 'bus', name: 'Business Studies' }
+  ],
+  'jss2b': [
+    { id: 'math', name: 'Mathematics' },
+    { id: 'eng', name: 'English Language' }
+  ]
+};
+const notifications = [
+  { id: 1, message: "Term result deadline is Friday, June 14th.", date: "2025-06-08" },
+  { id: 2, message: "Staff meeting on Wednesday at 2:00pm.", date: "2025-06-07" }
+];
+let draftResults = [
+  {
+    studentId: 'stu1',
+    classId: 'jss2a',
+    term: 'First Term',
+    status: 'Draft',
+    updated: '2025-06-07 10:31',
+    data: {
+      math: { ca: 15, mid: 13, exam: 50, comment: 'Excellent' },
+      eng: { ca: 12, mid: 10, exam: 44, comment: 'Very Good' },
+      bus: { ca: 13, mid: 12, exam: 47, comment: 'Good' }
+    }
+  }
+];
+
+// --- UI Logic ---
+const sidebarBtns = document.querySelectorAll('.sidebar nav button');
+const sections = {
+  dashboard: document.getElementById('section-dashboard'),
+  classes: document.getElementById('section-dashboard'),
+  draftResults: document.getElementById('section-draftResults'),
+  notifications: document.getElementById('section-notifications'),
+  profile: document.getElementById('section-profile')
+};
+sidebarBtns.forEach(btn => {
+  btn.onclick = function() {
+    sidebarBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Hide all
+    Object.values(sections).forEach(s => s.style.display = 'none');
+    // Show selected
+    const sec = btn.getAttribute('data-section');
+    sections[sec].style.display = '';
+    if (sec === 'draftResults') renderDraftResults();
+    if (sec === 'notifications') renderNotifications();
+  }
+});
+
+// --- Classes List and Students ---
+let selectedClassId = null;
+function renderClassesList() {
+  const classList = document.getElementById('class-list');
+  classList.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'class-btn';
+    btn.innerText = cls.name;
+    if (selectedClassId === cls.id) btn.classList.add('active');
+    btn.onclick = () => {
+      selectedClassId = cls.id;
+      renderClassesList();
+      renderStudentsBlock();
+    };
+    li.appendChild(btn);
+    classList.appendChild(li);
+  });
+}
+function renderStudentsBlock() {
+  const block = document.getElementById('students-block');
+  block.innerHTML = '';
+  if (!selectedClassId) return;
+  const students = studentsByClass[selectedClassId] || [];
+  if (students.length === 0) {
+    block.innerHTML = '<div class="students-table"><em>No students found in this class.</em></div>';
+    return;
+  }
+  let html = `<div class="students-table"><h2>Students in ${teacher.classes.find(c=>c.id===selectedClassId).name}</h2>
+    <table>
+      <thead><tr>
+        <th>Name</th><th>Reg. No.</th><th>Email</th><th>Actions</th>
+      </tr></thead>
+      <tbody>`;
+  students.forEach(stu => {
+    html += `<tr>
+      <td>${stu.name}</td>
+      <td>${stu.regNo}</td>
+      <td>${stu.email}</td>
+      <td class="actions">
+        <button class="btn" onclick="openResultModal('${stu.id}','${selectedClassId}')">Enter/Update Result</button>
+        <button class="btn" onclick="alert('Profile for ${stu.name}')">View Profile</button>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  block.innerHTML = html;
+}
+
+// --- Result Modal ---
+let currentResultStudentId = null;
+let currentResultClassId = null;
+function openResultModal(studentId, classId) {
+  currentResultStudentId = studentId;
+  currentResultClassId = classId;
+  // Find existing draft result for this student/class
+  let result = draftResults.find(r => r.studentId === studentId && r.classId === classId) || {};
+  // Build dynamic fields
+  const subjects = subjectsByClass[classId] || [];
+  let html = '<h4>Subjects & Scores</h4>';
+  subjects.forEach(subj => {
+    const data = (result.data && result.data[subj.id]) || {};
+    html += `
+      <label>${subj.name} - CA</label>
+      <input type="number" min="0" max="20" name="ca_${subj.id}" value="${data.ca||''}" required>
+      <label>${subj.name} - Mid Term</label>
+      <input type="number" min="0" max="20" name="mid_${subj.id}" value="${data.mid||''}" required>
+      <label>${subj.name} - Exam</label>
+      <input type="number" min="0" max="60" name="exam_${subj.id}" value="${data.exam||''}" required>
+      <label>${subj.name} - Teacher's Comment</label>
+      <input type="text" name="comment_${subj.id}" value="${data.comment||''}">
+    `;
+  });
+  // Skill Ratings
+  html += `<h4 style="margin-top:12px;">Affective Skills (1-5)</h4>`;
+  const affectiveSkills = ['Punctuality','Attentiveness','Neatness','Honesty','Politeness','Perseverance','Relationship with Others','Organization Ability'];
+  affectiveSkills.forEach(skill => {
+    html += `<label>${skill}</label>
+      <input type="number" min="1" max="5" name="affective_${skill.toLowerCase().replace(/ /g,'_')}" value="${(result.affectiveRatings && result.affectiveRatings[skill])||''}">`;
+  });
+  html += `<h4 style="margin-top:12px;">Psychomotor Skills (1-5)</h4>`;
+  const psychomotorSkills = ['Hand Writing','Drawing and Painting','Speech / Verbal Fluency','Quantitative Reasoning','Processing Speed','Retentiveness','Visual Memory','Public Speaking','Sports and Games'];
+  psychomotorSkills.forEach(skill => {
+    html += `<label>${skill}</label>
+      <input type="number" min="1" max="5" name="psychomotor_${skill.toLowerCase().replace(/ |\\//g,'_')}" value="${(result.psychomotorRatings && result.psychomotorRatings[skill])||''}">`;
+  });
+  // Attendance
+  html += `<h4 style="margin-top:12px;">Attendance</h4>
+    <label>No. of School Days</label>
+    <input type="number" min="0" name="attendance_total" value="${result.attendanceTotal||''}">
+    <label>No. of Days Present</label>
+    <input type="number" min="0" name="attendance_present" value="${result.attendancePresent||''}">
+    <label>No. of Days Absent</label>
+    <input type="number" min="0" name="attendance_absent" value="${result.attendanceAbsent||''}">
+    <label>% Attendance</label>
+    <input type="number" min="0" max="100" step="0.01" name="attendance_percent" value="${result.attendancePercent||''}">
+  `;
+  document.getElementById('resultFormFields').innerHTML = html;
+  document.getElementById('resultModalBg').style.display = 'flex';
+}
+function closeResultModal() {
+  document.getElementById('resultModalBg').style.display = 'none';
+  currentResultStudentId = currentResultClassId = null;
+}
+document.getElementById('resultForm').onsubmit = function(e) {
+  e.preventDefault();
+  // Read form data
+  const fd = new FormData(e.target);
+  const subjects = subjectsByClass[currentResultClassId] || [];
+  let resultData = {};
+  subjects.forEach(subj => {
+    resultData[subj.id] = {
+      ca: Number(fd.get(`ca_${subj.id}`)),
+      mid: Number(fd.get(`mid_${subj.id}`)),
+      exam: Number(fd.get(`exam_${subj.id}`)),
+      comment: fd.get(`comment_${subj.id}`) || ''
+    };
+  });
+  let affectiveRatings = {};
+  ['Punctuality','Attentiveness','Neatness','Honesty','Politeness','Perseverance','Relationship with Others','Organization Ability']
+    .forEach(skill => affectiveRatings[skill]=Number(fd.get(`affective_${skill.toLowerCase().replace(/ /g,'_')}`)) );
+  let psychomotorRatings = {};
+  ['Hand Writing','Drawing and Painting','Speech / Verbal Fluency','Quantitative Reasoning','Processing Speed','Retentiveness','Visual Memory','Public Speaking','Sports and Games']
+    .forEach(skill => psychomotorRatings[skill]=Number(fd.get(`psychomotor_${skill.toLowerCase().replace(/ |\\//g,'_')}`)));
+  let attendanceTotal = Number(fd.get('attendance_total'));
+  let attendancePresent = Number(fd.get('attendance_present'));
+  let attendanceAbsent = Number(fd.get('attendance_absent'));
+  let attendancePercent = Number(fd.get('attendance_percent'));
+  // Save to draftResults (simulate API)
+  let draft = draftResults.find(r => r.studentId===currentResultStudentId && r.classId===currentResultClassId);
+  if (!draft) {
+    draft = {
+      studentId: currentResultStudentId,
+      classId: currentResultClassId,
+      term: 'First Term',
+      status: 'Draft',
+      updated: (new Date()).toISOString().slice(0,16).replace('T',' '),
+      data: {}
+    };
+    draftResults.push(draft);
+  }
+  draft.data = resultData;
+  draft.affectiveRatings = affectiveRatings;
+  draft.psychomotorRatings = psychomotorRatings;
+  draft.attendanceTotal = attendanceTotal;
+  draft.attendancePresent = attendancePresent;
+  draft.attendanceAbsent = attendanceAbsent;
+  draft.attendancePercent = attendancePercent;
+  draft.updated = (new Date()).toISOString().slice(0,16).replace('T',' ');
+  alert('Draft result saved!');
+  closeResultModal();
+  renderDraftResults();
+};
+
+window.openResultModal = openResultModal;
+window.closeResultModal = closeResultModal;
+
+// --- Draft Results ---
+function renderDraftResults() {
+  const tbody = document.querySelector('#draft-results-table tbody');
+  tbody.innerHTML = '';
+  draftResults.forEach(dr => {
+    const stu = Object.values(studentsByClass).flat().find(s => s.id===dr.studentId) || {};
+    const cls = teacher.classes.find(c=>c.id===dr.classId) || {};
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${stu.name||'[Unknown]'}</td>
+      <td>${cls.name||dr.classId}</td>
+      <td>${dr.term}</td>
+      <td>${dr.status}</td>
+      <td>${dr.updated}</td>
+      <td>
+        <button class="btn" onclick="openResultModal('${dr.studentId}','${dr.classId}')">Edit</button>
+        <button class="btn" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// --- Notifications ---
+function renderNotifications() {
+  const list = document.getElementById('notification-list');
+  list.innerHTML = `<h2>Notifications</h2>`;
+  notifications.forEach(note => {
+    const div = document.createElement('div');
+    div.className = 'notification';
+    div.innerHTML = `<strong>${note.date}:</strong> ${note.message}`;
+    list.appendChild(div);
+  });
+}
+
+// --- Profile Update (Dummy) ---
+document.getElementById('profile-form').onsubmit = function(e){
+  e.preventDefault();
+  alert('Profile updated!');
+};
+
+// --- Initial Render ---
+renderClassesList();
+renderStudentsBlock();
+</script>
+</body>
+</html>

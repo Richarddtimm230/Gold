@@ -41,6 +41,63 @@ body {
   min-height: 100vh;
   transition: flex-direction 0.2s;
 }
+
+/* --- Fix Start/Join (and similar) buttons overflowing on mobile --- */
+@media (max-width: 600px) {
+  .eclassroom-video button.btn,
+  .eclassroom-chat button.btn,
+  .btn {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+  .eclassroom-video {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .eclassroom-chat .btn.danger {
+    margin-left: 0;
+    width: 100%;
+  }
+  .eclassroom-chat input[type="text"] {
+    min-width: 0;
+    flex: 1 1 60%;
+    box-sizing: border-box;
+  }
+  .eclassroom-chat .avatar {
+    margin-right: 2px;
+  }
+
+  /* --- Fix for Navigation List Container (Sidebar Menu) --- */
+  .sidebar nav {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    padding: 0 2px;
+    overflow-x: auto;
+    width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .sidebar nav button {
+    flex: 1 0 auto;
+    min-width: 85px;
+    font-size: 0.98em;
+    padding: 10px 6px;
+    white-space: nowrap;
+  }
+
+  /* --- Prevent chat input/action row from overflowing --- */
+  .eclassroom-chat > div[style*="display:flex"] {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}
+    
 .sidebar {
   width: 270px;
   background: var(--sidebar-bg);

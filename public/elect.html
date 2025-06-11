@@ -292,7 +292,7 @@
         </div>
       </section>
       <!-- VOTERS -->
-      <section id="voters">
+<section id="voters">
         <div class="search-bar">
           <input type="text" id="voter-search" placeholder="Search voters...">
           <button class="btn" id="add-voter-btn">+ Add Voter</button>
@@ -305,6 +305,7 @@
                 <th>Name</th>
                 <th>Status</th>
                 <th>Voted</th>
+                <th>Voted Via</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -312,6 +313,16 @@
           </table>
         </div>
       </section>
+      <div class="modal" id="mark-voted-confirm-modal">
+    <div class="modal-content">
+      <h2>Confirm Mark as Voted</h2>
+      <p>Are you sure you want to mark <span id="confirm-voter-name"></span> as having voted via paper ballot? This action cannot be undone, and the voter will not be able to vote online.</p>
+      <div class="modal-actions">
+        <button class="btn secondary" id="mark-voted-cancel">Cancel</button>
+        <button class="btn danger" id="mark-voted-confirm">Yes, Mark as Voted</button>
+      </div>
+    </div>
+  </div>
       <!-- RESULTS -->
       <section id="results">
         <div class="search-bar">
@@ -849,30 +860,64 @@ function renderElectionsTable(filter="") {
       hideCandidateConfirmModal();
       candidateToDelete = null;
     };
-    // ------------------------------- VOTERS CRUD -----------------------------------
+
     let voters = [
-      { id: 101, name: "John Doe", status: "Active", voted: "Yes" },
-      { id: 102, name: "Jane Smith", status: "Active", voted: "No" },
-      { id: 103, name: "Mary Lin", status: "Inactive", voted: "No" }
+      { id: 101, name: "John Doe", status: "Active", voted: "Yes", votedVia: "Paper", timestamp: "2025-06-11 10:30" },
+      { id: 102, name: "Jane Smith", status: "Active", voted: "No" }
     ];
-    let voterToDelete = null;
+    let voterToMark = null;
     function renderVotersTable(filter = "") {
       const table = document.getElementById('voters-table');
       table.innerHTML = "";
       voters.filter(v => Object.values(v).some(val => String(val).toLowerCase().includes(filter.toLowerCase())))
         .forEach((v, idx) => {
+          let markBtn = "";
+          if (v.voted === "No") {
+            markBtn = `<button class="btn small" onclick="showMarkVotedConfirmModal(${idx})">Mark as Voted</button>`;
+          } else {
+            markBtn = `<span style="color:var(--success);font-weight:600;">&#10004; Voted</span>`;
+          }
+          let votedVia = v.votedVia ? v.votedVia : "-";
           let tr = document.createElement('tr');
           tr.innerHTML = `<td>${v.id}</td>
             <td>${v.name}</td>
             <td>${v.status === "Active" ? `<span style="color:var(--success);font-weight:600">${v.status}</span>` : `<span style="color:var(--danger);font-weight:600">${v.status}</span>`}</td>
             <td>${v.voted === "Yes" ? `<span style="color:var(--primary);font-weight:600">${v.voted}</span>` : v.voted}</td>
+            <td>${votedVia}</td>
             <td class="action-btns">
               <button class="btn small" onclick="showEditVoterModal(${idx})">Edit</button>
               <button class="btn small danger" onclick="showDeleteVoterModal(${idx})">Delete</button>
+              ${markBtn}
             </td>`;
           table.appendChild(tr);
         });
     }
+    function showMarkVotedConfirmModal(idx) {
+      voterToMark = idx;
+      document.getElementById("confirm-voter-name").textContent = voters[idx].name;
+      document.getElementById("mark-voted-confirm-modal").classList.add("active");
+      document.body.style.overflow = 'hidden';
+    }
+    function hideMarkVotedConfirmModal() {
+      document.getElementById("mark-voted-confirm-modal").classList.remove("active");
+      document.body.style.overflow = '';
+      voterToMark = null;
+    }
+    document.getElementById('mark-voted-cancel').onclick = hideMarkVotedConfirmModal;
+    document.getElementById('mark-voted-confirm').onclick = function() {
+      if (voterToMark !== null) {
+        voters[voterToMark].voted = "Yes";
+        voters[voterToMark].votedVia = "Paper";
+        voters[voterToMark].timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        renderVotersTable(document.getElementById('voter-search').value);
+        logAdminAction?.('Mark as Voted (Paper)', voters[voterToMark].name, `Voter marked as voted via paper ballot.`);
+      }
+      hideMarkVotedConfirmModal();
+    };
+    window.onclick = function(event) {
+      if (event.target === document.getElementById("mark-voted-confirm-modal")) hideMarkVotedConfirmModal();
+      // ...Other modal close handlers...
+    };
     renderVotersTable();
     document.getElementById('voter-search').addEventListener('input', e => { renderVotersTable(e.target.value); });
     const voterModal = document.getElementById('voter-modal');

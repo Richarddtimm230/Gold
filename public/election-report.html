@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Election Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Use the same CSS as your admin panel for consistency. Minimal CSS below: -->
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f7faff; color: #252e3e; margin:0; }
+    .container { max-width: 900px; margin: 36px auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px 0 rgba(30,144,255,0.08); padding: 32px 24px 40px 24px; }
+    h1 { color: #1e90ff; }
+    .dashboard-cards { display: flex; gap: 24px; margin-bottom: 36px; }
+    .card { flex: 1; background: #f9fbff; border-radius: 12px; box-shadow: 0 2px 8px rgba(34, 42, 53, 0.08); padding: 24px 16px; text-align: center;}
+    .card h3 { margin: 0 0 12px 0; color: #1e90ff; }
+    .card .card-value { font-size: 2.1em; font-weight: 700; color: #252e3e;}
+    .btn { background: #1e90ff; color: #fff; border: none; border-radius: 7px; padding: 8px 22px; font-size: 1em; font-weight: 600; cursor: pointer; margin: 16px 0; }
+    .btn:active, .btn:hover { background: #1877cc;}
+    table { width: 100%; border-collapse: collapse; margin-top: 22px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(30,144,255,0.08);}
+    th, td { padding: 13px 8px; border-bottom: 1px solid #ececec; }
+    th { background: #f4f6fb; color: #1e90ff; }
+    tr:last-child td { border-bottom: none; }
+    .back-link { display: inline-block; color:#1e90ff; margin-bottom: 20px; text-decoration:none; }
+    .back-link:hover { text-decoration:underline; }
+    @media (max-width:600px){ .dashboard-cards{flex-direction:column;gap:10px;} .container{padding:10px;} th,td{padding:8px 2px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="admin-panel-with-activity-log.html" class="back-link">&larr; Back to Admin Panel</a>
+    <h1 id="election-title">Election Report</h1>
+    <div class="dashboard-cards">
+      <div class="card">
+        <h3>Total Voters</h3>
+        <span class="card-value" id="total-voters">0</span>
+      </div>
+      <div class="card">
+        <h3>Voters Voted</h3>
+        <span class="card-value" id="voters-voted">0</span>
+      </div>
+      <div class="card">
+        <h3>Turnout</h3>
+        <span class="card-value" id="turnout-rate">0%</span>
+      </div>
+    </div>
+    <button class="btn" onclick="document.getElementById('detailed-report').style.display='block';this.style.display='none'">Show Detailed Report</button>
+    <div id="detailed-report" style="display:none;">
+      <h2>Detailed Report</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Total Votes</th>
+            <th>Valid Votes</th>
+            <th>Void Votes</th>
+          </tr>
+        </thead>
+        <tbody id="candidates-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    // ----------- DEMO DATA (should be loaded from backend in real use) -----------
+    const allVoters = [
+      { id: 101, name: "John Doe", status: "Active", voted: "Yes", election: "School President 2025" },
+      { id: 102, name: "Jane Smith", status: "Active", voted: "No", election: "School President 2025" },
+      { id: 103, name: "Mary Lin", status: "Inactive", voted: "No", election: "School President 2025" },
+      { id: 104, name: "Sam Wise", status: "Active", voted: "Yes", election: "School President 2025" },
+      { id: 105, name: "Pat Lee", status: "Active", voted: "Yes", election: "School President 2025" }
+    ];
+    const allCandidates = [
+      { name: "Jane Doe", election: "School President 2025", votes: 420, validVotes: 417, voidVotes: 3 },
+      { name: "John Smith", election: "School President 2025", votes: 392, validVotes: 385, voidVotes: 7 },
+      // Example for another election:
+      { name: "Sara Park", election: "Science Club Election", votes: 55, validVotes: 53, voidVotes: 2 }
+    ];
+
+    // ----------- LOAD ELECTION FROM URL -----------
+    function getQueryParam(name) {
+      let url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    const electionName = getQueryParam('election');
+    document.getElementById('election-title').textContent = electionName ? `Election Report: ${electionName}` : 'Election Report';
+
+    // ----------- DASHBOARD CARDS -----------
+    const votersForElection = allVoters.filter(v => v.election === electionName);
+    const totalVoters = votersForElection.length;
+    const votersVoted = votersForElection.filter(v => v.voted === "Yes").length;
+    document.getElementById('total-voters').textContent = totalVoters;
+    document.getElementById('voters-voted').textContent = votersVoted;
+    document.getElementById('turnout-rate').textContent = totalVoters ? Math.round(votersVoted/totalVoters*100) + '%' : '0%';
+
+    // ----------- DETAILED REPORT -----------
+    function renderCandidatesTable() {
+      const table = document.getElementById('candidates-table');
+      const candidates = allCandidates.filter(c => c.election === electionName);
+      if (candidates.length === 0) {
+        table.innerHTML = `<tr><td colspan="4" style="color:#888;">No candidates found for this election.</td></tr>`;
+        return;
+      }
+      candidates.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.name}</td>
+                        <td>${c.votes}</td>
+                        <td>${c.validVotes}</td>
+                        <td>${c.voidVotes}</td>`;
+        table.appendChild(tr);
+      });
+    }
+    // (Table renders when button is clicked)
+    document.querySelector('.btn').addEventListener('click', renderCandidatesTable);
+  </script>
+</body>
+</html>

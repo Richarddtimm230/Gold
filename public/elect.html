@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Voting Platform Admin Panel</title>
+  <title>Voting Platform Admin Panel - With Activity Log</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <style>
+    /* [All the CSS from previous advanced UI and activity log, merged] */
     :root {
       --primary: #1e90ff;
       --primary-dark: #1877cc;
@@ -125,7 +125,7 @@
       border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px;
       font-size: 1em; min-width: 690px;
     }
-    th, td { padding: 16px 10px; text-align: left; border-bottom: 1px solid var(--table-border);}
+    th, td { padding: 12px 8px; border-bottom: 1px solid var(--table-border);}
     th { background: #f4f6fb; color: var(--primary-dark); font-weight: 600;}
     tr:last-child td { border-bottom: none;}
     tr.duplicate { background: #fff4f4;}
@@ -160,7 +160,6 @@
     .settings-box label { display: block; margin: 16px 0 6px 0; font-weight: 500;}
     .settings-box input[type="text"] { width: 100%; }
     .settings-box button { margin-top: 18px; }
-    /* Modal Styles */
     .modal {
       display: none; position: fixed; z-index: 99; left: 0; top: 0; width: 100%; height: 100%;
       overflow: auto; background-color: rgba(21, 30, 45, 0.24);
@@ -183,25 +182,9 @@
     .modal-content .error {
       color: var(--danger); margin-top: 7px; font-size: 0.98em; display: none;
     }
-    @media (max-width: 1100px) {
-      .container { padding: 18px 5vw; }
-      .dashboard-cards { gap: 14px; }
-      .recent { padding: 16px 10px;}
-    }
-    @media (max-width: 780px) {
-      .sidebar { width: 62px; }
-      .sidebar-header { font-size: 1.08em; padding: 22px 0;}
-      .sidebar ul li a { padding: 10px 12px; font-size: 1em;}
-      .sidebar ul li a span { display: none;}
-      .container { padding: 14px 2vw; }
-      .topbar { padding: 10px 12px;}
-      table { font-size: 0.97em;}
-    }
-    @media (max-width: 600px) {
-      .dashboard-cards { grid-template-columns: 1fr; }
-      .container { padding: 4px 0.5vw;}
-      th, td { padding: 10px 6px;}
-    }
+    @media (max-width:1100px){ .container{padding:18px 5vw;} .dashboard-cards{gap:14px;} .recent{padding:16px 10px;} }
+    @media (max-width:780px){ .sidebar{width:62px;} .sidebar-header{font-size:1.08em;padding:22px 0;} .sidebar ul li a{padding:10px 12px;font-size:1em;} .sidebar ul li a span{display:none;} .container{padding:14px 2vw;} .topbar{padding:10px 12px;} table{font-size:0.97em;} }
+    @media (max-width:600px){ .dashboard-cards{grid-template-columns:1fr;} .container{padding:4px 0.5vw;} th,td{padding:10px 6px;} }
   </style>
 </head>
 <body>
@@ -217,6 +200,7 @@
       <li><a href="#" data-section="voters"><span>🧑‍🤝‍🧑</span> Voters</a></li>
       <li><a href="#" data-section="results"><span>📊</span> Results</a></li>
       <li><a href="#" data-section="voter-logs"><span>🕒</span> Voter Logs</a></li>
+      <li><a href="#" data-section="activity-log"><span>📜</span> Activity Log</a></li>
       <li><a href="#" data-section="settings"><span>⚙️</span> Settings</a></li>
     </ul>
     <div class="sidebar-footer">
@@ -228,7 +212,7 @@
       <h1 id="section-title">Dashboard</h1>
       <div class="profile">
         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin">
-        <span>Admin</span>
+        <span>Richarddtimm230</span>
       </div>
     </div>
     <div class="container">
@@ -368,6 +352,28 @@
           </table>
         </div>
       </section>
+      <!-- ACTIVITY LOG -->
+      <section id="activity-log">
+        <div class="search-bar">
+          <input type="text" id="admin-log-search" placeholder="Search by action, admin, target...">
+          <input type="date" id="admin-log-date">
+          <button class="btn secondary" id="export-log-btn">Export CSV</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="activity-log-table"></tbody>
+          </table>
+        </div>
+      </section>
       <!-- SETTINGS -->
       <section id="settings">
         <div class="settings-box">
@@ -385,8 +391,7 @@
       </section>
     </div>
   </main>
-  <!-- MODALS -->
-  <!-- Election Modal -->
+  <!-- [All modals as in previous file...] -->
   <div class="modal" id="election-modal">
     <div class="modal-content">
       <h2 id="election-modal-title">Add Election</h2>
@@ -416,7 +421,6 @@
       </form>
     </div>
   </div>
-  <!-- Election Confirm Delete Modal -->
   <div class="modal" id="election-confirm-modal">
     <div class="modal-content">
       <h2>Confirm Delete</h2>
@@ -427,7 +431,6 @@
       </div>
     </div>
   </div>
-  <!-- Candidate Modal -->
   <div class="modal" id="candidate-modal">
     <div class="modal-content">
       <h2 id="candidate-modal-title">Add Candidate</h2>
@@ -453,7 +456,6 @@
       </form>
     </div>
   </div>
-  <!-- Candidate Delete Modal -->
   <div class="modal" id="candidate-confirm-modal">
     <div class="modal-content">
       <h2>Confirm Delete</h2>
@@ -464,7 +466,6 @@
       </div>
     </div>
   </div>
-  <!-- Voter Modal -->
   <div class="modal" id="voter-modal">
     <div class="modal-content">
       <h2 id="voter-modal-title">Add Voter</h2>
@@ -496,7 +497,6 @@
       </form>
     </div>
   </div>
-  <!-- Voter Delete Modal -->
   <div class="modal" id="voter-confirm-modal">
     <div class="modal-content">
       <h2>Confirm Delete</h2>
@@ -508,7 +508,97 @@
     </div>
   </div>
   <script>
-    // Navigation
+    // USER/ADMIN LOGIN NAME
+    const currentAdmin = 'Richarddtimm230';
+
+    // ------------------------------- ACTIVITY LOG -----------------------------------
+    let adminLogs = [
+      {ts:'2025-06-11 02:50:10',admin:currentAdmin,action:'Login',target:'',details:'Logged in successfully.'},
+      {ts:'2025-06-11 02:51:00',admin:currentAdmin,action:'Create Election',target:'School President 2025',details:'Election created.'},
+      {ts:'2025-06-11 02:51:30',admin:currentAdmin,action:'Edit Candidate',target:'Jane Doe',details:'Profile updated.'},
+      {ts:'2025-06-11 02:51:40',admin:currentAdmin,action:'Delete Voter',target:'Voter ID 103',details:'Voter removed.'},
+      {ts:'2025-06-11 02:52:00',admin:currentAdmin,action:'Settings Change',target:'Platform',details:'Changed brand color.'},
+    ];
+    function logAdminAction(action, target, details) {
+      const now = new Date();
+      const ts = now.getFullYear() + '-' +
+        String(now.getMonth()+1).padStart(2,'0') + '-' +
+        String(now.getDate()).padStart(2,'0') + ' ' +
+        String(now.getHours()).padStart(2,'0') + ':' +
+        String(now.getMinutes()).padStart(2,'0') + ':' +
+        String(now.getSeconds()).padStart(2,'0');
+      adminLogs.unshift({
+        ts,
+        admin: currentAdmin,
+        action,
+        target,
+        details
+      });
+      renderAdminLogTable(getCurrentAdminLogFilter());
+    }
+    function getCurrentAdminLogFilter() {
+      return {
+        text: document.getElementById('admin-log-search').value.trim().toLowerCase(),
+        date: document.getElementById('admin-log-date').value
+      };
+    }
+    function renderAdminLogTable(filter = {text:'',date:''}) {
+      const tbody = document.getElementById('activity-log-table');
+      tbody.innerHTML = '';
+      let filtered = adminLogs.filter(log => {
+        let matchesText = filter.text === '' ||
+          [log.action, log.admin, log.target, log.details].some(f =>
+            String(f).toLowerCase().includes(filter.text)
+          );
+        let matchesDate = filter.date === '' ||
+          log.ts.startsWith(filter.date);
+        return matchesText && matchesDate;
+      });
+      if(filtered.length === 0){
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#7d8ca9;text-align:center;">No log entries found.</td></tr>`;
+        return;
+      }
+      filtered.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${log.ts}</td>
+                        <td>${log.admin}</td>
+                        <td>${log.action}</td>
+                        <td>${log.target}</td>
+                        <td>${log.details}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    renderAdminLogTable();
+
+    document.getElementById('admin-log-search').addEventListener('input', ()=> renderAdminLogTable(getCurrentAdminLogFilter()));
+    document.getElementById('admin-log-date').addEventListener('change', ()=> renderAdminLogTable(getCurrentAdminLogFilter()));
+
+    document.getElementById('export-log-btn').onclick = function(){
+      let rows = [['Timestamp','Admin','Action','Target','Details']];
+      let filter = getCurrentAdminLogFilter();
+      let filtered = adminLogs.filter(log => {
+        let matchesText = filter.text === '' ||
+          [log.action, log.admin, log.target, log.details].some(f =>
+            String(f).toLowerCase().includes(filter.text)
+          );
+        let matchesDate = filter.date === '' ||
+          log.ts.startsWith(filter.date);
+        return matchesText && matchesDate;
+      });
+      filtered.forEach(log =>
+        rows.push([log.ts,log.admin,log.action,log.target,log.details])
+      );
+      let csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+      let blob = new Blob([csv], {type:'text/csv'});
+      let a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'admin-activity-log.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    // ------------------------------- NAVIGATION -----------------------------------
     document.querySelectorAll('.sidebar ul li a').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
@@ -520,7 +610,8 @@
         document.getElementById('section-title').textContent = this.textContent.replace(/^\s*[\S]+\s*/, '');
       });
     });
-    // Dashboard
+
+    // ------------------------------- DASHBOARD -----------------------------------
     const dashboardStats = { activeElections: 2, totalVoters: 1245, votesCast: 860 };
     document.getElementById('active-elections').textContent = dashboardStats.activeElections;
     document.getElementById('total-voters').textContent = dashboardStats.totalVoters;
@@ -540,7 +631,8 @@
       li.innerHTML = `<span class="dot"></span> ${item}`;
       recentList.appendChild(li);
     });
-    // Elections CRUD
+
+    // ------------------------------- ELECTIONS CRUD -----------------------------------
     let elections = [
       { name: "School President 2025", status: "Active", start: "2025-06-10", end: "2025-06-12" },
       { name: "Science Club Election", status: "Closed", start: "2025-05-01", end: "2025-05-02" }
@@ -622,8 +714,10 @@
       }
       if (idx) {
         elections[idx] = { name, status, start, end };
+        logAdminAction('Edit Election', name, `Election updated: status=${status}, start=${start}, end=${end}`);
       } else {
         elections.push({ name, status, start, end });
+        logAdminAction('Create Election', name, `Election created.`);
       }
       hideElectionModal();
       renderElectionsTable(document.getElementById('election-search').value);
@@ -640,13 +734,15 @@
     document.getElementById('election-delete-cancel').onclick = hideElectionConfirmModal;
     document.getElementById('election-delete-confirm').onclick = function() {
       if (electionToDelete !== null) {
+        logAdminAction('Delete Election', elections[electionToDelete].name, 'Election deleted.');
         elections.splice(electionToDelete, 1);
         renderElectionsTable(document.getElementById('election-search').value);
       }
       hideElectionConfirmModal();
       electionToDelete = null;
     };
-    // Candidates CRUD
+
+    // ------------------------------- CANDIDATES CRUD -----------------------------------
     let candidates = [
       { name: "Jane Doe", election: "School President 2025", profile: "Vision for school", votes: 420 },
       { name: "John Smith", election: "School President 2025", profile: "Student leader", votes: 392 }
@@ -722,8 +818,10 @@
       }
       if (idx) {
         candidates[idx] = { name, election, profile, votes: Number(votes) };
+        logAdminAction('Edit Candidate', name, `Candidate updated: election=${election}, profile=${profile}, votes=${votes}`);
       } else {
         candidates.push({ name, election, profile, votes: Number(votes) });
+        logAdminAction('Create Candidate', name, `Candidate created for election: ${election}`);
       }
       hideCandidateModal();
       renderCandidatesTable(document.getElementById('candidate-search').value);
@@ -740,13 +838,14 @@
     document.getElementById('candidate-delete-cancel').onclick = hideCandidateConfirmModal;
     document.getElementById('candidate-delete-confirm').onclick = function() {
       if (candidateToDelete !== null) {
+        logAdminAction('Delete Candidate', candidates[candidateToDelete].name, 'Candidate deleted.');
         candidates.splice(candidateToDelete, 1);
         renderCandidatesTable(document.getElementById('candidate-search').value);
       }
       hideCandidateConfirmModal();
       candidateToDelete = null;
     };
-    // Voters CRUD
+    // ------------------------------- VOTERS CRUD -----------------------------------
     let voters = [
       { id: 101, name: "John Doe", status: "Active", voted: "Yes" },
       { id: 102, name: "Jane Smith", status: "Active", voted: "No" },
@@ -823,8 +922,10 @@
       }
       if (idx) {
         voters[idx] = { id: Number(id), name, status, voted };
+        logAdminAction('Edit Voter', name, `Voter updated: id=${id}, status=${status}, voted=${voted}`);
       } else {
         voters.push({ id: Number(id), name, status, voted });
+        logAdminAction('Create Voter', name, `Voter added: id=${id}, status=${status}, voted=${voted}`);
       }
       hideVoterModal();
       renderVotersTable(document.getElementById('voter-search').value);
@@ -841,13 +942,14 @@
     document.getElementById('voter-delete-cancel').onclick = hideVoterConfirmModal;
     document.getElementById('voter-delete-confirm').onclick = function() {
       if (voterToDelete !== null) {
+        logAdminAction('Delete Voter', voters[voterToDelete].name, `Voter deleted (id=${voters[voterToDelete].id}).`);
         voters.splice(voterToDelete, 1);
         renderVotersTable(document.getElementById('voter-search').value);
       }
       hideVoterConfirmModal();
       voterToDelete = null;
     };
-    // Results
+    // ------------------------------- RESULTS -----------------------------------
     const results = [
       { election: "School President 2025", candidate: "Jane Doe", votes: 420 },
       { election: "School President 2025", candidate: "John Smith", votes: 392 }
@@ -864,7 +966,8 @@
     }
     renderResultsTable();
     document.getElementById('results-search').addEventListener('input', e => { renderResultsTable(e.target.value); });
-    // Voter Logs
+
+    // ------------------------------- VOTER LOGS -----------------------------------
     const logs = [
       { voterId: 101, name: "John Doe", election: "School President 2025", action: "Voted", timestamp: "2025-06-10 09:03", status: "Success" },
       { voterId: 101, name: "John Doe", election: "School President 2025", action: "Voted", timestamp: "2025-06-10 09:10", status: "Duplicate Blocked" },
@@ -888,7 +991,8 @@
     }
     renderLogs();
     document.getElementById('log-search').addEventListener('input', e => { renderLogs(e.target.value); });
-    // Close modals on outside click
+
+    // ------------------------------- CLOSE MODALS ON OUTSIDE CLICK -----------------------------------
     window.onclick = function(event) {
       if (event.target === electionModal) hideElectionModal();
       if (event.target === electionConfirmModal) hideElectionConfirmModal();

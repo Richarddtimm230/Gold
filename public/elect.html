@@ -638,23 +638,27 @@
       { name: "Science Club Election", status: "Closed", start: "2025-05-01", end: "2025-05-02" }
     ];
     let electionToDelete = null;
-    function renderElectionsTable(filter="") {
-      const table = document.getElementById('elections-table');
-      table.innerHTML = "";
-      elections.filter(e => Object.values(e).some(v => String(v).toLowerCase().includes(filter.toLowerCase())))
-        .forEach((e, idx) => {
-          let tr = document.createElement('tr');
-          tr.innerHTML = `<td>${e.name}</td>
-            <td>${e.status === "Active" ? `<span style="color:var(--success);font-weight:600">${e.status}</span>` : e.status}</td>
-            <td>${e.start}</td>
-            <td>${e.end}</td>
-            <td class="action-btns">
-              <button class="btn small" onclick="showEditElectionModal(${idx})">Edit</button>
-              <button class="btn small danger" onclick="showDeleteElectionModal(${idx})">Delete</button>
-            </td>`;
-          table.appendChild(tr);
-        });
+    // Replace your renderElectionsTable() function with the following:
+
+function renderElectionsTable(filter="") {
+  const table = document.getElementById('elections-table');
+  table.innerHTML = "";
+  elections.filter(e => Object.values(e).some(v => String(v).toLowerCase().includes(filter.toLowerCase())))
+    .forEach((e, idx) => {
+      let tr = document.createElement('tr');
+      tr.innerHTML = `<td>${e.name}</td>
+        <td>${e.status === "Active" ? `<span style="color:var(--success);font-weight:600">${e.status}</span>` : e.status}</td>
+        <td>${e.start}</td>
+        <td>${e.end}</td>
+        <td class="action-btns">
+          <button class="btn small" onclick="showEditElectionModal(${idx})">Edit</button>
+          <button class="btn small danger" onclick="showDeleteElectionModal(${idx})">Delete</button>
+          <a class="btn small secondary" href="election-report.html?election=${encodeURIComponent(e.name)}">View</a>
+        </td>`;
+      table.appendChild(tr);
+    });
     }
+    
     renderElectionsTable();
     document.getElementById('election-search').addEventListener('input', e => { renderElectionsTable(e.target.value); });
     // Election Modal logic

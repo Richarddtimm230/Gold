@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voting Platform Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts for modern look -->
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e90ff;
+      --primary-dark: #1877cc;
+      --accent: #ffb300;
+      --bg: #f7faff;
+      --sidebar-bg: #212a3a;
+      --sidebar-active: #25304b;
+      --text: #252e3e;
+      --text-light: #7d8ca9;
+      --card-bg: #fff;
+      --shadow: 0 4px 24px 0 rgba(30, 144, 255, 0.08);
+      --radius: 16px;
+      --danger: #ff4545;
+      --success: #24b47e;
+      --warning: #ffd600;
+      --table-border: #ececec;
+      --transition: all .18s cubic-bezier(.4,0,.2,1);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; background: var(--bg); color: var(--text);
+      font-size: 16px;
+    }
+    body { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 260px; background: var(--sidebar-bg); color: #fff; flex-shrink: 0; display: flex; flex-direction: column;
+      box-shadow: 2px 0 24px 0 rgba(30,144,255,0.07); z-index: 10;
+    }
+    .sidebar-header {
+      padding: 40px 0 32px 0; text-align: center; font-size: 2em; font-weight: 700; letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: #fff; border-bottom: 1px solid #22304b;
+      box-shadow: 0 2px 8px 0 rgba(30,144,255,0.04);
+    }
+    .sidebar ul {
+      list-style: none; padding: 0; margin: 0; flex: 1;
+    }
+    .sidebar ul li {
+      margin: 0;
+    }
+    .sidebar ul li a {
+      color: #fff; text-decoration: none; display: block;
+      padding: 16px 36px; font-size: 1.08em; font-weight: 500;
+      transition: var(--transition);
+      border-left: 4px solid transparent;
+      position: relative;
+    }
+    .sidebar ul li a.active,
+    .sidebar ul li a:hover {
+      background: var(--sidebar-active);
+      border-left: 4px solid var(--primary);
+    }
+    .sidebar-footer {
+      padding: 24px 0; text-align: center; font-size: 0.88em; color: #7d8ca9;
+      border-top: 1px solid #1a2333;
+    }
+    main {
+      flex: 1; padding: 0 0 0 0; margin-left: 0; min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .topbar {
+      width: 100%; background: #fff; box-shadow: 0 2px 12px 0 rgba(30,144,255,0.06);
+      padding: 18px 36px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 5;
+    }
+    .topbar h1 { margin: 0; font-size: 1.7em; font-weight: 700; color: var(--primary-dark);}
+    .topbar .profile {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .topbar .profile img {
+      width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);
+      object-fit: cover;
+    }
+    .topbar .profile span {
+      font-weight: 600; color: var(--text);
+    }
+    .container {
+      flex: 1; padding: 34px 40px 40px 40px; background: var(--bg);
+      min-height: 0; overflow-y: auto;
+    }
+    section { display: none; }
+    section.active { display: block; animation: fadeIn .5s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px);} to { opacity: 1; transform: none;} }
+
+    /* Dashboard Cards */
+    .dashboard-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 34px; margin-bottom: 40px;
+    }
+    .card {
+      background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 32px 24px; display: flex; flex-direction: column; align-items: flex-start;
+      position: relative; min-height: 100px;
+    }
+    .card h3 { margin: 0 0 14px 0; font-size: 1.16em; color: var(--primary-dark); font-weight: 600;}
+    .card .card-value { font-size: 2.5em; font-weight: 700; color: var(--text);}
+    .card .trend { margin-top: 6px; font-size: 0.95em; }
+    .card .trend.up { color: var(--success);}
+    .card .trend.down { color: var(--danger);}
+    .card .card-icon { position: absolute; top: 22px; right: 24px; font-size: 2.1em; opacity: 0.16;}
+
+    /* Recent Activity */
+    .recent {
+      background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 25px 36px; margin-bottom: 24px;
+    }
+    .recent h2 { margin: 0 0 18px 0; font-size: 1.18em; color: var(--primary-dark); }
+    .recent ul { padding: 0; margin: 0; list-style: none; }
+    .recent ul li {
+      padding: 10px 0; border-bottom: 1px dashed #e4e7ef; font-size: 1.03em; color: var(--text-light);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .recent ul li:last-child { border-bottom: none; }
+    .recent ul li .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0;
+      display: inline-block;
+    }
+
+    /* Table Styles */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; background: var(--card-bg);
+      border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px;
+      font-size: 1em; min-width: 690px;
+    }
+    th, td { padding: 16px 10px; text-align: left; border-bottom: 1px solid var(--table-border);}
+    th { background: #f4f6fb; color: var(--primary-dark); font-weight: 600;}
+    tr:last-child td { border-bottom: none;}
+    tr.duplicate { background: #fff4f4;}
+    tr.success { background: #f7fff9;}
+    tr:hover { background: #f6faff;}
+    .action-btns { display: flex; gap: 8px;}
+    .btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 7px;
+      padding: 7px 18px; font-size: 1em; font-weight: 600; cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn:active, .btn:hover { background: var(--primary-dark);}
+    .btn.danger { background: var(--danger);}
+    .btn.danger:active, .btn.danger:hover { background: #e32b2b;}
+    .btn.small { padding: 6px 12px; font-size: 0.95em;}
+    .btn.secondary { background: #ececec; color: var(--text);}
+    .btn.secondary:hover { background: #d1e9ff;}
+
+    /* Search and Inputs */
+    .search-bar {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+    }
+    .search-bar input[type="text"], .search-bar input[type="date"] {
+      padding: 8px 12px; border: 1px solid #c4d1e3; border-radius: 5px;
+      background: #f7faff; font-size: 1em; color: var(--text);
+      transition: border-color .16s;
+    }
+    .search-bar input:focus { outline: none; border-color: var(--primary);}
+    .settings-box {
+      background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 26px 40px; margin-bottom: 24px;
+    }
+    .settings-box h3 { margin-top: 0; font-size: 1.15em; color: var(--primary-dark); }
+    .settings-box label { display: block; margin: 16px 0 6px 0; font-weight: 500;}
+    .settings-box input[type="text"] { width: 100%; }
+    .settings-box button { margin-top: 18px; }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .container { padding: 18px 5vw; }
+      .dashboard-cards { gap: 14px; }
+      .recent { padding: 16px 10px;}
+    }
+    @media (max-width: 780px) {
+      .sidebar { width: 62px; }
+      .sidebar-header { font-size: 1.08em; padding: 22px 0;}
+      .sidebar ul li a { padding: 10px 12px; font-size: 1em;}
+      .sidebar ul li a span { display: none;}
+      .container { padding: 14px 2vw; }
+      .topbar { padding: 10px 12px;}
+      table { font-size: 0.97em;}
+    }
+    @media (max-width: 600px) {
+      .dashboard-cards { grid-template-columns: 1fr; }
+      .container { padding: 4px 0.5vw;}
+      th, td { padding: 10px 6px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <span>🗳️ VotePlus</span>
+    </div>
+    <ul>
+      <li><a href="#" data-section="dashboard" class="active"><span>🏠</span> Dashboard</a></li>
+      <li><a href="#" data-section="elections"><span>📝</span> Elections</a></li>
+      <li><a href="#" data-section="candidates"><span>👤</span> Candidates</a></li>
+      <li><a href="#" data-section="voters"><span>🧑‍🤝‍🧑</span> Voters</a></li>
+      <li><a href="#" data-section="results"><span>📊</span> Results</a></li>
+      <li><a href="#" data-section="voter-logs"><span>🕒</span> Voter Logs</a></li>
+      <li><a href="#" data-section="settings"><span>⚙️</span> Settings</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      &copy; 2025 VotePlus <br> All rights reserved.
+    </div>
+  </nav>
+
+  <main>
+    <div class="topbar">
+      <h1 id="section-title">Dashboard</h1>
+      <div class="profile">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin">
+        <span>Admin</span>
+      </div>
+    </div>
+    <div class="container">
+      <!-- Dashboard -->
+      <section id="dashboard" class="active">
+        <div class="dashboard-cards">
+          <div class="card">
+            <div class="card-icon">🗳️</div>
+            <h3>Active Elections</h3>
+            <span class="card-value" id="active-elections">0</span>
+            <span class="trend up">+2 today</span>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧑‍🤝‍🧑</div>
+            <h3>Total Voters</h3>
+            <span class="card-value" id="total-voters">0</span>
+            <span class="trend up">+15 this week</span>
+          </div>
+          <div class="card">
+            <div class="card-icon">📥</div>
+            <h3>Votes Cast</h3>
+            <span class="card-value" id="votes-cast">0</span>
+            <span class="trend up">+120 today</span>
+          </div>
+          <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>Turnout Rate</h3>
+            <span class="card-value" id="turnout-rate">0%</span>
+            <span class="trend up">up 4%</span>
+          </div>
+        </div>
+        <div class="recent">
+          <h2>Recent Activity</h2>
+          <ul id="recent-activity"></ul>
+        </div>
+      </section>
+      <!-- Elections Management -->
+      <section id="elections">
+        <div class="search-bar">
+          <input type="text" id="election-search" placeholder="Search elections...">
+          <button class="btn" onclick="alert('Show create election form (not implemented)')">+ New Election</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Election</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="elections-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Candidates Management -->
+      <section id="candidates">
+        <div class="search-bar">
+          <input type="text" id="candidate-search" placeholder="Search candidates...">
+          <button class="btn" onclick="alert('Show add candidate form (not implemented)')">+ Add Candidate</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Election</th>
+                <th>Profile</th>
+                <th>Votes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="candidates-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Voters Management -->
+      <section id="voters">
+        <div class="search-bar">
+          <input type="text" id="voter-search" placeholder="Search voters...">
+          <button class="btn" onclick="alert('Show add voter form (not implemented)')">+ Add Voter</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Voter ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Voted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="voters-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Results Monitoring -->
+      <section id="results">
+        <div class="search-bar">
+          <input type="text" id="results-search" placeholder="Search results...">
+          <button class="btn secondary" onclick="alert('Export results feature coming soon.')">Export Results</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Election</th>
+                <th>Candidate</th>
+                <th>Votes</th>
+              </tr>
+            </thead>
+            <tbody id="results-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Voter Logs -->
+      <section id="voter-logs">
+        <div class="search-bar">
+          <input type="text" id="log-search" placeholder="Search logs...">
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Voter ID</th>
+                <th>Name</th>
+                <th>Election</th>
+                <th>Action</th>
+                <th>Timestamp</th>
+                <th>Status/Note</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Settings -->
+      <section id="settings">
+        <div class="settings-box">
+          <h3>Platform Settings</h3>
+          <label>Organization Name</label>
+          <input type="text" value="My University" disabled>
+          <label>Brand Color</label>
+          <input type="color" value="#1e90ff" disabled>
+          <button class="btn" disabled>Save Changes</button>
+        </div>
+        <div class="settings-box">
+          <h3>Admin Management</h3>
+          <p>Feature Coming Soon!</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    // Navigation logic
+    document.querySelectorAll('.sidebar ul li a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.sidebar ul li a').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        var section = this.getAttribute('data-section');
+        document.querySelectorAll('.container > section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(section).classList.add('active');
+        // Update title
+        document.getElementById('section-title').textContent = this.textContent.replace(/^\s*[\S]+\s*/, '');
+      });
+    });
+
+    // Demo Data
+    // Dashboard Stats
+    const dashboardStats = { activeElections: 2, totalVoters: 1245, votesCast: 860 };
+    document.getElementById('active-elections').textContent = dashboardStats.activeElections;
+    document.getElementById('total-voters').textContent = dashboardStats.totalVoters;
+    document.getElementById('votes-cast').textContent = dashboardStats.votesCast;
+    document.getElementById('turnout-rate').textContent = Math.round((dashboardStats.votesCast / dashboardStats.totalVoters) * 100) + "%";
+    // Recent
+    const recent = [
+      "Election <b>'School President 2025'</b> was created.",
+      "<b>Jane Doe</b> added as candidate.",
+      "New voter list imported.",
+      "Results exported for <b>'Science Club Election'</b>.",
+      "<b>John Doe</b> attempted duplicate vote (blocked)."
+    ];
+    const recentList = document.getElementById('recent-activity');
+    recent.forEach(item => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="dot"></span> ${item}`;
+      recentList.appendChild(li);
+    });
+
+    // Elections Table
+    const elections = [
+      { name: "School President 2025", status: "Active", start: "2025-06-10", end: "2025-06-12" },
+      { name: "Science Club Election", status: "Closed", start: "2025-05-01", end: "2025-05-02" }
+    ];
+    function renderElectionsTable(filter="") {
+      const table = document.getElementById('elections-table');
+      table.innerHTML = "";
+      elections.filter(e => Object.values(e).some(v => String(v).toLowerCase().includes(filter.toLowerCase())))
+        .forEach(e => {
+          let tr = document.createElement('tr');
+          tr.innerHTML = `<td>${e.name}</td>
+            <td>${e.status === "Active" ? `<span style="color:var(--success);font-weight:600">${e.status}</span>` : e.status}</td>
+            <td>${e.start}</td>
+            <td>${e.end}</td>
+            <td class="action-btns">
+              <button class="btn small" onclick="alert('Edit not implemented')">Edit</button>
+              <button class="btn small danger" onclick="alert('Delete not implemented')">Delete</button>
+            </td>`;
+          table.appendChild(tr);
+        });
+    }
+    renderElectionsTable();
+    document.getElementById('election-search').addEventListener('input', e => { renderElectionsTable(e.target.value); });
+
+    // Candidates Table
+    const candidates = [
+      { name: "Jane Doe", election: "School President 2025", profile: "Vision for school", votes: 420 },
+      { name: "John Smith", election: "School President 2025", profile: "Student leader", votes: 392 }
+    ];
+    function renderCandidatesTable(filter="") {
+      const table = document.getElementById('candidates-table');
+      table.innerHTML = "";
+      candidates.filter(c => Object.values(c).some(v => String(v).toLowerCase().includes(filter.toLowerCase())))
+        .forEach(c => {
+          let tr = document.createElement('tr');
+          tr.innerHTML = `<td>${c.name}</td>
+            <td>${c.election}</td>
+            <td>${c.profile}</td>
+            <td>${c.votes}</td>
+            <td class="action-btns">
+              <button class="btn small" onclick="alert('Edit not implemented')">Edit</button>
+              <button class="btn small danger" onclick="alert('Remove not implemented')">Remove</button>
+            </td>`;
+          table.appendChild(tr);
+        });
+    }
+    renderCandidatesTable();
+    document.getElementById('candidate-search').addEventListener('input', e => { renderCandidatesTable(e.target.value); });
+
+    // Voters Table
+    const voters = [
+      { id: 101, name: "John Doe", status: "Active", voted: "Yes" },
+      { id: 102, name: "Jane Smith", status: "Active", voted: "No" },
+      { id: 103, name: "Mary Lin", status: "Inactive", voted: "No" }
+    ];
+    function renderVotersTable(filter = "") {
+      const table = document.getElementById('voters-table');
+      table.innerHTML = "";
+      voters.filter(v => Object.values(v).some(val => String(val).toLowerCase().includes(filter.toLowerCase())))
+        .forEach(v => {
+          let tr = document.createElement('tr');
+          tr.innerHTML = `<td>${v.id}</td>
+            <td>${v.name}</td>
+            <td>${v.status === "Active" ? `<span style="color:var(--success);font-weight:600">${v.status}</span>` : `<span style="color:var(--danger);font-weight:600">${v.status}</span>`}</td>
+            <td>${v.voted === "Yes" ? `<span style="color:var(--primary);font-weight:600">${v.voted}</span>` : v.voted}</td>
+            <td class="action-btns">
+              <button class="btn small" onclick="alert('Edit not implemented')">Edit</button>
+              <button class="btn small danger" onclick="alert('Remove not implemented')">Remove</button>
+            </td>`;
+          table.appendChild(tr);
+        });
+    }
+    renderVotersTable();
+    document.getElementById('voter-search').addEventListener('input', e => { renderVotersTable(e.target.value); });
+
+    // Results Table
+    const results = [
+      { election: "School President 2025", candidate: "Jane Doe", votes: 420 },
+      { election: "School President 2025", candidate: "John Smith", votes: 392 }
+    ];
+    function renderResultsTable(filter = "") {
+      const table = document.getElementById('results-table');
+      table.innerHTML = "";
+      results.filter(r => Object.values(r).some(val => String(val).toLowerCase().includes(filter.toLowerCase())))
+        .forEach(r => {
+          let tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.election}</td><td>${r.candidate}</td><td>${r.votes}</td>`;
+          table.appendChild(tr);
+        });
+    }
+    renderResultsTable();
+    document.getElementById('results-search').addEventListener('input', e => { renderResultsTable(e.target.value); });
+
+    // Voter Logs & Duplicate Attempt Demo
+    const logs = [
+      { voterId: 101, name: "John Doe", election: "School President 2025", action: "Voted", timestamp: "2025-06-10 09:03", status: "Success" },
+      { voterId: 101, name: "John Doe", election: "School President 2025", action: "Voted", timestamp: "2025-06-10 09:10", status: "Duplicate Blocked" },
+      { voterId: 102, name: "Jane Smith", election: "School President 2025", action: "Voted", timestamp: "2025-06-10 09:15", status: "Success" }
+    ];
+    function renderLogs(filter = "") {
+      const table = document.getElementById('logs-table');
+      table.innerHTML = "";
+      logs.filter(log => Object.values(log).some(val => String(val).toLowerCase().includes(filter.toLowerCase())))
+        .forEach(log => {
+          const tr = document.createElement('tr');
+          Object.values(log).forEach(val => {
+            const td = document.createElement('td');
+            td.textContent = val;
+            tr.appendChild(td);
+          });
+          if(log.status === "Duplicate Blocked") tr.classList.add('duplicate');
+          if(log.status === "Success") tr.classList.add('success');
+          table.appendChild(tr);
+        });
+    }
+    renderLogs();
+    document.getElementById('log-search').addEventListener('input', e => { renderLogs(e.target.value); });
+  </script>
+</body>
+</html>

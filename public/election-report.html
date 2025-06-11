@@ -7,27 +7,42 @@
   <!-- Use the same CSS as your admin panel for consistency. Minimal CSS below: -->
   <style>
     body { font-family: 'Inter', Arial, sans-serif; background: #f7faff; color: #252e3e; margin:0; }
-    .container { max-width: 900px; margin: 36px auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px 0 rgba(30,144,255,0.08); padding: 32px 24px 40px 24px; }
+    .container { max-width: 980px; margin: 36px auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px 0 rgba(30,144,255,0.08); padding: 32px 24px 40px 24px; }
     h1 { color: #1e90ff; }
-    .dashboard-cards { display: flex; gap: 24px; margin-bottom: 36px; }
-    .card { flex: 1; background: #f9fbff; border-radius: 12px; box-shadow: 0 2px 8px rgba(34, 42, 53, 0.08); padding: 24px 16px; text-align: center;}
+    .dashboard-cards { display: flex; gap: 24px; margin-bottom: 36px; flex-wrap:wrap;}
+    .card { flex: 1; background: #f9fbff; border-radius: 12px; box-shadow: 0 2px 8px rgba(34, 42, 53, 0.08); padding: 24px 16px; text-align: center; min-width:180px}
     .card h3 { margin: 0 0 12px 0; color: #1e90ff; }
     .card .card-value { font-size: 2.1em; font-weight: 700; color: #252e3e;}
+    .badge { display:inline-block; background:#1e90ff; color:#fff; border-radius:12px; padding:3px 12px; font-size:0.97em; margin-left:8px;}
+    .badge.concluded { background:#24b47e;}
+    .badge.in-progress { background:#ffb300; color:#252e3e;}
+    .badge.counting { background:#1877cc;}
     .btn { background: #1e90ff; color: #fff; border: none; border-radius: 7px; padding: 8px 22px; font-size: 1em; font-weight: 600; cursor: pointer; margin: 16px 0; }
     .btn:active, .btn:hover { background: #1877cc;}
+    .btn.secondary { background:#ececec; color:#252e3e; margin-left:12px;}
     table { width: 100%; border-collapse: collapse; margin-top: 22px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(30,144,255,0.08);}
     th, td { padding: 13px 8px; border-bottom: 1px solid #ececec; }
     th { background: #f4f6fb; color: #1e90ff; }
     tr:last-child td { border-bottom: none; }
     .back-link { display: inline-block; color:#1e90ff; margin-bottom: 20px; text-decoration:none; }
     .back-link:hover { text-decoration:underline; }
-    @media (max-width:600px){ .dashboard-cards{flex-direction:column;gap:10px;} .container{padding:10px;} th,td{padding:8px 2px;} }
+    .chart-container { max-width:340px; margin:auto; }
+    .timeline { margin:26px 0 18px 0; padding:0; list-style:none; border-left:4px solid #1e90ff1a;}
+    .timeline li { position:relative; padding-left:22px; margin-bottom:12px; }
+    .timeline li:before { content:""; position:absolute; left:-13px; top:2px; width:10px; height:10px; background:#1e90ff; border-radius:50%; }
+    .timeline .event-label { font-weight:600; color:#1e90ff; }
+    @media (max-width:700px){ .dashboard-cards{flex-direction:column;gap:10px;} .container{padding:10px;} th,td{padding:8px 2px;} .chart-container{max-width:100%;} }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <a href="admin-panel-with-activity-log.html" class="back-link">&larr; Back to Admin Panel</a>
+    <a href="elect.html" class="back-link">&larr; Back to Admin Panel</a>
     <h1 id="election-title">Election Report</h1>
+    <div>
+      <span id="election-status-badge" class="badge"></span>
+      <span id="election-type"></span>
+    </div>
     <div class="dashboard-cards">
       <div class="card">
         <h3>Total Voters</h3>
@@ -41,8 +56,16 @@
         <h3>Turnout</h3>
         <span class="card-value" id="turnout-rate">0%</span>
       </div>
+      <div class="card">
+        <h3>Invalid Ballots</h3>
+        <span class="card-value" id="invalid-ballots">0</span>
+      </div>
     </div>
-    <button class="btn" onclick="document.getElementById('detailed-report').style.display='block';this.style.display='none'">Show Detailed Report</button>
+    <div class="chart-container">
+      <canvas id="voteSharePie" width="320" height="320"></canvas>
+    </div>
+    <button class="btn" onclick="showDetailedReport()">Show Detailed Report</button>
+    <button class="btn secondary" onclick="exportTableToCSV('election-detailed-report.csv')">Export CSV</button>
     <div id="detailed-report" style="display:none;">
       <h2>Detailed Report</h2>
       <table>
@@ -52,26 +75,79 @@
             <th>Total Votes</th>
             <th>Valid Votes</th>
             <th>Void Votes</th>
+            <th>% Share</th>
+            <th>Winner</th>
           </tr>
         </thead>
         <tbody id="candidates-table"></tbody>
+      </table>
+      <h3>Voter List</h3>
+      <input type="text" id="voter-search" placeholder="Search voters..." style="margin-bottom:12px;padding:6px 10px;width:60%;border:1px solid #c4d1e3;border-radius:5px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Voter ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Voted</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody id="voters-table"></tbody>
+      </table>
+      <h3>Election Timeline</h3>
+      <ul class="timeline" id="timeline"></ul>
+      <h3>Admin Actions (Recent)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Admin</th>
+            <th>Action</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="admin-log-table"></tbody>
       </table>
     </div>
   </div>
   <script>
     // ----------- DEMO DATA (should be loaded from backend in real use) -----------
     const allVoters = [
-      { id: 101, name: "John Doe", status: "Active", voted: "Yes", election: "School President 2025" },
-      { id: 102, name: "Jane Smith", status: "Active", voted: "No", election: "School President 2025" },
-      { id: 103, name: "Mary Lin", status: "Inactive", voted: "No", election: "School President 2025" },
-      { id: 104, name: "Sam Wise", status: "Active", voted: "Yes", election: "School President 2025" },
-      { id: 105, name: "Pat Lee", status: "Active", voted: "Yes", election: "School President 2025" }
+      { id: 101, name: "John Doe", status: "Active", voted: "Yes", timestamp:"2025-06-10 09:03", election: "School President 2025" },
+      { id: 102, name: "Jane Smith", status: "Active", voted: "No", timestamp:"", election: "School President 2025" },
+      { id: 103, name: "Mary Lin", status: "Inactive", voted: "No", timestamp:"", election: "School President 2025" },
+      { id: 104, name: "Sam Wise", status: "Active", voted: "Yes", timestamp:"2025-06-10 10:15", election: "School President 2025" },
+      { id: 105, name: "Pat Lee", status: "Active", voted: "Yes", timestamp:"2025-06-10 11:41", election: "School President 2025" },
+      { id: 106, name: "Alex Finch", status: "Active", voted: "Yes", timestamp:"2025-06-10 12:50", election: "School President 2025" },
+      // Another election example:
+      { id: 201, name: "Bob New", status: "Active", voted: "Yes", timestamp:"2025-05-01 09:21", election: "Science Club Election" }
     ];
     const allCandidates = [
       { name: "Jane Doe", election: "School President 2025", votes: 420, validVotes: 417, voidVotes: 3 },
       { name: "John Smith", election: "School President 2025", votes: 392, validVotes: 385, voidVotes: 7 },
       // Example for another election:
       { name: "Sara Park", election: "Science Club Election", votes: 55, validVotes: 53, voidVotes: 2 }
+    ];
+    const allElections = [
+      { name: "School President 2025", status: "Concluded", type: "First-Past-The-Post", start: "2025-06-10", end: "2025-06-12" },
+      { name: "Science Club Election", status: "Counting", type: "First-Past-The-Post", start: "2025-05-01", end: "2025-05-02" }
+    ];
+    // Simulate admin logs for this election
+    const adminLogs = [
+      {ts:'2025-06-10 08:00:00',admin:'Richarddtimm230',action:'Create Election',details:'Election created.'},
+      {ts:'2025-06-10 08:05:00',admin:'Richarddtimm230',action:'Add Candidate',details:'Jane Doe added.'},
+      {ts:'2025-06-10 08:06:00',admin:'Richarddtimm230',action:'Add Candidate',details:'John Smith added.'},
+      {ts:'2025-06-10 08:10:00',admin:'Richarddtimm230',action:'Open Voting',details:'Voting started.'},
+      {ts:'2025-06-12 16:00:00',admin:'Richarddtimm230',action:'End Voting',details:'Voting closed.'},
+      {ts:'2025-06-12 16:30:00',admin:'Richarddtimm230',action:'Publish Results',details:'Results published.'}
+    ];
+    // Timeline data for demo purposes
+    const timelineEvents = [
+      {date:'2025-06-10 08:00:00', label:'Election Created'},
+      {date:'2025-06-10 08:10:00', label:'Voting Started'},
+      {date:'2025-06-12 16:00:00', label:'Voting Closed'},
+      {date:'2025-06-12 16:30:00', label:'Results Published'}
     ];
 
     // ----------- LOAD ELECTION FROM URL -----------
@@ -82,33 +158,150 @@
     const electionName = getQueryParam('election');
     document.getElementById('election-title').textContent = electionName ? `Election Report: ${electionName}` : 'Election Report';
 
+    // Election object
+    const electionObj = allElections.find(e => e.name === electionName);
+
+    // ----------- STATUS BADGE & TYPE -----------
+    if (electionObj) {
+      const badge = document.getElementById('election-status-badge');
+      badge.textContent = electionObj.status;
+      badge.className = 'badge ' +
+        (electionObj.status.toLowerCase().includes('conclud') ? 'concluded' :
+        electionObj.status.toLowerCase().includes('counting') ? 'counting' :
+        'in-progress');
+      document.getElementById('election-type').textContent = "Method: " + electionObj.type;
+    }
+
     // ----------- DASHBOARD CARDS -----------
     const votersForElection = allVoters.filter(v => v.election === electionName);
     const totalVoters = votersForElection.length;
     const votersVoted = votersForElection.filter(v => v.voted === "Yes").length;
+    // Calculate invalid ballots (sum of all void votes for this election)
+    const candidatesForElection = allCandidates.filter(c => c.election === electionName);
+    const invalidBallots = candidatesForElection.reduce((sum, c) => sum + (c.voidVotes || 0), 0);
     document.getElementById('total-voters').textContent = totalVoters;
     document.getElementById('voters-voted').textContent = votersVoted;
     document.getElementById('turnout-rate').textContent = totalVoters ? Math.round(votersVoted/totalVoters*100) + '%' : '0%';
+    document.getElementById('invalid-ballots').textContent = invalidBallots;
 
-    // ----------- DETAILED REPORT -----------
-    function renderCandidatesTable() {
-      const table = document.getElementById('candidates-table');
-      const candidates = allCandidates.filter(c => c.election === electionName);
-      if (candidates.length === 0) {
-        table.innerHTML = `<tr><td colspan="4" style="color:#888;">No candidates found for this election.</td></tr>`;
-        return;
-      }
-      candidates.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.name}</td>
-                        <td>${c.votes}</td>
-                        <td>${c.validVotes}</td>
-                        <td>${c.voidVotes}</td>`;
-        table.appendChild(tr);
+    // ----------- PIE CHART (Vote Share) -----------
+    function renderPieChart() {
+      const ctx = document.getElementById('voteSharePie').getContext('2d');
+      const data = {
+        labels: candidatesForElection.map(c => c.name),
+        datasets: [{
+          data: candidatesForElection.map(c => c.votes),
+          backgroundColor: ['#1e90ff','#ffb300','#24b47e','#ff4545','#1877cc','#8b5cf6'],
+          borderWidth: 2
+        }]
+      };
+      new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+          plugins: {
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'Candidate Vote Share', font:{size:15}}
+          }
+        }
       });
     }
-    // (Table renders when button is clicked)
-    document.querySelector('.btn').addEventListener('click', renderCandidatesTable);
+    renderPieChart();
+
+    // ----------- DETAILED REPORT -----------
+    function showDetailedReport() {
+      document.getElementById('detailed-report').style.display = 'block';
+      renderCandidatesTable();
+      renderVotersTable();
+      renderTimeline();
+      renderAdminLogs();
+    }
+    function renderCandidatesTable() {
+      const table = document.getElementById('candidates-table');
+      table.innerHTML = '';
+      let maxVotes = Math.max(...candidatesForElection.map(c => c.votes));
+      candidatesForElection.forEach(c => {
+        let percent = (c.votes / candidatesForElection.reduce((sum, x) => sum + x.votes,0) * 100).toFixed(1);
+        let isWinner = c.votes === maxVotes && c.votes > 0;
+        table.innerHTML += `<tr>
+          <td>${c.name}</td>
+          <td>${c.votes}</td>
+          <td>${c.validVotes}</td>
+          <td>${c.voidVotes}</td>
+          <td>${percent}%</td>
+          <td>${isWinner ? '<span class="badge concluded">Winner</span>' : ''}</td>
+        </tr>`;
+      });
+    }
+    // ----------- VOTER LIST WITH SEARCH -----------
+    function renderVotersTable(filter="") {
+      const tbody = document.getElementById('voters-table');
+      tbody.innerHTML = '';
+      votersForElection
+        .filter(v => !filter || Object.values(v).join('|').toLowerCase().includes(filter.toLowerCase()))
+        .forEach(v => {
+          tbody.innerHTML += `<tr>
+            <td>${v.id}</td>
+            <td>${v.name}</td>
+            <td>${v.status}</td>
+            <td>${v.voted}</td>
+            <td>${v.timestamp||"-"}</td>
+          </tr>`;
+        });
+    }
+    document.getElementById('voter-search').addEventListener('input', function() {
+      renderVotersTable(this.value);
+    });
+
+    // ----------- TIMELINE -----------
+    function renderTimeline() {
+      const ul = document.getElementById('timeline');
+      ul.innerHTML = '';
+      timelineEvents
+        .filter(ev => electionObj && ev.date >= electionObj.start && ev.date <= electionObj.end + " 23:59:59")
+        .forEach(ev => {
+          ul.innerHTML += `<li><span class="event-label">${ev.label}:</span> ${ev.date}</li>`;
+        });
+    }
+
+    // ----------- ADMIN LOGS -----------
+    function renderAdminLogs() {
+      const tbody = document.getElementById('admin-log-table');
+      tbody.innerHTML = '';
+      adminLogs.slice(-5).reverse().forEach(log => {
+        tbody.innerHTML += `<tr>
+          <td>${log.ts}</td>
+          <td>${log.admin}</td>
+          <td>${log.action}</td>
+          <td>${log.details}</td>
+        </tr>`;
+      });
+    }
+
+    // ----------- EXPORT TO CSV -----------
+    function exportTableToCSV(filename) {
+      // Export candidate report
+      let csv = 'Candidate,Total Votes,Valid Votes,Void Votes,% Share,Winner\n';
+      let maxVotes = Math.max(...candidatesForElection.map(c => c.votes));
+      candidatesForElection.forEach(c => {
+        let percent = (c.votes / candidatesForElection.reduce((sum, x) => sum + x.votes,0) * 100).toFixed(1);
+        let isWinner = c.votes === maxVotes && c.votes > 0 ? 'Winner' : '';
+        csv += `"${c.name}",${c.votes},${c.validVotes},${c.voidVotes},${percent}%,${isWinner}\n`;
+      });
+      // Export voter list
+      csv += '\nVoter ID,Name,Status,Voted,Timestamp\n';
+      votersForElection.forEach(v => {
+        csv += `${v.id},"${v.name}",${v.status},${v.voted},${v.timestamp||"-"}\n`;
+      });
+      // Download
+      let blob = new Blob([csv], {type:'text/csv'});
+      let a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   </script>
 </body>
 </html>

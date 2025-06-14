@@ -3,61 +3,72 @@ const router = express.Router();
 const multer = require('multer');
 const { db, bucket } = require('../config/firebase');
 
-// Replace with your actual admin middleware
+// Middleware: Only superadmins allowed
 const requireAdmin = (req, res, next) => {
-  // Example: req.user.role === 'superadmin'
   if (!req.user || req.user.role !== 'superadmin') {
     return res.status(403).json({ error: "Forbidden" });
   }
   next();
 };
 
-// ========== GET homepage data ==========
+// ====== GET homepage data ======
 router.get('/homepage', requireAdmin, async (req, res) => {
   try {
     const snap = await db.collection('siteContent').doc('homepage').get();
     if (!snap.exists) return res.json({});
     res.json(snap.data());
   } catch (err) {
-    res.status(500).json({ error: "Firestore error" });
+    res.status(500).json({ error: "Firestore error", details: err.message });
   }
 });
 
-// ========== UPDATE homepage data ==========
+// ====== UPDATE homepage data ======
 router.put('/homepage', requireAdmin, async (req, res) => {
   const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection } = req.body;
   try {
-    await db.collection('siteContent').doc('homepage').set({
-      heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection
-    }, { merge: true });
+    await db.collection('siteContent').doc('homepage').set(
+      { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection },
+      { merge: true }
+    );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: "Firestore error" });
+    res.status(500).json({ error: "Firestore error", details: err.message });
   }
 });
 
-// ========== IMAGE UPLOAD ==========
+// ====== IMAGE UPLOAD (Firebase Storage) ======
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload-image', requireAdmin, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const fileName = `homepage/${Date.now()}_${req.file.originalname}`;
-  const file = bucket.file(fileName);
 
-  const stream = file.createWriteStream({
-    metadata: {
-      contentType: req.file.mimetype
-    }
-  });
+  try {
+    const fileName = `homepage/${Date.now()}_${req.file.originalname.replace(/\s+/g, '_')}`;
+    const file = bucket.file(fileName);
 
-  stream.on('error', err => res.status(500).json({ error: "Upload error" }));
-  stream.on('finish', async () => {
-    await file.makePublic();
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-    res.json({ url: publicUrl });
-  });
+    const stream = file.createWriteStream({
+      metadata: { contentType: req.file.mimetype }
+    });
 
-  stream.end(req.file.buffer);
+    stream.on('error', err => {
+      console.error('[Upload error]', err);
+      res.status(500).json({ error: "Upload error", details: err.message });
+    });
+
+    stream.on('finish', async () => {
+      try {
+        await file.makePublic();
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+        res.json({ url: publicUrl });
+      } catch (err) {
+        res.status(500).json({ error: "Error making file public", details: err.message });
+      }
+    });
+
+    stream.end(req.file.buffer);
+  } catch (err) {
+    res.status(500).json({ error: "Unexpected upload error", details: err.message });
+  }
 });
 
 module.exports = router;

@@ -43,7 +43,34 @@ body {
   margin: 0;
   overflow-x: hidden;
 }
-    
+    .hero-images {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-img {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+  animation: none;
+}
+
+.hero-img.active {
+  opacity: 1;
+  animation: heroZoom 6s ease-in-out;
+  z-index: 1;
+}
+
+@keyframes heroZoom {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
     /* HEADER */
     .topbar {
       background: var(--gradient);
@@ -1175,16 +1202,21 @@ body {
   
   
   <!-- Hero Section -->
-<section class="hero">
+
+<!-- HERO -->
+<div class="hero">
   <div class="hero-overlay"></div>
+  <div class="hero-images">
+    <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1400&q=80" class="hero-img active" alt="Hero 1">
+    <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=80" class="hero-img" alt="Hero 2">
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80" class="hero-img" alt="Hero 3">
+  </div>
   <div class="hero-content">
-    
     <h1 class="hero-title">Gold & Linc Schools</h1>
     <p class="hero-subtitle">Behind Irenitemi Hotel, Testing Ground Area<br>Off Osogbo Road, Ilesa, Osun State</p>
     <p class="hero-motto">“For Sound Learning.”</p>
   </div>
-</section>
-
+</div>
 <!-- Carousel Section -->
 <section class="carousel-section">
   <div class="carousel-images" id="carouselImages" style="position:relative;">
@@ -1727,7 +1759,25 @@ document.addEventListener('DOMContentLoaded', () => {
   animatedElements.forEach(el => observer.observe(el));
 });
     
-    
+document.addEventListener('DOMContentLoaded', function() {
+  const images = document.querySelectorAll('.hero-img');
+  let current = 0;
+  const interval = 6000; // 6 seconds per image
+
+  function showImage(index) {
+    images.forEach((img, i) => {
+      img.classList.toggle('active', i === index);
+    });
+  }
+
+  setInterval(() => {
+    current = (current + 1) % images.length;
+    showImage(current);
+  }, interval);
+
+  showImage(current); // show first image initially
+});
+
   </script>
 </body>
 </html>

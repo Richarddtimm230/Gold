@@ -515,7 +515,7 @@
       for (const img of toUpload) {
         const formData = new FormData();
         formData.append('file', img.file);
-        const res = await fetch('https://gold-1-z03x.onrender.com/api/adminHomepage/upload-image', {
+        const res = await fetch('https://gold-1-z03x.onrender.com/api/admin/upload-image', {
           method: 'POST',
           headers: {'Authorization': `Bearer ${token}`},
           body: formData

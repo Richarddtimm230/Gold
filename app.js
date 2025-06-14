@@ -46,7 +46,8 @@ const profileRoute = require('./routes/profile');
 
 // Legacy/combined dashboard route if needed
 const dashboardRoute = require('./routes/dashboard');
-
+const adminHomepageRouter = require('./routes/adminHomepage');
+app.use('/api/admin', adminHomepageRouter);
 // --- APP MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());

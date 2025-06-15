@@ -12,12 +12,9 @@ const { authMiddleware } = require('./auth');
 const router = express.Router();
 
 // --- Configure Cloudinary using CLOUDINARY_URL environment variable ---
-// Cloudinary SDK will automatically pick up CLOUDINARY_URL from process.env
-// Make sure CLOUDINARY_URL is set on Render!
 cloudinary.config(); 
 
 // --- Multer setup for image uploads ---
-// Using memory storage for Multer, as files will be directly uploaded to Cloudinary
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -35,7 +32,6 @@ const upload = multer({
 
 // --- Middleware to ensure Super Admin role ---
 const ensureSuperAdminRole = (req, res, next) => {
-  // authMiddleware should have already populated req.user
   if (!req.user || req.user.role !== 'superadmin') {
     return res.status(403).json({ error: 'Forbidden: Super Admin access required.' });
   }
@@ -61,11 +57,21 @@ router.get('/homepage', async (req, res) => {
         heroSubtitle: '',
         heroMotto: '',
         heroImages: [],
-        aboutSection: ''
+        aboutSection: '',
+        carouselSlides: [] // NEW: Default empty array for carousel slides
       });
     }
 
-    res.status(200).json(doc.data());
+    // Return existing data, ensuring new fields default to empty if not present
+    const data = doc.data();
+    res.status(200).json({
+      heroTitle: data.heroTitle || '',
+      heroSubtitle: data.heroSubtitle || '',
+      heroMotto: data.heroMotto || '',
+      heroImages: data.heroImages || [],
+      aboutSection: data.aboutSection || '',
+      carouselSlides: data.carouselSlides || [] // NEW: Ensure carouselSlides is an array
+    });
   } catch (error) {
     console.error('Error fetching homepage content:', error);
     res.status(500).json({ error: 'Failed to fetch homepage content.' });
@@ -78,26 +84,27 @@ router.get('/homepage', async (req, res) => {
 router.put('/homepage', async (req, res) => {
   try {
     const db = req.app.locals.firestoreDB; // Access Firestore instance
-    const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection } = req.body;
+    const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection, carouselSlides } = req.body; // NEW: Destructure carouselSlides
 
     // Basic validation (you can add more robust validation here)
-    if (typeof heroTitle !== 'string' || !Array.isArray(heroImages) || typeof aboutSection !== 'string') {
+    if (typeof heroTitle !== 'string' || !Array.isArray(heroImages) || typeof aboutSection !== 'string' || !Array.isArray(carouselSlides)) { // NEW: Validate carouselSlides
       return res.status(400).json({ error: 'Invalid data format for homepage update.' });
     }
 
     const homepageDocRef = db.collection('siteContent').doc('homepage');
     await homepageDocRef.set({
-      heroTitle: heroTitle || '', // Ensure empty string if null/undefined
+      heroTitle: heroTitle || '',
       heroSubtitle: heroSubtitle || '',
       heroMotto: heroMotto || '',
       heroImages: heroImages, // Array of image URLs
-      aboutSection: aboutSection || ''
+      aboutSection: aboutSection || '',
+      carouselSlides: carouselSlides // NEW: Save carouselSlides
     }, { merge: true }); // Use merge: true to only update specified fields
 
     res.status(200).json({ message: 'Homepage content updated successfully!' });
   } catch (error) {
     console.error('Error updating homepage content:', error);
-    res.status(500).json({ error: 'Failed to update homepage content.' });
+    res.status(500).json({ error: error.message || 'Failed to update homepage content.' });
   }
 });
 
@@ -110,17 +117,14 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded.' });
     }
 
-    // Convert buffer to data URI for Cloudinary upload
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
 
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(dataURI, {
       folder: 'goldlinc_homepage_images', // Optional: organize uploads in a folder
-      resource_type: 'image' // Ensure it's treated as an image
+      resource_type: 'image'
     });
 
-    // Cloudinary returns a secure URL for the uploaded image
     res.status(200).json({ url: result.secure_url });
 
   } catch (error) {

@@ -49,7 +49,7 @@ const dashboardRoute = require('./routes/dashboard');
 
 // --- NEW: SITE CONTENT ROUTE ---
 const siteContentRouter = require('./routes/siteContent');
-
+    
 // --- APP MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
@@ -73,8 +73,6 @@ app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/students', studentsRoute);
-
-
 // --- SITE CONTENT ROUTE ---
 app.use('/api/site', siteContentRouter);
 

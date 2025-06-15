@@ -76,7 +76,12 @@ const dashboardRoute = require('./routes/dashboard');
 
 // --- NEW: SITE CONTENT ROUTE ---
 const siteContentRouter = require('./routes/siteContent');
-    
+    // In app.js, near your other router imports
+const adminRoute = require('./routes/admin'); // Add this line
+// ...
+
+
+
 // --- APP MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
@@ -102,7 +107,9 @@ app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/students', studentsRoute);
 // --- SITE CONTENT ROUTE ---
 app.use('/api/site', siteContentRouter);
-
+// Then, where you define your API routes
+app.use('/api/admin', adminRoute); // Add this line
+// ...
 // Example: Super Admin protected dashboard endpoint
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') return res.status(403).json({ error: "Forbidden" });

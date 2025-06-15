@@ -381,7 +381,35 @@
       <textarea id="aboutSection" name="aboutSection" maxlength="800" placeholder="About the school..." style="margin-bottom:5px;"></textarea>
       <div class="preview-label">Preview:</div>
       <div class="preview-block" id="aboutSectionPreview"></div>
-      <!-- Other sections can be added here in similar fashion -->
+
+      <!-- NEW: CAROUSEL SLIDES SECTION -->
+      <div class="section-divider"></div>
+      <div class="section-title">Carousel Slides</div>
+      <div class="input-row">
+        <div class="input-col">
+          <label for="newCarouselSlideTitle">Slide Title</label>
+          <input type="text" id="newCarouselSlideTitle" maxlength="80" placeholder="e.g., Science Fair 2025">
+        </div>
+        <div class="input-col">
+          <label for="newCarouselSlideText">Slide Text</label>
+          <input type="text" id="newCarouselSlideText" maxlength="150" placeholder="e.g., Students impress judges...">
+        </div>
+      </div>
+      <div class="hero-images-uploader"> <!-- Reusing some styles, but for carousel images -->
+        <label><b>Slide Image:</b>
+          <span class="file-label" id="uploadCarouselImgBtn">Upload Image</span>
+          <input type="file" class="file-input" id="carouselImgFileInput" accept="image/*">
+        </label>
+        <div class="add-img-url-row">
+          <input type="text" id="newCarouselImgUrl" placeholder="Paste image URL...">
+          <button type="button" class="add-img-url-btn" id="addCarouselSlideBtn">Add Slide</button>
+        </div>
+        <div class="hero-images-list" id="carouselSlidesList">
+          <!-- Carousel slides will be rendered here -->
+        </div>
+      </div>
+      <!-- END NEW: CAROUSEL SLIDES SECTION -->
+
       <div class="editor-actions">
         <button type="reset" class="reset-btn">Reset</button>
         <button type="submit" class="save-btn" id="saveBtn">Save Changes</button>
@@ -392,14 +420,13 @@
   </main>
   <script>
     // Define your backend API base URL here
-    // This makes it easy to change if your backend URL changes (e.g., moving from Render's default URL to a custom domain)
-    const API_BASE_URL = 'https://goldlincschools.onrender.com'; // <--- THIS IS THE KEY CHANGE
+    const API_BASE_URL = 'https://gold-1-z03x.onrender.com'; // Make sure this is your correct backend URL
 
     // ========== AUTH & REDIRECT ==========
     (function(){
       const token = localStorage.getItem('token');
       if (!token) return window.location.href = 'login.html';
-      fetch(`${API_BASE_URL}/api/auth/me`, { // Use API_BASE_URL
+      fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       }).then(res => {
         if (!res.ok) return window.location.href = 'login.html';
@@ -418,6 +445,8 @@
     // ========== STATE ==========
     let heroImages = []; // {src, file?, uploaded?}
     let heroImagesToDelete = [];
+    let carouselSlides = []; // NEW: {imageUrl, captionTitle, captionText, file?, uploaded?}
+    let carouselImagesToDelete = []; // NEW: For tracking images to delete from Cloudinary
 
     // ========== DOM ==========
     const heroImagesListDiv = document.getElementById('heroImagesList');
@@ -431,6 +460,15 @@
     const editorMsg = document.getElementById('editorMsg');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const saveBtn = document.getElementById('saveBtn');
+
+    // NEW: Carousel DOM elements
+    const carouselSlidesListDiv = document.getElementById('carouselSlidesList');
+    const carouselImgFileInput = document.getElementById('carouselImgFileInput');
+    const uploadCarouselImgBtn = document.getElementById('uploadCarouselImgBtn');
+    const addCarouselSlideBtn = document.getElementById('addCarouselSlideBtn');
+    const newCarouselImgUrlInput = document.getElementById('newCarouselImgUrl');
+    const newCarouselSlideTitleInput = document.getElementById('newCarouselSlideTitle');
+    const newCarouselSlideTextInput = document.getElementById('newCarouselSlideText');
 
     // ========== INIT ==========
     document.addEventListener('DOMContentLoaded', loadHomepageContent);
@@ -477,6 +515,83 @@
     // Make function global for onclick in renderHeroImagesList
     window.removeHeroImg = removeHeroImg;
 
+    // NEW: ========== CAROUSEL SLIDE MANAGEMENT ==========
+    uploadCarouselImgBtn.onclick = function() { carouselImgFileInput.click(); };
+    carouselImgFileInput.onchange = function(e) {
+      const file = e.target.files[0]; // Only one file for a slide image
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        carouselSlides.push({
+          imageUrl: ev.target.result,
+          captionTitle: newCarouselSlideTitleInput.value.trim(),
+          captionText: newCarouselSlideTextInput.value.trim(),
+          file: file,
+          uploaded: false
+        });
+        renderCarouselSlidesList();
+        // Clear inputs after adding
+        newCarouselSlideTitleInput.value = "";
+        newCarouselSlideTextInput.value = "";
+        carouselImgFileInput.value = "";
+        newCarouselImgUrlInput.value = "";
+      };
+      reader.readAsDataURL(file);
+    };
+
+    addCarouselSlideBtn.onclick = function() {
+      const url = newCarouselImgUrlInput.value.trim();
+      const title = newCarouselSlideTitleInput.value.trim();
+      const text = newCarouselSlideTextInput.value.trim();
+
+      if (!url && !title && !text) return; // Don't add empty slide
+
+      carouselSlides.push({
+        imageUrl: url,
+        captionTitle: title,
+        captionText: text,
+        uploaded: true // Assume URL is already uploaded
+      });
+      renderCarouselSlidesList();
+      // Clear inputs after adding
+      newCarouselImgUrlInput.value = "";
+      newCarouselSlideTitleInput.value = "";
+      newCarouselSlideTextInput.value = "";
+      carouselImgFileInput.value = "";
+    };
+
+    function removeCarouselSlide(idx) {
+      const slide = carouselSlides[idx];
+      if (slide.uploaded && slide.imageUrl) carouselImagesToDelete.push(slide.imageUrl); // Track for deletion
+      carouselSlides.splice(idx, 1);
+      renderCarouselSlidesList();
+    }
+
+    function renderCarouselSlidesList() {
+      carouselSlidesListDiv.innerHTML = "";
+      if (!carouselSlides.length) {
+        carouselSlidesListDiv.innerHTML = `<span style="color:#888;">No carousel slides yet.</span>`;
+      } else {
+        carouselSlides.forEach((slide, i) => {
+          const div = document.createElement('div');
+          div.className = 'hero-image-thumb'; // Reusing style for consistency
+          div.style.width = '180px'; // Adjust size for carousel preview
+          div.style.height = '100px';
+          div.innerHTML = `
+            <img src="${slide.imageUrl}" loading="lazy" alt="Carousel Slide">
+            <button type="button" class="remove-hero-img-btn" title="Remove" onclick="removeCarouselSlide(${i})">&times;</button>
+            <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.6); color:#fff; font-size:0.75rem; padding:3px 5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              ${slide.captionTitle || 'No Title'}
+            </div>
+          `;
+          carouselSlidesListDiv.appendChild(div);
+        });
+      }
+    }
+    // Make function global for onclick in renderCarouselSlidesList
+    window.removeCarouselSlide = removeCarouselSlide;
+
     // ========== ABOUT SECTION PREVIEW ==========
     aboutSectionTextarea.addEventListener('input', function() {
       aboutSectionPreview.textContent = aboutSectionTextarea.value || "—";
@@ -487,11 +602,13 @@
       setLoading(true, "Loading homepage...");
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, { // Use API_BASE_URL
+        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, {
           headers: {'Authorization': `Bearer ${token}`}
         });
         if (!res.ok) throw new Error("Failed to load homepage details");
         const data = await res.json();
+
+        // Populate Hero Section
         document.getElementById('heroTitle').value = data.heroTitle || "";
         document.getElementById('heroSubtitle').value = data.heroSubtitle || "";
         document.getElementById('heroMotto').value = data.heroMotto || "";
@@ -499,39 +616,81 @@
           ? data.heroImages.map(url => ({src: url, uploaded: true}))
           : (data.heroImages ? [{src: data.heroImages, uploaded: true}] : []);
         renderHeroImagesList();
+
+        // Populate About Section
         aboutSectionTextarea.value = data.aboutSection || "";
         aboutSectionPreview.textContent = data.aboutSection || "—";
+
+        // NEW: Populate Carousel Slides
+        carouselSlides = Array.isArray(data.carouselSlides)
+          ? data.carouselSlides.map(slide => ({
+              imageUrl: slide.imageUrl,
+              captionTitle: slide.captionTitle || '',
+              captionText: slide.captionText || '',
+              uploaded: true
+            }))
+          : [];
+        renderCarouselSlidesList(); // Render the fetched carousel slides
+
         setMsg("", "");
       } catch (e) {
-        setMsg("❌ Could not load homepage content.", "error");
+        setMsg("❌ Could not load homepage content. " + (e.message || ""), "error");
       } finally {
         setLoading(false);
       }
     }
 
-    // ========== UPLOAD HERO IMAGES ==========
-    async function uploadNewImages() {
-      // Only upload ones with file && uploaded==false
-      const toUpload = heroImages.filter(img => img.file && !img.uploaded);
-      if (!toUpload.length) return [];
+    // ========== UPLOAD NEW FILES (Hero and Carousel Images) ==========
+    async function uploadNewFiles() {
       const token = localStorage.getItem('token');
-      const urls = [];
-      for (const img of toUpload) {
+      const uploadedUrls = [];
+
+      // Process Hero Images
+      const heroImagesToUpload = heroImages.filter(img => img.file && !img.uploaded);
+      for (const img of heroImagesToUpload) {
         const formData = new FormData();
         formData.append('file', img.file);
-        const res = await fetch(`${API_BASE_URL}/api/admin/upload-image`, { // Use API_BASE_URL
-          method: 'POST',
-          headers: {'Authorization': `Bearer ${token}`},
-          body: formData
-        });
-        if (!res.ok) throw new Error("Image upload failed");
-        const { url } = await res.json();
-        urls.push(url);
-        img.src = url;
-        img.uploaded = true;
-        delete img.file;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/admin/upload-image`, {
+            method: 'POST',
+            headers: {'Authorization': `Bearer ${token}`},
+            body: formData
+          });
+          if (!res.ok) throw new Error("Hero image upload failed");
+          const { url } = await res.json();
+          img.src = url;
+          img.uploaded = true;
+          delete img.file;
+          uploadedUrls.push(url); // Track all uploaded URLs if needed
+        } catch (error) {
+          console.error("Error uploading hero image:", error);
+          throw new Error("Failed to upload one or more hero images.");
+        }
       }
-      return urls;
+
+      // Process Carousel Images (NEW)
+      const carouselImagesToUpload = carouselSlides.filter(slide => slide.file && !slide.uploaded);
+      for (const slide of carouselImagesToUpload) {
+        const formData = new FormData();
+        formData.append('file', slide.file);
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/admin/upload-image`, {
+            method: 'POST',
+            headers: {'Authorization': `Bearer ${token}`},
+            body: formData
+          });
+          if (!res.ok) throw new Error("Carousel image upload failed");
+          const { url } = await res.json();
+          slide.imageUrl = url; // Update the imageUrl in the slide object
+          slide.uploaded = true;
+          delete slide.file;
+          uploadedUrls.push(url); // Track all uploaded URLs if needed
+        } catch (error) {
+          console.error("Error uploading carousel image:", error);
+          throw new Error("Failed to upload one or more carousel images.");
+        }
+      }
+      return uploadedUrls; // Returns all newly uploaded URLs
     }
 
     // ========== SAVE HOMEPAGE ==========
@@ -541,21 +700,32 @@
       setLoading(true, "Saving...");
       saveBtn.disabled = true;
       try {
-        // 1. Upload new hero images (if any)
-        await uploadNewImages();
+        // 1. Upload new images (Hero and Carousel)
+        await uploadNewFiles(); // Renamed from uploadNewImages()
+
         // 2. Prepare heroImages URLs only
         const heroImagesUrls = heroImages.map(img => img.src);
-        // 3. Prepare payload
+
+        // NEW: 3. Prepare carouselSlides data (only necessary fields)
+        const carouselSlidesData = carouselSlides.map(slide => ({
+          imageUrl: slide.imageUrl,
+          captionTitle: slide.captionTitle,
+          captionText: slide.captionText
+        }));
+
+        // 4. Prepare final payload
         const payload = {
           heroTitle: document.getElementById('heroTitle').value,
           heroSubtitle: document.getElementById('heroSubtitle').value,
           heroMotto: document.getElementById('heroMotto').value,
           heroImages: heroImagesUrls,
           aboutSection: document.getElementById('aboutSection').value,
+          carouselSlides: carouselSlidesData // NEW: Include carousel slides in payload
         };
-        // 4. Update homepage content
+
+        // 5. Update homepage content
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, { // Use API_BASE_URL
+        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -565,7 +735,10 @@
         });
         if (!res.ok) throw new Error("Failed to update homepage");
         setMsg("✔️ Homepage updated!", "success");
-        // 5. Optionally: delete removed images from server (not implemented, but backend can do garbage collection)
+        // 6. Optionally: delete removed images from server (not implemented, but backend can do garbage collection)
+        // You would send heroImagesToDelete and carouselImagesToDelete to a backend route for deletion
+        heroImagesToDelete = []; // Clear after successful save
+        carouselImagesToDelete = []; // Clear after successful save
       } catch (e) {
         setMsg("❌ Update failed. " + (e.message || ""), "error");
       } finally {

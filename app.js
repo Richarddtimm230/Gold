@@ -7,12 +7,39 @@ const cors = require('cors');
 const { initializeApp, getApps, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-// Prefer environment variable for service account (for Render/deployment), fallback to local file
 let serviceAccount;
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+// --- NEW: Prioritize Base64 encoded environment variable for deployment ---
+if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+  try {
+    // Decode the Base64 string back to a UTF-8 JSON string
+    const decodedServiceAccount = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+    // Parse the JSON string into a JavaScript object
+    serviceAccount = JSON.parse(decodedServiceAccount);
+    console.log("Service account loaded successfully from Base64 environment variable.");
+  } catch (error) {
+    console.error("Error parsing Base64 FIREBASE_SERVICE_ACCOUNT_BASE64:", error);
+    // If parsing fails, throw an error to stop the app startup
+    throw new Error("Failed to parse Base64 FIREBASE_SERVICE_ACCOUNT_BASE64. Please check its format on Render.");
+  }
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // --- Fallback to direct JSON string environment variable (less reliable for Render) ---
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log("Service account loaded from direct JSON environment variable (less recommended).");
+  } catch (error) {
+    console.error("Error parsing direct JSON FIREBASE_SERVICE_ACCOUNT:", error);
+    throw new Error("Failed to parse FIREBASE_SERVICE_ACCOUNT. Check its format.");
+  }
 } else {
-  serviceAccount = require('./firebaseServiceAccount.json');
+  // --- Fallback to local file (for local development) ---
+  try {
+    serviceAccount = require('./firebaseServiceAccount.json');
+    console.log("Service account loaded from local firebaseServiceAccount.json for development.");
+  } catch (error) {
+    console.error("Error loading local firebaseServiceAccount.json:", error);
+    throw new Error("firebaseServiceAccount.json not found or invalid. Ensure it exists for local development.");
+  }
 }
 
 // Guard against duplicate app initialization

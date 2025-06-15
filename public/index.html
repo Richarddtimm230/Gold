@@ -51,7 +51,7 @@ body {
 }
 
 .hero-img {
-  position: absolute;
+  position: absolute; 
   top: 0; left: 0; width: 100%; height: 100%;
   object-fit: cover;
   opacity: 0;
@@ -1202,21 +1202,21 @@ body {
   
   
   <!-- Hero Section -->
-
 <!-- HERO -->
 <div class="hero">
   <div class="hero-overlay"></div>
-  <div class="hero-images">
-    <img src="images (4).jpeg?auto=format&fit=crop&w=1400&q=80" class="hero-img active" alt="Hero 1">
-    <img src="images (3).jpeg?auto=format&fit=crop&w=1400&q=80" class="hero-img" alt="Hero 2">
-    <img src="student in the lab 900 x 600.webp?auto=format&fit=crop&w=1400&q=80" class="hero-img" alt="Hero 3">
+  <div class="hero-images" id="heroImagesContainer">
+    <!-- This will be dynamically populated by JavaScript -->
+    <img src="https://via.placeholder.com/1400x800?text=Loading..." class="hero-img active" alt="Loading Hero Image">
   </div>
   <div class="hero-content">
-    <h1 class="hero-title">Gold & Linc Schools</h1>
-    <p class="hero-subtitle">Behind Irenitemi Hotel, Testing Ground Area<br>Off Osogbo Road, Ilesa, Osun State</p>
-    <p class="hero-motto">“For Sound Learning.”</p>
+    <h1 class="hero-title" id="heroTitle">Loading...</h1>
+    <p class="hero-subtitle" id="heroSubtitle">Loading...</p>
+    <p class="hero-motto" id="heroMotto">Loading...</p>
   </div>
 </div>
+
+
 <!-- Carousel Section -->
 <section class="carousel-section">
   <div class="carousel-images" id="carouselImages" style="position:relative;">

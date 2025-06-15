@@ -1,8 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { db, bucket } = require('../config/firebase');
+const bcrypt = require('bcryptjs');
 
+// Firestore DB instance (update the path if you use app.locals.firestoreDB or a different export)
+const db = require('../firestore'); // Or: req.app.locals.firestoreDB in each route handler
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Utility: get staff collection
+function siteContent() {
+  return db.collection('siteContent');
+}
 // Middleware: Only superadmins allowed
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'superadmin') {

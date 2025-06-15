@@ -11,7 +11,7 @@ const upload = multer({ storage });
 
 // Utility: get staff collection
 function siteContent() {
-  return db.collection('siteContent');
+  return db.collection('site');
 }
 // Middleware: Only superadmins allowed
 const requireAdmin = (req, res, next) => {
@@ -36,7 +36,7 @@ router.get('/homepage', requireAdmin, async (req, res) => {
 router.put('/homepage', requireAdmin, async (req, res) => {
   const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection } = req.body;
   try {
-    await db.collection('siteContent').doc('homepage').set(
+    await db.collection('site').doc('homepage').set(
       { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection },
       { merge: true }
     );

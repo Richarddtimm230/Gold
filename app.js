@@ -46,7 +46,6 @@ const profileRoute = require('./routes/profile');
 
 // Legacy/combined dashboard route if needed
 const dashboardRoute = require('./routes/dashboard');
-const adminHomepageRouter = require('./routes/adminHomepage');
 
 // --- NEW: SITE CONTENT ROUTE ---
 const siteContentRouter = require('./routes/siteContent');
@@ -75,8 +74,6 @@ app.use('/api/classes', classesRoute);
 app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/students', studentsRoute);
 
-// Admin homepage route
-app.use('/api/admin', adminHomepageRouter);
 
 // --- SITE CONTENT ROUTE ---
 app.use('/api/site', siteContentRouter);

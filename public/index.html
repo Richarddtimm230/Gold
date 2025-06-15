@@ -1215,37 +1215,17 @@ body {
     <p class="hero-motto" id="heroMotto">Loading...</p>
   </div>
 </div>
-
-
 <!-- Carousel Section -->
 <section class="carousel-section">
-  <div class="carousel-images" id="carouselImages" style="position:relative;">
-    <div class="carousel-slide">
-      <img class="carousel-image" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" alt="Campus 1">
-      <div class="carousel-caption">
-        <div class="caption-title">Gold and Linc Schools Welcomes New Students!</div>
-        <div class="caption-text">Orientation for the 2025/2026 Academic Year was a huge success.</div>
-      </div>
-    </div>
-    <div class="carousel-slide">
-      <img class="carousel-image" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80" alt="Campus 2">
-      <div class="carousel-caption">
-        <div class="caption-title">Science Fair 2025</div>
-        <div class="caption-text">Students impress judges with innovative projects and experiments.</div>
-      </div>
-    </div>
-    <div class="carousel-slide">
-      <img class="carousel-image" src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=1200&q=80" alt="Event 1">
-      <div class="carousel-caption">
-        <div class="caption-title">Annual Sports Day Highlights</div>
-        <div class="caption-text">Inter-house competitions foster teamwork and school spirit.</div>
-      </div>
-    </div>
-    <div class="carousel-slide">
-      <img class="carousel-image" src="https://images.unsplash.com/photo-1517520287167-4bbf64a00d66?auto=format&fit=crop&w=1200&q=80" alt="Graduation">
-      <div class="carousel-caption">
-        <div class="caption-title">Congratulations to Our Graduates</div>
-        <div class="caption-text">Celebrating excellence and achievement in academics.</div>
+  <div class="carousel-wrapper">
+    <div class="carousel-images" id="carouselImages">
+      <!-- Dynamic carousel slides will be loaded here by JavaScript -->
+      <div class="carousel-slide active">
+        <img class="carousel-image" src="https://via.placeholder.com/1200x600?text=Loading+Carousel..." alt="Loading Carousel">
+        <div class="carousel-caption">
+          <div class="caption-title">Loading...</div>
+          <div class="caption-text">Please wait while content loads.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1253,7 +1233,11 @@ body {
     <button class="carousel-btn" id="carouselPrev"><i class="fa fa-chevron-left"></i></button>
     <button class="carousel-btn" id="carouselNext"><i class="fa fa-chevron-right"></i></button>
   </div>
-  <div class="carousel-dots" id="carouselDots"></div>
+  <div class="carousel-dots" id="carouselDots">
+    <!-- Dynamic dots will be loaded here by JavaScript -->
+  </div>
+      
+  
   <style>
     .carousel-slide {
       min-width: 100%;

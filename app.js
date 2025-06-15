@@ -47,7 +47,10 @@ const profileRoute = require('./routes/profile');
 // Legacy/combined dashboard route if needed
 const dashboardRoute = require('./routes/dashboard');
 const adminHomepageRouter = require('./routes/adminHomepage');
-app.use('/api/admin', adminHomepageRouter);
+
+// --- NEW: SITE CONTENT ROUTE ---
+const siteContentRouter = require('./routes/siteContent');
+
 // --- APP MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
@@ -71,6 +74,12 @@ app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/students', studentsRoute);
+
+// Admin homepage route
+app.use('/api/admin', adminHomepageRouter);
+
+// --- SITE CONTENT ROUTE ---
+app.use('/api/site', siteContentRouter);
 
 // Example: Super Admin protected dashboard endpoint
 app.get('/api/dashboard', authMiddleware, (req, res) => {

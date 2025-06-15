@@ -391,11 +391,15 @@
     </form>
   </main>
   <script>
+    // Define your backend API base URL here
+    // This makes it easy to change if your backend URL changes (e.g., moving from Render's default URL to a custom domain)
+    const API_BASE_URL = 'https://gold-1-z03x.onrender.com'; // <--- THIS IS THE KEY CHANGE
+
     // ========== AUTH & REDIRECT ==========
     (function(){
       const token = localStorage.getItem('token');
       if (!token) return window.location.href = 'login.html';
-      fetch('https://gold-1-z03x.onrender.com/api/auth/me', {
+      fetch(`${API_BASE_URL}/api/auth/me`, { // Use API_BASE_URL
         headers: { 'Authorization': `Bearer ${token}` }
       }).then(res => {
         if (!res.ok) return window.location.href = 'login.html';
@@ -483,7 +487,7 @@
       setLoading(true, "Loading homepage...");
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('https://gold-1-z03x.onrender.com/api/admin/homepage', {
+        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, { // Use API_BASE_URL
           headers: {'Authorization': `Bearer ${token}`}
         });
         if (!res.ok) throw new Error("Failed to load homepage details");
@@ -515,7 +519,7 @@
       for (const img of toUpload) {
         const formData = new FormData();
         formData.append('file', img.file);
-        const res = await fetch('https://gold-1-z03x.onrender.com/api/admin/upload-image', {
+        const res = await fetch(`${API_BASE_URL}/api/admin/upload-image`, { // Use API_BASE_URL
           method: 'POST',
           headers: {'Authorization': `Bearer ${token}`},
           body: formData
@@ -551,7 +555,7 @@
         };
         // 4. Update homepage content
         const token = localStorage.getItem('token');
-        const res = await fetch('https://gold-1-z03x.onrender.com/api/admin/homepage', {
+        const res = await fetch(`${API_BASE_URL}/api/admin/homepage`, { // Use API_BASE_URL
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,

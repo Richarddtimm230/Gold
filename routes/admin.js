@@ -1,9 +1,9 @@
 // routes/admin.js
 
 const express = require('express');
-const admin = require('firebase-admin'); // Import firebase-admin for Storage
+const admin = require('firebase-admin'); // Still needed for Firestore operations
 const multer = require('multer'); // For handling file uploads
-const path = require('path'); // For path manipulation, useful for file extensions
+const cloudinary = require('cloudinary').v2; // Import Cloudinary SDK
 
 // Assuming authMiddleware is exported from your auth route file
 // Adjust the path if your auth.js is in a different location relative to admin.js
@@ -11,8 +11,13 @@ const { authMiddleware } = require('./auth');
 
 const router = express.Router();
 
+// --- Configure Cloudinary using CLOUDINARY_URL environment variable ---
+// Cloudinary SDK will automatically pick up CLOUDINARY_URL from process.env
+// Make sure CLOUDINARY_URL is set on Render!
+cloudinary.config(); 
+
 // --- Multer setup for image uploads ---
-// Using memory storage for Multer, as files will be directly uploaded to Firebase Storage
+// Using memory storage for Multer, as files will be directly uploaded to Cloudinary
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -41,7 +46,7 @@ const ensureSuperAdminRole = (req, res, next) => {
 router.use(authMiddleware, ensureSuperAdminRole);
 
 // ====================================================================
-// GET /api/admin/homepage - Fetch homepage content
+// GET /api/admin/homepage - Fetch homepage content (Firestore)
 // ====================================================================
 router.get('/homepage', async (req, res) => {
   try {
@@ -68,7 +73,7 @@ router.get('/homepage', async (req, res) => {
 });
 
 // ====================================================================
-// PUT /api/admin/homepage - Update homepage content
+// PUT /api/admin/homepage - Update homepage content (Firestore)
 // ====================================================================
 router.put('/homepage', async (req, res) => {
   try {
@@ -97,7 +102,7 @@ router.put('/homepage', async (req, res) => {
 });
 
 // ====================================================================
-// POST /api/admin/upload-image - Upload an image to Firebase Storage
+// POST /api/admin/upload-image - Upload an image to Cloudinary
 // ====================================================================
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   try {
@@ -105,33 +110,21 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded.' });
     }
 
-    const bucket = admin.storage().bucket(); // Get default Firebase Storage bucket
-    const fileName = `homepage_images/${Date.now()}_${req.file.originalname}`;
-    const file = bucket.file(fileName);
+    // Convert buffer to data URI for Cloudinary upload
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
 
-    // Create a writable stream to upload the file
-    const stream = file.createWriteStream({
-      metadata: {
-        contentType: req.file.mimetype,
-      },
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'goldlinc_homepage_images', // Optional: organize uploads in a folder
+      resource_type: 'image' // Ensure it's treated as an image
     });
 
-    stream.on('error', (err) => {
-      console.error('Error uploading to Firebase Storage:', err);
-      res.status(500).json({ error: 'Failed to upload image to storage.' });
-    });
-
-    stream.on('finish', async () => {
-      // Make the file publicly accessible
-      await file.makePublic();
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-      res.status(200).json({ url: publicUrl });
-    });
-
-    stream.end(req.file.buffer); // End the stream with the file buffer
+    // Cloudinary returns a secure URL for the uploaded image
+    res.status(200).json({ url: result.secure_url });
 
   } catch (error) {
-    console.error('Error in image upload route:', error);
+    console.error('Error uploading image to Cloudinary:', error);
     res.status(500).json({ error: error.message || 'Failed to upload image.' });
   }
 });

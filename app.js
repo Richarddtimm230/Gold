@@ -1,136 +1,130 @@
-// routes/admin.js
-
+require('dotenv').config();
 const express = require('express');
-const admin = require('firebase-admin'); // Still needed for Firestore operations
-const multer = require('multer'); // For handling file uploads
-const cloudinary = require('cloudinary').v2; // Import Cloudinary SDK
+const path = require('path');
+const cors = require('cors');
 
-// Assuming authMiddleware is exported from your auth route file
-// Adjust the path if your auth.js is in a different location relative to admin.js
-const { authMiddleware } = require('./auth'); 
+// --- FIREBASE ADMIN/FIRESTORE INIT ---
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
-const router = express.Router();
+let serviceAccount;
 
-// --- Configure Cloudinary using CLOUDINARY_URL environment variable ---
-cloudinary.config(); 
-
-// --- Multer setup for image uploads ---
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // Limit file size to 5MB
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF, WebP) are allowed.'), false);
-    }
-  }
-});
-
-// --- Middleware to ensure Super Admin role ---
-const ensureSuperAdminRole = (req, res, next) => {
-  if (!req.user || req.user.role !== 'superadmin') {
-    return res.status(403).json({ error: 'Forbidden: Super Admin access required.' });
-  }
-  next();
-};
-
-// Apply authMiddleware and ensureSuperAdminRole to all admin routes
-router.use(authMiddleware, ensureSuperAdminRole);
-
-// ====================================================================
-// GET /api/admin/homepage - Fetch homepage content (Firestore)
-// ====================================================================
-router.get('/homepage', async (req, res) => {
+// --- NEW: Prioritize Base64 encoded environment variable for deployment ---
+if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
   try {
-    const db = req.app.locals.firestoreDB; // Access Firestore instance from app.js
-    const homepageDocRef = db.collection('siteContent').doc('homepage');
-    const doc = await homepageDocRef.get();
-
-    if (!doc.exists) {
-      // If no homepage content exists, return a default empty structure
-      return res.status(200).json({
-        heroTitle: '',
-        heroSubtitle: '',
-        heroMotto: '',
-        heroImages: [],
-        aboutSection: '',
-        carouselSlides: [] // NEW: Default empty array for carousel slides
-      });
-    }
-
-    // Return existing data, ensuring new fields default to empty if not present
-    const data = doc.data();
-    res.status(200).json({
-      heroTitle: data.heroTitle || '',
-      heroSubtitle: data.heroSubtitle || '',
-      heroMotto: data.heroMotto || '',
-      heroImages: data.heroImages || [],
-      aboutSection: data.aboutSection || '',
-      carouselSlides: data.carouselSlides || [] // NEW: Ensure carouselSlides is an array
-    });
+    // Decode the Base64 string back to a UTF-8 JSON string
+    const decodedServiceAccount = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+    // Parse the JSON string into a JavaScript object
+    serviceAccount = JSON.parse(decodedServiceAccount);
+    console.log("Service account loaded successfully from Base64 environment variable.");
   } catch (error) {
-    console.error('Error fetching homepage content:', error);
-    res.status(500).json({ error: 'Failed to fetch homepage content.' });
+    console.error("Error parsing Base64 FIREBASE_SERVICE_ACCOUNT_BASE64:", error);
+    // If parsing fails, throw an error to stop the app startup
+    throw new Error("Failed to parse Base64 FIREBASE_SERVICE_ACCOUNT_BASE64. Please check its format on Render.");
   }
-});
-
-// ====================================================================
-// PUT /api/admin/homepage - Update homepage content (Firestore)
-// ====================================================================
-router.put('/homepage', async (req, res) => {
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // --- Fallback to direct JSON string environment variable (less reliable for Render) ---
   try {
-    const db = req.app.locals.firestoreDB; // Access Firestore instance
-    const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection, carouselSlides } = req.body; // NEW: Destructure carouselSlides
-
-    // Basic validation (you can add more robust validation here)
-    if (typeof heroTitle !== 'string' || !Array.isArray(heroImages) || typeof aboutSection !== 'string' || !Array.isArray(carouselSlides)) { // NEW: Validate carouselSlides
-      return res.status(400).json({ error: 'Invalid data format for homepage update.' });
-    }
-
-    const homepageDocRef = db.collection('siteContent').doc('homepage');
-    await homepageDocRef.set({
-      heroTitle: heroTitle || '',
-      heroSubtitle: heroSubtitle || '',
-      heroMotto: heroMotto || '',
-      heroImages: heroImages, // Array of image URLs
-      aboutSection: aboutSection || '',
-      carouselSlides: carouselSlides // NEW: Save carouselSlides
-    }, { merge: true }); // Use merge: true to only update specified fields
-
-    res.status(200).json({ message: 'Homepage content updated successfully!' });
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log("Service account loaded from direct JSON environment variable (less recommended).");
   } catch (error) {
-    console.error('Error updating homepage content:', error);
-    res.status(500).json({ error: error.message || 'Failed to update homepage content.' });
+    console.error("Error parsing direct JSON FIREBASE_SERVICE_ACCOUNT:", error);
+    throw new Error("Failed to parse FIREBASE_SERVICE_ACCOUNT. Check its format.");
   }
-});
-
-// ====================================================================
-// POST /api/admin/upload-image - Upload an image to Cloudinary
-// ====================================================================
-router.post('/upload-image', upload.single('file'), async (req, res) => {
+} else {
+  // --- Fallback to local file (for local development) ---
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded.' });
-    }
-
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
-
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: 'goldlinc_homepage_images', // Optional: organize uploads in a folder
-      resource_type: 'image'
-    });
-
-    res.status(200).json({ url: result.secure_url });
-
+    serviceAccount = require('./firebaseServiceAccount.json');
+    console.log("Service account loaded from local firebaseServiceAccount.json for development.");
   } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
-    res.status(500).json({ error: error.message || 'Failed to upload image.' });
+    console.error("Error loading local firebaseServiceAccount.json:", error);
+    throw new Error("firebaseServiceAccount.json not found or invalid. Ensure it exists for local development.");
   }
+}
+
+// Guard against duplicate app initialization
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(serviceAccount),
+    projectId: 'myschoolapp-eac54', // optional if included in service account
+  });
+}
+const db = getFirestore();
+
+const ensureSuperAdmin = require('./utils/ensureSuperAdmin'); // Adjust path if needed
+
+const app = express();
+app.locals.firestoreDB = db;
+
+// --- ROUTER IMPORTS ---
+const resultsRoute = require('./routes/results');
+const classesRoute = require('./routes/classes');
+const studentsRoute = require('./routes/students');
+const { router: authRoute, authMiddleware } = require('./routes/auth');
+
+// NEW: Modular routes for all dashboard features
+const academicsRoute = require('./routes/academics');
+const examsRoute = require('./routes/exams');
+const cbtRoute = require('./routes/cbt');
+const assignmentsRoute = require('./routes/assignments');
+const attendanceRoute = require('./routes/attendance');
+const notificationsRoute = require('./routes/notifications');
+const profileRoute = require('./routes/profile');
+
+// Legacy/combined dashboard route if needed
+const dashboardRoute = require('./routes/dashboard');
+
+// --- NEW: SITE CONTENT ROUTE ---
+const siteContentRouter = require('./routes/siteContent');
+    // In app.js, near your other router imports
+const adminRoute = require('./routes/admin'); // Add this line
+// ...
+
+
+
+// --- APP MIDDLEWARE ---
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// --- API ROUTES ---
+app.use('/api/auth', authRoute);
+app.use('/api/staff', require('./routes/staff'));
+app.use('/api', dashboardRoute); // legacy/combined routes
+
+// Modular REST endpoints for dashboard features
+app.use('/api/academics', academicsRoute);
+app.use('/api/exams', examsRoute);
+app.use('/api/cbt', cbtRoute);
+app.use('/api/assignments', assignmentsRoute);
+app.use('/api/attendance', attendanceRoute);
+app.use('/api/notifications', notificationsRoute);
+app.use('/api/profile', profileRoute);
+
+app.use('/api/results', resultsRoute);
+app.use('/api/classes', classesRoute);
+app.use('/api/subjects', require('./routes/subjects'));
+app.use('/api/students', studentsRoute);
+// --- SITE CONTENT ROUTE ---
+app.use('/api/site', siteContentRouter);
+// Then, where you define your API routes
+app.use('/api/admin', adminRoute); // Add this line
+// ...
+// Example: Super Admin protected dashboard endpoint
+app.get('/api/dashboard', authMiddleware, (req, res) => {
+  if (req.user.role !== 'superadmin') return res.status(403).json({ error: "Forbidden" });
+  res.json({ message: "Welcome, Super Admin!" });
 });
 
-module.exports = router;
+// Serve SPA entry point
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+const PORT = process.env.PORT || 5000;
+
+// Ensure Superadmin, then start server
+(async () => {
+  await ensureSuperAdmin(db); // Pass db if ensureSuperAdmin expects it
+  app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+})();

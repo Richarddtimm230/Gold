@@ -30,16 +30,6 @@ const upload = multer({
   }
 });
 
-// --- Middleware to ensure Super Admin role ---
-const ensureSuperAdminRole = (req, res, next) => {
-  if (!req.user || req.user.role !== 'superadmin') {
-    return res.status(403).json({ error: 'Forbidden: Super Admin access required.' });
-  }
-  next();
-};
-
-// Apply authMiddleware and ensureSuperAdminRole to all admin routes
-router.use(authMiddleware, ensureSuperAdminRole);
 
 // ====================================================================
 // GET /api/admin/homepage - Fetch homepage content (Firestore)

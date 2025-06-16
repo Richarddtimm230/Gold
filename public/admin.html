@@ -317,7 +317,9 @@ window.addEventListener('resize', function(){
       window.location.href = 'login.html';
   }
 })();
+localStorage.setItem('token', data.token);
 
+    
 // ====== Fetch Dashboard Data & Render ======
 async function fetchDashboardData() {
     const loadingDiv = document.getElementById('dashboardLoading');

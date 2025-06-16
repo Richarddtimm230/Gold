@@ -1680,7 +1680,7 @@ body {
       }
     }
 
-    // ========== DOM Elements for Static Carousel Section (Now Dynamic) ==========
+    // ========== DOM Elements for Main Carousel Section (Dynamic) ==========
     const staticCarouselImagesContainer = document.getElementById('carouselImages');
     const staticCarouselPrevBtn = document.getElementById('carouselPrev');
     const staticCarouselNextBtn = document.getElementById('carouselNext');
@@ -1689,8 +1689,13 @@ body {
     let currentStaticSlide = 0;
     let staticCarouselInterval;
 
-    // ========== Dynamic Carousel Section Logic ==========
+    // ========== Dynamic Main Carousel Section Logic ==========
     function renderStaticCarousel(slidesData) {
+      if (!staticCarouselImagesContainer || !staticCarouselDotsContainer) {
+        console.warn("Carousel containers not found. Skipping dynamic carousel rendering.");
+        return;
+      }
+
       staticCarouselImagesContainer.innerHTML = ''; // Clear existing slides
       staticCarouselDotsContainer.innerHTML = ''; // Clear existing dots
       staticCarouselSlides = []; // Reset the array
@@ -1750,7 +1755,7 @@ body {
     }
 
     function showStaticSlide(idx) {
-      if (staticCarouselSlides.length === 0) return; // No slides to show
+      if (staticCarouselSlides.length === 0 || !staticCarouselImagesContainer) return; // No slides to show or container missing
 
       if (idx < 0) idx = staticCarouselSlides.length - 1;
       if (idx >= staticCarouselSlides.length) idx = 0;
@@ -1768,13 +1773,10 @@ body {
     function nextStaticSlide() { showStaticSlide(currentStaticSlide + 1); }
     function prevStaticSlide() { showStaticSlide(currentStaticSlide - 1); }
 
-    if (staticCarouselPrevBtn) staticCarouselPrevBtn.onclick = prevStaticSlide;
-    if (staticCarouselNextBtn) staticCarouselNextBtn.onclick = nextStaticSlide;
-
     // Auto-advance
     function startStaticCarousel() {
       if (staticCarouselInterval) clearInterval(staticCarouselInterval); // Clear any existing interval
-      if (staticCarouselSlides.length > 1) { // Only auto-advance if more than one slide
+      if (staticCarouselSlides.length > 1 && staticCarouselImagesContainer) { // Only auto-advance if more than one slide
         staticCarouselInterval = setInterval(nextStaticSlide, 7000); // Change slide every 7 seconds
       }
     }
@@ -1785,7 +1787,6 @@ body {
       staticCarouselImagesContainer.addEventListener('mouseenter', stopStaticCarousel);
       staticCarouselImagesContainer.addEventListener('mouseleave', startStaticCarousel);
     }
-
     // For responsive mobile swipe (bonus)
     let startX = 0, endX = 0;
     if (staticCarouselImagesContainer) {
@@ -1815,7 +1816,6 @@ body {
         heroSubtitleElem.textContent = data.heroSubtitle || "Behind Irenitemi Hotel, Testing Ground Area Off Osogbo Road, Ilesa, Osun State";
         heroMottoElem.textContent = data.heroMotto || "“For Sound Learning.”";
 
-        // Populate Hero Images
         heroImagesContainer.innerHTML = ''; // Clear existing placeholder images
         if (Array.isArray(data.heroImages) && data.heroImages.length > 0) {
           data.heroImages.forEach((url, index) => {
@@ -1841,7 +1841,7 @@ body {
         // Populate About Section
         aboutSectionContentElem.textContent = data.aboutSection || "Welcome to Gold & Linc Schools! We are dedicated to providing sound learning and holistic development for our students. Our commitment is to nurture young minds, fostering academic excellence and strong moral values. Join us on a journey of discovery and growth.";
 
-        // Populate Carousel Section (NEW)
+        // Populate Main Carousel Section
         renderStaticCarousel(data.carouselSlides); // Pass the fetched slides data
 
       } catch (error) {
@@ -1856,86 +1856,71 @@ body {
       }
     }
 
-    // ========== Combined DOMContentLoaded Listener ==========
+    // ========== Combined DOMContentLoaded Listener (All initializations go here) ==========
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Load all dynamic homepage content (Hero, About, and Carousel sections)
+      // 1. Load all dynamic homepage content (Hero, About, and Main Carousel sections)
       loadAllHomepageContent();
 
-
-
-  
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // 2. Modal handling (from your original script)
+      // 2. Modal handling
       document.querySelectorAll('.faculty-card').forEach(card => {
         card.addEventListener('click', () => {
           const id = card.dataset.modal;
-          document.getElementById(id).style.display = 'flex';
+          const modal = document.getElementById(id);
+          if (modal) modal.style.display = 'flex';
         });
       });
 
-  document.querySelectorAll('.close').forEach(close => {
-    close.addEventListener('click', () => {
-      const id = close.dataset.modal;
-      document.getElementById(id).style.display = 'none';
-    });
-  });
+      document.querySelectorAll('.close').forEach(closeBtn => { // Renamed 'close' to 'closeBtn' to avoid conflict
+        closeBtn.addEventListener('click', () => {
+          const id = closeBtn.dataset.modal;
+          const modal = document.getElementById(id);
+          if (modal) modal.style.display = 'none';
+        });
+      });
 
-  window.addEventListener('click', e => {
-    document.querySelectorAll('.modal').forEach(modal => {
-      if (e.target === modal) modal.style.display = 'none';
-    });
-  });
+      window.addEventListener('click', e => {
+        document.querySelectorAll('.modal').forEach(modal => {
+          if (e.target === modal) modal.style.display = 'none';
+        });
+      });
 
-  // Slider navigation
-  const list = document.querySelector('.faculty-list');
-  document.querySelector('.prev').addEventListener('click', () => list.scrollBy({ left: -300, behavior: 'smooth' }));
-  document.querySelector('.next').addEventListener('click', () => list.scrollBy({ left: 300, behavior: 'smooth' }));
-});
+      // 3. Slider navigation (for faculty list)
+      const facultyList = document.querySelector('.faculty-list');
+      if (facultyList) { // Check if element exists
+        const prevFacultyBtn = document.querySelector('.prev'); // Renamed to avoid conflict
+        const nextFacultyBtn = document.querySelector('.next'); // Renamed to avoid conflict
+
+        if (prevFacultyBtn) {
+          prevFacultyBtn.addEventListener('click', () => facultyList.scrollBy({ left: -300, behavior: 'smooth' }));
+        }
+        if (nextFacultyBtn) {
+          nextFacultyBtn.addEventListener('click', () => facultyList.scrollBy({ left: 300, behavior: 'smooth' }));
+        }
+      }
+
+      // 4. Responsive Navigation Toggle
+      const menuBtn = document.getElementById('menuToggle');
+      const navList = document.getElementById('navList');
+      if (menuBtn && navList) { // Check if elements exist
+        menuBtn.addEventListener('click', () => {
+          navList.classList.toggle('show');
+        });
+      }
+
+      // 5. Scroll-triggered fade+slide animation
+      const animatedElements = document.querySelectorAll('.animate-fade-slide');
+      if (animatedElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
           });
-// Responsive Navigation Toggle
-document.addEventListener('DOMContentLoaded', () => {
-  const menuBtn = document.getElementById('menuToggle');
-  const navList = document.getElementById('navList');
+        }, { threshold: 0.3 });
 
-  menuBtn.addEventListener('click', () => {
-    navList.classList.toggle('show');
-  });
-});
-  // Scroll-triggered fade+slide animation
-document.addEventListener('DOMContentLoaded', () => {
-  const animatedElements = document.querySelectorAll('.animate-fade-slide');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        animatedElements.forEach(el => observer.observe(el));
       }
     });
-  }, { threshold: 0.3 });
-
-  animatedElements.forEach(el => observer.observe(el));
-});
-    
-document.addEventListener('DOMContentLoaded', function() {
-  const images = document.querySelectorAll('.hero-img');
-  let current = 0;
-  const interval = 6000; // 6 seconds per image
-
-  function showImage(index) {
-    images.forEach((img, i) => {
-      img.classList.toggle('active', i === index);
-    });
-  }
-
-  setInterval(() => {
-    current = (current + 1) % images.length;
-    showImage(current);
-  }, interval);
-
-  showImage(current); // show first image initially
-});
-
-  </script>
+</script>
 </body>
 </html>

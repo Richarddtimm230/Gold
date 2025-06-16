@@ -511,6 +511,7 @@
           if (res.ok && data?.token) {
             // Store JWT token
             localStorage.setItem('token', data.token);
+            localStorage.setItem('superadmin_token', data.token);
             localStorage.setItem('student_token', data.token); // Add this line
 
 

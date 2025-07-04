@@ -259,28 +259,34 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/results/check?regNo=...&scratchCard=...&class=...&session=...&term=...
+// Accepts regNo or student_id in regNo field
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
-
-    // Validate required fields
     if (!regNo || !scratchCard || !className || !session || !term)
       return res.status(400).json({ error: 'Missing required parameters.' });
 
-    // 1. Find Student by regNo
-    const studentSnap = await studentCollection().where('regNo', '==', regNo).limit(1).get();
-    if (studentSnap.empty) return res.status(404).json({ error: 'Student not found.' });
+    // Find student by regNo or student_id (case-insensitive)
+    let studentSnap = await studentCollection().where('regNo', '==', regNo).limit(1).get();
+    if (studentSnap.empty) {
+      studentSnap = await studentCollection().where('student_id', '==', regNo).limit(1).get();
+    }
+    if (studentSnap.empty) {
+      return res.status(404).json({ error: 'Student not found.' });
+    }
     const studentDoc = studentSnap.docs[0];
     const student = studentDoc.data();
 
-    // 2. Check scratchCard: Use student's scratchCard if set, else default to ABCD
+    // Scratch card logic: use student's scratchCard if set, else default to ABCD
     const defaultScratch = 'ABCD';
-    const studentScratch = student.scratchCard && student.scratchCard.trim().length > 0 ? student.scratchCard.trim().toUpperCase() : defaultScratch;
+    const studentScratch = student.scratchCard && student.scratchCard.trim().length > 0
+      ? student.scratchCard.trim().toUpperCase()
+      : defaultScratch;
     if (scratchCard.trim().toUpperCase() !== studentScratch) {
       return res.status(401).json({ error: 'Invalid scratch card' });
     }
 
-    // 3. Lookup class, session, term by name to get IDs
+    // Lookup class, session, term by name to get IDs
     const classSnap = await classCollection().where('name', '==', className).limit(1).get();
     if (classSnap.empty) return res.status(404).json({ error: 'Class not found.' });
     const classId = classSnap.docs[0].id;
@@ -293,7 +299,7 @@ router.get('/check', async (req, res) => {
     if (termSnap.empty) return res.status(404).json({ error: 'Term not found.' });
     const termId = termSnap.docs[0].id;
 
-    // 4. Query results for the IDs
+    // Query results for the IDs
     let query = resultCollection()
       .where('student', '==', studentDoc.id)
       .where('class', '==', classId)
@@ -302,7 +308,7 @@ router.get('/check', async (req, res) => {
 
     const snap = await query.get();
 
-    // 5. Prepare results for table
+    // Prepare results for table
     const results = [];
     for (const doc of snap.docs) {
       const r = doc.data();

@@ -263,6 +263,7 @@ router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
 
+    // Validate required fields
     if (!regNo || !scratchCard || !className || !session || !term)
       return res.status(400).json({ error: 'Missing required parameters.' });
 
@@ -272,8 +273,12 @@ router.get('/check', async (req, res) => {
     const studentDoc = studentSnap.docs[0];
     const student = studentDoc.data();
 
-    // 2. (Optional) Check scratchCard validity here
-    if (student.scratchCard !== scratchCard) return res.status(401).json({ error: 'Invalid scratch card' });
+    // 2. Check scratchCard: Use student's scratchCard if set, else default to ABCD
+    const defaultScratch = 'ABCD';
+    const studentScratch = student.scratchCard && student.scratchCard.trim().length > 0 ? student.scratchCard.trim().toUpperCase() : defaultScratch;
+    if (scratchCard.trim().toUpperCase() !== studentScratch) {
+      return res.status(401).json({ error: 'Invalid scratch card' });
+    }
 
     // 3. Lookup class, session, term by name to get IDs
     const classSnap = await classCollection().where('name', '==', className).limit(1).get();
@@ -288,7 +293,7 @@ router.get('/check', async (req, res) => {
     if (termSnap.empty) return res.status(404).json({ error: 'Term not found.' });
     const termId = termSnap.docs[0].id;
 
-    // 4. Find results for the student for the specified class/session/term
+    // 4. Query results for the IDs
     let query = resultCollection()
       .where('student', '==', studentDoc.id)
       .where('class', '==', classId)
@@ -327,4 +332,5 @@ router.get('/check', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 module.exports = router;

@@ -696,8 +696,10 @@
       <div class="bottom-nav-label">Me</div>
     </button>
   </nav>
-</div>
-<script>
+</div><script>
+  // Use your backend URL
+  const API_BASE_URL = "https://goldlincschools.onrender.com";
+
   // Responsive: participant panel only on wide screens
   function toggleParticipantPanel() {
     const panel = document.getElementById('participantPanel');
@@ -745,7 +747,7 @@
     let data = defaultData;
     if (token) {
       try {
-        const res = await fetch('/api/students/me', {
+        const res = await fetch(API_BASE_URL + '/api/students/me', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         if (res.ok) data = await res.json();

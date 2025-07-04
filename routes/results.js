@@ -258,4 +258,65 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// GET /api/results/check?regNo=...&scratchCard=...&class=...&session=...&term=...
+router.get('/check', async (req, res) => {
+  try {
+    const { regNo, scratchCard, class: className, session, term } = req.query;
+
+    // Validate required fields
+    if (!regNo || !scratchCard || !className || !session || !term)
+      return res.status(400).json({ error: 'Missing required parameters.' });
+
+    // 1. Find Student by regNo
+    const studentSnap = await studentCollection().where('regNo', '==', regNo).limit(1).get();
+    if (studentSnap.empty) return res.status(404).json({ error: 'Student not found.' });
+    const studentDoc = studentSnap.docs[0];
+    const student = studentDoc.data();
+
+    // 2. (Optional) Check scratchCard validity here (implement your own logic)
+    // For demonstration, let's assume you store scratchCard in student doc or a separate collection.
+    if (student.scratchCard !== scratchCard) return res.status(401).json({ error: 'Invalid scratch card' });
+
+    // 3. Find results for the student for the specified class, session, term
+    let query = resultCollection()
+      .where('student', '==', studentDoc.id)
+      .where('class', '==', className)
+      .where('session', '==', session)
+      .where('term', '==', term);
+
+    const snap = await query.get();
+
+    // 4. Prepare results for table
+    const results = [];
+    for (const doc of snap.docs) {
+      const r = doc.data();
+      // Populate subject name if needed
+      let subjectName = '';
+      if (r.subject) {
+        try {
+          const subj = await db.collection('subjects').doc(r.subject).get();
+          if (subj.exists) subjectName = subj.data().name;
+        } catch {}
+      }
+      results.push({
+        subject: subjectName || r.subject_name || '',
+        ca1_score: r.ca1_score || '',
+        ca2_score: r.ca2_score || '',
+        midterm_score: r.midterm_score || '',
+        exam_score: r.exam_score || '',
+        total: (['ca1_score','ca2_score','midterm_score','exam_score'].map(k=>parseFloat(r[k]||0)).reduce((a,b)=>a+b,0)) || r.score || '',
+        grade: r.grade || '',
+        remark: r.remarks || ''
+      });
+    }
+
+    if (!results.length) return res.status(404).json({ error: 'No result found.' });
+
+    res.json({ results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;

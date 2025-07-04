@@ -498,5 +498,57 @@ router.post('/:regNo/fees', adminAuth, async (req, res) => {
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
+// Add or update skills & reports for a student (admin only)
+router.post('/:regNo/skills-report', adminAuth, async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const { session, term, skills, attendance, comment } = req.body;
+    if (!session || !term || !skills) {
+      return res.status(400).json({ error: 'session, term, and skills are required.' });
+    }
 
+    // Find student doc by regNo
+    const snap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docId = snap.docs[0].id;
+    const docData = snap.docs[0].data();
+
+    // Skills record format
+    const reportEntry = {
+      session,
+      term,
+      skills,      // { affective: { ... }, psychomotor: { ... } }
+      attendance,  // { days_present, days_absent }
+      comment,     // Principal's comment
+      updatedAt: new Date()
+    };
+
+    // Store in docData.skillsReports (array)
+    let skillsReports = docData.skillsReports || [];
+    // If exists for session+term, replace; else, push
+    const idx = skillsReports.findIndex(r => r.session === session && r.term === term);
+    if (idx >= 0) skillsReports[idx] = reportEntry;
+    else skillsReports.push(reportEntry);
+
+    await studentsCollection().doc(docId).update({ skillsReports, updatedAt: new Date() });
+
+    res.json({ message: 'Skills report saved!', skillsReports });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
+// Get all skills & reports for a student (admin or student)
+router.get('/:regNo/skills-report', adminAuth, async (req, res) => {
+  try {
+    const regNo = req.params.regNo;
+    const snap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+
+    const docData = snap.docs[0].data();
+    res.json({ skillsReports: docData.skillsReports || [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
 module.exports = router;

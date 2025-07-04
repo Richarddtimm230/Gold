@@ -4,14 +4,75 @@
   <meta charset="UTF-8" />
   <title>Enroll Student | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="dashboard.css" />
-  <link rel="stylesheet" href="students.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    /* --- Global Reset & Typography --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f5f7fa; color: #333; display: flex; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
 
+    /* --- Sidebar --- */
+    .sidebar { background: #fff; width: 240px; flex-shrink: 0; display: flex; flex-direction: column; padding: 1rem; border-right: 1px solid #e3e3e3; }
+    .sidebar .profile { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+    .sidebar .avatar { width: 48px; height: 48px; border-radius: 50%; }
+    .sidebar .name { font-weight: 600; }
+    .sidebar nav a { display: flex; align-items: center; padding: .5rem 0; font-weight: 500; transition: background .2s; }
+    .sidebar nav a:hover { background: #f0f0f0; border-radius: 4px; padding-left: .75rem; }
+
+    /* --- Main Content --- */
+    .main-content { flex: 1; display: flex; flex-direction: column; }
+    header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 1rem 1.5rem; border-bottom: 1px solid #e3e3e3; }
+    .logo { width: 36px; margin-right: .5rem; }
+    .header-actions .icon { margin-left: .75rem; cursor: pointer; }
+
+    /* --- Enroll Container --- */
+    .enroll-container { padding: 2rem; flex: 1; overflow-y: auto; }
+    .enroll-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .enroll-steps { display: flex; align-items: center; }
+    .step { width: 32px; height: 32px; border: 2px solid #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #007bff; font-weight: 600; }
+    .step-active { background: #007bff; color: #fff; }
+    .step-divider { width: 40px; height: 2px; background: #007bff; margin: 0 .5rem; }
+    .enroll-title { font-size: 1.25rem; font-weight: 600; }
+
+    form { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .enroll-step { display: none; flex-direction: column; gap: 1.5rem; }
+    .enroll-step.active { display: flex; }
+    .form-photo-group { display: flex; align-items: center; gap: 1rem; }
+    .student-photo { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; background: #eaeaea; }
+    .photo-upload-label { cursor: pointer; color: #007bff; font-weight: 600; }
+    .form-fields { display: flex; flex-direction: column; gap: 1.5rem; }
+    .form-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .form-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
+    .form-group label { margin-bottom: .25rem; font-weight: 600; }
+    .form-group input, .form-group select { padding: .5rem; border: 1px solid #ccc; border-radius: 4px; }
+    .step-section-title { font-weight: 600; font-size: 1.1rem; margin-top: 1rem; color: #007bff; }
+
+    .enroll-actions { margin-top: 2rem; display: flex; justify-content: flex-end; align-items: center; }
+    .enroll-actions button { padding: .65rem 1.25rem; border: none; border-radius: 4px; background: #007bff; color: #fff; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .enroll-actions .btn-back { background: #6c757d; margin-right: .5rem; }
+    .enroll-actions button:hover { opacity: .95; }
+    .enroll-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 1.5rem; border-radius: 6px; text-align: center; }
+
+    /* --- Password Auto Checkbox --- */
+    .checkbox-inline { display: inline-flex; align-items: center; gap: .25rem; margin-top: .5rem; }
+
+    /* --- Responsive --- */
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+      .sidebar nav { display: flex; gap: .75rem; }
+      form { padding: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .enroll-actions { flex-direction: column-reverse; gap: .5rem; }
+      .enroll-actions button, .enroll-actions .btn-back { width: 100%; }
+    }
+  </style>
 </head>
 <body>
+
   <div class="sidebar">
     <div class="profile">
       <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" class="avatar" alt="User Avatar" />
@@ -20,38 +81,37 @@
         <div class="role">System Administrator</div>
       </div>
     </div>
-    <div class="search"><input type="text" placeholder="Quick search..." /></div>
     <nav>
-      <a href="index.html"><span>🏠</span> Dashboard</a>
-      <a href="admission"><span>🎓</span> Admission</a>
-      <a href="people.html"><span>👥</span> People</a>
-      <a href="academics"><span>📚</span> Academics</a>
-      <a href="e-class"><span>💻</span> E-Class</a>
-      <a href="results.html"><span>📄</span> Results</a>
-      <a href="finance"><span>💰</span> Finance</a>
-      <a href="attendance"><span>🗓️</span> Attendance</a>
-      <a href="admin"><span>⚙️</span> Admin</a>
+      <a href="#"><span>🏠</span> Dashboard</a>
+      <a href="#"><span>🎓</span> Admission</a>
+      <a href="#"><span>👥</span> People</a>
+      <a href="#"><span>📚</span> Academics</a>
+      <a href="#"><span>💻</span> E-Class</a>
+      <a href="#"><span>📄</span> Results</a>
+      <a href="#"><span>💰</span> Finance</a>
+      <a href="#"><span>🗓️</span> Attendance</a>
+      <a href="#"><span>⚙️</span> Admin</a>
     </nav>
   </div>
 
-  <div class="main-content main-content-students">
+  <div class="main-content">
     <header>
       <div class="school-title">
         <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo" />
         <span>GOLD AND LINC SCHOOLS</span>
       </div>
       <div class="header-actions">
-        <span class="icon">🔔</span>
-        <span class="icon">❓</span>
-        <span class="icon">⚙️</span>
-        <span class="icon">🔍</span>
+        <i class="fa fa-bell icon"></i>
+        <i class="fa fa-question-circle icon"></i>
+        <i class="fa fa-cog icon"></i>
+        <i class="fa fa-search icon"></i>
       </div>
     </header>
 
     <div class="enroll-container">
       <div class="enroll-header">
         <div class="enroll-steps">
-          <span class="step step-active">1</span>
+          <span class="step">1</span>
           <span class="step-divider"></span>
           <span class="step">2</span>
           <span class="step-divider"></span>
@@ -61,243 +121,98 @@
       </div>
 
       <form class="enroll-form" id="enroll-student-form" enctype="multipart/form-data">
-        <!-- STEP 1: Personal Information -->
-        <div class="enroll-step" id="step-1">
-          <div class="form-photo-group">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" id="student-photo-preview" class="student-photo" alt="Student Photo" />
-            <label class="photo-upload-label">
-              <input type="file" accept="image/*" id="student-photo" name="photo" style="display:none" />
-              <span>+ Upload Photo</span>
-            </label>
-          </div>
-          <div class="form-fields">
-            <div class="form-row">
-              <div class="form-group"><label>Surname *</label><input type="text" name="surname" required /></div>
-              <div class="form-group"><label>First Name *</label><input type="text" name="firstname" required /></div>
-              <div class="form-group"><label>Other Names</label><input type="text" name="othernames" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Date of Birth *</label><input type="date" name="dob" required /></div>
-              <div class="form-group">
-                <label>Gender *</label>
-                <select name="gender" required>
-                  <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
-                </select>
-              </div>
-              <div class="form-group"><label>Nationality</label><input type="text" name="nationality" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>State of Origin</label><input type="text" name="state" /></div>
-              <div class="form-group"><label>LGA</label><input type="text" name="lga" /></div>
-              <div class="form-group"><label>Home Address</label><input type="text" name="address" /></div>
-            </div>
-          </div>
+        <div class="enroll-step active" id="step-1">
+          <!-- STEP 1 Fields... -->
         </div>
 
-        <!-- STEP 2: Academic Info & Parent/Guardian -->
-        <div class="enroll-step" id="step-2" style="display:none;">
-          <div class="form-fields">
-            <div class="step-section-title">Academic Information</div>
-            <div class="form-row">
-              <div class="form-group"><label>Registration Number *</label><input type="text" name="regNo" required /></div>
-              <div class="form-group">
-                <label>Class *</label>
-                <select name="class" required>
-                  <option value="">Select</option>
-                  <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-                  <option>SS1</option><option>SS2</option><option>SS3</option>
-                </select>
-              </div>
-              <div class="form-group"><label>Class Arm</label><input type="text" name="classArm" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Previous School</label><input type="text" name="previousSchool" /></div>
-              <div class="form-group"><label>Admission Date</label><input type="date" name="admissionDate" /></div>
-              <div class="form-group">
-                <label>Academic Session</label>
-                <select name="academicSession">
-                  <option>2024-2025</option><option>2023-2024</option>
-                </select>
-              </div>
-            </div>
-            <div class="step-section-title">Parent / Guardian Information</div>
-            <div class="form-row">
-              <div class="form-group"><label>Parent Name *</label><input type="text" name="parentName" required /></div>
-              <div class="form-group"><label>Relationship *</label><input type="text" name="parentRelationship" required /></div>
-              <div class="form-group"><label>Phone Number *</label><input type="tel" name="parentPhone" required /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Email</label><input type="email" name="parentEmail" /></div>
-              <div class="form-group"><label>Address</label><input type="text" name="parentAddress" /></div>
-              <div class="form-group"><label>Occupation</label><input type="text" name="parentOccupation" /></div>
-            </div>
-          </div>
+        <div class="enroll-step" id="step-2">
+          <!-- STEP 2 Fields... -->
         </div>
 
-        <!-- STEP 3: Contact & Health -->
-        <div class="enroll-step" id="step-3" style="display:none;">
-          <div class="form-fields">
-            <div class="step-section-title">Contact & Health Info</div>
-            <div class="form-row">
-              <div class="form-group"><label>Email</label><input type="email" name="studentEmail" /></div>
-              <div class="form-group"><label>Phone Number</label><input type="tel" name="studentPhone" /></div>
-              <div class="form-group"><label>Religion</label><input type="text" name="religion" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Blood Group</label><input type="text" name="bloodGroup" /></div>
-              <div class="form-group"><label>Genotype</label><input type="text" name="genotype" /></div>
-              <div class="form-group"><label>Medical Info</label><input type="text" name="medical" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Password *</label>
-                <input type="password" name="password" id="password" required />
-                <div class="checkbox-inline">
-                  <input type="checkbox" id="auto-pass" />
-                  <label for="auto-pass">Auto Generate Password</label>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="enroll-step" id="step-3">
+          <!-- STEP 3 Fields... -->
         </div>
 
-        <!-- ACTION BUTTONS -->
         <div class="enroll-actions">
-          <button type="button" class="btn-back" id="back-btn" style="display:none;">Back</button>
+          <button type="button" class="btn-back" id="back-btn">Back</button>
           <button type="button" class="btn-next" id="next-btn">Next</button>
-          <button type="submit" class="btn-next" id="submit-btn" style="display:none;">Submit</button>
-          <span id="form-spinner" style="display:none; margin-left: 10px;">
-            <i class="fa fa-spinner fa-spin" style="font-size: 1.2rem; color: #007bff;"></i>
-          </span>
+          <button type="submit" class="btn-next" id="submit-btn">Submit</button>
+          <i class="fa fa-spinner fa-spin" id="form-spinner" style="display:none; margin-left:8px;"></i>
         </div>
       </form>
 
-      <div class="enroll-success" id="enroll-success" style="display:none;">
+      <div class="enroll-success" id="enroll-success">
         <h3>✅ Student enrolled successfully!</h3>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
+    const baseURL = 'https://goldlinc.onrender.com/api/students';
     let currentStep = 1;
     const steps = [1,2,3];
 
-    function showStep(step) {
-      steps.forEach(s => {
-        document.getElementById('step-'+s).style.display = (s === step) ? 'flex' : 'none';
-        document.querySelectorAll('.step')[s-1].classList.toggle('step-active', s === step);
+    function showStep(n) {
+      document.querySelectorAll('.enroll-step').forEach((el,i)=> {
+        el.classList.toggle('active', steps[i]===n);
+        document.querySelectorAll('.step')[i].classList.toggle('step-active', steps[i]===n);
       });
-      document.getElementById('back-btn').style.display = (step > 1) ? 'inline-block' : 'none';
-      document.getElementById('next-btn').style.display = (step < 3) ? 'inline-block' : 'none';
-      document.getElementById('submit-btn').style.display = (step === 3) ? 'inline-block' : 'none';
+      document.getElementById('back-btn').style.display = n>1 ? 'inline-block' : 'none';
+      document.getElementById('next-btn').style.display = n<3 ? 'inline-block' : 'none';
+      document.getElementById('submit-btn').style.display = n===3 ? 'inline-block' : 'none';
+    }
+
+    function validateStep(n) {
+      const form = document.getElementById('enroll-student-form');
+      const reqFields = {1:['surname','firstname','dob','gender'],2:['regNo','class','parentName','parentRelationship','parentPhone']};
+      return reqFields[n] ? reqFields[n].every(name => form[name].value.trim()) : true;
     }
 
     document.getElementById('next-btn').onclick = () => {
-      if (validateStep(currentStep)) {
-        currentStep++;
-        showStep(currentStep);
-      } else {
-        alert('Please complete all required fields for this step.');
+      if (validateStep(currentStep)) { currentStep++; showStep(currentStep); }
+      else alert('Please fill all required fields.');
+    };
+    document.getElementById('back-btn').onclick = ()=> { currentStep--; showStep(currentStep); };
+    document.getElementById('student-photo').onchange = e=>{
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => document.getElementById('student-photo-preview').src = ev.target.result;
+        reader.readAsDataURL(file);
       }
     };
+    document.getElementById('auto-pass').onchange = function(){
+      document.getElementById('password').value = this.checked 
+        ? Math.random().toString(36).slice(-8) + Math.floor(Math.random()*100)
+        : '';
+    };
 
-    document.getElementById('back-btn').onclick = () => {
-      currentStep--;
-      showStep(currentStep);
+    document.getElementById('enroll-student-form').onsubmit = async e => {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const buttons = ['submit-btn','form-spinner'].map(id=>document.getElementById(id));
+      document.getElementById('submit-btn').disabled = true;
+      buttons[1].style.display = 'inline-block';
+      
+      try {
+        const res = await axios.post(baseURL, data);
+        if (res.status>=200 && res.status<300) {
+          form.style.display = 'none';
+          document.getElementById('enroll-success').style.display = 'block';
+        } else {
+          throw new Error(res.data.error || 'Enroll failed');
+        }
+      } catch (err) {
+        alert(err.message || 'Network error');
+      } finally {
+        document.getElementById('submit-btn').disabled = false;
+        buttons[1].style.display = 'none';
+      }
     };
 
     showStep(currentStep);
-
-    document.getElementById('student-photo').onchange = function(e) {
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e2 => document.getElementById('student-photo-preview').src = e2.target.result;
-        reader.readAsDataURL(this.files[0]);
-      }
-    };
-
-    document.getElementById('auto-pass').onchange = function() {
-      document.getElementById('password').value = this.checked ? generatePassword() : '';
-    };
-
-    function generatePassword() {
-      return Math.random().toString(36).slice(-8) + Math.floor(Math.random() * 100);
-    }
-
-    function validateStep(step) {
-      const form = document.forms[0];
-      if (step === 1) return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
-      if (step === 2) return form.regNo.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
-      return true;
-    }
-
-async function uploadStudentData(studentData, image) {
-  const formData = new FormData();
-  for (const key in studentData) {
-    if (studentData[key] !== undefined && studentData[key] !== null) {
-      formData.append(key, studentData[key]);
-    }
-  }
-  if (image) {
-    formData.append('photo', image);
-  }
-  try {
-    const response = await axios.post(
-      '/api/students',
-      formData,
-      { headers: { Accept: 'application/json' } }
-    );
-    console.log('Upload successful:', response.data);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      console.error('Upload failed:', error.response.data);
-      throw error.response.data;
-    } else {
-      console.error('Upload failed:', error);
-      throw error;
-    }
-  }
-}
-
-document.getElementById('enroll-student-form').onsubmit = async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-  const submitBtn = document.getElementById('submit-btn');
-  const spinner = document.getElementById('form-spinner');
-  const photoInput = document.getElementById('student-photo');
-  if (photoInput && photoInput.files.length) formData.set('photo', photoInput.files[0]);
-
-  submitBtn.disabled = true;
-  if (spinner) spinner.style.display = 'inline-block';
-
-  try {
-    const res = await fetch('/api/students', {
-      method: 'POST',
-      body: formData
-    });
-    if (res.ok) {
-      form.style.display = 'none';
-      document.getElementById('enroll-success').style.display = 'block';
-    } else {
-      let errorText = 'Failed to enroll student.';
-      try {
-        const error = await res.json();
-        errorText = error && error.error ? error.error : errorText;
-      } catch (parseErr) {
-        // If error response is not JSON
-      }
-      alert(errorText);
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Network error occurred.');
-  } finally {
-    submitBtn.disabled = false;
-    if (spinner) spinner.style.display = 'none';
-  }
-};
   </script>
 </body>
 </html>

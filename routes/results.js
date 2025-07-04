@@ -37,7 +37,7 @@ async function findOrCreateStudent(row, classId) {
 // POST /api/results/upload - Bulk/manual upload of student results
 router.post('/upload', async (req, res) => {
   try {
-    const { session, term, class: className, subject, results } = req.body;
+    const { session, term, class: className, subject, resultType, results } = req.body;
     // Find or create session, term, class, subject
     const sessionObj = await findOrCreateByName(sessionCollection, session);
     const termObj = await findOrCreateByName(termCollection, term);
@@ -48,20 +48,31 @@ router.post('/upload', async (req, res) => {
     for (const row of results) {
       let student = await findOrCreateStudent(row, classObj.id);
 
-      // Check for duplicate result (optional: skip or update if exists)
-      // For now, just insert
-
-      const newResult = {
+      // Build the result object by type
+      let newResult = {
         student: student.id,
         session: sessionObj.id,
         term: termObj.id,
         class: classObj.id,
         subject: subjectObj.id,
-        score: row.score,
         grade: row.grade,
         remarks: row.remarks,
         status: row.status || 'Draft'
       };
+
+      // Store resultType-specific score field
+      if (resultType === "exam") {
+        newResult.exam_score = row.score;
+      } else if (resultType === "ca1") {
+        newResult.ca1_score = row.score;
+      } else if (resultType === "ca2") {
+        newResult.ca2_score = row.score;
+      } else if (resultType === "midterm") {
+        newResult.midterm_score = row.score;
+      } else {
+        newResult.score = row.score;
+      }
+
       const resultRef = await resultCollection().add(newResult);
       insertedResults.push({ id: resultRef.id, ...newResult });
     }
@@ -76,7 +87,6 @@ router.post('/upload', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     // Optional query params: student_id, class, session, term, subject
-    const filter = {};
     let studentId, classId, sessionId, termId, subjectId;
 
     if (req.query.student_id) {
@@ -210,8 +220,6 @@ router.patch('/:id', async (req, res) => {
     await docRef.update(update);
     const updated = (await docRef.get()).data();
     updated.id = req.params.id;
-
-    // Optionally populate references
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

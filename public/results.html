@@ -7,487 +7,488 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ======= PLACE YOUR CSS HERE OR LINK TO YOUR CSS FILE ======= */
         :root {
-            --primary: #007bff;
-            --accent: #20c997;
-            --danger: #dc3545;
-            --sidebar-bg: #fff;
-            --sidebar-width: 260px;
-            --sidebar-width-mobile: 90vw;
-            --header-height: 64px;
-            --border-radius: 13px;
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-            --neutral: #f8f9fa;
-            --table-head: #f2f6fc;
-            --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
-            --font-main: 'Inter', Arial, sans-serif;
-            --mobile-padding: 4vw;
-            --main-content-min-width: 0;
-        }
-        html, body {
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-main);
-            background: var(--neutral);
-            color: #222;
-            min-height: 100%;
-            max-width: 100vw;
-            box-sizing: border-box;
-        }
-        body { min-width: 0; }
-        #pageSpinnerOverlay {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.96);
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            transition: opacity 0.4s;
-        }
-        .spinner {
-            width: 46px;
-            height: 46px;
-            border: 5px solid #e3e6ea;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0; left: 0;
-            width: var(--sidebar-width);
-            min-width: 180px;
-            max-width: 320px;
-            height: 100vh;
-            background: var(--sidebar-bg);
-            box-shadow: var(--shadow);
-            z-index: 1050;
-            padding: 0 0 2rem 0;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.25s cubic-bezier(.37,1.01,.47,1.02);
-            overflow: hidden;
-        }
-        .profile {
-            display: flex; align-items: center; gap: 1rem;
-            padding: 1.7rem 1.2rem 1.1rem 1.2rem;
-            border-bottom: 1px solid #ececec;
-            flex-shrink: 0;
-            background: #f7faff;
-        }
-        .avatar {
-            width: 52px; height: 52px; border-radius: 50%; border: 2px solid #e3e6ea; object-fit: cover;
-        }
-        .name { font-weight: 700; font-size: 1.18em; letter-spacing: 0.5px; }
-        .role { font-size: 0.98em; color: #888; margin-top: 2px; }
-        .search { padding: 0.7em 1.2em; flex-shrink: 0; background: #fff; }
-        .search input {
-            width: 100%; padding: 0.6em 0.9em; border-radius: 8px; border: 1px solid #ddd; font-size: 1em; background: #f7faff;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .search input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px #007bff22;
-            outline: none;
-        }
-        .sidebar nav {
-            flex: 1 1 0%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.3em;
-            margin-top: 1.5em;
-            min-height: 0;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-        }
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            gap: 0.7em;
-            padding: 0.85em 1.3em;
-            text-decoration: none;
-            color: #222;
-            font-weight: 500;
-            border-left: 4px solid transparent;
-            border-radius: 0 6px 6px 0;
-            background: none;
-            transition: background 0.16s, border-color 0.16s, color 0.16s;
-            font-size: 1.06em;
-        }
-        .sidebar a span.icon {
-            display: inline-block;
-            width: 1.7em;
-            text-align: center;
-            font-size: 1.13em;
-        }
-        .sidebar a.active, .sidebar a:hover {
-            background: #f1f6fd;
-            border-left: 4px solid var(--primary);
-            color: var(--primary);
-        }
-        /* Sidebar toggle for mobile */
-        .sidebar-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: var(--primary);
-            margin-right: 1.2rem;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-            height: var(--header-height);
-        }
-        .sidebar-overlay {
-            display: none;
-        }
-        .sidebar-overlay.active {
-            display: block;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.25);
-            z-index: 1040;
-        }
-        @media (max-width: 950px) {
-            .main-content { margin-left: 0 !important; }
-            .sidebar {
-                position: fixed;
-                width: var(--sidebar-width-mobile);
-                min-width: 0;
-                max-width: 98vw;
-                height: 100vh;
-                z-index: 1050;
-                overflow-y: auto;
-            }
-            .results-table-container { min-width: 0; }
-        }
-        @media (max-width: 750px) {
-            .sidebar {
-                width: var(--sidebar-width-mobile);
-                min-width: 0;
-                max-width: 97vw;
-                height: 100vh;
-                max-height: 100vh;
-                transform: translateX(-105%);
-                box-shadow: 2px 0 18px rgba(0,0,0,0.13);
-                position: fixed;
-                z-index: 1050;
-                overflow: hidden;
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .sidebar-toggle {
-                display: inline-flex;
-            }
-            .sidebar-overlay.active {
-                display: block;
-            }
-            body.sidebar-open {
-                overflow: hidden;
-            }
-            .main-content { margin-left: 0; padding: var(--mobile-padding); }
-            .results-filters {
-                grid-template-columns: 1fr;
-                gap: 0.7em 0.1em;
-                padding: 1em 0.7em 0.5em 0.7em;
-            }
-            .results-actions { gap: 0.7em; padding: 0.8em 0.7em 0.6em 0.7em;}
-            .modal-content { padding: 16px 6vw 28px 6vw; }
-        }
-        .sidebar {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        /* Main content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            padding: 0 2vw 2vw 2vw;
-            box-sizing: border-box;
-            max-width: 100vw;
-            overflow-x: hidden;
-            transition: padding 0.2s;
-        }
-        header {
-            display: flex;
-            align-items: center;
-            height: var(--header-height);
-            gap: 1em;
-            padding: 2vw 0 1vw 0;
-            background: none;
-        }
-        .school-title {
-            display: flex;
-            align-items: center;
-            gap: 0.65em;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 1px;
-        }
-        .logo { width: 32px; height: 32px; border-radius: 7px; }
-        .header-actions { margin-left: auto; display: flex; align-items: center; gap: 1em; }
-        .header-actions .icon { font-size: 1.25em; cursor: pointer; opacity: 0.88; transition: opacity 0.2s; }
-        .header-actions .icon:hover { opacity: 1; }
-        .page-title {
-            margin: 1.2em 0 1em 0; padding-bottom: 0.2em; border-bottom: 1.5px solid #e7eefa;
-        }
-        .page-title h2 {
-            font-size: 1.15em; font-weight: 700; color: #222; display: flex; align-items: center; gap: 0.6em;
-        }
-        .admin-badge {
-            display: inline-block;
-            background: #e9f1ff;
-            color: #007bff;
-            font-weight: 600;
-            font-size: 0.93em;
-            border-radius: 8px;
-            padding: 0.14em 0.7em 0.16em 0.7em;
-            margin-left: .7em;
-        }
-        .results-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7em;
-            margin: 1.4em 0 1.1em 0;
-            background: #fff;
-            padding: 0.8em 0.7em 0.6em 0.7em;
-            border-radius: 13px;
-            box-shadow: var(--shadow);
-        }
-        .results-actions button {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1em;
-            padding: 9px 16px;
-            cursor: pointer;
-            transition: background 0.17s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.09);
-            margin: 0 1px;
-        }
-        .results-actions button:hover { background: #005ecb; }
-        .results-filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.7em 1em;
-            margin-bottom: 16px;
-            align-items: end;
-            background: #fff;
-            padding: 1em 0.7em 0.5em 0.7em;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-        }
-        .results-filters select, .results-filters input[type="text"] {
-            padding: 7px 8px;
-            border-radius: 6px;
-            border: 1px solid #e3e8ee;
-            background: #fafcff;
-            font-size: 1em;
-            transition: border-color 0.18s;
-        }
-        .results-filters select:focus, .results-filters input[type="text"]:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        .results-filters button {
-            justify-self: end; align-self: end;
-            padding: 8px 16px;
-            border-radius: 7px;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            font-weight: 600;
-            font-size: 1em;
-            transition: background 0.2s;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-        }
-        .results-filters button:hover { background: #005ecb; }
-        /* Table - responsive improvements */
-        .results-table-container {
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: var(--card-shadow);
-            padding: 0;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            width: 100%;
-        }
-        .results-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 800px;
-        }
-        .results-table thead th {
-            background: var(--table-head);
-            color: #22577a;
-            font-weight: 700;
-            padding: 12px 7px;
-            font-size: 1em;
-            border-bottom: 2px solid #cbe5ff;
-            text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-        .results-table tbody td {
-            padding: 9px 7px;
-            border-bottom: 1px solid #e3e8ee;
-            font-size: 0.98em;
-            background: #fff;
-            transition: background 0.16s;
-        }
-        .results-table tr:hover td { background: #f1f9ff; }
-        .action-btn { text-decoration: none; margin: 0 2px; font-size: 1.13em; cursor: pointer; border: none; background: none;}
-        .action-btn.edit { color: #007bff; }
-        .action-btn.delete { color: #dc3545; }
-        .action-btn.publish { color: #20c997; }
-        td.status-published { color: #20c997; font-weight: 600; }
-        td.status-draft { color: #888; }
-        td.status-pending { color: #ffc107; }
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2050;
-            left: 0; top: 0;
-            width: 100vw; height: 100vh;
-            overflow: auto;
-            background: rgba(0,0,0,0.27);
-        }
-        .modal-content {
-            background: #fff;
-            border-radius: 16px;
-            margin: 4% auto;
-            padding: 20px 18px 27px 18px;
-            width: 98vw;
-            max-width: 460px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.16);
-            position: relative;
-        }
-        .modal-content h3 { margin: 0 0 18px 0; font-size: 1.15em; }
-        .modal-content label {
-            display: block;
-            margin-bottom: 0.9em;
-            color: #333;
-            font-size: 1em;
-        }
-        .modal-content input[type='number'],
-        .modal-content input[type='text'] {
-            width: 100%;
-            padding: 8px 9px;
-            font-size: 1em;
-            border-radius: 6px;
-            border: 1px solid #e3e8ee;
-            background: #fafcff;
-            margin-top: 5px;
-            box-sizing: border-box;
-            margin-bottom: 4px;
-        }
-        .close {
-            color: #aaa;
-            position: absolute;
-            top: 14px; right: 19px;
-            font-size: 1.45em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .close:hover { color: #007bff; }
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 7px;
-            padding: 8px 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-primary:hover { background: #005ecb; }
-        .btn-danger {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            border-radius: 7px;
-            padding: 8px 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-danger:hover { background: #c82333; }
-        /* Floating buttons */
-        .support-tab, .eclass-fab {
-            position: fixed;
-            right: 1.1em;
-            border-radius: 50px;
-            background: var(--primary);
-            color: #fff;
-            padding: 0.5em 1.1em;
-            font-size: 1em;
-            z-index: 200;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-            border: none;
-            outline: none;
-            transition: background 0.2s;
-        }
-        .support-tab { bottom: 4.1em; }
-        .eclass-fab { bottom: 1.1em; }
-        .support-tab:hover, .eclass-fab:hover { background: #005ecb; }
-        /* Mobile first - Table improvements */
-        @media (max-width: 600px) {
-            .results-table-container {
-                border-radius: 10px;
-                margin-bottom: 16px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-                padding: 0 0.5vw;
-            }
-            .results-table {
-                min-width: 440px;
-                font-size: 0.94em;
-            }
-            .results-table thead th, .results-table tbody td {
-                padding: 8px 6px;
-            }
-            .results-table tbody td {
-                font-size: 0.93em;
-            }
-            .modal-content { padding: 10px 2vw 16px 2vw; max-width: 97vw;}
-            .results-actions button, .results-filters button {
-                padding: 7px 12px;
-                font-size: 0.97em;
-            }
-        }
-        @media (max-width: 470px) {
-            .results-table-container { padding: 0 0.5vw;}
-            .results-table {
-                min-width: 350px;
-            }
-            .results-table thead th, .results-table tbody td {
-                padding: 7px 3.5px;
-            }
-            .results-table thead th { font-size: 0.95em; }
-            .modal-content { padding: 9px 2vw 11px 2vw; }
-        }
-        .mobile-scroll-hint {
-            display: none;
-            font-size: 0.97em;
-            color: #888;
-            text-align: center;
-            margin-bottom: 7px;
-        }
-        @media (max-width: 650px) {
-            .mobile-scroll-hint {
-                display: block;
-            }
-        }
-        ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
-        ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+    --primary: #007bff;
+    --accent: #20c997;
+    --danger: #dc3545;
+    --sidebar-bg: #fff;
+    --sidebar-width: 260px;
+    --sidebar-width-mobile: 90vw;
+    --header-height: 64px;
+    --border-radius: 13px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --neutral: #f8f9fa;
+    --table-head: #f2f6fc;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --font-main: 'Inter', Arial, sans-serif;
+    --mobile-padding: 4vw;
+    --main-content-min-width: 0;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    background: var(--neutral);
+    color: #222;
+    min-height: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+}
+body { min-width: 0; }
+#pageSpinnerOverlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.96);
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    transition: opacity 0.4s;
+}
+.spinner {
+    width: 46px;
+    height: 46px;
+    border: 5px solid #e3e6ea;
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-width);
+    min-width: 180px;
+    max-width: 320px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    box-shadow: var(--shadow);
+    z-index: 1050;
+    padding: 0 0 2rem 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s cubic-bezier(.37,1.01,.47,1.02);
+    overflow: hidden;
+}
+.profile {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.7rem 1.2rem 1.1rem 1.2rem;
+    border-bottom: 1px solid #ececec;
+    flex-shrink: 0;
+    background: #f7faff;
+}
+.avatar {
+    width: 52px; height: 52px; border-radius: 50%; border: 2px solid #e3e6ea; object-fit: cover;
+}
+.name { font-weight: 700; font-size: 1.18em; letter-spacing: 0.5px; }
+.role { font-size: 0.98em; color: #888; margin-top: 2px; }
+.search { padding: 0.7em 1.2em; flex-shrink: 0; background: #fff; }
+.search input {
+    width: 100%; padding: 0.6em 0.9em; border-radius: 8px; border: 1px solid #ddd; font-size: 1em; background: #f7faff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px #007bff22;
+    outline: none;
+}
+.sidebar nav {
+    flex: 1 1 0%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    margin-top: 1.5em;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.85em 1.3em;
+    text-decoration: none;
+    color: #222;
+    font-weight: 500;
+    border-left: 4px solid transparent;
+    border-radius: 0 6px 6px 0;
+    background: none;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+    font-size: 1.06em;
+}
+.sidebar a span.icon {
+    display: inline-block;
+    width: 1.7em;
+    text-align: center;
+    font-size: 1.13em;
+}
+.sidebar a.active, .sidebar a:hover {
+    background: #f1f6fd;
+    border-left: 4px solid var(--primary);
+    color: var(--primary);
+}
+/* Sidebar toggle for mobile */
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--primary);
+    margin-right: 1.2rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    height: var(--header-height);
+}
+.sidebar-overlay {
+    display: none;
+}
+.sidebar-overlay.active {
+    display: block;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 1040;
+}
+@media (max-width: 950px) {
+    .main-content { margin-left: 0 !important; }
+    .sidebar {
+        position: fixed;
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 98vw;
+        height: 100vh;
+        z-index: 1050;
+        overflow-y: auto;
+    }
+    .results-table-container { min-width: 0; }
+}
+@media (max-width: 750px) {
+    .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 97vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        box-shadow: 2px 0 18px rgba(0,0,0,0.13);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .sidebar-toggle {
+        display: inline-flex;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    body.sidebar-open {
+        overflow: hidden;
+    }
+    .main-content { margin-left: 0; padding: var(--mobile-padding); }
+    .results-filters {
+        grid-template-columns: 1fr;
+        gap: 0.7em 0.1em;
+        padding: 1em 0.7em 0.5em 0.7em;
+    }
+    .results-actions { gap: 0.7em; padding: 0.8em 0.7em 0.6em 0.7em;}
+    .modal-content { padding: 16px 6vw 28px 6vw; }
+}
+.sidebar {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+/* Main content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    padding: 0 2vw 2vw 2vw;
+    box-sizing: border-box;
+    max-width: 100vw;
+    overflow-x: hidden;
+    transition: padding 0.2s;
+}
+header {
+    display: flex;
+    align-items: center;
+    height: var(--header-height);
+    gap: 1em;
+    padding: 2vw 0 1vw 0;
+    background: none;
+}
+.school-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+}
+.logo { width: 32px; height: 32px; border-radius: 7px; }
+.header-actions { margin-left: auto; display: flex; align-items: center; gap: 1em; }
+.header-actions .icon { font-size: 1.25em; cursor: pointer; opacity: 0.88; transition: opacity 0.2s; }
+.header-actions .icon:hover { opacity: 1; }
+.page-title {
+    margin: 1.2em 0 1em 0; padding-bottom: 0.2em; border-bottom: 1.5px solid #e7eefa;
+}
+.page-title h2 {
+    font-size: 1.15em; font-weight: 700; color: #222; display: flex; align-items: center; gap: 0.6em;
+}
+.admin-badge {
+    display: inline-block;
+    background: #e9f1ff;
+    color: #007bff;
+    font-weight: 600;
+    font-size: 0.93em;
+    border-radius: 8px;
+    padding: 0.14em 0.7em 0.16em 0.7em;
+    margin-left: .7em;
+}
+.results-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7em;
+    margin: 1.4em 0 1.1em 0;
+    background: #fff;
+    padding: 0.8em 0.7em 0.6em 0.7em;
+    border-radius: 13px;
+    box-shadow: var(--shadow);
+}
+.results-actions button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1em;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background 0.17s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+    margin: 0 1px;
+}
+.results-actions button:hover { background: #005ecb; }
+.results-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.7em 1em;
+    margin-bottom: 16px;
+    align-items: end;
+    background: #fff;
+    padding: 1em 0.7em 0.5em 0.7em;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+.results-filters select, .results-filters input[type="text"] {
+    padding: 7px 8px;
+    border-radius: 6px;
+    border: 1px solid #e3e8ee;
+    background: #fafcff;
+    font-size: 1em;
+    transition: border-color 0.18s;
+}
+.results-filters select:focus, .results-filters input[type="text"]:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+.results-filters button {
+    justify-self: end; align-self: end;
+    padding: 8px 16px;
+    border-radius: 7px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    font-size: 1em;
+    transition: background 0.2s;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+.results-filters button:hover { background: #005ecb; }
+/* Table - responsive improvements */
+.results-table-container {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    width: 100%;
+}
+.results-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+}
+.results-table thead th {
+    background: var(--table-head);
+    color: #22577a;
+    font-weight: 700;
+    padding: 12px 7px;
+    font-size: 1em;
+    border-bottom: 2px solid #cbe5ff;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.results-table tbody td {
+    padding: 9px 7px;
+    border-bottom: 1px solid #e3e8ee;
+    font-size: 0.98em;
+    background: #fff;
+    transition: background 0.16s;
+}
+.results-table tr:hover td { background: #f1f9ff; }
+.action-btn { text-decoration: none; margin: 0 2px; font-size: 1.13em; cursor: pointer; border: none; background: none;}
+.action-btn.edit { color: #007bff; }
+.action-btn.delete { color: #dc3545; }
+.action-btn.publish { color: #20c997; }
+td.status-published { color: #20c997; font-weight: 600; }
+td.status-draft { color: #888; }
+td.status-pending { color: #ffc107; }
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2050;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    overflow: auto;
+    background: rgba(0,0,0,0.27);
+}
+.modal-content {
+    background: #fff;
+    border-radius: 16px;
+    margin: 4% auto;
+    padding: 20px 18px 27px 18px;
+    width: 98vw;
+    max-width: 460px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    position: relative;
+}
+.modal-content h3 { margin: 0 0 18px 0; font-size: 1.15em; }
+.modal-content label {
+    display: block;
+    margin-bottom: 0.9em;
+    color: #333;
+    font-size: 1em;
+}
+.modal-content input[type='number'],
+.modal-content input[type='text'] {
+    width: 100%;
+    padding: 8px 9px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid #e3e8ee;
+    background: #fafcff;
+    margin-top: 5px;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+}
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 14px; right: 19px;
+    font-size: 1.45em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.close:hover { color: #007bff; }
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-primary:hover { background: #005ecb; }
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-danger:hover { background: #c82333; }
+/* Floating buttons */
+.support-tab, .eclass-fab {
+    position: fixed;
+    right: 1.1em;
+    border-radius: 50px;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5em 1.1em;
+    font-size: 1em;
+    z-index: 200;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+    border: none;
+    outline: none;
+    transition: background 0.2s;
+}
+.support-tab { bottom: 4.1em; }
+.eclass-fab { bottom: 1.1em; }
+.support-tab:hover, .eclass-fab:hover { background: #005ecb; }
+/* Mobile first - Table improvements */
+@media (max-width: 600px) {
+    .results-table-container {
+        border-radius: 10px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 0 0.5vw;
+    }
+    .results-table {
+        min-width: 600px;
+        font-size: 0.94em;
+    }
+    .results-table thead th, .results-table tbody td {
+        padding: 8px 6px;
+    }
+    .results-table tbody td {
+        font-size: 0.93em;
+    }
+    .modal-content { padding: 10px 2vw 16px 2vw; max-width: 97vw;}
+    .results-actions button, .results-filters button {
+        padding: 7px 12px;
+        font-size: 0.97em;
+    }
+}
+@media (max-width: 470px) {
+    .results-table-container { padding: 0 0.5vw;}
+    .results-table {
+        min-width: 350px;
+    }
+    .results-table thead th, .results-table tbody td {
+        padding: 7px 3.5px;
+    }
+    .results-table thead th { font-size: 0.95em; }
+    .modal-content { padding: 9px 2vw 11px 2vw; }
+}
+.mobile-scroll-hint {
+    display: none;
+    font-size: 0.97em;
+    color: #888;
+    text-align: center;
+    margin-bottom: 7px;
+}
+@media (max-width: 650px) {
+    .mobile-scroll-hint {
+        display: block;
+    }
+}
+::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -522,13 +523,11 @@
       <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
       <div class="school-title">
         <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
-   
       </div>
       <div class="header-actions">
         <span class="icon" title="Notifications">🔔</span>
         <span class="icon" title="Help">❓</span>
         <span class="icon" title="Settings">⚙️</span>
-        
       </div>
     </header>
     <div class="page-title">
@@ -582,7 +581,11 @@
             <th>Student Name</th>
             <th>Class</th>
             <th>Subject</th>
-            <th>Score</th>
+            <th>CA1</th>
+            <th>CA2</th>
+            <th>Mid Term</th>
+            <th>Exam</th>
+            <th>Total</th>
             <th>Grade</th>
             <th>Remarks</th>
             <th>Status</th>
@@ -593,6 +596,7 @@
       </table>
     </div>
     <div id="resultsStatus" style="margin:1.2em 0 0.5em 0; color: #007bff; min-height: 22px;"></div>
+    <!-- Statistics Modal -->
     <div id="statisticsModal" class="modal" aria-modal="true" role="dialog">
       <div class="modal-content">
         <span class="close" id="closeStatsModal" tabindex="0" role="button" aria-label="Close">&times;</span>
@@ -608,12 +612,24 @@
         <form id="editResultForm">
           <input type="hidden" name="resultId" id="editResultId">
           <label>
-            Score
-            <input type="number" name="score" id="editScore" required min="0" max="100">
+            CA1
+            <input type="number" name="ca1_score" id="editCA1" min="0" max="20">
+          </label>
+          <label>
+            CA2
+            <input type="number" name="ca2_score" id="editCA2" min="0" max="20">
+          </label>
+          <label>
+            Mid Term
+            <input type="number" name="midterm_score" id="editMidTerm" min="0" max="20">
+          </label>
+          <label>
+            Exam
+            <input type="number" name="exam_score" id="editExam" min="0" max="60">
           </label>
           <label>
             Grade
-            <input type="text" name="grade" id="editGrade" required maxlength="2">
+            <input type="text" name="grade" id="editGrade" maxlength="2">
           </label>
           <label>
             Remarks
@@ -667,6 +683,7 @@
         }
       }, 1200);
     });
+
     // Sidebar mobile toggle logic
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -687,6 +704,19 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeSidebar();
     });
+
+    // Utility for total score calculation
+    function calcTotal(result) {
+      let total = 0;
+      if (!result) return '';
+      if (result.ca1_score) total += parseFloat(result.ca1_score) || 0;
+      if (result.ca2_score) total += parseFloat(result.ca2_score) || 0;
+      if (result.midterm_score) total += parseFloat(result.midterm_score) || 0;
+      if (result.exam_score) total += parseFloat(result.exam_score) || 0;
+      // fallback for legacy
+      if (!result.ca1_score && !result.ca2_score && !result.midterm_score && !result.exam_score && result.score) total = parseFloat(result.score) || '';
+      return total || '';
+    }
 
     // Render and fetch logic
     async function fetchResultsAndRender() {
@@ -709,17 +739,27 @@
       const tbody = document.getElementById('resultsTbody');
       tbody.innerHTML = '';
       results.forEach((result, idx) => {
+        const ca1 = result.ca1_score !== undefined ? result.ca1_score : '';
+        const ca2 = result.ca2_score !== undefined ? result.ca2_score : '';
+        const midterm = result.midterm_score !== undefined ? result.midterm_score : '';
+        const exam = result.exam_score !== undefined ? result.exam_score : '';
+        const total = calcTotal(result);
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><input type="checkbox" class="row-check" data-idx="${idx}" aria-label="Select row"></td>
           <td>${result.student_id || (result.student && result.student.student_id) || ''}</td>
-          <td>${result.student_name || (result.student && result.student.firstname) || ''}</td>
+          <td>${result.student_name || (result.student && (result.student.firstname || result.student.name)) || ''}</td>
           <td>${result.class_name || (result.class && result.class.name) || ''}</td>
           <td>${result.subject_name || (result.subject && result.subject.name) || ''}</td>
-          <td>${result.score}</td>
-          <td>${result.grade}</td>
-          <td>${result.remarks}</td>
-          <td class="status-${(result.status || '').toLowerCase()}">${result.status}</td>
+          <td>${ca1}</td>
+          <td>${ca2}</td>
+          <td>${midterm}</td>
+          <td>${exam}</td>
+          <td>${total}</td>
+          <td>${result.grade || ''}</td>
+          <td>${result.remarks || ''}</td>
+          <td class="status-${(result.status || '').toLowerCase()}">${result.status || ''}</td>
           <td>
             <button class="action-btn edit" title="Edit" data-id="${result.id}" aria-label="Edit result">✏️</button>
             <button class="action-btn delete" title="Delete" data-id="${result.id}" aria-label="Delete result">🗑️</button>
@@ -731,11 +771,9 @@
     }
     document.addEventListener('DOMContentLoaded', function() {
       fetchResultsAndRender();
-      // Select all checkboxes
       document.getElementById('selectAll').addEventListener('change', function(e) {
         document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
       });
-      // Filter button
       document.getElementById('filterBtn').onclick = async function() {
         const classVal = document.getElementById('classSelect').value;
         const subjectVal = document.getElementById('subjectSelect').value;
@@ -748,7 +786,7 @@
         if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
         if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
         if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
-        const url = 'https://gold-1-z03x.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
+        const url = 'https://goldlincschools.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
         try {
           const response = await fetch(url);
           if (!response.ok) throw new Error('Network response was not ok');
@@ -768,7 +806,6 @@
       document.getElementById('publishResultsBtn').onclick = () => window.location.href = "publish-results.html";
       document.getElementById('exportCSVBtn').onclick = () => window.location.href = "export-csv.html";
       document.getElementById('manageTemplatesBtn').onclick = () => window.location.href = "manage-templates.html";
-      // Statistics Modal
       const statsModal = document.getElementById('statisticsModal');
       document.getElementById('viewStatsBtn').onclick = function() {
         statsModal.style.display = 'block';
@@ -787,20 +824,9 @@
     });
 
     // Results actions: Edit, Delete, Publish
-    // Modal helpers
-    function openModal(modalId) {
-      document.getElementById(modalId).style.display = 'block';
-    }
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-
-    // Store current row data for modals
     let _editResultData = null;
     let _deleteResultData = null;
     let _publishResultData = null;
-
-    // Delegated event handlers for action buttons
     document.getElementById('resultsTbody').addEventListener('click', function(e) {
       // Edit
       if (e.target.classList.contains('edit')) {
@@ -809,9 +835,12 @@
         const id = e.target.getAttribute('data-id');
         _editResultData = { id, tr };
         document.getElementById('editResultId').value = id;
-        document.getElementById('editScore').value = tr.children[5].textContent.trim();
-        document.getElementById('editGrade').value = tr.children[6].textContent.trim();
-        document.getElementById('editRemarks').value = tr.children[7].textContent.trim();
+        document.getElementById('editCA1').value = tr.children[5].textContent.trim();
+        document.getElementById('editCA2').value = tr.children[6].textContent.trim();
+        document.getElementById('editMidTerm').value = tr.children[7].textContent.trim();
+        document.getElementById('editExam').value = tr.children[8].textContent.trim();
+        document.getElementById('editGrade').value = tr.children[10].textContent.trim();
+        document.getElementById('editRemarks').value = tr.children[11].textContent.trim();
         document.getElementById('editResultStatus').textContent = '';
         openModal('editResultModal');
       }
@@ -839,28 +868,31 @@
     document.getElementById('editResultForm').onsubmit = async function(e) {
       e.preventDefault();
       const id = document.getElementById('editResultId').value;
-      const score = document.getElementById('editScore').value;
+      const ca1_score = document.getElementById('editCA1').value;
+      const ca2_score = document.getElementById('editCA2').value;
+      const midterm_score = document.getElementById('editMidTerm').value;
+      const exam_score = document.getElementById('editExam').value;
       const grade = document.getElementById('editGrade').value;
       const remarks = document.getElementById('editRemarks').value;
       const statusDiv = document.getElementById('editResultStatus');
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Saving...";
       try {
-  const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({score, grade, remarks})
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('Failed to update: ' + text);
-  }
-  closeModal('editResultModal');
-  await fetchResultsAndRender();
-} catch (err) {
-  statusDiv.style.color = "#dc3545";
-  statusDiv.textContent = "❌ " + err.message;
-}
+        const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {
+          method: 'PATCH',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ca1_score, ca2_score, midterm_score, exam_score, grade, remarks})
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('Failed to update: ' + text);
+        }
+        closeModal('editResultModal');
+        await fetchResultsAndRender();
+      } catch (err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
+      }
     };
 
     // Delete confirm
@@ -869,17 +901,17 @@
       const statusDiv = document.getElementById('deleteResultStatus');
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Deleting...";
-try {
-  const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {method:'DELETE'});
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('Failed to delete: ' + text);
-  }
-  closeModal('deleteResultModal');
-  await fetchResultsAndRender();
-} catch(err) {
-  statusDiv.style.color = "#dc3545";
-  statusDiv.textContent = "❌ " + err.message;
+      try {
+        const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {method:'DELETE'});
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('Failed to delete: ' + text);
+        }
+        closeModal('deleteResultModal');
+        await fetchResultsAndRender();
+      } catch(err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
       }
     };
     document.getElementById('cancelDeleteBtn').onclick = function() {
@@ -893,23 +925,22 @@ try {
       statusDiv.style.color = "#888";
       statusDiv.textContent = "Publishing...";
       try {
-  const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}/publish`, {method:'POST'});
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('Failed to publish: ' + text);
-  }
-  closeModal('publishResultModal');
-  await fetchResultsAndRender();
-} catch(err) {
-  statusDiv.style.color = "#dc3545";
-  statusDiv.textContent = "❌ " + err.message;
+        const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}/publish`, {method:'POST'});
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('Failed to publish: ' + text);
+        }
+        closeModal('publishResultModal');
+        await fetchResultsAndRender();
+      } catch(err) {
+        statusDiv.style.color = "#dc3545";
+        statusDiv.textContent = "❌ " + err.message;
       }
     };
     document.getElementById('cancelPublishBtn').onclick = function() {
       closeModal('publishResultModal');
     };
 
-    // Modal close (add for all modals)
     document.querySelectorAll('.modal .close').forEach(btn=>{
       btn.onclick = function() {
         closeModal(btn.closest('.modal').id);
@@ -918,7 +949,6 @@ try {
 
     // Chart
     function renderStatsChart(results) {
-      // Calculate grade counts
       const gradeCounts = {};
       if (Array.isArray(results)) {
         results.forEach(r => {
@@ -959,6 +989,13 @@ try {
           }
         }
       });
+    }
+    // Modal helpers
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
     }
   </script>
 </body>

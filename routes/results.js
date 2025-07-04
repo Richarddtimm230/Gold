@@ -263,7 +263,6 @@ router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
 
-    // Validate required fields
     if (!regNo || !scratchCard || !className || !session || !term)
       return res.status(400).json({ error: 'Missing required parameters.' });
 
@@ -273,24 +272,35 @@ router.get('/check', async (req, res) => {
     const studentDoc = studentSnap.docs[0];
     const student = studentDoc.data();
 
-    // 2. (Optional) Check scratchCard validity here (implement your own logic)
-    // For demonstration, let's assume you store scratchCard in student doc or a separate collection.
+    // 2. (Optional) Check scratchCard validity here
     if (student.scratchCard !== scratchCard) return res.status(401).json({ error: 'Invalid scratch card' });
 
-    // 3. Find results for the student for the specified class, session, term
+    // 3. Lookup class, session, term by name to get IDs
+    const classSnap = await classCollection().where('name', '==', className).limit(1).get();
+    if (classSnap.empty) return res.status(404).json({ error: 'Class not found.' });
+    const classId = classSnap.docs[0].id;
+
+    const sessionSnap = await sessionCollection().where('name', '==', session).limit(1).get();
+    if (sessionSnap.empty) return res.status(404).json({ error: 'Session not found.' });
+    const sessionId = sessionSnap.docs[0].id;
+
+    const termSnap = await termCollection().where('name', '==', term).limit(1).get();
+    if (termSnap.empty) return res.status(404).json({ error: 'Term not found.' });
+    const termId = termSnap.docs[0].id;
+
+    // 4. Find results for the student for the specified class/session/term
     let query = resultCollection()
       .where('student', '==', studentDoc.id)
-      .where('class', '==', className)
-      .where('session', '==', session)
-      .where('term', '==', term);
+      .where('class', '==', classId)
+      .where('session', '==', sessionId)
+      .where('term', '==', termId);
 
     const snap = await query.get();
 
-    // 4. Prepare results for table
+    // 5. Prepare results for table
     const results = [];
     for (const doc of snap.docs) {
       const r = doc.data();
-      // Populate subject name if needed
       let subjectName = '';
       if (r.subject) {
         try {
@@ -317,6 +327,4 @@ router.get('/check', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 module.exports = router;

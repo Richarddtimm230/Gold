@@ -583,7 +583,7 @@
             const tbody = document.getElementById('manualResultsTbody');
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
             try {
-                const res = await fetch(`https://gold-1-z03x.onrender.com/api/students?class=${encodeURIComponent(className)}`);
+                const res = await fetch(`https://goldlincschools.onrender.com/api/students?class=${encodeURIComponent(className)}`);
                 const data = await res.json();
                 const students = data.students || [];
                 if (!Array.isArray(students) || students.length === 0) {
@@ -640,7 +640,7 @@
             document.getElementById('uploadStatus').innerHTML = 'Uploading...';
 
             try {
-                const res = await fetch('https://gold-1-z03x.onrender.com/api/results/upload', {
+                const res = await fetch('https://goldlincschools.onrender.com/api/results/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

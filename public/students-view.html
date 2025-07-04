@@ -547,166 +547,170 @@
     </main>
     <button class="support-tab" aria-label="Open Support">Support</button>
     <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
-    <script>
-        // Spinner overlay logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const spinner = document.getElementById('pageSpinnerOverlay');
-            if (spinner) spinner.style.display = 'flex';
-            setTimeout(() => {
-                if (spinner) {
-                    spinner.style.opacity = '0';
-                    setTimeout(() => { spinner.style.display = 'none'; }, 400);
+<script>
+    // BACKEND URL
+    const API_BASE_URL = "https://goldlincschools.onrender.com";
+
+    // Spinner overlay logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const spinner = document.getElementById('pageSpinnerOverlay');
+        if (spinner) spinner.style.display = 'flex';
+        setTimeout(() => {
+            if (spinner) {
+                spinner.style.opacity = '0';
+                setTimeout(() => { spinner.style.display = 'none'; }, 400);
+            }
+        }, 1200);
+    });
+
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+        sidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
+        document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+    }
+    if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    // Students table logic (as before)
+    let studentsData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const pageSize = 15;
+
+    // Fetch students from backend
+    async function fetchStudents(filters = {}) {
+        let url = API_BASE_URL + '/api/students';
+        const params = Object.keys(filters)
+            .filter(key => filters[key])
+            .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`)
+            .join('&');
+        if (params) url += '?' + params;
+
+        const token = localStorage.getItem('student_token');
+        try {
+            const res = await fetch(url, {
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            if(res.ok) {
+                const data = await res.json();
+                // FIX: Support backend {"students":{"student_id":[...]}}
+                let studentsList = [];
+                if (Array.isArray(data.students)) {
+                    studentsList = data.students;
+                } else if (data.students && Array.isArray(data.students.student_id)) {
+                    studentsList = data.students.student_id;
                 }
-            }, 1200);
-        });
-
-        // Sidebar mobile toggle logic
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        function openSidebar() {
-            sidebar.classList.add('active');
-            sidebarOverlay.classList.add('active');
-            document.body.classList.add('sidebar-open');
-        }
-        function closeSidebar() {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
-        }
-        if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
-        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeSidebar();
-        });
-
-        // Students table logic (as before)
-        let studentsData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        const pageSize = 15;
-// Fetch students from backend
-        async function fetchStudents(filters = {}) {
-            let url = '/api/students';
-            const params = Object.keys(filters)
-                .filter(key => filters[key])
-                .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`)
-                .join('&');
-            if (params) url += '?' + params;
-
-            const token = localStorage.getItem('student_token');
-            try {
-                const res = await fetch(url, {
-                    headers: token ? { Authorization: 'Bearer ' + token } : {}
-                });
-                if(res.ok) {
-                    const data = await res.json();
-                    // FIX: Support backend {"students":{"student_id":[...]}}
-                    let studentsList = [];
-                    if (Array.isArray(data.students)) {
-                        studentsList = data.students;
-                    } else if (data.students && Array.isArray(data.students.student_id)) {
-                        studentsList = data.students.student_id;
-                    }
-                    studentsData = studentsList;
-                    filteredData = studentsData;
-                    renderStudentsTable();
-                } else {
-                    studentsData = [];
-                    filteredData = [];
-                    renderStudentsTable();
-                }
-            } catch (err) {
+                studentsData = studentsList;
+                filteredData = studentsData;
+                renderStudentsTable();
+            } else {
                 studentsData = [];
                 filteredData = [];
                 renderStudentsTable();
             }
-        }
-
-        function renderStudentsTable() {
-            const tbody = document.getElementById('students-table-body');
-            tbody.innerHTML = '';
-            const searchVal = document.getElementById('search-student-input').value.toLowerCase();
-            // Filter by search
-            filteredData = studentsData.filter(stu =>
-                (!searchVal || (
-                    (stu.surname && stu.surname.toLowerCase().includes(searchVal)) ||
-                    (stu.firstname && stu.firstname.toLowerCase().includes(searchVal)) ||
-                    (stu.regNo && stu.regNo.toLowerCase().includes(searchVal))
-                ))
-            );
-            // Pagination
-            const totalPages = Math.ceil(filteredData.length / pageSize);
-            if(currentPage > totalPages) currentPage = 1;
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const pageData = filteredData.slice(start, end);
-
-            if(pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#888;">No students found.</td></tr>`;
-            } else {
-                for(const stu of pageData) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><img src="${stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
-                            <td>${stu.surname || ''}</td>
-                            <td>${stu.firstname || ''}</td>
-                            <td>${stu.othernames || ''}</td>
-                            <td>${stu.class && stu.class.name ? stu.class.name : (stu.class || '')}</td>
-                            <td>${stu.classArm || ''}</td>
-                            <td>${stu.regNo || ''}</td>
-                            <td>${stu.gender || ''}</td>
-                            <td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td>
-                            <td>
-                                <div><b>${stu.parentName || ''}</b></div>
-                                <div style="font-size:0.95em;color:#888;">${stu.parentPhone || ''}</div>
-                            </td>
-                            <td>
-                                <div>${stu.studentEmail || ''}</div>
-                                <div style="font-size:0.95em;color:#888;">${stu.studentPhone || ''}</div>
-                            </td>
-                        </tr>
-                    `;
-                }
-            }
-            renderPagination(totalPages);
-        }
-
-        function renderPagination(totalPages) {
-            const pagDiv = document.getElementById('students-pagination');
-            pagDiv.innerHTML = '';
-            if(totalPages <= 1) return;
-            for(let i=1;i<=totalPages;i++) {
-                pagDiv.innerHTML += `<button class="page-btn${i===currentPage?' page-btn-active':''}" onclick="gotoPage(${i})">${i}</button>`;
-            }
-        }
-        window.gotoPage = function(num) {
-            currentPage = num;
+        } catch (err) {
+            studentsData = [];
+            filteredData = [];
             renderStudentsTable();
         }
+    }
 
-        // Event: filter form submit
-        document.getElementById('students-filter-form').onsubmit = function(e) {
-            e.preventDefault();
-            const filters = {
-                class: this.class.value,
-                classArm: this.classArm.value,
-                academicSession: this.academicSession.value,
-                accountStatus: this.accountStatus.value,
-                subscriptionStatus: this.subscriptionStatus.value
-            };
-            currentPage = 1;
-            fetchStudents(filters);
+    function renderStudentsTable() {
+        const tbody = document.getElementById('students-table-body');
+        tbody.innerHTML = '';
+        const searchVal = document.getElementById('search-student-input').value.toLowerCase();
+        // Filter by search
+        filteredData = studentsData.filter(stu =>
+            (!searchVal || (
+                (stu.surname && stu.surname.toLowerCase().includes(searchVal)) ||
+                (stu.firstname && stu.firstname.toLowerCase().includes(searchVal)) ||
+                (stu.regNo && stu.regNo.toLowerCase().includes(searchVal))
+            ))
+        );
+        // Pagination
+        const totalPages = Math.ceil(filteredData.length / pageSize);
+        if(currentPage > totalPages) currentPage = 1;
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = filteredData.slice(start, end);
+
+        if(pageData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#888;">No students found.</td></tr>`;
+        } else {
+            for(const stu of pageData) {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
+                        <td>${stu.surname || ''}</td>
+                        <td>${stu.firstname || ''}</td>
+                        <td>${stu.othernames || ''}</td>
+                        <td>${stu.class && stu.class.name ? stu.class.name : (stu.class || '')}</td>
+                        <td>${stu.classArm || ''}</td>
+                        <td>${stu.regNo || ''}</td>
+                        <td>${stu.gender || ''}</td>
+                        <td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td>
+                        <td>
+                            <div><b>${stu.parentName || ''}</b></div>
+                            <div style="font-size:0.95em;color:#888;">${stu.parentPhone || ''}</div>
+                        </td>
+                        <td>
+                            <div>${stu.studentEmail || ''}</div>
+                            <div style="font-size:0.95em;color:#888;">${stu.studentPhone || ''}</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const pagDiv = document.getElementById('students-pagination');
+        pagDiv.innerHTML = '';
+        if(totalPages <= 1) return;
+        for(let i=1;i<=totalPages;i++) {
+            pagDiv.innerHTML += `<button class="page-btn${i===currentPage?' page-btn-active':''}" onclick="gotoPage(${i})">${i}</button>`;
+        }
+    }
+    window.gotoPage = function(num) {
+        currentPage = num;
+        renderStudentsTable();
+    }
+
+    // Event: filter form submit
+    document.getElementById('students-filter-form').onsubmit = function(e) {
+        e.preventDefault();
+        const filters = {
+            class: this.class.value,
+            classArm: this.classArm.value,
+            academicSession: this.academicSession.value,
+            accountStatus: this.accountStatus.value,
+            subscriptionStatus: this.subscriptionStatus.value
         };
+        currentPage = 1;
+        fetchStudents(filters);
+    };
 
-        // Event: search input
-        document.getElementById('search-student-input').oninput = function() {
-            currentPage = 1;
-            renderStudentsTable();
-        };
+    // Event: search input
+    document.getElementById('search-student-input').oninput = function() {
+        currentPage = 1;
+        renderStudentsTable();
+    };
 
-        // On page load, fetch all students
-        fetchStudents();
-    </script>
+    // On page load, fetch all students
+    fetchStudents();
+</script>
 </body>
 </html>

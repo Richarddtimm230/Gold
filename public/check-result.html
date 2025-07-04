@@ -434,7 +434,9 @@
           <thead>
             <tr>
               <th>Subject</th>
-              <th>CA</th>
+              <th>CA1</th>
+              <th>CA2</th>
+              <th>Midterm</th>
               <th>Exam</th>
               <th>Total</th>
               <th>Grade</th>
@@ -486,36 +488,9 @@
       </button>
     </nav>
     <script>
-      // Demo result data
-      const demoResultsDB = [
-        {
-          regNo: "GLS/2024/001", scratchCard: "ABCD1234", class: "SS3", session: "2024/2025", term: "2nd Term",
-          results: [
-            { subject: "Mathematics", ca: 18, exam: 70, total: 88, grade: "A", remark: "Excellent" },
-            { subject: "English", ca: 16, exam: 66, total: 82, grade: "A", remark: "Excellent" },
-            { subject: "Biology", ca: 14, exam: 58, total: 72, grade: "B", remark: "Good" },
-            { subject: "Chemistry", ca: 12, exam: 50, total: 62, grade: "C", remark: "Fair" }
-          ]
-        },
-        {
-          regNo: "GLS/2024/002", scratchCard: "XYZ9876", class: "SS2", session: "2024/2025", term: "2nd Term",
-          results: [
-            { subject: "Mathematics", ca: 17, exam: 65, total: 82, grade: "A", remark: "Excellent" },
-            { subject: "English", ca: 15, exam: 60, total: 75, grade: "B", remark: "Good" },
-            { subject: "Biology", ca: 13, exam: 57, total: 70, grade: "B", remark: "Good" },
-            { subject: "Chemistry", ca: 13, exam: 56, total: 69, grade: "C", remark: "Fair" }
-          ]
-        },
-        {
-          regNo: "GLS/2023/045", scratchCard: "OLDCARD99", class: "SS3", session: "2023/2024", term: "3rd Term",
-          results: [
-            { subject: "Mathematics", ca: 17, exam: 63, total: 80, grade: "A", remark: "Excellent" },
-            { subject: "English", ca: 14, exam: 60, total: 74, grade: "B", remark: "Good" },
-            { subject: "Biology", ca: 12, exam: 50, total: 62, grade: "C", remark: "Fair" },
-            { subject: "Chemistry", ca: 10, exam: 48, total: 58, grade: "D", remark: "Pass" }
-          ]
-        }
-      ];
+      // BACKEND URL
+      const API_BASE_URL = "https://goldlincschools.onrender.com";
+
       // Previous viewed results (simulate persistence with localStorage)
       function getViewedResults() {
         let arr = [];
@@ -550,8 +525,9 @@
         const arr = getViewedResults();
         if (arr[idx]) displayResult(arr[idx]);
       }
-      // Handle result search
-      function handleResultSearch(e) {
+
+      // Main: Handle result search
+      async function handleResultSearch(e) {
         e.preventDefault();
         const regNo = document.getElementById("regNoInput").value.trim().toUpperCase();
         const scratch = document.getElementById("scratchCardInput").value.trim().toUpperCase();
@@ -560,35 +536,41 @@
         const term = document.getElementById("termInput").value;
         const errorBox = document.getElementById("searchError");
         errorBox.style.display = "none";
-        // Validation
+
         if (!regNo || !scratch || !klass || !session || !term) {
           errorBox.textContent = "All fields are required!";
           errorBox.style.display = "block";
           return false;
         }
-        // Simulate backend search
-        const result = demoResultsDB.find(r =>
-          r.regNo === regNo &&
-          r.scratchCard === scratch &&
-          r.class === klass &&
-          r.session === session &&
-          r.term === term
-        );
-        if (!result) {
-          errorBox.textContent = "No result found! Please check your details or contact the school.";
+
+        try {
+          // Query backend: /api/results/check?regNo=...&scratchCard=...&class=...&session=...&term=...
+          const response = await fetch(`${API_BASE_URL}/api/results/check?regNo=${encodeURIComponent(regNo)}&scratchCard=${encodeURIComponent(scratch)}&class=${encodeURIComponent(klass)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`);
+          if (!response.ok) {
+            throw new Error("Result not found or incorrect details.");
+          }
+          const data = await response.json();
+          if (!data || !Array.isArray(data.results) || !data.results.length) {
+            errorBox.textContent = "No result found! Please check your details or contact the school.";
+            errorBox.style.display = "block";
+            document.getElementById("resultsDisplaySection").style.display = "none";
+            return false;
+          }
+          // Save to previous results
+          saveViewedResult({
+            regNo, scratchCard: scratch, class: klass, session, term, results: data.results
+          });
+          // Display
+          displayResult({regNo, class: klass, session, term, results: data.results});
+          renderPreviousResults();
+        } catch (err) {
+          errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
           errorBox.style.display = "block";
           document.getElementById("resultsDisplaySection").style.display = "none";
-          return false;
         }
-        // Save to previous results
-        saveViewedResult({
-          regNo, scratchCard: scratch, class: klass, session, term, results: result.results
-        });
-        // Display
-        displayResult({regNo, class: klass, session, term, results: result.results});
-        renderPreviousResults();
         return false;
       }
+
       // Display result in table and details
       function displayResult(r) {
         document.getElementById("resultsDisplaySection").style.display = "";
@@ -599,19 +581,23 @@
         const tbody = document.getElementById("resultsTable").querySelector("tbody");
         tbody.innerHTML = r.results.map(res => `
           <tr>
-            <td>${res.subject}</td>
-            <td>${res.ca}</td>
-            <td>${res.exam}</td>
-            <td>${res.total}</td>
-            <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade}</td>
-            <td>${res.remark}</td>
+            <td>${res.subject || res.subject_name || ""}</td>
+            <td>${res.ca1_score !== undefined ? res.ca1_score : res.ca !== undefined ? res.ca : ""}</td>
+            <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
+            <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
+            <td>${res.exam_score !== undefined ? res.exam_score : res.exam !== undefined ? res.exam : ""}</td>
+            <td>${res.total !== undefined ? res.total : (
+              (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0)) ||
+              (parseFloat(res.ca || 0) + parseFloat(res.exam || 0))
+            )}</td>
+            <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
+            <td>${res.remark || res.remarks || ""}</td>
           </tr>
         `).join("");
       }
       function downloadCurrentResult() {
         alert("Download as PDF coming soon!");
       }
-      // On load
       renderPreviousResults();
     </script>
   </div>

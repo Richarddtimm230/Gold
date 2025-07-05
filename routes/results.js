@@ -258,8 +258,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET /api/results/check?regNo=...&scratchCard=...&class=...&session=...&term=...
-// Accepts regNo or student_id in regNo field
+
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
@@ -299,12 +298,13 @@ router.get('/check', async (req, res) => {
     if (termSnap.empty) return res.status(404).json({ error: 'Term not found.' });
     const termId = termSnap.docs[0].id;
 
-    // Query results for the IDs
+    // Query results for the IDs and status 'Published'
     let query = resultCollection()
       .where('student', '==', studentDoc.id)
       .where('class', '==', classId)
       .where('session', '==', sessionId)
-      .where('term', '==', termId);
+      .where('term', '==', termId)
+      .where('status', '==', 'Published'); // <<--- Only show published
 
     const snap = await query.get();
 
@@ -340,3 +340,4 @@ router.get('/check', async (req, res) => {
 });
 
 module.exports = router;
+

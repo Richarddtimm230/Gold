@@ -10,7 +10,6 @@
       padding: 0;
       background: #f7f7f7;
     }
-
     .report-container {
       background: #fff;
       max-width: 950px;
@@ -20,24 +19,20 @@
       box-shadow: 0 0 12px rgba(0,0,0,0.08);
       padding: 30px 30px 15px 30px;
     }
-
     .school-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-
     .school-logo, .coat-of-arms {
       height: 75px;
       width: 75px;
       object-fit: contain;
     }
-
     .school-info {
       flex: 1;
       text-align: center;
     }
-
     .school-info h1 {
       color: #0c4e8c;
       margin: 0;
@@ -45,13 +40,11 @@
       font-weight: bold;
       letter-spacing: 1px;
     }
-
     .school-info p {
       margin: 6px 0 0 0;
       font-size: 1.02rem;
       line-height: 1.5;
     }
-
     .term-title {
       background: #0c4e8c;
       margin-top: 18px;
@@ -59,66 +52,55 @@
       padding: 10px 0;
       border-radius: 5px;
     }
-
     .term-title h2 {
       color: #fff;
       margin: 0;
       font-size: 1.14rem;
       letter-spacing: 1.2px;
     }
-
     .student-info-section {
       margin-bottom: 18px;
     }
-
     .student-info-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 1rem;
     }
-
     .student-info-table td {
       padding: 4px 8px;
       border: none;
     }
-
     .results-section {
       margin-top: 0;
       margin-bottom: 16px;
     }
-
     .results-table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 8px;
       font-size: 0.97rem;
     }
-
     .results-table th, .results-table td {
       border: 1px solid #d2dce6;
       padding: 7px 5px;
       text-align: center;
     }
-
     .results-table thead th {
       background: #e7f0fa;
       color: #0c4e8c;
       font-size: 0.97rem;
       font-weight: bold;
     }
-
     .results-table tbody tr td:first-child {
       text-align: left;
       font-weight: 500;
     }
-
     .skills-tables-section {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       margin-bottom: 16px;
     }
-
     .skills-table {
       width: 31.5%;
       border-collapse: collapse;
@@ -129,7 +111,6 @@
       border-radius: 5px;
       overflow: hidden;
     }
-
     .skills-table th {
       background: #0c4e8c;
       color: #fff;
@@ -138,51 +119,42 @@
       padding: 6px 0;
       border: none;
     }
-
     .skills-table td {
       border: 1px solid #d2dce6;
       padding: 6px 8px;
       text-align: left;
     }
-
     .skills-table tr td:last-child {
       text-align: center;
       font-weight: bold;
     }
-
     .grades-key-section {
       margin: 8px 0 12px 0;
     }
-
     .grades-key-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.97rem;
     }
-
     .grades-key-table th, .grades-key-table td {
       border: 1px solid #b6c8db;
       padding: 6px 8px;
       text-align: center;
     }
-
     .grades-key-table th {
       background: #e7f0fa;
       color: #0c4e8c;
       font-size: 1.04rem;
       font-weight: bold;
     }
-
     .comments-section {
       margin: 14px 0;
     }
-
     .principal-comment {
       font-size: 1.07rem;
       font-weight: 500;
       color: #0c4e8c;
     }
-
     .principal-sign {
       margin-top: 10px;
       display: flex;
@@ -190,7 +162,6 @@
       font-size: 1.03rem;
       color: #222;
     }
-
     .footer-section {
       display: flex;
       justify-content: space-between;
@@ -199,12 +170,10 @@
       font-size: 0.98rem;
       color: #212121;
     }
-
     .next-term {
       font-weight: bold;
       color: #0c4e8c;
     }
-
     .next-term-date {
       font-family: 'Segoe UI', 'Arial', sans-serif;
       font-size: 1.1em;
@@ -212,22 +181,18 @@
       margin-left: 5px;
       color: #0a3a6c;
     }
-
     .footer-meta {
       text-align: right;
       font-size: 0.92rem;
     }
-
     .powered-by {
       margin-left: 14px;
     }
-
     .powered-by a {
       color: #0c4e8c;
       text-decoration: none;
       font-weight: bold;
     }
-
     @media (max-width: 900px) {
       .report-container {
         padding: 8px;
@@ -245,6 +210,10 @@
         align-items: flex-start;
         gap: 10px;
       }
+    }
+    @media print {
+      .no-print, nav, .bottom-nav { display: none !important; }
+      body { background: #fff !important; }
     }
   </style>
 </head>
@@ -266,45 +235,43 @@
         <img src="https://i.imgur.com/XQ4VwFQ.png" alt="Nigeria Coat of Arms" class="coat-of-arms">
       </div>
       <div class="term-title">
-        <h2>FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
+        <h2 id="termTitle">FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
       </div>
     </header>
-
     <section class="student-info-section">
-      <table class="student-info-table">
+      <table class="student-info-table" id="studentInfoTable">
         <tr>
-          <td><strong>Name:</strong> OLAREWAJU TESTIMONY</td>
-          <td><strong>Performance Grade:</strong> A (Excellent)</td>
+          <td><strong>Name:</strong> <span id="stuName">OLAREWAJU TESTIMONY</span></td>
+          <td><strong>Performance Grade:</strong> <span id="perfGrade">A (Excellent)</span></td>
         </tr>
         <tr>
-          <td><strong>Reg. No:</strong> 2024/000838</td>
-          <td><strong>Class Size:</strong> 17</td>
+          <td><strong>Reg. No:</strong> <span id="stuRegNo">2024/000838</span></td>
+          <td><strong>Class Size:</strong> <span id="classSize">17</span></td>
         </tr>
         <tr>
-          <td><strong>Gender:</strong> F</td>
-          <td><strong>No. of Subjects:</strong> 13</td>
+          <td><strong>Gender:</strong> <span id="stuGender">F</span></td>
+          <td><strong>No. of Subjects:</strong> <span id="numSubjects">13</span></td>
         </tr>
         <tr>
-          <td><strong>Age:</strong> 11</td>
-          <td><strong>Student Total Score:</strong> 911 / 1300</td>
+          <td><strong>Age:</strong> <span id="stuAge">11</span></td>
+          <td><strong>Student Total Score:</strong> <span id="stuTotalScore">911 / 1300</span></td>
         </tr>
         <tr>
-          <td><strong>DOB:</strong> 17-03-2013</td>
-          <td><strong>Student Average (%):</strong> 70.08%</td>
+          <td><strong>DOB:</strong> <span id="stuDOB">17-03-2013</span></td>
+          <td><strong>Student Average (%):</strong> <span id="stuAverage">70.08%</span></td>
         </tr>
         <tr>
-          <td><strong>Class:</strong> JSS2 - A</td>
-          <td><strong>Grade Point Average:</strong> 4.38</td>
+          <td><strong>Class:</strong> <span id="stuClass">JSS2 - A</span></td>
+          <td><strong>Grade Point Average:</strong> <span id="stuGPA">4.38</span></td>
         </tr>
         <tr>
-          <td><strong>Email:</strong> testimony.olarewaju@goldlincschools.com</td>
-          <td><strong>Result Summary:</strong> Excellent</td>
+          <td><strong>Email:</strong> <span id="stuEmail">testimony.olarewaju@goldlincschools.com</span></td>
+          <td><strong>Result Summary:</strong> <span id="resultSummary">Excellent</span></td>
         </tr>
       </table>
     </section>
-
     <section class="results-section">
-      <table class="results-table">
+      <table class="results-table" id="resultsTable">
         <thead>
           <tr>
             <th>Subject</th>
@@ -319,155 +286,12 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>PRE-VOCATIONAL STUDIES</td>
-            <td>10.0</td>
-            <td>12.0</td>
-            <td>45.0</td>
-            <td>67.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>N.V.E</td>
-            <td>7.0</td>
-            <td>7.0</td>
-            <td>48.0</td>
-            <td>62.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>BASIC SCIENCE AND TECHNOLOGY</td>
-            <td>10.0</td>
-            <td>12.0</td>
-            <td>46.0</td>
-            <td>68.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Basic Science</td>
-            <td>10.0</td>
-            <td>13.0</td>
-            <td>44.0</td>
-            <td>67.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Computer</td>
-            <td>8.0</td>
-            <td>12.0</td>
-            <td>40.0</td>
-            <td>60.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Physical And Health Education</td>
-            <td>7.0</td>
-            <td>10.0</td>
-            <td>50.0</td>
-            <td>67.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Yoruba</td>
-            <td>12.0</td>
-            <td>12.0</td>
-            <td>45.0</td>
-            <td>69.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Mathematics</td>
-            <td>15.0</td>
-            <td>15.0</td>
-            <td>52.0</td>
-            <td>82.0</td>
-            <td>A</td>
-            <td>Excellent</td>
-            <td>5.00</td>
-            <td>EXCELLENT</td>
-          </tr>
-          <tr>
-            <td>English Language</td>
-            <td>8.0</td>
-            <td>9.0</td>
-            <td>51.0</td>
-            <td>68.0</td>
-            <td>B</td>
-            <td>Very Good</td>
-            <td>4.00</td>
-            <td>VERY GOOD</td>
-          </tr>
-          <tr>
-            <td>Christian Religious Studies</td>
-            <td>12.0</td>
-            <td>11.0</td>
-            <td>47.0</td>
-            <td>70.0</td>
-            <td>A</td>
-            <td>Excellent</td>
-            <td>5.00</td>
-            <td>EXCELLENT</td>
-          </tr>
-          <tr>
-            <td>Business Studies</td>
-            <td>10.0</td>
-            <td>10.0</td>
-            <td>61.0</td>
-            <td>81.0</td>
-            <td>A</td>
-            <td>Excellent</td>
-            <td>5.00</td>
-            <td>EXCELLENT</td>
-          </tr>
-          <tr>
-            <td>Music</td>
-            <td>15.0</td>
-            <td>15.0</td>
-            <td>50.0</td>
-            <td>80.0</td>
-            <td>A</td>
-            <td>Excellent</td>
-            <td>5.00</td>
-            <td>EXCELLENT</td>
-          </tr>
-          <tr>
-            <td>Cultural and Creative Art</td>
-            <td>7.0</td>
-            <td>7.0</td>
-            <td>56.0</td>
-            <td>70.0</td>
-            <td>A</td>
-            <td>Excellent</td>
-            <td>5.00</td>
-            <td>EXCELLENT</td>
-          </tr>
+          <!-- Populated by JS -->
         </tbody>
       </table>
     </section>
-
     <section class="skills-tables-section">
-      <table class="skills-table affective-skills">
+      <table class="skills-table affective-skills" id="affectiveSkillsTable">
         <thead>
           <tr>
             <th colspan="2">Affective Skills Rating (5)</th>
@@ -484,7 +308,7 @@
           <tr><td>Organization Ability</td><td>3</td></tr>
         </tbody>
       </table>
-      <table class="skills-table psychomotor-skills">
+      <table class="skills-table psychomotor-skills" id="psychomotorSkillsTable">
         <thead>
           <tr>
             <th colspan="2">Psychomotor Skills Rating (5)</th>
@@ -502,7 +326,7 @@
           <tr><td>Sports and Games</td><td>3</td></tr>
         </tbody>
       </table>
-      <table class="skills-table attendance">
+      <table class="skills-table attendance" id="attendanceTable">
         <thead>
           <tr>
             <th colspan="2">Attendance Report</th>
@@ -516,7 +340,6 @@
         </tbody>
       </table>
     </section>
-
     <section class="grades-key-section">
       <table class="grades-key-table">
         <tr>
@@ -539,26 +362,115 @@
         </tr>
       </table>
     </section>
-
     <section class="comments-section">
       <p class="principal-comment">
-        <strong>Principal's Comment :</strong> This is an excellent result, do not rest on your oars.
+        <strong>Principal's Comment :</strong> <span id="principalComment">This is an excellent result, do not rest on your oars.</span>
       </p>
       <div class="principal-sign">
-        <span><strong>Principal:</strong> ABIODUN FESTUS ADENIYI</span>
+        <span><strong>Principal:</strong> <span id="principalName">ABIODUN FESTUS ADENIYI</span></span>
         <span><strong>Principal's Signature :</strong> ____________________</span>
       </div>
     </section>
-
     <section class="footer-section">
       <div class="next-term">
-        <strong>Next Term Begins:</strong> <span class="next-term-date">Monday 6th of January 2025.</span>
+        <strong>Next Term Begins:</strong> <span class="next-term-date" id="nextTermDate">Monday 6th of January 2025.</span>
       </div>
       <div class="footer-meta">
-        <span>Printed : 18-12-2024 02:53 pm</span>
+        <span id="printDate">Printed : 18-12-2024 02:53 pm</span>
         <span class="powered-by">Powered By : <a href="https://schoolsfocus.net">SchoolsFocus</a></span>
       </div>
     </section>
   </div>
+  <script>
+  // Helper to format the date/time for "Printed" line
+  function getFormattedPrintDate() {
+    const now = new Date();
+    const dd = now.getDate().toString().padStart(2,'0');
+    const mm = (now.getMonth()+1).toString().padStart(2,'0');
+    const yyyy = now.getFullYear();
+    let h = now.getHours();
+    let ampm = "am";
+    if (h > 12) { h = h - 12; ampm = "pm"; }
+    else if (h === 0) { h = 12; }
+    const min = now.getMinutes().toString().padStart(2,'0');
+    return `Printed : ${dd}-${mm}-${yyyy} ${h}:${min} ${ampm}`;
+  }
+
+  // Main logic to fill fields from sessionStorage.reportData
+  function fillReport() {
+    const dataStr = sessionStorage.getItem("reportData");
+    if (!dataStr) return; // fallback to static
+    const data = JSON.parse(dataStr);
+
+    // Fill session/term
+    if (data.term && data.session) {
+      document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
+    }
+    // Fill basic student info
+    if (data.student) {
+      document.getElementById("stuName").innerText = data.student.name || "";
+      document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
+      document.getElementById("stuGender").innerText = data.student.gender || "";
+      document.getElementById("stuDOB").innerText = data.student.DOB || "";
+      document.getElementById("stuEmail").innerText = data.student.email || "";
+      document.getElementById("stuClass").innerText = data.class || "";
+      if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
+    } else {
+      document.getElementById("stuRegNo").innerText = data.regNo || "";
+      document.getElementById("stuClass").innerText = data.class || "";
+    }
+    // Fill summary fields if present
+    if (data.perfGrade) document.getElementById("perfGrade").innerText = data.perfGrade;
+    if (data.classSize) document.getElementById("classSize").innerText = data.classSize;
+    if (data.numSubjects) document.getElementById("numSubjects").innerText = data.numSubjects;
+    if (data.stuTotalScore) document.getElementById("stuTotalScore").innerText = data.stuTotalScore;
+    if (data.stuAverage) document.getElementById("stuAverage").innerText = data.stuAverage;
+    if (data.stuGPA) document.getElementById("stuGPA").innerText = data.stuGPA;
+    if (data.resultSummary) document.getElementById("resultSummary").innerText = data.resultSummary;
+    if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
+    if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
+    if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
+
+    // Fill results table
+    const tbody = document.querySelector("#resultsTable tbody");
+    if (tbody && Array.isArray(data.results)) {
+      tbody.innerHTML = data.results.map(res => `
+        <tr>
+          <td>${res.subject || ""}</td>
+          <td>${parseFloat(res.ca1_score||0) + parseFloat(res.ca2_score||0)}</td>
+          <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
+          <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
+          <td>${res.total !== undefined ? res.total :
+               (parseFloat(res.ca1_score||0) + parseFloat(res.ca2_score||0) + parseFloat(res.midterm_score||0) + parseFloat(res.exam_score||0))}</td>
+          <td>${res.grade || ""}</td>
+          <td>${res.remarks || res.remark || ""}</td>
+          <td>${res.grade_point || ""}</td>
+          <td>${res.teacher_comment || res.comment || ""}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Fill affective/psychomotor/attendance if provided (optional)
+    if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
+      const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
+    }
+    if (data.psychomotorSkills && Array.isArray(data.psychomotorSkills)) {
+      const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
+    }
+    if (data.attendance && Array.isArray(data.attendance)) {
+      const rows = data.attendance.map(a => `<tr><td>${a.label}</td><td>${a.value}</td></tr>`).join('');
+      document.querySelector("#attendanceTable tbody").innerHTML = rows;
+    }
+
+    // Update printed date
+    document.getElementById("printDate").innerText = getFormattedPrintDate();
+
+    // Auto-trigger print after a short delay
+    setTimeout(() => window.print(), 1200);
+  }
+  window.addEventListener('DOMContentLoaded', fillReport);
+  </script>
 </body>
 </html>

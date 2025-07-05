@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Check Results | Gold and Linc Schools</title>
-  <meta name="viewport" content="width=device-width, initial-scale=0.75">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -404,16 +404,17 @@
             <select id="sessionInput" class="result-form-select" required>
               <option value="">Select Session</option>
               <option>2024–2025</option>
-        <option>2023–2024</option>
+              <option>2023–2024</option>
+              <option>2022–2023</option>
             </select>
           </div>
           <div class="result-form-group">
             <label class="result-form-label" for="termInput">Term</label>
             <select id="termInput" class="result-form-select" required>
               <option value="">Select Term</option>
+              <option>FIRST TERM</option>
+              <option>SECOND TERM</option>
               <option>THIRD TERM</option>
-        <option>SECOND TERM</option>
-        <option>FIRST TERM</option>
             </select>
           </div>
           <button class="result-search-btn" type="submit"><i class="fa fa-search"></i> View Result</button>
@@ -528,8 +529,8 @@
       // Main: Handle result search
       async function handleResultSearch(e) {
         e.preventDefault();
-        const regNo = document.getElementById("regNoInput").value.trim().toUpperCase();
-        const scratch = document.getElementById("scratchCardInput").value.trim().toUpperCase();
+        const regNo = document.getElementById("regNoInput").value.trim();
+        const scratch = document.getElementById("scratchCardInput").value.trim();
         const klass = document.getElementById("classInput").value;
         const session = document.getElementById("sessionInput").value;
         const term = document.getElementById("termInput").value;
@@ -543,10 +544,18 @@
         }
 
         try {
-          // Query backend: /api/results/check?regNo=...&scratchCard=...&class=...&session=...&term=...
-          const response = await fetch(`${API_BASE_URL}/api/results/check?regNo=${encodeURIComponent(regNo)}&scratchCard=${encodeURIComponent(scratch)}&class=${encodeURIComponent(klass)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`);
+          // Backend API call
+          const params = new URLSearchParams({
+            regNo,
+            scratchCard: scratch,
+            class: klass,
+            session,
+            term
+          });
+          const response = await fetch(`${API_BASE_URL}/api/results/check?${params.toString()}`);
           if (!response.ok) {
-            throw new Error("Result not found or incorrect details.");
+            const data = await response.json();
+            throw new Error(data.error || "Result not found or incorrect details.");
           }
           const data = await response.json();
           if (!data || !Array.isArray(data.results) || !data.results.length) {
@@ -580,15 +589,13 @@
         const tbody = document.getElementById("resultsTable").querySelector("tbody");
         tbody.innerHTML = r.results.map(res => `
           <tr>
-            <td>${res.subject || res.subject_name || ""}</td>
-            <td>${res.ca1_score !== undefined ? res.ca1_score : res.ca !== undefined ? res.ca : ""}</td>
+            <td>${res.subject || ""}</td>
+            <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
             <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
             <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
-            <td>${res.exam_score !== undefined ? res.exam_score : res.exam !== undefined ? res.exam : ""}</td>
-            <td>${res.total !== undefined ? res.total : (
-              (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0)) ||
-              (parseFloat(res.ca || 0) + parseFloat(res.exam || 0))
-            )}</td>
+            <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
+            <td>${res.total !== undefined ? res.total :
+              (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
             <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
             <td>${res.remark || res.remarks || ""}</td>
           </tr>

@@ -7,7 +7,7 @@
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <!-- Your CSS goes here or in a separate file -->
+  <link rel="stylesheet" href="check-results.css">
   <style>
     :root {
   --primary: #2647a6;
@@ -405,7 +405,7 @@ body { width: 100vw; }
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
           <div class="result-form-group">
             <label class="result-form-label" for="regNoInput">Registration Number</label>
-            <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" required>
+            <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" readonly disabled required>
           </div>
           <div class="result-form-group">
             <label class="result-form-label" for="classInput">Class</label>
@@ -441,9 +441,6 @@ body { width: 100vw; }
         </form>
         <div class="result-search-error" id="searchError" style="display:none;"></div>
       </section>
-      
-    <!-- table headers and body -->
-  
       <!-- Results Display Section (hidden by default until search) -->
       <section class="results-section" id="resultsDisplaySection" style="display:none;">
         <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
@@ -454,25 +451,24 @@ body { width: 100vw; }
           <span><b>Term:</b> <span id="dispTerm"></span></span>
         </div>
         <div class="results-table-container">
-  
-        <table class="results-table" id="resultsTable">
-          <thead>
-            <tr>
-              <th>Subject</th>
-              <th>CA1</th>
-              <th>CA2</th>
-              <th>Midterm</th>
-              <th>Exam</th>
-              <th>Total</th>
-              <th>Grade</th>
-              <th>Remark</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- JS fills rows -->
-          </tbody>
-        </table>
-      </div>
+          <table class="results-table" id="resultsTable">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>CA1</th>
+                <th>CA2</th>
+                <th>Midterm</th>
+                <th>Exam</th>
+                <th>Total</th>
+                <th>Grade</th>
+                <th>Remark</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- JS fills rows -->
+            </tbody>
+          </table>
+        </div>
         <button class="download-btn" onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
       </section>
       <!-- Previously Viewed Results -->
@@ -514,8 +510,47 @@ body { width: 100vw; }
       </button>
     </nav>
     <script>
-      // BACKEND URL
       const API_BASE_URL = "https://goldlincschools.onrender.com";
+
+      // Autofill and lock registration number for logged-in student
+      async function autofillRegNo() {
+        const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+        if (!token) {
+          document.getElementById('regNoInput').value = '';
+          document.getElementById('regNoInput').placeholder = 'Login required';
+          document.getElementById('regNoInput').disabled = true;
+          document.getElementById('regNoInput').readOnly = true;
+          document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
+          return;
+        }
+        try {
+          const res = await fetch(API_BASE_URL + '/api/students/me', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (res.ok) {
+            const student = await res.json();
+            // Prefer regNo, else student_id, else blank
+            const regNo = student.regNo || student.student_id || '';
+            document.getElementById('regNoInput').value = regNo;
+            document.getElementById('regNoInput').disabled = true;
+            document.getElementById('regNoInput').readOnly = true;
+            document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = false;
+          } else {
+            document.getElementById('regNoInput').value = '';
+            document.getElementById('regNoInput').placeholder = 'Login required';
+            document.getElementById('regNoInput').disabled = true;
+            document.getElementById('regNoInput').readOnly = true;
+            document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
+          }
+        } catch {
+          document.getElementById('regNoInput').value = '';
+          document.getElementById('regNoInput').placeholder = 'Login required';
+          document.getElementById('regNoInput').disabled = true;
+          document.getElementById('regNoInput').readOnly = true;
+          document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
+        }
+      }
+      autofillRegNo();
 
       // Previous viewed results (simulate persistence with localStorage)
       function getViewedResults() {

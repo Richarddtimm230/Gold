@@ -54,6 +54,7 @@
         .btn-skills { background: #20c997; }
         .btn-edit:hover { background: #005bc1;}
         .btn-skills:hover { background: #13896b;}
+
         /* Modal */
         .modal {
             display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
@@ -64,9 +65,12 @@
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 6px 32px rgba(0,0,0,0.10);
-            padding: 2em 2em 1em 2em;
-            min-width: 330px;
-            max-width: 98vw;
+            padding: 2em 1em 1em 1em;
+            min-width: 300px;
+            max-width: 99vw;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
         }
         .modal-content h3 { margin-top: 0;}
         .modal-content label { font-weight: 500; margin-top: 0.9em;}
@@ -84,9 +88,72 @@
         }
         .modal-content .btn-submit:hover { background: #13896b;}
         .modal-content .close-modal { cursor:pointer; float:right; font-size:1.5em; color:#888;margin-top:-0.3em;}
+
+        /* Edit Modal Style */
+        #editStudentModal .modal-content {
+            max-width: 98vw;
+            width: 400px;
+            padding: 1.5em 1em 1em 1em;
+        }
+        #editStudentForm label {
+            font-weight: 500;
+            margin-top: 0.5em;
+            display: block;
+        }
+        #editStudentForm input, #editStudentForm select {
+            width: 100%;
+            padding: 7px 8px;
+            margin-top: 0.15em;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #editStudentForm .edit-row {
+            margin-bottom: 0.6em;
+        }
+        #editStudentForm .btn-submit {
+            margin-top: 1em;
+        }
+        #editModalSpinner {
+            display:none;
+            margin: 0.6em 0;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .profile-container {
+                max-width: 98vw;
+                padding: 1.1em 0.3em 1em 0.3em;
+            }
+            .modal-content {
+                padding: 1.1em 0.2em 0.5em 0.2em;
+            }
+        }
+        /* Loader Styles */
+        #profileSpinnerOverlay {
+            position: fixed;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            z-index: 3000;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {transform: rotate(0deg);}
+            100% {transform: rotate(360deg);}
+        }
     </style>
 </head>
 <body>
+    <div id="profileSpinnerOverlay"><div class="spinner"></div></div>
     <div class="profile-container" id="profile-container">
         <div class="profile-header">
             <img id="student-avatar" class="profile-avatar" src="" alt="Student Avatar">
@@ -159,6 +226,18 @@
             </form>
         </div>
     </div>
+    <!-- Modal for Editing Student -->
+    <div class="modal" id="editStudentModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeEditModal">&times;</span>
+            <h3>Edit Student Profile</h3>
+            <form id="editStudentForm" autocomplete="off">
+                <div id="editModalSpinner"><div class="spinner" style="width:30px;height:30px;border-width:4px;"></div></div>
+                <div id="editFieldsWrapper"></div>
+                <button type="submit" class="btn-submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
     <script>
     // GET student_id from URL
     function getQueryParam(name) {
@@ -167,11 +246,20 @@
     }
     const studentIdParam = getQueryParam('student_id');
     const API_BASE_URL = "https://goldlincschools.onrender.com";
+    let loadedStudent = null; // Will hold the loaded student data
+
+    // Show spinner
+    function showSpinner(show) {
+        const el = document.getElementById('profileSpinnerOverlay');
+        if (el) el.style.display = show ? 'flex' : 'none';
+    }
 
     // Fetch and render profile (robust logic: try both student_id and regNo, no paging/order when direct lookup)
     async function fetchAndRenderStudent() {
         const profileContainer = document.getElementById('profile-container');
+        showSpinner(true);
         if (!studentIdParam) {
+            showSpinner(false);
             profileContainer.innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
             return;
         }
@@ -191,9 +279,11 @@
             }
 
             if (!stu) {
+                showSpinner(false);
                 profileContainer.innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
                 return;
             }
+            loadedStudent = stu;
             document.getElementById('student-avatar').src = stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
             document.getElementById('student-name').textContent = ((stu.firstname||'') + ' ' + (stu.surname||'')).trim();
             document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentIdParam);
@@ -225,6 +315,8 @@
             table.innerHTML = detailFields.map(f => `<tr><td><b>${f.label}</b></td><td>${f.value}</td></tr>`).join('');
         } catch (err) {
             profileContainer.innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
+        } finally {
+            showSpinner(false);
         }
     }
     fetchAndRenderStudent();
@@ -256,6 +348,106 @@
             document.getElementById('skillsStatus').textContent = "❌ Failed to save.";
         }
     };
+
+    // ---- EDIT STUDENT MODAL LOGIC ----
+    const editModal = document.getElementById('editStudentModal');
+    const editBtn = document.getElementById('editBtn');
+    const closeEditModalBtn = document.getElementById('closeEditModal');
+    const editFieldsWrapper = document.getElementById('editFieldsWrapper');
+    const editForm = document.getElementById('editStudentForm');
+    const editModalSpinner = document.getElementById('editModalSpinner');
+
+    // Which fields to show in the edit modal
+    const editableFields = [
+        {label: "Surname", name: "surname", type: "text", required: true},
+        {label: "First Name", name: "firstname", type: "text", required: true},
+        {label: "Other Names", name: "othernames", type: "text"},
+        {label: "Gender", name: "gender", type: "text", required: true},
+        {label: "DOB", name: "dob", type: "date", required: true},
+        {label: "Nationality", name: "nationality", type: "text"},
+        {label: "State of Origin", name: "state", type: "text"},
+        {label: "LGA", name: "lga", type: "text"},
+        {label: "Home Address", name: "address", type: "text"},
+        {label: "Reg No", name: "regNo", type: "text", readonly: true},
+        {label: "Scratch Card", name: "scratchCard", type: "text", readonly: true},
+        {label: "Class", name: "class", type: "text", required: true},
+        {label: "Class Arm", name: "classArm", type: "text"},
+        {label: "Previous School", name: "previousSchool", type: "text"},
+        {label: "Admission Date", name: "admissionDate", type: "date"},
+        {label: "Academic Session", name: "academicSession", type: "text"},
+        {label: "Parent Name", name: "parentName", type: "text", required: true},
+        {label: "Parent Relationship", name: "parentRelationship", type: "text"},
+        {label: "Parent Phone", name: "parentPhone", type: "text"},
+        {label: "Parent Email", name: "parentEmail", type: "email"},
+        {label: "Parent Address", name: "parentAddress", type: "text"},
+        {label: "Parent Occupation", name: "parentOccupation", type: "text"},
+        {label: "Student Email", name: "studentEmail", type: "email"},
+        {label: "Student Phone", name: "studentPhone", type: "text"},
+        {label: "Religion", name: "religion", type: "text"},
+        {label: "Blood Group", name: "bloodGroup", type: "text"},
+        {label: "Genotype", name: "genotype", type: "text"},
+        {label: "Medical", name: "medical", type: "text"}
+    ];
+
+    editBtn.onclick = function() {
+        if (!loadedStudent) return;
+        // Fill the form
+        editFieldsWrapper.innerHTML = '';
+        editableFields.forEach(field => {
+            let val = loadedStudent[field.name] || '';
+            if (field.type === "date" && val) {
+                val = (new Date(val)).toISOString().slice(0,10);
+            }
+            editFieldsWrapper.innerHTML += `
+            <div class="edit-row">
+                <label>${field.label}${field.required ? ' *' : ''}</label>
+                <input name="${field.name}" type="${field.type}" value="${val}" ${field.readonly ? 'readonly' : ''} ${field.required ? 'required' : ''} />
+            </div>`;
+        });
+        editModalSpinner.style.display = "none";
+        editModal.classList.add('active');
+    };
+
+    closeEditModalBtn.onclick = function() {
+        editModal.classList.remove('active');
+    };
+
+    // Save changes
+    editForm.onsubmit = async function(e) {
+        e.preventDefault();
+        if (!loadedStudent) return;
+        editModalSpinner.style.display = "block";
+        const formData = new FormData(editForm);
+        let editData = {};
+        for (const [k,v] of formData.entries()) editData[k]=v;
+        try {
+            // Use student_id or regNo for update
+            const identifier = loadedStudent.student_id || loadedStudent.regNo;
+            let res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(identifier)}`, {
+                method: "PUT",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(editData)
+            });
+            if (res.ok) {
+                editModalSpinner.style.display = "none";
+                editModal.classList.remove('active');
+                alert('Student updated!');
+                fetchAndRenderStudent();
+            } else {
+                editModalSpinner.style.display = "none";
+                alert('Failed to update student.');
+            }
+        } catch (err) {
+            editModalSpinner.style.display = "none";
+            alert('Network error.');
+        }
+    };
+
+    // Close modal on background click
+    document.getElementById('editStudentModal').onclick = function(e) {
+        if (e.target === this) editModal.classList.remove('active');
+    };
+
     </script>
 </body>
 </html>

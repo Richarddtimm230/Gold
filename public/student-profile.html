@@ -165,7 +165,7 @@
         const url = new URL(window.location.href);
         return url.searchParams.get(name);
     }
-    const studentId = getQueryParam('student_id');
+    const studentId = getQueryParam('student_Id');
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
     // Fetch and render profile (updated to support student_id or regNo, and robust field display)
@@ -176,7 +176,7 @@
         }
         try {
             // Try with student_id first
-            let res = await fetch(`${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentId)}`);
+            let res = await fetch(`${API_BASE_URL}/api/students?student_Id=${encodeURIComponent(studentId)}`);
             let data = await res.json();
             let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
 

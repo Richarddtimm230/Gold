@@ -412,14 +412,23 @@
         editModal.classList.remove('active');
     };
 
-    // Save changes
+    // Save changes (fixed: only send allowed fields)
     editForm.onsubmit = async function(e) {
         e.preventDefault();
         if (!loadedStudent) return;
         editModalSpinner.style.display = "block";
         const formData = new FormData(editForm);
         let editData = {};
-        for (const [k,v] of formData.entries()) editData[k]=v;
+        // Only allow fields that are actually updatable (as in the backend)
+        const allowedFields = [
+            "surname", "firstname", "othernames", "dob", "gender", "nationality", "state", "lga", "address",
+            "class", "classArm", "previousSchool", "admissionDate", "academicSession",
+            "parentName", "parentRelationship", "parentPhone", "parentEmail", "parentAddress", "parentOccupation",
+            "studentEmail", "studentPhone", "religion", "bloodGroup", "genotype", "medical"
+        ];
+        for (const [k, v] of formData.entries()) {
+            if (allowedFields.includes(k)) editData[k] = v;
+        }
         try {
             // Use student_id or regNo for update
             const identifier = loadedStudent.student_id || loadedStudent.regNo;

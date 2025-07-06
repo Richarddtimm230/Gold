@@ -5,7 +5,8 @@
   <title>Teacher Dashboard - Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width,initial-scale=0.90">
   <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
-
+  <!-- Link to external CSS -->
+  <link rel="stylesheet" href="teachers.css">
 </head>
 <body>
 <div class="dashboard-container">
@@ -157,60 +158,117 @@
     </div>
   </main>
 </div>
-  <script>
-    // --- Demo Data ---
-const teacher = {
-  id: 'teach001',
-  name: 'Mr. John Doe',
-  email: 'john.doe@goldlincschools.com',
-  classes: [
-    { id: 'jss2a', name: 'JSS2 - A' },
-    { id: 'jss2b', name: 'JSS2 - B' }
-  ]
-};
-const studentsByClass = {
-  'jss2a': [
-    { id: 'stu1', name: 'Olarewaju Testimony', regNo: '2024/000838', email: 'testimony.olarewaju@goldlincschools.com' },
-    { id: 'stu2', name: 'Jane Adekunle', regNo: '2024/000839', email: 'jane.adekunle@goldlincschools.com' }
-  ],
-  'jss2b': [
-    { id: 'stu3', name: 'James Okoro', regNo: '2024/000840', email: 'james.okoro@goldlincschools.com' }
-  ]
-};
-const subjectsByClass = {
-  'jss2a': [
-    { id: 'math', name: 'Mathematics' },
-    { id: 'eng', name: 'English Language' },
-    { id: 'bus', name: 'Business Studies' }
-  ],
-  'jss2b': [
-    { id: 'math', name: 'Mathematics' },
-    { id: 'eng', name: 'English Language' }
-  ]
-};
-const notifications = [
-  { id: 1, message: "Term result deadline is Friday, June 14th.", date: "2025-06-08" },
-  { id: 2, message: "Staff meeting on Wednesday at 2:00pm.", date: "2025-06-07" }
-];
-let draftResults = [
-  {
-    studentId: 'stu1',
-    classId: 'jss2a',
-    term: 'First Term',
-    status: 'Draft',
-    updated: '2025-06-07 10:31',
-    data: {
-      math: { ca: 15, mid: 13, exam: 50, comment: 'Excellent' },
-      eng: { ca: 12, mid: 10, exam: 44, comment: 'Very Good' },
-      bus: { ca: 13, mid: 12, exam: 47, comment: 'Good' }
-    }
-  }
-];
+<script>
+  // Set to your backend API base URL
+const API_BASE_URL = "https://goldlincschools.onrender.com";
+
+// --- DATA HOLDERS ---
+let teacher = null;
+let studentsByClass = {};
+let subjectsByClass = {};
+let notifications = [];
+let draftResults = [];
 let attendanceRecords = [];
 let gradebookData = {};
 let assignments = [];
 
-// --- UI Logic ---
+// --- INITIAL FETCH & SETUP ---
+window.addEventListener('DOMContentLoaded', fetchAndSetup);
+
+async function fetchAndSetup() {
+  // 1. Fetch teacher profile
+  teacher = await fetchTeacherProfile();
+  if (!teacher) return alert("Failed to load teacher profile.");
+  document.querySelector('.profile-section strong').textContent = teacher.name;
+  document.querySelector('.profile-section small').textContent = teacher.role || '';
+  document.querySelector('header h1').textContent = `Welcome, ${teacher.name}`;
+  document.querySelector('.avatar').textContent = (teacher.name || '').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+  // 2. Fetch classes
+  teacher.classes = await fetchTeacherClasses(teacher.id);
+
+  // 3. Fetch notifications
+  notifications = await fetchTeacherNotifications(teacher.id);
+
+  // 4. Fetch students and subjects for each class
+  studentsByClass = {};
+  subjectsByClass = {};
+  for (const cls of teacher.classes) {
+    studentsByClass[cls.id] = await fetchStudentsByClass(cls.name);
+    subjectsByClass[cls.id] = await fetchSubjectsByClass(cls.name);
+  }
+
+  // 5. Fetch assignments and draft results if you have endpoints for those
+  assignments = await fetchAssignments(teacher.id) || [];
+  draftResults = await fetchDraftResults(teacher.id) || [];
+
+  // 6. Render initial UI
+  renderClassesList();
+  renderStudentsBlock();
+}
+
+// --- BACKEND API CALLS ---
+async function fetchTeacherProfile() {
+  try {
+    // You may need auth token/JWT here
+    const res = await fetch(`${API_BASE_URL}/api/teachers/me`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+async function fetchTeacherClasses(teacherId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/classes?teacher_id=${encodeURIComponent(teacherId)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.classes) ? data.classes : [];
+  } catch { return []; }
+}
+async function fetchTeacherNotifications(teacherId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/notifications`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.notifications) ? data.notifications : [];
+  } catch { return []; }
+}
+async function fetchStudentsByClass(className) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(className)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.students) ? data.students.map(stu => ({
+      ...stu,
+      id: stu.student_id || stu.regNo
+    })) : [];
+  } catch { return []; }
+}
+async function fetchSubjectsByClass(className) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/subjects?class=${encodeURIComponent(className)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.subjects) ? data.subjects : [];
+  } catch { return []; }
+}
+async function fetchAssignments(teacherId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/assignments`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.assignments) ? data.assignments : [];
+  } catch { return []; }
+}
+async function fetchDraftResults(teacherId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/draft-results`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.draftResults) ? data.draftResults : [];
+  } catch { return []; }
+}
+
+// --- UI LOGIC ---
 const sidebarBtns = document.querySelectorAll('.sidebar nav button');
 const sections = {
   dashboard: document.getElementById('section-dashboard'),
@@ -223,7 +281,7 @@ const sections = {
   profile: document.getElementById('section-profile')
 };
 sidebarBtns.forEach(btn => {
-  btn.onclick = function() {
+  btn.onclick = function () {
     sidebarBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     Object.values(sections).forEach(s => s.style.display = 'none');
@@ -237,7 +295,7 @@ sidebarBtns.forEach(btn => {
   }
 });
 
-// --- Hamburger menu for sidebar (mobile) ---
+// Hamburger menu for sidebar (mobile)
 function toggleSidebarMenu() {
   document.querySelector('.sidebar').classList.toggle('open');
 }
@@ -259,6 +317,7 @@ let selectedClassId = null;
 function renderClassesList() {
   const classList = document.getElementById('class-list');
   classList.innerHTML = '';
+  if (!teacher.classes) return;
   teacher.classes.forEach(cls => {
     const li = document.createElement('li');
     const btn = document.createElement('button');
@@ -283,7 +342,7 @@ function renderStudentsBlock() {
     block.innerHTML = '<div class="card students-table"><em>No students found in this class.</em></div>';
     return;
   }
-  let html = `<div class="card students-table"><h2>Students in ${teacher.classes.find(c=>c.id===selectedClassId).name}</h2>
+  let html = `<div class="card students-table"><h2>Students in ${teacher.classes.find(c => c.id === selectedClassId).name}</h2>
     <table>
       <thead><tr>
         <th>Name</th><th>Reg. No.</th><th>Email</th><th>Actions</th>
@@ -308,6 +367,7 @@ function renderStudentsBlock() {
 function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');
   attendanceClassSel.innerHTML = '';
+  if (!teacher.classes) return;
   teacher.classes.forEach(cls => {
     let opt = document.createElement('option');
     opt.value = cls.id;
@@ -333,7 +393,7 @@ function renderAttendanceStudents() {
   html += `</tbody></table>`;
   document.getElementById('attendance-students').innerHTML = html;
 }
-document.getElementById('attendance-form').onsubmit = function(e){
+document.getElementById('attendance-form').onsubmit = function (e) {
   e.preventDefault();
   const classId = document.getElementById('attendance-class').value;
   const students = studentsByClass[classId] || [];
@@ -348,12 +408,14 @@ document.getElementById('attendance-form').onsubmit = function(e){
     }
   });
   alert('Attendance saved!');
+  // Optionally: POST attendance to backend here
 };
 
 // --- Gradebook ---
 function renderGradebook() {
   const gradebookClassSel = document.getElementById('gradebook-class');
   gradebookClassSel.innerHTML = '';
+  if (!teacher.classes) return;
   teacher.classes.forEach(cls => {
     let opt = document.createElement('option');
     opt.value = cls.id;
@@ -387,6 +449,7 @@ function renderGradebookTable() {
 function renderAssignments() {
   const assignmentClassSel = document.getElementById('assignment-class');
   assignmentClassSel.innerHTML = '';
+  if (!teacher.classes) return;
   teacher.classes.forEach(cls => {
     let opt = document.createElement('option');
     opt.value = cls.id;
@@ -403,10 +466,10 @@ function renderAssignmentList() {
   }
   let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
-    const cls = teacher.classes.find(c=>c.id===a.classId) || {};
+    const cls = teacher.classes.find(c => c.id === a.classId) || {};
     html += `<tr>
       <td data-label="Title">${a.title}</td>
-      <td data-label="Class">${cls.name||a.classId}</td>
+      <td data-label="Class">${cls.name || a.classId}</td>
       <td data-label="Due">${a.due}</td>
       <td data-label="Description">${a.desc}</td>
     </tr>`;
@@ -420,19 +483,31 @@ function openAssignmentModal() {
 function closeAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'none';
 }
-document.getElementById('assignmentForm').onsubmit = function(e){
+document.getElementById('assignmentForm').onsubmit = async function (e) {
   e.preventDefault();
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
-  assignments.push({
+  const assignment = {
     classId,
     title: fd.get('title'),
     desc: fd.get('desc'),
     due: fd.get('due')
-  });
-  alert('Assignment created!');
-  closeAssignmentModal();
-  renderAssignmentList();
+  };
+  // POST to backend
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(assignment)
+    });
+    if (!res.ok) throw new Error();
+    assignments.push(assignment);
+    alert('Assignment created!');
+    closeAssignmentModal();
+    renderAssignmentList();
+  } catch {
+    alert('Failed to create assignment.');
+  }
 };
 window.openAssignmentModal = openAssignmentModal;
 window.closeAssignmentModal = closeAssignmentModal;
@@ -450,36 +525,36 @@ function openResultModal(studentId, classId) {
     const data = (result.data && result.data[subj.id]) || {};
     html += `
       <label>${subj.name} - CA</label>
-      <input type="number" min="0" max="20" name="ca_${subj.id}" value="${data.ca||''}" required>
+      <input type="number" min="0" max="20" name="ca_${subj.id}" value="${data.ca || ''}" required>
       <label>${subj.name} - Mid Term</label>
-      <input type="number" min="0" max="20" name="mid_${subj.id}" value="${data.mid||''}" required>
+      <input type="number" min="0" max="20" name="mid_${subj.id}" value="${data.mid || ''}" required>
       <label>${subj.name} - Exam</label>
-      <input type="number" min="0" max="60" name="exam_${subj.id}" value="${data.exam||''}" required>
+      <input type="number" min="0" max="60" name="exam_${subj.id}" value="${data.exam || ''}" required>
       <label>${subj.name} - Teacher's Comment</label>
-      <input type="text" name="comment_${subj.id}" value="${data.comment||''}">
+      <input type="text" name="comment_${subj.id}" value="${data.comment || ''}">
     `;
   });
   html += `<h4 style="margin-top:15px;">Affective Skills (1-5)</h4>`;
-  const affectiveSkills = ['Punctuality','Attentiveness','Neatness','Honesty','Politeness','Perseverance','Relationship with Others','Organization Ability'];
+  const affectiveSkills = ['Punctuality', 'Attentiveness', 'Neatness', 'Honesty', 'Politeness', 'Perseverance', 'Relationship with Others', 'Organization Ability'];
   affectiveSkills.forEach(skill => {
     html += `<label>${skill}</label>
-      <input type="number" min="1" max="5" name="affective_${skill.toLowerCase().replace(/ /g,'_')}" value="${(result.affectiveRatings && result.affectiveRatings[skill])||''}">`;
+      <input type="number" min="1" max="5" name="affective_${skill.toLowerCase().replace(/ /g, '_')}" value="${(result.affectiveRatings && result.affectiveRatings[skill]) || ''}">`;
   });
   html += `<h4 style="margin-top:15px;">Psychomotor Skills (1-5)</h4>`;
-  const psychomotorSkills = ['Hand Writing','Drawing and Painting','Speech / Verbal Fluency','Quantitative Reasoning','Processing Speed','Retentiveness','Visual Memory','Public Speaking','Sports and Games'];
+  const psychomotorSkills = ['Hand Writing', 'Drawing and Painting', 'Speech / Verbal Fluency', 'Quantitative Reasoning', 'Processing Speed', 'Retentiveness', 'Visual Memory', 'Public Speaking', 'Sports and Games'];
   psychomotorSkills.forEach(skill => {
     html += `<label>${skill}</label>
-      <input type="number" min="1" max="5" name="psychomotor_${skill.toLowerCase().replace(/ |\\//g,'_')}" value="${(result.psychomotorRatings && result.psychomotorRatings[skill])||''}">`;
+      <input type="number" min="1" max="5" name="psychomotor_${skill.toLowerCase().replace(/ |\//g, '_')}" value="${(result.psychomotorRatings && result.psychomotorRatings[skill]) || ''}">`;
   });
   html += `<h4 style="margin-top:15px;">Attendance</h4>
     <label>No. of School Days</label>
-    <input type="number" min="0" name="attendance_total" value="${result.attendanceTotal||''}">
+    <input type="number" min="0" name="attendance_total" value="${result.attendanceTotal || ''}">
     <label>No. of Days Present</label>
-    <input type="number" min="0" name="attendance_present" value="${result.attendancePresent||''}">
+    <input type="number" min="0" name="attendance_present" value="${result.attendancePresent || ''}">
     <label>No. of Days Absent</label>
-    <input type="number" min="0" name="attendance_absent" value="${result.attendanceAbsent||''}">
+    <input type="number" min="0" name="attendance_absent" value="${result.attendanceAbsent || ''}">
     <label>% Attendance</label>
-    <input type="number" min="0" max="100" step="0.01" name="attendance_percent" value="${result.attendancePercent||''}">
+    <input type="number" min="0" max="100" step="0.01" name="attendance_percent" value="${result.attendancePercent || ''}">
   `;
   document.getElementById('resultFormFields').innerHTML = html;
   document.getElementById('resultModalBg').style.display = 'flex';
@@ -488,7 +563,7 @@ function closeResultModal() {
   document.getElementById('resultModalBg').style.display = 'none';
   currentResultStudentId = currentResultClassId = null;
 }
-document.getElementById('resultForm').onsubmit = function(e) {
+document.getElementById('resultForm').onsubmit = async function (e) {
   e.preventDefault();
   const fd = new FormData(e.target);
   const subjects = subjectsByClass[currentResultClassId] || [];
@@ -502,23 +577,23 @@ document.getElementById('resultForm').onsubmit = function(e) {
     };
   });
   let affectiveRatings = {};
-  ['Punctuality','Attentiveness','Neatness','Honesty','Politeness','Perseverance','Relationship with Others','Organization Ability']
-    .forEach(skill => affectiveRatings[skill]=Number(fd.get(`affective_${skill.toLowerCase().replace(/ /g,'_')}`)) );
+  ['Punctuality', 'Attentiveness', 'Neatness', 'Honesty', 'Politeness', 'Perseverance', 'Relationship with Others', 'Organization Ability']
+    .forEach(skill => affectiveRatings[skill] = Number(fd.get(`affective_${skill.toLowerCase().replace(/ /g, '_')}`)));
   let psychomotorRatings = {};
-  ['Hand Writing','Drawing and Painting','Speech / Verbal Fluency','Quantitative Reasoning','Processing Speed','Retentiveness','Visual Memory','Public Speaking','Sports and Games']
-    .forEach(skill => psychomotorRatings[skill]=Number(fd.get(`psychomotor_${skill.toLowerCase().replace(/ |\\//g,'_')}`)));
+  ['Hand Writing', 'Drawing and Painting', 'Speech / Verbal Fluency', 'Quantitative Reasoning', 'Processing Speed', 'Retentiveness', 'Visual Memory', 'Public Speaking', 'Sports and Games']
+    .forEach(skill => psychomotorRatings[skill] = Number(fd.get(`psychomotor_${skill.toLowerCase().replace(/ |\//g, '_')}`)));
   let attendanceTotal = Number(fd.get('attendance_total'));
   let attendancePresent = Number(fd.get('attendance_present'));
   let attendanceAbsent = Number(fd.get('attendance_absent'));
   let attendancePercent = Number(fd.get('attendance_percent'));
-  let draft = draftResults.find(r => r.studentId===currentResultStudentId && r.classId===currentResultClassId);
+  let draft = draftResults.find(r => r.studentId === currentResultStudentId && r.classId === currentResultClassId);
   if (!draft) {
     draft = {
       studentId: currentResultStudentId,
       classId: currentResultClassId,
       term: 'First Term',
       status: 'Draft',
-      updated: (new Date()).toISOString().slice(0,16).replace('T',' '),
+      updated: (new Date()).toISOString().slice(0, 16).replace('T', ' '),
       data: {}
     };
     draftResults.push(draft);
@@ -530,10 +605,22 @@ document.getElementById('resultForm').onsubmit = function(e) {
   draft.attendancePresent = attendancePresent;
   draft.attendanceAbsent = attendanceAbsent;
   draft.attendancePercent = attendancePercent;
-  draft.updated = (new Date()).toISOString().slice(0,16).replace('T',' ');
-  alert('Draft result saved!');
-  closeResultModal();
-  renderDraftResults();
+  draft.updated = (new Date()).toISOString().slice(0, 16).replace('T', ' ');
+
+  // Optionally: POST to backend
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/draft-results`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(draft)
+    });
+    if (!res.ok) throw new Error();
+    alert('Draft result saved!');
+    closeResultModal();
+    renderDraftResults();
+  } catch {
+    alert('Failed to save draft result.');
+  }
 };
 window.openResultModal = openResultModal;
 window.closeResultModal = closeResultModal;
@@ -543,11 +630,11 @@ function renderDraftResults() {
   const tbody = document.querySelector('#draft-results-table tbody');
   tbody.innerHTML = '';
   draftResults.forEach(dr => {
-    const stu = Object.values(studentsByClass).flat().find(s => s.id===dr.studentId) || {};
-    const cls = teacher.classes.find(c=>c.id===dr.classId) || {};
+    const stu = Object.values(studentsByClass).flat().find(s => s.id === dr.studentId) || {};
+    const cls = teacher.classes.find(c => c.id === dr.classId) || {};
     let tr = document.createElement('tr');
-    tr.innerHTML = `<td data-label="Student">${stu.name||'[Unknown]'}</td>
-      <td data-label="Class">${cls.name||dr.classId}</td>
+    tr.innerHTML = `<td data-label="Student">${stu.name || '[Unknown]'}</td>
+      <td data-label="Class">${cls.name || dr.classId}</td>
       <td data-label="Term">${dr.term}</td>
       <td data-label="Status">${dr.status}</td>
       <td data-label="Last Updated">${dr.updated}</td>
@@ -573,14 +660,19 @@ function renderNotifications() {
 }
 
 // --- Profile Update (Dummy) ---
-document.getElementById('profile-form').onsubmit = function(e){
+document.getElementById('profile-form').onsubmit = function (e) {
   e.preventDefault();
-  alert('Profile updated!');
+  alert('Profile updated! (Not yet connected to backend)');
 };
 
-// --- Initial Render ---
-renderClassesList();
-renderStudentsBlock();
-  </script>
+// --- Initial Render (called after data is fetched) ---
+window.renderClassesList = renderClassesList;
+window.renderStudentsBlock = renderStudentsBlock;
+window.openAssignmentModal = openAssignmentModal;
+window.closeAssignmentModal = closeAssignmentModal;
+window.openResultModal = openResultModal;
+window.closeResultModal = closeResultModal;
+
+</script>
 </body>
 </html>

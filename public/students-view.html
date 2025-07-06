@@ -5,9 +5,8 @@
     <title>View Students | Gold and Linc Schools</title>
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
- <link rel="stylesheet" href="students-view.css" />
+    <link rel="stylesheet" href="students-view.css" />
     <style>
-        /* Spinner Styles */
         #pageSpinnerOverlay, #tableSpinnerOverlay {
             position: fixed;
             inset: 0;
@@ -35,22 +34,37 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-        .mini-spinner {
-            width: 22px; height: 22px; border-width: 3px;
+        .mini-spinner { width: 22px; height: 22px; border-width: 3px; }
+        @keyframes spin { 0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
+        .students-table-wrapper { position: relative; }
+        .action-buttons { display: flex; gap: 0.5em; }
+        .btn-edit, .btn-delete {
+            border: none; background: none; cursor: pointer; font-size: 1.1em;
         }
-        @keyframes spin {
-            0% {transform: rotate(0deg);}
-            100% {transform: rotate(360deg);}
+        .btn-edit { color: #007bff; }
+        .btn-delete { color: #dc3545; }
+        /* Popup styles */
+        #editStudentModal {
+            display: none; position: fixed; z-index: 1100; left: 0; top: 0;
+            width: 100vw; height: 100vh; overflow: auto;
+            background: rgba(0,0,0,0.25);
+            align-items: center; justify-content: center;
         }
-        .students-table-wrapper {
-            position: relative;
+        #editStudentModal .modal-content {
+            background: #fff; padding: 2em; border-radius: 8px; min-width: 350px; max-width: 95vw;
         }
+        #editStudentModal .modal-header { font-weight: bold; margin-bottom: 1em; }
+        #editStudentModal .close { float:right; font-size:1.3em; cursor:pointer; }
+        #editStudentModal .edit-form-row { display: flex; gap: 1em; margin-bottom: 1em; }
+        #editStudentModal label { display: block; margin-bottom: .2em; }
+        #editStudentModal input, #editStudentModal select { width: 100%; padding: .4em; border: 1px solid #ccc; border-radius: 4px; }
+        #editStudentModal button[type=submit] { background: #007bff; color: #fff; border: none; padding:.5em 1em; border-radius: 4px; }
+        #editStudentModal .modal-actions { text-align: right; }
+        #editModalSpinner { display:none; margin-left: 10px; }
     </style>
 </head>
 <body>
-    <div id="pageSpinnerOverlay">
-        <div class="spinner"></div>
-    </div>
+    <div id="pageSpinnerOverlay"><div class="spinner"></div></div>
     <aside class="sidebar" id="sidebar">
         <div class="profile">
             <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
@@ -166,11 +180,12 @@
                             <th>Previous School</th>
                             <th>Admission Date</th>
                             <th>Academic Session</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody id="students-table-body">
                         <tr>
-                            <td colspan="18" style="text-align:center;color:#888;">No students found.</td>
+                            <td colspan="19" style="text-align:center;color:#888;">No students found.</td>
                         </tr>
                         </tbody>
                     </table>
@@ -179,6 +194,22 @@
             </div>
         </div>
     </main>
+
+    <div id="editStudentModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <div class="modal-header">Edit Student</div>
+            <form id="editStudentForm">
+                <div id="editModalSpinner"><div class="mini-spinner"></div></div>
+                <!-- fields will be dynamically generated -->
+                <div id="editFieldsWrapper"></div>
+                <div class="modal-actions">
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <button class="support-tab" aria-label="Open Support">Support</button>
     <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
 <script>
@@ -223,7 +254,6 @@
     let currentPage = 1;
     const pageSize = 15;
 
-    // Show/hide table spinner
     function showTableSpinner(show) {
         const spinner = document.getElementById('tableSpinnerOverlay');
         if (spinner) spinner.style.display = show ? 'flex' : 'none';
@@ -239,19 +269,11 @@
             .join('&');
         if (params) url += '?' + params;
 
-        const token = localStorage.getItem('student_token');
         try {
-            const res = await fetch(url, {
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
+            const res = await fetch(url);
             if(res.ok) {
                 const data = await res.json();
-                let studentsList = [];
-                if (Array.isArray(data.students)) {
-                    studentsList = data.students;
-                } else if (data.students && Array.isArray(data.students.student_id)) {
-                    studentsList = data.students.student_id;
-                }
+                let studentsList = Array.isArray(data.students) ? data.students : [];
                 studentsData = studentsList;
                 filteredData = studentsData;
                 currentPage = 1;
@@ -270,23 +292,18 @@
         }
     }
 
-    // Apply all filters (including search)
     function applyFilters() {
         const searchVal = document.getElementById('search-student-input').value.trim().toLowerCase();
-
-        // Get filters from form
         const form = document.getElementById('students-filter-form');
         const classVal = form.class.value;
         const classArmVal = form.classArm.value.trim().toLowerCase();
         const sessionVal = form.academicSession.value;
-        // For demo: accountStatus and subscriptionStatus are not used in filtering, you can implement as needed
 
         filteredData = studentsData.filter(stu => {
             let pass = true;
             if (classVal && (stu.class !== classVal && (stu.class?.name !== classVal))) pass = false;
             if (classArmVal && stu.classArm && stu.classArm.toLowerCase() !== classArmVal) pass = false;
             if (sessionVal && stu.academicSession !== sessionVal) pass = false;
-            // Search by surname, firstname, regNo, scratchCard
             if (searchVal) {
                 const fields = [
                     stu.surname, stu.firstname, stu.othernames, stu.regNo,
@@ -309,7 +326,7 @@
         const pageData = filteredData.slice(start, end);
 
         if(pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="18" style="text-align:center;color:#888;">No students found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;color:#888;">No students found.</td></tr>`;
         } else {
             for(const stu of pageData) {
                 const studentId = stu.student_id || stu._id || stu.regNo || '';
@@ -328,7 +345,7 @@
                         <td>${stu.regNo || ''}</td>
                         <td>${stu.scratchCard || '<span style="color:#888;">N/A</span>'}</td>
                         <td>${stu.gender || ''}</td>
-                        <td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td>
+                        <td>${stu.dob ? (formatDate(stu.dob)) : ''}</td>
                         <td>
                             <div><b>${stu.parentName || ''}</b></div>
                             <div style="font-size:0.95em;color:#888;">${stu.parentPhone || ''}</div>
@@ -341,8 +358,14 @@
                         <td>${stu.state || ''}</td>
                         <td>${stu.lga || ''}</td>
                         <td>${stu.previousSchool || ''}</td>
-                        <td>${stu.admissionDate ? (new Date(stu.admissionDate)).toLocaleDateString() : ''}</td>
+                        <td>${stu.admissionDate ? (formatDate(stu.admissionDate)) : ''}</td>
                         <td>${stu.academicSession || ''}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" title="Edit" onclick="editStudent('${encodeURIComponent(studentId)}')">&#9998;</button>
+                                <button class="btn-delete" title="Delete" onclick="deleteStudent('${encodeURIComponent(studentId)}')">&#128465;</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }
@@ -365,7 +388,6 @@
 
     document.getElementById('students-filter-form').onsubmit = function(e) {
         e.preventDefault();
-        // Only refetch from backend on filter submit, not on every input
         const filters = {
             class: this.class.value,
             classArm: this.classArm.value,
@@ -380,6 +402,133 @@
     document.getElementById('search-student-input').oninput = function() {
         currentPage = 1;
         renderStudentsTable();
+    };
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString();
+    }
+
+    // --- EDIT & DELETE Functionality ---
+    window.editStudent = async function(studentId) {
+        studentId = decodeURIComponent(studentId);
+        const stu = studentsData.find(s => (s.student_id || s._id || s.regNo) == studentId);
+        if (!stu) return alert('Student not found!');
+        openEditModal(stu);
+    };
+
+    window.deleteStudent = async function(studentId) {
+        studentId = decodeURIComponent(studentId);
+        if (!confirm('Are you sure you want to delete this student?')) return;
+        showTableSpinner(true);
+        try {
+            // You should have an API endpoint for delete, e.g. /api/students/:studentId
+            let res = await fetch(`${API_BASE_URL}/api/students/${studentId}`, { method: "DELETE" });
+            if (res.ok) {
+                studentsData = studentsData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
+                filteredData = filteredData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
+                renderStudentsTable();
+                alert('Student deleted!');
+            } else {
+                alert('Failed to delete student.');
+            }
+        } catch (e) {
+            alert('Network error.');
+        } finally {
+            showTableSpinner(false);
+        }
+    };
+
+    function openEditModal(stu) {
+        const modal = document.getElementById('editStudentModal');
+        const form = document.getElementById('editStudentForm');
+        const fields = [
+            {label: 'Surname', name: 'surname', type: 'text', required:true},
+            {label: 'First Name', name: 'firstname', type: 'text', required:true},
+            {label: 'Other Names', name: 'othernames', type: 'text'},
+            {label: 'Gender', name: 'gender', type: 'text', required:true},
+            {label: 'DOB', name: 'dob', type: 'date', required:true},
+            {label: 'Nationality', name: 'nationality', type: 'text'},
+            {label: 'State of Origin', name: 'state', type: 'text'},
+            {label: 'LGA', name: 'lga', type: 'text'},
+            {label: 'Home Address', name: 'address', type: 'text'},
+            {label: 'Reg No', name: 'regNo', type: 'text', readonly:true},
+            {label: 'Scratch Card', name: 'scratchCard', type: 'text', readonly:true},
+            {label: 'Class', name: 'class', type: 'text', required:true},
+            {label: 'Class Arm', name: 'classArm', type: 'text'},
+            {label: 'Previous School', name: 'previousSchool', type: 'text'},
+            {label: 'Admission Date', name: 'admissionDate', type: 'date'},
+            {label: 'Academic Session', name: 'academicSession', type: 'text'},
+            {label: 'Parent Name', name: 'parentName', type: 'text', required:true},
+            {label: 'Parent Relationship', name: 'parentRelationship', type: 'text'},
+            {label: 'Parent Phone', name: 'parentPhone', type: 'text'},
+            {label: 'Parent Email', name: 'parentEmail', type: 'email'},
+            {label: 'Parent Address', name: 'parentAddress', type: 'text'},
+            {label: 'Parent Occupation', name: 'parentOccupation', type: 'text'},
+            {label: 'Student Email', name: 'studentEmail', type: 'email'},
+            {label: 'Student Phone', name: 'studentPhone', type: 'text'},
+            {label: 'Religion', name: 'religion', type: 'text'},
+            {label: 'Blood Group', name: 'bloodGroup', type: 'text'},
+            {label: 'Genotype', name: 'genotype', type: 'text'},
+            {label: 'Medical', name: 'medical', type: 'text'}
+        ];
+        const wrapper = document.getElementById('editFieldsWrapper');
+        wrapper.innerHTML = '';
+        fields.forEach(f => {
+            let val = stu[f.name] || '';
+            if (f.type === "date" && val) {
+                val = (new Date(val)).toISOString().slice(0,10);
+            }
+            wrapper.innerHTML += `
+                <div class="edit-form-row">
+                    <div style="flex:1">
+                        <label>${f.label}${f.required? ' *':''}</label>
+                        <input name="${f.name}" type="${f.type}" value="${val}" ${f.readonly?'readonly':''} ${f.required?'required':''} />
+                    </div>
+                </div>
+            `;
+        });
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            const spinner = document.getElementById('editModalSpinner');
+            spinner.style.display = 'inline-block';
+            const formData = new FormData(form);
+            let editData = {};
+            for (const [k,v] of formData.entries()) editData[k]=v;
+            try {
+                // PATCH/PUT to /api/students/:studentId or similar
+                const studentId = stu.student_id || stu._id || stu.regNo;
+                let res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(studentId)}`, {
+                    method: "PUT",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(editData)
+                });
+                if (res.ok) {
+                    alert('Student updated!');
+                    // Update local data:
+                    Object.assign(stu, editData);
+                    renderStudentsTable();
+                    closeEditModal();
+                } else {
+                    alert('Failed to update student.');
+                }
+            } catch (e) {
+                alert('Network error.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        };
+        modal.style.display = "flex";
+    }
+    function closeEditModal() {
+        document.getElementById('editStudentModal').style.display = "none";
+    }
+
+    // Close modal on background click
+    document.getElementById('editStudentModal').onclick = function(e) {
+        if (e.target === this) closeEditModal();
     };
 
     // Initial fetch

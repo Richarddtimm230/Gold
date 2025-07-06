@@ -183,24 +183,28 @@ router.post('/', upload.single('photo'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     let query = studentsCollection();
+    let directLookup = false;
 
-    // Support direct lookup by student_id or regNo
+    // Direct lookup by student_id or regNo
     if (req.query.student_id) {
-      query = query.where('student_id', '==', req.query.student_id);
+      query = query.where('student_id', '==', String(req.query.student_id));
+      directLookup = true;
     } else if (req.query.regNo) {
-      query = query.where('regNo', '==', req.query.regNo);
+      query = query.where('regNo', '==', String(req.query.regNo));
+      directLookup = true;
     } else {
       if (req.query.class) query = query.where('class', '==', req.query.class);
       if (req.query.classArm) query = query.where('classArm', '==', req.query.classArm);
       if (req.query.academicSession) query = query.where('academicSession', '==', req.query.academicSession);
     }
 
-    const pageSize = parseInt(req.query.pageSize) || 20;
     let snap;
-    if (req.query.startAfter) {
-      snap = await query.orderBy('surname').startAfter(req.query.startAfter).limit(pageSize).get();
+    if (directLookup) {
+      snap = await query.limit(1).get();  // Only fetch one record for direct lookup
+    } else if (req.query.startAfter) {
+      snap = await query.orderBy('surname').startAfter(req.query.startAfter).limit(parseInt(req.query.pageSize)||20).get();
     } else {
-      snap = await query.orderBy('surname').limit(pageSize).get();
+      snap = await query.orderBy('surname').limit(parseInt(req.query.pageSize)||20).get();
     }
 
     const students = [];
@@ -244,7 +248,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
   
 
 

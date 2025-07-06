@@ -19,7 +19,7 @@
     <div class="profile">
       <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" class="avatar" alt="User Avatar" />
       <div>
-        <div class="name">RICHARD TIMOTHY</div>
+        <div class="name">SCHOOL ICT</div>
         <div class="role">System Administrator</div>
       </div>
     </div>
@@ -98,7 +98,14 @@
           <div class="form-fields">
             <div class="step-section-title">Academic Information</div>
             <div class="form-row">
-              <div class="form-group"><label>Registration Number *</label><input type="text" name="regNo" required /></div>
+              <div class="form-group">
+                <label>Registration Number *</label>
+                <input type="text" name="regNo" id="regNo" required readonly style="background:#eee; cursor:not-allowed;" />
+              </div>
+              <div class="form-group">
+                <label>Scratch Card *</label>
+                <input type="text" name="scratchCard" id="scratchCard" required readonly style="background:#eee; cursor:not-allowed;" />
+              </div>
               <div class="form-group">
                 <label>Class *</label>
                 <select name="class" required>
@@ -189,8 +196,13 @@
       document.getElementById('submit-btn').style.display = (step === 3) ? 'inline-block' : 'none';
     }
 
-    document.getElementById('next-btn').onclick = () => {
+    document.getElementById('next-btn').onclick = async () => {
       if (validateStep(currentStep)) {
+        // When moving to step 2, generate registration number and scratch card if not set yet
+        if (currentStep === 1) {
+          await generateRegistrationNumber();
+          generateScratchCard();
+        }
         currentStep++;
         showStep(currentStep);
       } else {
@@ -224,8 +236,52 @@
     function validateStep(step) {
       const form = document.forms[0];
       if (step === 1) return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
-      if (step === 2) return form.regNo.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
+      if (step === 2) return form.regNo.value && form.scratchCard.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
       return true;
+    }
+
+    /**
+     * Generate the next registration number in the format "currentyear/0001"
+     * by fetching the latest student or the current count from backend.
+     */
+    async function generateRegistrationNumber() {
+      const regNoInput = document.getElementById('regNo');
+      regNoInput.value = "Generating...";
+      regNoInput.style.color = "#aaa";
+      try {
+        const year = new Date().getFullYear();
+        // Example API: /api/students/last-reg-no/2025
+        const res = await fetch(`${API_BASE_URL}/api/students/last-reg-no/${year}`);
+        let serial = 1;
+        if (res.ok) {
+          const data = await res.json();
+          // data.lastSerial should be the last serial number (number, not string)
+          if (data && typeof data.lastSerial === "number") {
+            serial = data.lastSerial + 1;
+          }
+        }
+        const regNo = `${year}/${String(serial).padStart(4, '0')}`;
+        regNoInput.value = regNo;
+        regNoInput.style.color = "#222";
+      } catch(e) {
+        // fallback to just year/0001
+        const year = new Date().getFullYear();
+        regNoInput.value = `${year}/0001`;
+        regNoInput.style.color = "#222";
+      }
+    }
+
+    /**
+     * Generate an 8-character alphanumeric scratch card code
+     */
+    function generateScratchCard() {
+      const scratchCardInput = document.getElementById('scratchCard');
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let card = '';
+      for (let i = 0; i < 8; i++) {
+        card += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      scratchCardInput.value = card;
     }
 
     document.getElementById('enroll-student-form').onsubmit = async function(e) {

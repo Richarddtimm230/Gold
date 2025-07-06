@@ -5,8 +5,8 @@ const bcrypt = require('bcryptjs');
  * @param {FirebaseFirestore.Firestore} db - The Firestore instance.
  */
 async function ensureSuperAdmin(db) {
-  const superEmail = process.env.SUPERADMIN_EMAIL || 'superadmin@goldlincschools.com';
-  const superPassword = process.env.SUPERADMIN_PASSWORD || 'SuperSecurePassword123!';
+  const superEmail = process.env.SUPERADMIN_EMAIL || 'admin@goldlincschools.com';
+  const superPassword = process.env.SUPERADMIN_PASSWORD || 'GoldLinc123';
   const superName = process.env.SUPERADMIN_NAME || 'Super Admin';
 
   try {

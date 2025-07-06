@@ -1,0 +1,352 @@
+  
+    /* === General Reset === */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f9fafc;
+      color: #23272f;
+      box-sizing: border-box;
+    }
+    a {text-decoration: none; color: inherit;}
+    /* === Sidebar === */
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #007bff 0%, #1656a6 100%);
+      color: #fff;
+      min-height: 100vh;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 10;
+      padding-bottom: 2em;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar .profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 1.5em 1.2em 1em 1.2em;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .sidebar .avatar {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      background: #fff;
+      object-fit: cover;
+    }
+    .sidebar .name { font-weight: 700; font-size: 1.1em; }
+    .sidebar .role { font-size: 0.89em; color: #d0e6ff; }
+    .sidebar .search {
+      padding: 1em 1.2em;
+    }
+    .sidebar .search input {
+      width: 100%;
+      padding: 0.6em 1em;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      background: #e6f0fa;
+      color: #23272f;
+    }
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3em;
+      padding: 1em 0.7em;
+      margin-top: 0.5em;
+    }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.85em 1em;
+      border-radius: 18px;
+      font-weight: 500;
+      font-size: 1.05em;
+      transition: background 0.18s;
+      color: #eaf6ff;
+    }
+    .sidebar nav a:hover, .sidebar nav a.active {
+      background: rgba(255,255,255,0.13);
+      color: #fff;
+    }
+    /* === Main Content === */
+    .main-content {
+      margin-left: 250px;
+      padding: 0;
+      min-height: 100vh;
+      background: #f9fafc;
+      transition: margin 0.2s;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2em 2.2em 1.2em 2em;
+      background: #fff;
+      border-bottom: 1px solid #e5eaf0;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      box-shadow: 0 2px 10px 0 rgba(30, 80, 190, 0.03);
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.28em;
+      font-weight: 700;
+      color: #1656a6;
+      letter-spacing: 1px;
+    }
+    .school-title .logo {
+      width: 32px;
+      height: 32px;
+      vertical-align: middle;
+    }
+    .header-actions {
+      display: flex;
+      gap: 20px;
+      font-size: 1.4em;
+      color: #8da3c2;
+    }
+    .header-actions .icon {
+      cursor: pointer;
+      transition: color 0.14s;
+    }
+    .header-actions .icon:hover {
+      color: #007bff;
+    }
+    /* === Enroll Form Container === */
+    .enroll-container {
+      max-width: 730px;
+      margin: 2.2em auto 0 auto;
+      background: #fff;
+      padding: 2.5em 2.4em 2em 2.4em;
+      border-radius: 16px;
+      box-shadow: 0 6px 32px 0 rgba(0,30,90,0.07);
+    }
+    .enroll-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1.7em;
+    }
+    .enroll-steps {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.7em;
+      user-select: none;
+    }
+    .step {
+      width: 36px; height: 36px;
+      background: #eaf0fa;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 1.12em;
+      color: #007bff;
+      border: 2px solid #eaf0fa;
+      transition: background 0.25s, border 0.25s, color 0.2s;
+    }
+    .step.step-active {
+      background: #007bff;
+      color: #fff;
+      border: 2.5px solid #1656a6;
+      box-shadow: 0 1px 10px #007bff33;
+    }
+    .step-divider {
+      width: 32px; height: 3px;
+      background: #eaf0fa;
+      border-radius: 2px;
+    }
+    .enroll-title {
+      font-size: 1.45em;
+      font-weight: 700;
+      text-align: center;
+      color: #23272f;
+      letter-spacing: 0.6px;
+    }
+    /* === Enroll Form === */
+    .enroll-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.7em;
+    }
+    .enroll-step {
+      display: flex;
+      flex-direction: row;
+      gap: 2em;
+      margin-bottom: 1em;
+      align-items: flex-start;
+      min-height: 220px;
+    }
+    .form-photo-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 13px;
+      min-width: 120px;
+      margin-right: 10px;
+    }
+    .student-photo {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #eaf0fa;
+      background: #f0f4fa;
+      box-shadow: 0 3px 12px #eaf0fa;
+      margin-bottom: 0.5em;
+    }
+    .photo-upload-label {
+      cursor: pointer;
+      background: #eaf0fa;
+      color: #007bff;
+      border-radius: 16px;
+      padding: 0.35em 1.2em;
+      font-size: 0.98em;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+      border: 1px dashed #b8d8ff;
+      display: inline-block;
+    }
+    .photo-upload-label:hover {
+      background: #007bff;
+      color: #fff;
+    }
+    .form-fields {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+    .form-row {
+      display: flex;
+      gap: 1.3em;
+      margin-bottom: 0.3em;
+      flex-wrap: wrap;
+    }
+    .form-group {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3em;
+      min-width: 145px;
+    }
+    .form-group label {
+      font-weight: 500;
+      color: #1656a6;
+      font-size: 0.98em;
+      margin-bottom: 0.1em;
+    }
+    .form-group input,
+    .form-group select {
+      padding: 0.65em 1em;
+      border: 1.2px solid #dbe3ee;
+      border-radius: 12px;
+      outline: none;
+      font-size: 1em;
+      background: #f7faff;
+      color: #23272f;
+      transition: border 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #007bff;
+      background: #fff;
+    }
+    .step-section-title {
+      font-weight: 700;
+      color: #007bff;
+      margin-bottom: 0.5em;
+      font-size: 1.09em;
+      letter-spacing: 0.3px;
+    }
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 0.5em;
+      font-size: 0.97em;
+    }
+    /* === Actions === */
+    .enroll-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1em;
+      margin-top: 0.7em;
+    }
+    .btn-next, .btn-back {
+      font-family: inherit;
+      padding: 0.65em 2.1em;
+      font-size: 1em;
+      font-weight: 600;
+      border: none;
+      background: linear-gradient(90deg, #007bff 0%, #1656a6 100%);
+      color: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #007bff22;
+      outline: none;
+    }
+    .btn-back {
+      background: linear-gradient(90deg,#c1d8f5 0%,#eaf0fa 100%);
+      color: #1656a6;
+      box-shadow: none;
+    }
+    .btn-next:active, .btn-back:active {
+      transform: scale(0.97);
+    }
+    /* === Success Message === */
+    .enroll-success {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1em;
+      padding: 2.5em 0 2em 0;
+      color: #007b60;
+    }
+    .enroll-success h3 {
+      font-size: 1.28em;
+      margin: 0;
+      color: #007b60;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+    /* === Responsive Design === */
+    @media (max-width: 1050px) {
+      .main-content { margin-left: 0; }
+      .sidebar { position: relative; width: 100vw; min-height: unset; flex-direction: row; height: 70px; }
+      .sidebar .profile, .sidebar .search { display: none; }
+      .sidebar nav { flex-direction: row; gap: 0.7em; padding: 0.5em 0.2em; margin: 0; overflow-x: auto; }
+      .sidebar nav a { font-size: 1em; padding: 0.7em 0.9em; min-width: 100px; justify-content: center; border-radius: 12px; }
+    }
+    @media (max-width: 850px) {
+      .enroll-container { padding: 1.1em 0.6em; max-width: 99vw; border-radius: 0; }
+      .main-content { padding: 0; }
+      header { padding: 1em 0.5em; }
+    }
+    @media (max-width: 650px) {
+      .enroll-step { flex-direction: column; gap: 1.5em; min-height: unset; }
+      .form-photo-group { margin: 0 auto 0.8em auto; }
+      .enroll-header { margin-bottom: 1.2em; }
+      .enroll-steps { gap: 5px; }
+      .step-divider { width: 14px; }
+      .enroll-title { font-size: 1.09em; }
+      .form-row { flex-direction: column; gap: 0.7em; }
+      .form-fields { gap: 0.7em; }
+      .enroll-actions { justify-content: center; }
+    }
+    @media (max-width: 420px) {
+      .sidebar nav a { min-width: 80px; font-size: 0.95em; }
+      .school-title span { font-size: 0.98em; }
+    }
+  

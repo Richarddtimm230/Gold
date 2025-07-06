@@ -168,32 +168,58 @@
     const studentId = getQueryParam('student_id');
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-    // Fetch and render profile
+    // Fetch and render profile (updated to support student_id or regNo, and robust field display)
     async function fetchAndRenderStudent() {
-        if (!studentId) return;
+        if (!studentId) {
+            document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
+            return;
+        }
         try {
-            const res = await fetch(`${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentId)}`);
-            const data = await res.json();
-            let stu = (Array.isArray(data.students) ? data.students[0] : null) || data.students?.student_id?.[0] || null;
+            // Try with student_id first
+            let res = await fetch(`${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentId)}`);
+            let data = await res.json();
+            let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
+
+            // If not found, try as regNo
+            if (!stu) {
+                res = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentId)}`);
+                data = await res.json();
+                stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
+            }
+
             if (!stu) {
                 document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
                 return;
             }
             document.getElementById('student-avatar').src = stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
-            document.getElementById('student-name').textContent = (stu.firstname||'') + ' ' + (stu.surname||'');
-            document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo||studentId);
+            document.getElementById('student-name').textContent = ((stu.firstname||'') + ' ' + (stu.surname||'')).trim();
+            document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentId);
+
+            // Render all available fields in a table
             const table = document.getElementById('profile-table');
-            table.innerHTML = `
-              <tr><td><b>Class</b></td><td>${stu.class && stu.class.name ? stu.class.name : (stu.class || '')}</td></tr>
-              <tr><td><b>Class Arm</b></td><td>${stu.classArm || ''}</td></tr>
-              <tr><td><b>Date of Birth</b></td><td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td></tr>
-              <tr><td><b>Gender</b></td><td>${stu.gender || ''}</td></tr>
-              <tr><td><b>Parent Name</b></td><td>${stu.parentName || ''}</td></tr>
-              <tr><td><b>Parent Phone</b></td><td>${stu.parentPhone || ''}</td></tr>
-              <tr><td><b>Email</b></td><td>${stu.studentEmail || ''}</td></tr>
-              <tr><td><b>Phone</b></td><td>${stu.studentPhone || ''}</td></tr>
-              <tr><td><b>Address</b></td><td>${stu.address || ''}</td></tr>
-            `;
+            const detailFields = [
+                {label: "Class", value: stu.class && stu.class.name ? stu.class.name : (stu.class || '')},
+                {label: "Class Arm", value: stu.classArm || ''},
+                {label: "Scratch Card", value: stu.scratchCard || ''},
+                {label: "Date of Birth", value: stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''},
+                {label: "Gender", value: stu.gender || ''},
+                {label: "Parent Name", value: stu.parentName || ''},
+                {label: "Parent Relationship", value: stu.parentRelationship || ''},
+                {label: "Parent Phone", value: stu.parentPhone || ''},
+                {label: "Parent Email", value: stu.parentEmail || ''},
+                {label: "Parent Address", value: stu.parentAddress || ''},
+                {label: "Parent Occupation", value: stu.parentOccupation || ''},
+                {label: "Student Email", value: stu.studentEmail || ''},
+                {label: "Student Phone", value: stu.studentPhone || ''},
+                {label: "Address", value: stu.address || ''},
+                {label: "Nationality", value: stu.nationality || ''},
+                {label: "State", value: stu.state || ''},
+                {label: "LGA", value: stu.lga || ''},
+                {label: "Previous School", value: stu.previousSchool || ''},
+                {label: "Admission Date", value: stu.admissionDate ? (new Date(stu.admissionDate)).toLocaleDateString() : ''},
+                {label: "Academic Session", value: stu.academicSession || ''}
+            ];
+            table.innerHTML = detailFields.map(f => `<tr><td><b>${f.label}</b></td><td>${f.value}</td></tr>`).join('');
         } catch (err) {
             document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
         }
@@ -217,12 +243,8 @@
             if (el.name) data[el.name] = el.value;
         });
         data.student_id = studentId;
-        // POST to backend endpoint e.g. /api/students/skills-report (implement on backend)
         document.getElementById('skillsStatus').textContent = "Saving...";
         try {
-            // Replace with actual API endpoint:
-            // await fetch(`${API_BASE_URL}/api/students/skills-report`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data)});
-            // Simulated:
             setTimeout(() => {
                 document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";
                 setTimeout(()=>{document.getElementById('skillsModal').classList.remove('active');},1000);

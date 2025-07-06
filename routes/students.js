@@ -33,6 +33,16 @@ function generateStudentId() {
 }
 function studentsCollection() { return db.collection('students'); }
 
+// Utility: generate 8-character alphanumeric scratch card
+function generateScratchCard() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let card = '';
+  for (let i = 0; i < 8; i++) {
+    card += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return card;
+}
+
 // --- Joi validation schema for enrollment ---
 const studentSchema = Joi.object({
   surname: Joi.string().required(),
@@ -40,6 +50,7 @@ const studentSchema = Joi.object({
   dob: Joi.string().required(),
   gender: Joi.string().required(),
   regNo: Joi.string().required(),
+  scratchCard: Joi.string().length(8).alphanum().required(),
   class: Joi.string().required(),
   parentName: Joi.string().required(),
   parentRelationship: Joi.string().required(),
@@ -68,6 +79,11 @@ const studentSchema = Joi.object({
 // --- Enroll a new student ---
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
+    // If scratchCard is not set, generate one
+    if (!req.body.scratchCard || req.body.scratchCard.length !== 8) {
+      req.body.scratchCard = generateScratchCard();
+    }
+
     const { error, value: data } = studentSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
@@ -75,6 +91,25 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const regNoSnap = await studentsCollection().where('regNo', '==', data.regNo).limit(1).get();
     if (!regNoSnap.empty) {
       return res.status(400).json({ error: 'A student with that registration number already exists.' });
+    }
+    // Ensure scratchCard is unique
+    const scratchCardSnap = await studentsCollection().where('scratchCard', '==', data.scratchCard).limit(1).get();
+    if (!scratchCardSnap.empty) {
+      // Try a few more times to generate a unique one (should be rare)
+      let tries = 0;
+      let newScratch;
+      do {
+        newScratch = generateScratchCard();
+        tries++;
+        const check = await studentsCollection().where('scratchCard', '==', newScratch).limit(1).get();
+        if (check.empty) {
+          data.scratchCard = newScratch;
+          break;
+        }
+      } while (tries < 5);
+      if (tries === 5) {
+        return res.status(400).json({ error: 'Could not generate a unique scratch card. Please try again.' });
+      }
     }
     let student_id = data.student_id || generateStudentId();
     const studentIdSnap = await studentsCollection().where('student_id', '==', student_id).limit(1).get();
@@ -108,6 +143,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       address: data.address || '',
       photoBase64: photoBase64,
       regNo: data.regNo,
+      scratchCard: data.scratchCard,
       class: data.class,
       classArm: data.classArm || '',
       previousSchool: data.previousSchool || '',
@@ -169,6 +205,7 @@ router.get('/', async (req, res) => {
         surname: d.surname,
         firstname: d.firstname,
         regNo: d.regNo,
+        scratchCard: d.scratchCard,
         class: d.class,
         classArm: d.classArm,
         photoBase64: d.photoBase64 || '',

@@ -1263,11 +1263,8 @@ export {
   renderAttendanceStudents
 };
 
-import { apiGet, apiPost } from './utils/api.js'; // Adjust the path if needed
-
-let assignments = []; // Will hold fetched assignments
-
-async function renderAssignments() {
+// --- Assignments ---
+function renderAssignments() {
   const assignmentClassSel = document.getElementById('assignment-class');
   assignmentClassSel.innerHTML = '';
   teacher.classes.forEach(cls => {
@@ -1276,33 +1273,8 @@ async function renderAssignments() {
     opt.innerText = cls.name;
     assignmentClassSel.appendChild(opt);
   });
-
-  // Fetch assignments for the selected class (or all classes for this teacher)
-  // If you want to fetch for a specific class, use its value. Here we load for the first class by default.
-  const firstClassId = teacher.classes.length ? teacher.classes[0].id : null;
-  if (firstClassId) {
-    await fetchAssignments(firstClassId);
-    assignmentClassSel.value = firstClassId;
-  } else {
-    assignments = [];
-  }
-
-  assignmentClassSel.onchange = async function() {
-    await fetchAssignments(this.value);
-    renderAssignmentList();
-  };
   renderAssignmentList();
 }
-
-async function fetchAssignments(classId) {
-  try {
-    // Backend returns [{id, title, desc, due, ...}]
-    assignments = await apiGet(`/assignments/${classId}`);
-  } catch (e) {
-    assignments = [];
-  }
-}
-
 function renderAssignmentList() {
   const div = document.getElementById('assignment-list');
   if (!assignments.length) {
@@ -1311,7 +1283,7 @@ function renderAssignmentList() {
   }
   let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
-    const cls = teacher.classes.find(c => c.id === a.classId) || {};
+    const cls = teacher.classes.find(c=>c.id===a.classId) || {};
     html += `<tr>
       <td data-label="Title">${a.title}</td>
       <td data-label="Class">${cls.name||a.classId}</td>
@@ -1322,41 +1294,29 @@ function renderAssignmentList() {
   html += '</tbody></table>';
   div.innerHTML = html;
 }
-
 function openAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'flex';
 }
 function closeAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'none';
 }
-
-// Submit form: Save assignment to backend, refresh list
-document.getElementById('assignmentForm').onsubmit = async function(e) {
+document.getElementById('assignmentForm').onsubmit = function(e){
   e.preventDefault();
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
-  const payload = {
+  assignments.push({
     classId,
     title: fd.get('title'),
     desc: fd.get('desc'),
     due: fd.get('due')
-  };
-  try {
-    await apiPost(`/assignments/${classId}`, payload);
-    alert('Assignment created!');
-    await fetchAssignments(classId);
-    closeAssignmentModal();
-    renderAssignmentList();
-  } catch (err) {
-    alert('Failed to create assignment: ' + err.message);
-  }
+  });
+  alert('Assignment created!');
+  closeAssignmentModal();
+  renderAssignmentList();
 };
-
 window.openAssignmentModal = openAssignmentModal;
 window.closeAssignmentModal = closeAssignmentModal;
 
-// Optionally, export for use elsewhere
-export { renderAssignments, renderAssignmentList, fetchAssignments };
 // --- Result Modal ---
 let currentResultStudentId = null;
 let currentResultClassId = null;

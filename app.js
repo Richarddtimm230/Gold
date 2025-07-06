@@ -100,7 +100,7 @@ app.use('/api/assignments', assignmentsRoute);
 app.use('/api/attendance', attendanceRoute);
 app.use('/api/notifications', notificationsRoute);
 app.use('/api/profile', profileRoute);
-
+app.use('/api/teachers', require('./routes/teachers'));
 app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', require('./routes/subjects'));

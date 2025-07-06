@@ -180,14 +180,20 @@ router.post('/', upload.single('photo'), async (req, res) => {
     res.status(500).json({ error: error.message || 'Unknown server error.' });
   }
 });
-
-// --- Retrieve all students with filters (summary fields only, with pagination) ---
 router.get('/', async (req, res) => {
   try {
     let query = studentsCollection();
-    if (req.query.class) query = query.where('class', '==', req.query.class);
-    if (req.query.classArm) query = query.where('classArm', '==', req.query.classArm);
-    if (req.query.academicSession) query = query.where('academicSession', '==', req.query.academicSession);
+
+    // Support direct lookup by student_id or regNo
+    if (req.query.student_id) {
+      query = query.where('student_id', '==', req.query.student_id);
+    } else if (req.query.regNo) {
+      query = query.where('regNo', '==', req.query.regNo);
+    } else {
+      if (req.query.class) query = query.where('class', '==', req.query.class);
+      if (req.query.classArm) query = query.where('classArm', '==', req.query.classArm);
+      if (req.query.academicSession) query = query.where('academicSession', '==', req.query.academicSession);
+    }
 
     const pageSize = parseInt(req.query.pageSize) || 20;
     let snap;
@@ -238,6 +244,9 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+  
+
 
 // --- Get logged-in student profile for dashboard/profile page ---
 router.get('/me', studentAuthMiddleware, async (req, res) => {

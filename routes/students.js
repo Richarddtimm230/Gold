@@ -604,4 +604,59 @@ router.get('/:regNo/skills-report', adminAuth, async (req, res) => {
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
+// --- Update student by student_id or regNo (admin only) ---
+router.put('/:studentId', adminAuth, upload.single('photo'), async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    // Find by student_id or regNo
+    let snap = await studentsCollection().where('student_id', '==', studentId).limit(1).get();
+    if (snap.empty) {
+      snap = await studentsCollection().where('regNo', '==', studentId).limit(1).get();
+    }
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docRef = snap.docs[0].ref;
+
+    // Allow all updatable fields
+    const allowedFields = [
+      "surname", "firstname", "othernames", "dob", "gender", "nationality", "state", "lga", "address",
+      "class", "classArm", "previousSchool", "admissionDate", "academicSession",
+      "parentName", "parentRelationship", "parentPhone", "parentEmail", "parentAddress", "parentOccupation",
+      "studentEmail", "studentPhone", "religion", "bloodGroup", "genotype", "medical"
+    ];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (key in req.body) updates[key] = req.body[key];
+    }
+
+    // Optionally handle photo upload
+    if (req.file) {
+      updates.photoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+    updates.updatedAt = new Date();
+
+    await docRef.update(updates);
+    res.json({ message: "Student updated successfully!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Unknown server error." });
+  }
+});
+
+// --- Delete student by student_id or regNo (admin only) ---
+router.delete('/:studentId', adminAuth, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    // Find by student_id or regNo
+    let snap = await studentsCollection().where('student_id', '==', studentId).limit(1).get();
+    if (snap.empty) {
+      snap = await studentsCollection().where('regNo', '==', studentId).limit(1).get();
+    }
+    if (snap.empty) return res.status(404).json({ error: 'Student not found' });
+    const docRef = snap.docs[0].ref;
+    await docRef.delete();
+    res.json({ message: "Student deleted successfully!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Unknown server error." });
+  }
+});
+                                                      
 module.exports = router;

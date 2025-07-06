@@ -44,12 +44,13 @@ function generateScratchCard() {
 }
 
 // --- Joi validation schema for enrollment ---
+// PATCH: regNo is no longer required or accepted from frontend
 const studentSchema = Joi.object({
   surname: Joi.string().required(),
   firstname: Joi.string().required(),
   dob: Joi.string().required(),
   gender: Joi.string().required(),
-  regNo: Joi.string().required(),
+  // regNo: Joi.string().required(), // REMOVE THIS LINE
   scratchCard: Joi.string().length(8).alphanum().required(),
   class: Joi.string().required(),
   parentName: Joi.string().required(),
@@ -77,6 +78,7 @@ const studentSchema = Joi.object({
 });
 
 // --- Enroll a new student ---
+// PATCH: regNo is generated here, NOT from frontend
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     // If scratchCard is not set, generate one
@@ -84,14 +86,38 @@ router.post('/', upload.single('photo'), async (req, res) => {
       req.body.scratchCard = generateScratchCard();
     }
 
+    // PATCH: Remove regNo from body before validation if accidentally sent
+    if (req.body.regNo) delete req.body.regNo;
+
     const { error, value: data } = studentSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    // Ensure regNo and student_id are unique
-    const regNoSnap = await studentsCollection().where('regNo', '==', data.regNo).limit(1).get();
+    // PATCH: Generate regNo on backend, atomic style
+    const year = new Date().getFullYear();
+    // Get highest regNo for this year
+    const regNoSnap = await studentsCollection()
+      .where('regNo', '>=', `${year}/0001`)
+      .where('regNo', '<=', `${year}/9999`)
+      .orderBy('regNo', 'desc')
+      .limit(1)
+      .get();
+
+    let nextSerial = 1;
     if (!regNoSnap.empty) {
-      return res.status(400).json({ error: 'A student with that registration number already exists.' });
+      const lastRegNo = regNoSnap.docs[0].data().regNo;
+      const parts = lastRegNo.split('/');
+      if (parts.length === 2) {
+        nextSerial = parseInt(parts[1], 10) + 1;
+      }
     }
+    const regNo = `${year}/${String(nextSerial).padStart(4, '0')}`;
+
+    // Ensure regNo and student_id are unique (should always be unique if above logic is atomic)
+    const regNoExistsSnap = await studentsCollection().where('regNo', '==', regNo).limit(1).get();
+    if (!regNoExistsSnap.empty) {
+      return res.status(400).json({ error: 'A student with that registration number already exists. Please try again.' });
+    }
+
     // Ensure scratchCard is unique
     const scratchCardSnap = await studentsCollection().where('scratchCard', '==', data.scratchCard).limit(1).get();
     if (!scratchCardSnap.empty) {
@@ -142,7 +168,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       lga: data.lga || '',
       address: data.address || '',
       photoBase64: photoBase64,
-      regNo: data.regNo,
+      regNo, // PATCH: backend-generated regNo
       scratchCard: data.scratchCard,
       class: data.class,
       classArm: data.classArm || '',
@@ -174,12 +200,14 @@ router.post('/', upload.single('photo'), async (req, res) => {
     };
 
     await studentsCollection().add(studentDoc);
-    res.status(201).json({ message: 'Student enrolled successfully!' });
+    res.status(201).json({ message: 'Student enrolled successfully!', regNo }); // PATCH: return regNo
   } catch (error) {
     console.error('[ENROLL ERROR]', error);
     res.status(500).json({ error: error.message || 'Unknown server error.' });
   }
 });
+
+
 router.get('/', async (req, res) => {
   try {
     let query = studentsCollection();

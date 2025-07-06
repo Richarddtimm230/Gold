@@ -5,10 +5,47 @@
     <title>View Students | Gold and Linc Schools</title>
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
-    <!-- CSS is intentionally excluded as requested -->
-
-
-
+ <link rel="stylesheet" href="students-view.css" />
+    <style>
+        /* Spinner Styles */
+        #pageSpinnerOverlay, #tableSpinnerOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s;
+        }
+        #tableSpinnerOverlay {
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10;
+        }
+        .spinner, .mini-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        .mini-spinner {
+            width: 22px; height: 22px; border-width: 3px;
+        }
+        @keyframes spin {
+            0% {transform: rotate(0deg);}
+            100% {transform: rotate(360deg);}
+        }
+        .students-table-wrapper {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <div id="pageSpinnerOverlay">
@@ -106,7 +143,8 @@
                     <h3 class="students-list-title">Students List</h3>
                     <input type="text" id="search-student-input" class="sub-search" placeholder="Search by name, reg no...">
                 </div>
-                <div class="students-table-wrapper">
+                <div class="students-table-wrapper" style="position:relative;">
+                    <div id="tableSpinnerOverlay" style="display:none;"><div class="spinner"></div></div>
                     <table class="students-table" id="students-table">
                         <thead>
                         <tr>
@@ -117,15 +155,22 @@
                             <th>Class</th>
                             <th>Arm</th>
                             <th>Reg No</th>
+                            <th>Scratch Card</th>
                             <th>Gender</th>
                             <th>DOB</th>
                             <th>Parent</th>
                             <th>Contact</th>
+                            <th>Nationality</th>
+                            <th>State</th>
+                            <th>LGA</th>
+                            <th>Previous School</th>
+                            <th>Admission Date</th>
+                            <th>Academic Session</th>
                         </tr>
                         </thead>
                         <tbody id="students-table-body">
                         <tr>
-                            <td colspan="11" style="text-align:center;color:#888;">No students found.</td>
+                            <td colspan="18" style="text-align:center;color:#888;">No students found.</td>
                         </tr>
                         </tbody>
                     </table>
@@ -172,14 +217,21 @@
         if (e.key === 'Escape') closeSidebar();
     });
 
-    // Students table logic (as before)
+    // Students table logic
     let studentsData = [];
     let filteredData = [];
     let currentPage = 1;
     const pageSize = 15;
 
+    // Show/hide table spinner
+    function showTableSpinner(show) {
+        const spinner = document.getElementById('tableSpinnerOverlay');
+        if (spinner) spinner.style.display = show ? 'flex' : 'none';
+    }
+
     // Fetch students from backend
     async function fetchStudents(filters = {}) {
+        showTableSpinner(true);
         let url = API_BASE_URL + '/api/students';
         const params = Object.keys(filters)
             .filter(key => filters[key])
@@ -194,7 +246,6 @@
             });
             if(res.ok) {
                 const data = await res.json();
-                // FIX: Support backend {"students":{"student_id":[...]}}
                 let studentsList = [];
                 if (Array.isArray(data.students)) {
                     studentsList = data.students;
@@ -203,6 +254,7 @@
                 }
                 studentsData = studentsList;
                 filteredData = studentsData;
+                currentPage = 1;
                 renderStudentsTable();
             } else {
                 studentsData = [];
@@ -213,28 +265,51 @@
             studentsData = [];
             filteredData = [];
             renderStudentsTable();
+        } finally {
+            showTableSpinner(false);
         }
     }
 
+    // Apply all filters (including search)
+    function applyFilters() {
+        const searchVal = document.getElementById('search-student-input').value.trim().toLowerCase();
+
+        // Get filters from form
+        const form = document.getElementById('students-filter-form');
+        const classVal = form.class.value;
+        const classArmVal = form.classArm.value.trim().toLowerCase();
+        const sessionVal = form.academicSession.value;
+        // For demo: accountStatus and subscriptionStatus are not used in filtering, you can implement as needed
+
+        filteredData = studentsData.filter(stu => {
+            let pass = true;
+            if (classVal && (stu.class !== classVal && (stu.class?.name !== classVal))) pass = false;
+            if (classArmVal && stu.classArm && stu.classArm.toLowerCase() !== classArmVal) pass = false;
+            if (sessionVal && stu.academicSession !== sessionVal) pass = false;
+            // Search by surname, firstname, regNo, scratchCard
+            if (searchVal) {
+                const fields = [
+                    stu.surname, stu.firstname, stu.othernames, stu.regNo,
+                    stu.scratchCard, stu.studentEmail, stu.studentPhone, stu.parentName, stu.parentPhone
+                ].map(x => (x || '').toLowerCase());
+                if (!fields.some(field => field.includes(searchVal))) pass = false;
+            }
+            return pass;
+        });
+    }
+
     function renderStudentsTable() {
+        applyFilters();
         const tbody = document.getElementById('students-table-body');
         tbody.innerHTML = '';
-        const searchVal = document.getElementById('search-student-input').value.toLowerCase();
-        filteredData = studentsData.filter(stu =>
-            (!searchVal || (
-                (stu.surname && stu.surname.toLowerCase().includes(searchVal)) ||
-                (stu.firstname && stu.firstname.toLowerCase().includes(searchVal)) ||
-                (stu.regNo && stu.regNo.toLowerCase().includes(searchVal))
-            ))
-        );
         const totalPages = Math.ceil(filteredData.length / pageSize);
-        if(currentPage > totalPages) currentPage = 1;
+        if(currentPage > totalPages && totalPages > 0) currentPage = 1;
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
         const pageData = filteredData.slice(start, end);
 
         if(pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#888;">No students found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="18" style="text-align:center;color:#888;">No students found.</td></tr>`;
         } else {
             for(const stu of pageData) {
                 const studentId = stu.student_id || stu._id || stu.regNo || '';
@@ -251,6 +326,7 @@
                         <td>${stu.class && stu.class.name ? stu.class.name : (stu.class || '')}</td>
                         <td>${stu.classArm || ''}</td>
                         <td>${stu.regNo || ''}</td>
+                        <td>${stu.scratchCard || '<span style="color:#888;">N/A</span>'}</td>
                         <td>${stu.gender || ''}</td>
                         <td>${stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''}</td>
                         <td>
@@ -261,6 +337,12 @@
                             <div>${stu.studentEmail || ''}</div>
                             <div style="font-size:0.95em;color:#888;">${stu.studentPhone || ''}</div>
                         </td>
+                        <td>${stu.nationality || ''}</td>
+                        <td>${stu.state || ''}</td>
+                        <td>${stu.lga || ''}</td>
+                        <td>${stu.previousSchool || ''}</td>
+                        <td>${stu.admissionDate ? (new Date(stu.admissionDate)).toLocaleDateString() : ''}</td>
+                        <td>${stu.academicSession || ''}</td>
                     </tr>
                 `;
             }
@@ -283,6 +365,7 @@
 
     document.getElementById('students-filter-form').onsubmit = function(e) {
         e.preventDefault();
+        // Only refetch from backend on filter submit, not on every input
         const filters = {
             class: this.class.value,
             classArm: this.classArm.value,
@@ -299,6 +382,7 @@
         renderStudentsTable();
     };
 
+    // Initial fetch
     fetchStudents();
 </script>
 </body>

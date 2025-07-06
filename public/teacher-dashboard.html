@@ -4,655 +4,548 @@
   <meta charset="UTF-8">
   <title>Teacher Dashboard - Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width,initial-scale=0.90">
-  <!-- CSS intentionally omitted as per your request -->
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <style>
     :root {
-  --primary: #003366;
-  --primary-light: #f0f6fa;
-  --accent: #10b981;
-  --sidebar-bg: #16213e;
-  --sidebar-active: #20305f;
-  --border: #e5e7eb;
-  --box-shadow: 0 2px 12px rgba(30,60,80,0.13), 0 1.5px 5px rgba(30,60,80,0.06);
-  --radius: 14px;
-  --radius-sm: 7px;
-  --transition: 0.17s cubic-bezier(.4,0,.2,1);
-  --font: 'Inter', 'Segoe UI', Arial, sans-serif;
-  --text: #222b45;
-  --muted: #6b7280;
-  --table-header: #eaf1fa;
-  --danger: #e74c3c;
-}
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+      --primary: #003366;
+      --primary-light: #f0f6fa;
+      --accent: #10b981;
+      --sidebar-bg: #16213e;
+      --sidebar-active: #20305f;
+      --border: #e5e7eb;
+      --box-shadow: 0 2px 12px rgba(30,60,80,0.13), 0 1.5px 5px rgba(30,60,80,0.06);
+      --radius: 14px;
+      --radius-sm: 7px;
+      --transition: 0.17s cubic-bezier(.4,0,.2,1);
+      --font: 'Inter', 'Segoe UI', Arial, sans-serif;
+      --text: #222b45;
+      --muted: #6b7280;
+      --table-header: #eaf1fa;
+      --danger: #e74c3c;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--primary-light);
+      color: var(--text);
+      min-height: 100vh;
+      letter-spacing: 0.02em;
+      font-size: 16px;
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+      transition: flex-direction 0.2s;
+    }
+    .sidebar {
+      width: 270px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 0 0;
+      box-shadow: 2px 0 14px rgba(0,0,0,0.07);
+      z-index: 20;
+      position: relative;
+      transition: width 0.3s;
+    }
+    .school-logo {
+      text-align: center;
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 32px 0 25px 0;
+      letter-spacing: 2px;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 0 22px;
+    }
+    .sidebar nav button {
+      background: none;
+      border: none;
+      color: #c7d5ed;
+      font-size: 1.08em;
+      text-align: left;
+      padding: 14px 0 14px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      outline: none;
+      position: relative;
+      transition: background var(--transition), color var(--transition);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+    .sidebar nav button.active,
+    .sidebar nav button:hover {
+      background: var(--sidebar-active);
+      color: var(--accent);
+    }
+    .sidebar nav button.active:before {
+      content: '';
+      position: absolute;
+      left: -12px; top: 12px;
+      width: 5px; height: 24px;
+      border-radius: 4px;
+      background: var(--accent);
+    }
+    .sidebar .profile-section {
+      margin-top: auto;
+      background: var(--sidebar-active);
+      padding: 24px 24px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      color: #dde8f8;
+      box-shadow: 0 -1px 8px rgba(16,24,40,0.09);
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 4px;
+    }
+    .sidebar .profile-section small {
+      color: #a9b7d3;
+      font-size: 0.96em;
+    }
 
-/* Modern style for academics section child buttons (sub-menu items) */
-.academics-menu-item {
-  display: block;
-  width: 100%;
-  margin: 6px 0;
-  padding: 10px 18px;
-  background: #f7fafc;
-  color: #23385c;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(44,80,140,0.08);
-  font-size: 1em;
-  font-weight: 600;
-  text-align: left;
-  transition: 
-    background 0.18s cubic-bezier(.4,0,.2,1),
-    color 0.18s cubic-bezier(.4,0,.2,1),
-    box-shadow 0.18s cubic-bezier(.4,0,.2,1),
-    transform 0.13s;
-  cursor: pointer;
-  outline: none;
-  position: relative;
-}
+    .main-content {
+      flex: 1;
+      padding: 38px 3vw 28px 3vw;
+      background: var(--primary-light);
+      overflow-y: auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      transition: padding 0.2s;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.03em;
+      flex: 1 1 60%;
+    }
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #e0f3f2;
+      color: var(--primary);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3em;
+      border: 2px solid var(--accent);
+      box-shadow: 0 2px 8px rgba(16,24,40,0.07);
+    }
 
-/* On hover or focus, a soft accent highlight and slight lift */
-.academics-menu-item:hover,
-.academics-menu-item:focus {
-  background: #e0f3f2;
-  color: #10b981;
-  box-shadow: 0 4px 16px rgba(16,185,129,0.11);
-  transform: translateY(-2px) scale(1.03);
-}
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--box-shadow);
+      padding: 28px 28px 22px 28px;
+      margin-bottom: 30px;
+      transition: box-shadow var(--transition), padding 0.2s;
+    }
+    .card h2 {
+      color: var(--primary);
+      font-size: 1.23em;
+      margin: 0 0 19px 0;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
 
-/* Optional: Show active/selected state */
-.academics-menu-item.active {
-  background: #10b981;
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(16,185,129,0.17);
-  transform: none;
-}
+    .classes-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .classes-list li {
+      margin: 0;
+    }
+    .class-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 28px;
+      font-size: 1.08em;
+      cursor: pointer;
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: background var(--transition), color var(--transition), border var(--transition);
+      box-shadow: 0 1px 2px rgba(20,36,60,0.02);
+      outline: none;
+    }
+    .class-btn.active,
+    .class-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(16,185,129,0.07);
+    }
 
-/* Optional: transition for menu open/close (if you want) */
-.academics-menu ul {
-  transition: max-height 0.22s cubic-bezier(.4,0,.2,1);
-}
+    .students-table, .draft-results-table, .notification-list, .profile-settings {
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--box-shadow);
+      padding: 26px 22px;
+      margin-bottom: 34px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: none;
+      margin-bottom: 0;
+      min-width: 600px;
+    }
+    th, td {
+      padding: 12px 11px;
+      border-bottom: 1.5px solid var(--border);
+      text-align: left;
+    }
+    th {
+      background: var(--table-header);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.01em;
+      border-bottom: 2.5px solid var(--border);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    td.actions {
+      text-align: center;
+    }
+    .btn {
+      padding: 6px 18px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.01em;
+      margin-right: 7px;
+      margin-bottom: 2px;
+      font-weight: 600;
+      transition: background var(--transition);
+      letter-spacing: 0.02em;
+    }
+    .btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn.danger:hover {
+      background: #b13a29;
+    }
 
-/* Slight margin for vertical separation */
-.academics-menu-item:not(:last-child) {
-  margin-bottom: 5px;
-}    
-body {
-  font-family: var(--font);
-  background: var(--primary-light);
-  color: var(--text);
-  min-height: 100vh;
-  letter-spacing: 0.02em;
-  font-size: 16px;
-}
-.dashboard-container {
-  display: flex;
-  min-height: 100vh;
-  transition: flex-direction 0.2s;
-}
+    /* Modal */
+    .form-modal-bg {
+      position: fixed; z-index: 1000; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(28,36,54,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .form-modal {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 38px 34px 22px 34px;
+      min-width: 349px;
+      max-width: 98vw;
+      box-sizing: border-box;
+      box-shadow: 0 2px 32px rgba(0,0,0,0.12);
+      position: relative;
+      animation: modalIn 0.23s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(38px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .form-modal h3 {
+      margin-top: 0;
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-size: 1.29em;
+      font-weight: 700;
+    }
+    .form-modal label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--primary);
+      font-size: 0.99em;
+      font-weight: 500;
+      margin-top: 12px;
+    }
+    .form-modal input[type="number"],
+    .form-modal input[type="text"],
+    .form-modal input[type="email"],
+    .form-modal input[type="password"],
+    .form-modal input[type="date"],
+    .form-modal select {
+      width: 100%;
+      padding: 9px 8px;
+      margin-bottom: 5px;
+      border-radius: var(--radius-sm);
+      border: 1.2px solid var(--border);
+      font-size: 1em;
+      background: #f7fafc;
+      font-family: var(--font);
+      box-sizing: border-box;
+      transition: border var(--transition);
+    }
+    .form-modal input:focus, .form-modal select:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+    .form-modal .modal-actions {
+      text-align: right;
+      margin-top: 19px;
+    }
+    .form-modal .close-btn {
+      position: absolute;
+      top: 13px;
+      right: 17px;
+      background: none;
+      border: none;
+      font-size: 1.6em;
+      color: #bbb;
+      cursor: pointer;
+      transition: color var(--transition);
+    }
+    .form-modal .close-btn:hover { color: var(--primary); }
 
-/* --- Fix Start/Join (and similar) buttons overflowing on mobile --- */
-@media (max-width: 600px) {
-  .eclassroom-video button.btn,
-  .eclassroom-chat button.btn,
-  .btn {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-  }
-  .eclassroom-video {
-    min-width: 0;
-    max-width: 100%;
-  }
-  .eclassroom-chat .btn.danger {
-    margin-left: 0;
-    width: 100%;
-  }
-  .eclassroom-chat input[type="text"] {
-    min-width: 0;
-    flex: 1 1 60%;
-    box-sizing: border-box;
-  }
-  .eclassroom-chat .avatar {
-    margin-right: 2px;
-  }
+    /* Notification */
+    .notification {
+      border-bottom: 1.2px solid var(--border);
+      padding: 13px 0;
+      color: var(--text);
+      font-size: 1.05em;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-weight: 500;
+    }
+    .notification:last-child {
+      border-bottom: none;
+    }
+    .notification .date {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 2px 11px;
+      font-size: 0.97em;
+      font-weight: 600;
+      margin-right: 7px;
+      letter-spacing: 0.04em;
+    }
 
-  /* --- Fix for Navigation List Container (Sidebar Menu) --- */
-  .sidebar nav {
-    display: flex;
-    flex-direction: row;
-    gap: 0;
-    padding: 0 2px;
-    overflow-x: auto;
-    width: 100vw;
-    min-width: 0;
-    box-sizing: border-box;
-  }
-  .sidebar nav button {
-    flex: 1 0 auto;
-    min-width: 85px;
-    font-size: 0.98em;
-    padding: 10px 6px;
-    white-space: nowrap;
-  }
+    .profile-settings label {
+      font-weight: 500;
+      color: var(--primary);
+      margin-top: 9px;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .profile-settings input[type="text"],
+    .profile-settings input[type="email"],
+    .profile-settings input[type="password"] {
+      width: 100%;
+      padding: 8px 8px;
+      border-radius: var(--radius-sm);
+      border: 1.2px solid var(--border);
+      font-size: 1em;
+      background: #f7fafc;
+      font-family: var(--font);
+      margin-bottom: 12px;
+      transition: border var(--transition);
+    }
+    .profile-settings input:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+    .profile-settings button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 9px 28px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+      margin-top: 7px;
+    }
+    .profile-settings button:hover { background: var(--accent); }
 
-  /* --- Prevent chat input/action row from overflowing --- */
-  .eclassroom-chat > div[style*="display:flex"] {
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-}
-    
-.sidebar {
-  width: 270px;
-  background: var(--sidebar-bg);
-  display: flex;
-  flex-direction: column;
-  padding: 0 0 0 0;
-  box-shadow: 2px 0 14px rgba(0,0,0,0.07);
-  z-index: 20;
-  position: relative;
-  transition: width 0.3s;
-}
-.school-logo {
-  text-align: center;
-  font-size: 2.3rem;
-  font-weight: 700;
-  color: var(--accent);
-  margin: 32px 0 25px 0;
-  letter-spacing: 2px;
-  font-family: 'Inter', sans-serif;
-  user-select: none;
-}
-.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 0 22px;
-}
-.sidebar nav button {
-  background: none;
-  border: none;
-  color: #c7d5ed;
-  font-size: 1.08em;
-  text-align: left;
-  padding: 14px 0 14px 16px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  outline: none;
-  position: relative;
-  transition: background var(--transition), color var(--transition);
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-.sidebar nav button.active,
-.sidebar nav button:hover {
-  background: var(--sidebar-active);
-  color: var(--accent);
-}
-.sidebar nav button.active:before {
-  content: '';
-  position: absolute;
-  left: -12px; top: 12px;
-  width: 5px; height: 24px;
-  border-radius: 4px;
-  background: var(--accent);
-}
-.sidebar .profile-section {
-  margin-top: auto;
-  background: var(--sidebar-active);
-  padding: 24px 24px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  color: #dde8f8;
-  box-shadow: 0 -1px 8px rgba(16,24,40,0.09);
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 4px;
-}
-.sidebar .profile-section small {
-  color: #a9b7d3;
-  font-size: 0.96em;
-}
+    /* Responsive: Large tablets and down */
+    @media (max-width: 1100px) {
+      .main-content { padding: 18px 2vw; }
+      .form-modal { min-width: 90vw; }
+      .sidebar { width: 200px; }
+      table { min-width: 500px; }
+    }
 
-.main-content {
-  flex: 1;
-  padding: 38px 3vw 28px 3vw;
-  background: var(--primary-light);
-  overflow-y: auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  transition: padding 0.2s;
-}
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-header h1 {
-  color: var(--primary);
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 0.03em;
-  flex: 1 1 60%;
-}
-.avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #e0f3f2;
-  color: var(--primary);
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3em;
-  border: 2px solid var(--accent);
-  box-shadow: 0 2px 8px rgba(16,24,40,0.07);
-}
+    /* Responsive: Tablets and down */
+    @media (max-width: 800px) {
+      .dashboard-container { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: start;
+        justify-content: space-between;
+        min-height: unset;
+        height: auto;
+        padding: 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .school-logo {
+        margin: 15px 0 15px 0;
+        font-size: 1.45rem;
+        flex: 1 0 auto;
+      }
+      .sidebar nav {
+        flex-direction: row; gap: 2px; padding: 0 7px;
+        overflow-x: auto;
+        flex: 3 1 auto;
+      }
+      .sidebar .profile-section { display: none; }
+      .main-content { padding: 12px 2vw; }
+      .avatar { width: 38px; height: 38px; font-size: 1em;}
+      .card { padding: 14px 4vw 8px 4vw;}
+    }
 
-.card {
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--box-shadow);
-  padding: 28px 28px 22px 28px;
-  margin-bottom: 30px;
-  transition: box-shadow var(--transition), padding 0.2s;
-}
-.card h2 {
-  color: var(--primary);
-  font-size: 1.23em;
-  margin: 0 0 19px 0;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
+    /* Responsive: Phones */
+    @media (max-width: 600px) {
+      html, body { font-size: 15px; }
+      .main-content { padding: 7px 1vw; }
+      .form-modal { min-width: 100vw; padding: 6vw 2vw 6vw 2vw; }
+      header h1 { font-size: 1.1em;}
+      .avatar { width: 32px; height: 32px; font-size: 0.89em;}
+      .card { padding: 10px 2vw 7px 2vw;}
+      .classes-list ul { gap: 7px; flex-wrap: wrap; }
+      .class-btn { padding: 7px 9px; font-size: 0.98em;}
+      .dashboard-container, .main-content { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        min-width: unset;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      }
+      .sidebar nav {
+        flex-direction: row;
+        gap: 0;
+        padding: 0 2px;
+        overflow-x: auto;
+        font-size: 0.91em;
+      }
+      .school-logo {
+        font-size: 1.1rem;
+        margin: 7px 0;
+        padding-left: 8px;
+      }
+      table { min-width: 420px; font-size: 0.97em; }
+      th, td { padding: 8px 6px;}
+      .students-table, .draft-results-table, .notification-list, .profile-settings {
+        padding: 10px 6px;
+      }
+      /* Cardize tables for small screens */
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead { display: none; }
+      tr {
+        margin-bottom: 12px;
+        border-radius: var(--radius-sm);
+        box-shadow: 0 1px 3px rgba(40,60,80,0.03);
+        background: #fff;
+        padding: 4px 0;
+      }
+      td {
+        border: none;
+        position: relative;
+        padding-left: 48%;
+        min-height: 32px;
+        margin-bottom: 2px;
+      }
+      td:before {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 0.93em;
+        content: attr(data-label);
+      }
+      /* Hide empty data-label */
+      td[data-label=""]:before { display:none; }
+      .btn { width: 100%; margin: 2px 0 0 0; }
+    }
 
-.classes-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.classes-list li {
-  margin: 0;
-}
-.class-btn {
-  background: var(--primary-light);
-  color: var(--primary);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 28px;
-  font-size: 1.08em;
-  cursor: pointer;
-  margin-bottom: 5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  transition: background var(--transition), color var(--transition), border var(--transition);
-  box-shadow: 0 1px 2px rgba(20,36,60,0.02);
-  outline: none;
-}
-.class-btn.active,
-.class-btn:hover {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 4px 14px rgba(16,185,129,0.07);
-}
-
-.students-table, .draft-results-table, .notification-list, .profile-settings {
-  border-radius: var(--radius);
-  background: #fff;
-  box-shadow: var(--box-shadow);
-  padding: 26px 22px;
-  margin-bottom: 34px;
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: none;
-  margin-bottom: 0;
-  min-width: 600px;
-}
-th, td {
-  padding: 12px 11px;
-  border-bottom: 1.5px solid var(--border);
-  text-align: left;
-}
-th {
-  background: var(--table-header);
-  color: var(--primary);
-  font-weight: 700;
-  font-size: 1.01em;
-  border-bottom: 2.5px solid var(--border);
-}
-tr:last-child td {
-  border-bottom: none;
-}
-td.actions {
-  text-align: center;
-}
-.btn {
-  padding: 6px 18px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: var(--primary);
-  color: #fff;
-  cursor: pointer;
-  font-size: 1.01em;
-  margin-right: 7px;
-  margin-bottom: 2px;
-  font-weight: 600;
-  transition: background var(--transition);
-  letter-spacing: 0.02em;
-}
-.btn:hover {
-  background: var(--accent);
-  color: #fff;
-}
-.btn.danger {
-  background: var(--danger);
-  color: #fff;
-}
-.btn.danger:hover {
-  background: #b13a29;
-}
-
-/* Modal */
-.form-modal-bg {
-  position: fixed; z-index: 1000; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(28,36,54,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-.form-modal {
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 38px 34px 22px 34px;
-  min-width: 349px;
-  max-width: 98vw;
-  box-sizing: border-box;
-  box-shadow: 0 2px 32px rgba(0,0,0,0.12);
-  position: relative;
-  animation: modalIn 0.23s cubic-bezier(.4,0,.2,1);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(38px);}
-  to { opacity: 1; transform: translateY(0);}
-}
-.form-modal h3 {
-  margin-top: 0;
-  color: var(--primary);
-  margin-bottom: 24px;
-  font-size: 1.29em;
-  font-weight: 700;
-}
-.form-modal label {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--primary);
-  font-size: 0.99em;
-  font-weight: 500;
-  margin-top: 12px;
-}
-.form-modal input[type="number"],
-.form-modal input[type="text"],
-.form-modal input[type="email"],
-.form-modal input[type="password"],
-.form-modal input[type="date"],
-.form-modal select {
-  width: 100%;
-  padding: 9px 8px;
-  margin-bottom: 5px;
-  border-radius: var(--radius-sm);
-  border: 1.2px solid var(--border);
-  font-size: 1em;
-  background: #f7fafc;
-  font-family: var(--font);
-  box-sizing: border-box;
-  transition: border var(--transition);
-}
-.form-modal input:focus, .form-modal select:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-.form-modal .modal-actions {
-  text-align: right;
-  margin-top: 19px;
-}
-.form-modal .close-btn {
-  position: absolute;
-  top: 13px;
-  right: 17px;
-  background: none;
-  border: none;
-  font-size: 1.6em;
-  color: #bbb;
-  cursor: pointer;
-  transition: color var(--transition);
-}
-.form-modal .close-btn:hover { color: var(--primary); }
-
-/* Notification */
-.notification {
-  border-bottom: 1.2px solid var(--border);
-  padding: 13px 0;
-  color: var(--text);
-  font-size: 1.05em;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-weight: 500;
-}
-.notification:last-child {
-  border-bottom: none;
-}
-.notification .date {
-  background: var(--primary-light);
-  color: var(--primary);
-  border-radius: var(--radius-sm);
-  padding: 2px 11px;
-  font-size: 0.97em;
-  font-weight: 600;
-  margin-right: 7px;
-  letter-spacing: 0.04em;
-}
-
-.profile-settings label {
-  font-weight: 500;
-  color: var(--primary);
-  margin-top: 9px;
-  display: block;
-  margin-bottom: 6px;
-}
-.profile-settings input[type="text"],
-.profile-settings input[type="email"],
-.profile-settings input[type="password"] {
-  width: 100%;
-  padding: 8px 8px;
-  border-radius: var(--radius-sm);
-  border: 1.2px solid var(--border);
-  font-size: 1em;
-  background: #f7fafc;
-  font-family: var(--font);
-  margin-bottom: 12px;
-  transition: border var(--transition);
-}
-.profile-settings input:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-.profile-settings button {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 9px 28px;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition);
-  margin-top: 7px;
-}
-.profile-settings button:hover { background: var(--accent); }
-
-/* Responsive: Large tablets and down */
-@media (max-width: 1100px) {
-  .main-content { padding: 18px 2vw; }
-  .form-modal { min-width: 90vw; }
-  .sidebar { width: 200px; }
-  table { min-width: 500px; }
-}
-
-/* Responsive: Tablets and down */
-@media (max-width: 800px) {
-  .dashboard-container { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    align-items: start;
-    justify-content: space-between;
-    min-height: unset;
-    height: auto;
-    padding: 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .school-logo {
-    margin: 15px 0 15px 0;
-    font-size: 1.45rem;
-    flex: 1 0 auto;
-  }
-  .sidebar nav {
-    flex-direction: row; gap: 2px; padding: 0 7px;
-    overflow-x: auto;
-    flex: 3 1 auto;
-  }
-  .sidebar .profile-section { display: none; }
-  .main-content { padding: 12px 2vw; }
-  .avatar { width: 38px; height: 38px; font-size: 1em;}
-  .card { padding: 14px 4vw 8px 4vw;}
-}
-
-/* Responsive: Phones */
-@media (max-width: 600px) {
-  html, body { font-size: 15px; }
-  .main-content { padding: 7px 1vw; }
-  .form-modal { min-width: 100vw; padding: 6vw 2vw 6vw 2vw; }
-  header h1 { font-size: 1.1em;}
-  .avatar { width: 32px; height: 32px; font-size: 0.89em;}
-  .card { padding: 10px 2vw 7px 2vw;}
-  .classes-list ul { gap: 7px; flex-wrap: wrap; }
-  .class-btn { padding: 7px 9px; font-size: 0.98em;}
-  .dashboard-container, .main-content { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    min-width: unset;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 0;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  }
-  .sidebar nav {
-    flex-direction: row;
-    gap: 0;
-    padding: 0 2px;
-    overflow-x: auto;
-    font-size: 0.91em;
-  }
-  .school-logo {
-    font-size: 1.1rem;
-    margin: 7px 0;
-    padding-left: 8px;
-  }
-  table { min-width: 420px; font-size: 0.97em; }
-  th, td { padding: 8px 6px;}
-  .students-table, .draft-results-table, .notification-list, .profile-settings {
-    padding: 10px 6px;
-  }
-  /* Cardize tables for small screens */
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-  thead { display: none; }
-  tr {
-    margin-bottom: 12px;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 1px 3px rgba(40,60,80,0.03);
-    background: #fff;
-    padding: 4px 0;
-  }
-  td {
-    border: none;
-    position: relative;
-    padding-left: 48%;
-    min-height: 32px;
-    margin-bottom: 2px;
-  }
-  td:before {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    width: 45%;
-    white-space: nowrap;
-    font-weight: 600;
-    color: var(--muted);
-    font-size: 0.93em;
-    content: attr(data-label);
-  }
-  td[data-label=""]:before { display:none; }
-  .btn { width: 100%; margin: 2px 0 0 0; }
-}
-
-/* Hamburger menu for sidebar on mobile */
-@media (max-width: 600px) {
-  .sidebar .hamburger {
-    display: block;
-    background: none;
-    border: none;
-    padding: 10px 12px;
-    margin-left: 3px;
-    font-size: 1.2em;
-    color: #fff;
-    cursor: pointer;
-  }
-  .sidebar nav {
-    display: none;
-    position: absolute;
-    top: 45px;
-    left: 0;
-    background: var(--sidebar-bg);
-    width: 100vw;
-    z-index: 100;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-  }
-  .sidebar.open nav {
-    display: flex;
-  }
-}
+    /* Hamburger menu for sidebar on mobile */
+    @media (max-width: 600px) {
+      .sidebar .hamburger {
+        display: block;
+        background: none;
+        border: none;
+        padding: 10px 12px;
+        margin-left: 3px;
+        font-size: 1.2em;
+        color: #fff;
+        cursor: pointer;
+      }
+      .sidebar nav {
+        display: none;
+        position: absolute;
+        top: 45px;
+        left: 0;
+        background: var(--sidebar-bg);
+        width: 100vw;
+        z-index: 100;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      }
+      .sidebar.open nav {
+        display: flex;
+      }
+    }
   </style>
 </head>
 <body>
@@ -662,12 +555,9 @@ td.actions {
     <button class="hamburger" aria-label="Open navigation" onclick="toggleSidebarMenu()" style="display:none;">&#9776;</button>
     <nav>
       <button class="active" data-section="dashboard">Dashboard</button>
-      <button data-section="academics">Academics</button>
-
       <button data-section="classes">My Classes</button>
       <button data-section="attendance">Attendance</button>
       <button data-section="gradebook">Gradebook</button>
-      <button data-section="eclassroom">E-Classroom</button>
       <button data-section="assignments">Assignments</button>
       <button data-section="draftResults">Draft Results</button>
       <button data-section="notifications">Notifications</button>
@@ -693,162 +583,10 @@ td.actions {
       <div id="students-block"></div>
     </section>
 
-<!-- Add this section after your other <section>s in <main> -->
-<section id="section-academics" style="display:none;">
-  <div class="card academics-panel" style="padding:0;">
-    <!-- Panel Header -->
-    <div class="academics-header" style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px 18px;border-bottom:1px solid var(--border);">
-      <div style="font-size: 1.13em; font-weight: 700;">Academics / Learning</div>
-      <button class="btn academics-close-btn" style="font-size:1.2em;background:none;color:var(--primary);padding:2px 8px;" onclick="sections['dashboard'].style.display='';sections['academics'].style.display='none';">×</button>
-    </div>
-    <!-- Search Bar -->
-    <div style="padding:10px 18px 6px 18px;">
-      <input type="text" class="academics-search" placeholder="Quick search . . ." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);">
-    </div>
-    <!-- Academics Left Menu + Right Content -->
-    <div style="display:flex;align-items:flex-start;gap:0;">
-      <!-- Left - Menu -->
-      <nav class="academics-menu" style="min-width: 160px; max-width: 220px; width:40vw; background: #f9fafb; border-right:1px solid var(--border);">
-        <ul style="margin:0;padding:0;list-style:none;">
-          <li>
-            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('learning')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
-              📚 Academics / Learning
-              <span style="float:right;font-size:1.1em;">▸</span>
-            </button>
-            <ul id="academics-menu-learning" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('subjects')">Subjects</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('schemes')">Schemes</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('topics')">Topics</button>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('exams')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
-              📝 Exams
-              <span style="float:right;font-size:1.1em;">▸</span>
-            </button>
-            <ul id="academics-menu-exams" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('exam-list')">Exam List</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('exam-timetable')">Exam Timetable</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('exam-results')">Exam Results</button>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <button class="academics-menu-btn" onclick="toggleAcademicsMenu('cbt')" style="width:100%;text-align:left;padding:12px 15px;border:none;background:none;font-weight:600;">
-              💻 CBT
-              <span style="float:right;font-size:1.1em;">▸</span>
-            </button>
-            <ul id="academics-menu-cbt" style="display:none;margin:0 0 0 8px;padding:0;list-style:none;">
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('question-bank')">Question Bank</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('instruction-sets')">Instruction Sets</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-schedules')">CBT Schedules</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-scores')">CBT Scores</button>
-              </li>
-              <li>
-                <button class="academics-menu-item" onclick="showAcademicsSubSection('cbt-practice')">CBT Practice</button>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
-      <!-- Right - Content -->
-      <div id="academics-content" style="padding:20px 14px;flex:1 1 0;min-width:0;">
-        <!-- Placeholder: will show section content here -->
-        <div style="color:var(--muted);font-size:1.08em;">Select an item from the menu to view details.</div>
-      </div>
-    </div>
-  </div>
-                                            </section>
-
-
- 
-    <section id="section-eclassroom" style="display:none;">
-      <div class="card" style="display: flex; flex-wrap: wrap; gap: 34px; justify-content: space-between;">
-        <!-- Video Class -->
-        <div class="eclassroom-video" style="flex: 1 1 320px; min-width: 300px; max-width: 480px;">
-          <h2 style="display: flex; align-items: center; gap: 9px;">
-            <span style="font-size:1.2em;">🎥</span> Video Class
-            <span id="video-class-status" style="margin-left:auto;padding:3px 12px;border-radius:7px;font-size:0.96em;">Live</span>
-          </h2>
-          <div style="position:relative;background:#000;border-radius:12px;height:195px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin-bottom:14px;">
-            <span style="color:#fff;font-size:1.1em;opacity:0.8;">[ Video Stream Here ]</span>
-            <button class="btn" id="video-toggle-btn" style="position:absolute;right:10px;width:60%;bottom:12px;">End Class</button>
-            <button class="btn" id="video-join-btn" style="position:absolute;right:10px;width:60%;bottom:12px;">Start/Join</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:0.98em;">
-            <span style="color:var(--primary);font-weight:600;">Participants:</span>
-            <div id="video-participants" style="display:flex;gap:5px;">
-              <span class="avatar" style="width:28px;height:28px;font-size:0.95em;">JD</span>
-              <span class="avatar" style="width:28px;height:28px;font-size:0.95em;background:#8fd3f4;color:#003366;">JA</span>
-              <span class="avatar" style="width:28px;height:28px;font-size:0.95em;background:#f9c784;color:#003366;">JO</span>
-            </div>
-            <button class="btn" style="padding:4px 11px;font-size:0.92em;" onclick="alert('Copied link!')">Copy Invite</button>
-          </div>
-          <div style="font-size:0.97em;color:var(--muted);margin-bottom:6px;">
-            Duration: <span id="video-class-timer">00:00:00</span>
-          </div>
-        </div>
-
-        <!-- Chat Class -->
-        <div class="eclassroom-chat" style="flex: 1 1 380px; min-width: 320px; max-width: 540px;display:flex;flex-direction:column;">
-          <h2 style="display: flex; align-items: center; gap: 9px;">
-            <span style="font-size:1.2em;">💬</span> Chat Class
-            <span id="chat-online-count" style="margin-left:auto;padding:3px 12px;border-radius:7px;font-size:0.96em;">3 Online</span>
-          </h2>
-          <div style="flex:1 1 180px;min-height:150px;max-height:210px;overflow-y:auto;background:#f6fafd;border-radius:10px;padding:12px 10px 6px 10px;margin-bottom:11px;box-shadow:0 1px 7px rgba(20,40,80,0.03);" id="chat-messages">
-            <!-- Example Messages -->
-            <div style="margin-bottom:9px;">
-              <span style="font-weight:600;color:var(--primary);">Mr. John Doe</span>
-              <span style="color:#a6b6d7;font-size:0.91em;">08:22</span>
-              <div>Hello class! Please join the video call above 👆</div>
-            </div>
-            <div style="margin-bottom:9px;">
-              <span style="font-weight:600;color:var(--primary);">Jane Adekunle</span>
-              <span style="color:#a6b6d7;font-size:0.91em;">08:23</span>
-              <div>Good morning sir!</div>
-            </div>
-            <div id="chat-typing" style="font-style:italic;font-size:0.95em;color:#7cb47a;display:none;">Someone is typing...</div>
-          </div>
-          <div style="display:flex;gap:7px;align-items:center;">
-            <input type="text" id="chat-input" style="flex:1 1 auto;border-radius:7px;border:1px solid var(--border);padding:7px 10px;font-size:1em;" placeholder="Type your message...">
-            <input type="file" id="chat-attach" style="display:none;">
-            <button class="btn" onclick="document.getElementById('chat-attach').click();" title="Attach file" style="background:#f0f0f0;color:var(--primary);font-size:1.15em;padding:7px 10px;">📎</button>
-            <button class="btn" id="chat-send-btn" style="padding:7px 18px;">Send</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:11px;">
-            <span style="font-size:0.98em;">Online:</span>
-            <span class="avatar" style="width:23px;height:23px;font-size:0.80em;">JD</span>
-            <span class="avatar" style="width:23px;height:23px;font-size:0.80em;background:#8fd3f4;color:#003366;">JA</span>
-            <span class="avatar" style="width:23px;height:23px;font-size:0.80em;background:#f9c784;color:#003366;">JO</span>
-            <button class="btn danger" style="padding:3px 10px;font-size:0.89em;margin-left:auto;" onclick="if(confirm('Clear chat for everyone?'))document.getElementById('chat-messages').innerHTML=''">Clear Chat</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Attendance Section -->
     <section id="section-attendance" style="display:none;">
       <div class="card students-table">
         <h2>Attendance</h2>
-        <div id="attendance-calendar"></div>
         <form id="attendance-form">
           <label>Select Class:</label>
           <select id="attendance-class"></select>
@@ -960,9 +698,8 @@ td.actions {
     </div>
   </main>
 </div>
-
-<script>
-// ----- Demo Data -----
+  <script>
+    // --- Demo Data ---
 const teacher = {
   id: 'teach001',
   name: 'Mr. John Doe',
@@ -1014,6 +751,33 @@ let attendanceRecords = [];
 let gradebookData = {};
 let assignments = [];
 
+// --- UI Logic ---
+const sidebarBtns = document.querySelectorAll('.sidebar nav button');
+const sections = {
+  dashboard: document.getElementById('section-dashboard'),
+  classes: document.getElementById('section-dashboard'),
+  attendance: document.getElementById('section-attendance'),
+  gradebook: document.getElementById('section-gradebook'),
+  assignments: document.getElementById('section-assignments'),
+  draftResults: document.getElementById('section-draftResults'),
+  notifications: document.getElementById('section-notifications'),
+  profile: document.getElementById('section-profile')
+};
+sidebarBtns.forEach(btn => {
+  btn.onclick = function() {
+    sidebarBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(sections).forEach(s => s.style.display = 'none');
+    const sec = btn.getAttribute('data-section');
+    sections[sec].style.display = '';
+    if (sec === 'draftResults') renderDraftResults();
+    if (sec === 'notifications') renderNotifications();
+    if (sec === 'attendance') renderAttendance();
+    if (sec === 'gradebook') renderGradebook();
+    if (sec === 'assignments') renderAssignments();
+  }
+});
+
 // --- Hamburger menu for sidebar (mobile) ---
 function toggleSidebarMenu() {
   document.querySelector('.sidebar').classList.toggle('open');
@@ -1030,37 +794,6 @@ function updateHamburger() {
 }
 window.addEventListener('resize', updateHamburger);
 window.addEventListener('DOMContentLoaded', updateHamburger);
-
-// --- Sidebar Section Navigation ---
-const sidebarBtns = document.querySelectorAll('.sidebar nav button');
-const sections = {
-  dashboard: document.getElementById('section-dashboard'),
-  classes: document.getElementById('section-dashboard'),
-  attendance: document.getElementById('section-attendance'),
-  gradebook: document.getElementById('section-gradebook'),
-  assignments: document.getElementById('section-assignments'),
-  draftResults: document.getElementById('section-draftResults'),
-  notifications: document.getElementById('section-notifications'),
-  profile: document.getElementById('section-profile'),
-  eclassroom: document.getElementById('section-eclassroom'),
-  academics: document.getElementById('section-academics')
-};
-sidebarBtns.forEach(btn => {
-  btn.onclick = function() {
-    sidebarBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    Object.values(sections).forEach(s => s.style.display = 'none');
-    const sec = btn.getAttribute('data-section');
-    if (sections[sec]) sections[sec].style.display = '';
-    if (sec === 'draftResults') renderDraftResults();
-    if (sec === 'notifications') renderNotifications();
-    if (sec === 'attendance') { renderAttendanceCalendar(); renderAttendance(); }
-    if (sec === 'gradebook') renderGradebook();
-    if (sec === 'assignments') renderAssignments();
-    if (sec === 'eclassroom') renderEclassroom();
-    if (sec === 'academics') renderAcademics();
-  }
-});
 
 // --- Classes List ---
 let selectedClassId = null;
@@ -1112,156 +845,84 @@ function renderStudentsBlock() {
   block.innerHTML = html;
 }
 
-import { apiGet, apiPost } from './utils/api.js'; // adjust the path as needed
-
-function getDateString(date) { return date.toISOString().slice(0, 10); }
-function isWeekday(date) { const day = date.getDay(); return day >= 1 && day <= 5; }
-function addWeekday(date, dir = 1) {
-  let d = new Date(date);
-  do { d.setDate(d.getDate() + dir); } while (!isWeekday(d));
-  return d;
-}
-function getTodayWeekday() {
-  const now = new Date();
-  if (isWeekday(now)) return now;
-  let d = new Date(now); while (!isWeekday(d)) d.setDate(d.getDate() - 1);
-  return d;
-}
-
-let selectedAttendanceDate = getTodayWeekday();
-let attendanceCache = {}; // { 'classId|YYYY-MM-DD': [ {studentId, present}, ... ] }
-
-// Fetch attendance from backend for classId/date
-async function fetchAttendance(classId, dateStr) {
-  const cacheKey = `${classId}|${dateStr}`;
-  if (attendanceCache[cacheKey]) return attendanceCache[cacheKey];
-  try {
-    const rec = await apiGet(`/attendance/${classId}/${dateStr}`);
-    attendanceCache[cacheKey] = rec.students || [];
-    return rec.students || [];
-  } catch (err) {
-    attendanceCache[cacheKey] = [];
-    return [];
-  }
-}
-
-// Save attendance to backend for classId/date
-async function saveAttendanceDay() {
-  const classId = document.getElementById('attendance-class').value;
-  const students = studentsByClass[classId] || [];
-  const dateStr = getDateString(selectedAttendanceDate);
-  let records = [];
-  students.forEach(stu => {
-    const cb = document.querySelector(`[name="present_${stu.id}"]`);
-    records.push({ studentId: stu.id, present: !!(cb && cb.checked) });
-  });
-  try {
-    await apiPost(`/attendance/${classId}/${dateStr}`, { students: records });
-    attendanceCache[`${classId}|${dateStr}`] = records;
-    return true;
-  } catch (err) {
-    alert('Error saving attendance: ' + err.message);
-    return false;
-  }
-}
-
-function renderAttendanceCalendar() {
-  const calDivId = 'attendance-calendar';
-  let calDiv = document.getElementById(calDivId);
-  if (!calDiv) {
-    calDiv = document.createElement('div');
-    calDiv.id = calDivId;
-    calDiv.style.display = 'flex';
-    calDiv.style.justifyContent = 'center';
-    calDiv.style.alignItems = 'center';
-    calDiv.style.gap = '10px';
-    calDiv.style.marginBottom = '15px';
-    document.querySelector('#section-attendance .card').insertBefore(calDiv, document.getElementById('attendance-form'));
-  }
-  const week = []; const d = new Date(selectedAttendanceDate);
-  const thisMonday = new Date(d); thisMonday.setDate(d.getDate() - (d.getDay() - 1));
-  for (let i=0; i<5; i++) { const day = new Date(thisMonday); day.setDate(thisMonday.getDate() + i); week.push(day);}
-  calDiv.innerHTML = '';
-  const prevBtn = document.createElement('button');
-  prevBtn.textContent = "←"; prevBtn.className = "btn";
-  prevBtn.onclick = async () => {
-    selectedAttendanceDate = addWeekday(week[0], -1); 
-    renderAttendanceCalendar();
-    await renderAttendance();
-  };
-  calDiv.appendChild(prevBtn);
-  week.forEach(day => {
-    const btn = document.createElement('button');
-    btn.className = "btn";
-    btn.textContent = day.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
-    btn.style.fontWeight = getDateString(day) === getDateString(selectedAttendanceDate) ? "700" : "400";
-    btn.style.background = getDateString(day) === getDateString(selectedAttendanceDate) ? "var(--accent)" : "#f0f6fa";
-    btn.style.color = getDateString(day) === getDateString(selectedAttendanceDate) ? "#fff" : "var(--primary)";
-    btn.onclick = async () => {
-      await saveAttendanceDay();
-      selectedAttendanceDate = day;
-      renderAttendanceCalendar();
-      await renderAttendance();
-    };
-    calDiv.appendChild(btn);
-  });
-  const nextBtn = document.createElement('button');
-  nextBtn.textContent = "→"; nextBtn.className = "btn";
-  nextBtn.onclick = async () => {
-    selectedAttendanceDate = addWeekday(week[4], 1);
-    renderAttendanceCalendar();
-    await renderAttendance();
-  };
-  calDiv.appendChild(nextBtn);
-}
-
-// Render class dropdown and students for attendance
-async function renderAttendance() {
+// --- Attendance ---
+function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');
   attendanceClassSel.innerHTML = '';
   teacher.classes.forEach(cls => {
     let opt = document.createElement('option');
-    opt.value = cls.id; opt.innerText = cls.name;
+    opt.value = cls.id;
+    opt.innerText = cls.name;
     attendanceClassSel.appendChild(opt);
   });
-  attendanceClassSel.onchange = () => renderAttendanceStudents();
-  await renderAttendanceStudents();
+  attendanceClassSel.onchange = renderAttendanceStudents;
+  renderAttendanceStudents();
 }
-
-async function renderAttendanceStudents() {
+function renderAttendanceStudents() {
   const classId = document.getElementById('attendance-class').value;
   const students = studentsByClass[classId] || [];
-  const dateStr = getDateString(selectedAttendanceDate);
-  document.getElementById('attendance-students').innerHTML = `<div class="spinner"></div>`;
-  let todaysRecords = await fetchAttendance(classId, dateStr);
   let html = `<table>
-      <thead><tr><th>Student</th><th>Present</th><th>Absent</th></tr></thead>
+      <thead><tr><th>Student</th><th>Present</th></tr></thead>
       <tbody>`;
   students.forEach(stu => {
-    const record = todaysRecords.find(a => a.studentId === stu.id);
+    const record = (attendanceRecords.find(a => a.classId === classId && a.studentId === stu.id) || { present: false });
     html += `<tr>
       <td data-label="Student">${stu.name}</td>
-      <td data-label="Present"><input type="checkbox" name="present_${stu.id}" ${record && record.present ? 'checked' : ''}></td>
-      <td data-label="Absent">${!(record && record.present) ? '✔️' : ''}</td>
+      <td data-label="Present"><input type="checkbox" name="present_${stu.id}" ${record.present ? 'checked' : ''}></td>
     </tr>`;
   });
   html += `</tbody></table>`;
   document.getElementById('attendance-students').innerHTML = html;
 }
-
-// Save attendance on form submit
-document.getElementById('attendance-form').onsubmit = async function(e){
+document.getElementById('attendance-form').onsubmit = function(e){
   e.preventDefault();
-  const ok = await saveAttendanceDay();
-  if (ok) alert('Attendance saved for ' + selectedAttendanceDate.toLocaleDateString());
+  const classId = document.getElementById('attendance-class').value;
+  const students = studentsByClass[classId] || [];
+  students.forEach(stu => {
+    const cb = document.querySelector(`[name="present_${stu.id}"]`);
+    let record = attendanceRecords.find(a => a.classId === classId && a.studentId === stu.id);
+    if (!record) {
+      record = { classId, studentId: stu.id, present: cb.checked };
+      attendanceRecords.push(record);
+    } else {
+      record.present = cb.checked;
+    }
+  });
+  alert('Attendance saved!');
 };
 
-// Export functions for initialization
-export {
-  renderAttendanceCalendar,
-  renderAttendance,
-  renderAttendanceStudents
-};
+// --- Gradebook ---
+function renderGradebook() {
+  const gradebookClassSel = document.getElementById('gradebook-class');
+  gradebookClassSel.innerHTML = '';
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    gradebookClassSel.appendChild(opt);
+  });
+  gradebookClassSel.onchange = renderGradebookTable;
+  renderGradebookTable();
+}
+function renderGradebookTable() {
+  const classId = document.getElementById('gradebook-class').value;
+  const students = studentsByClass[classId] || [];
+  const subjects = subjectsByClass[classId] || [];
+  let html = `<table>
+      <thead><tr><th>Student</th>`;
+  subjects.forEach(subj => html += `<th>${subj.name}</th>`);
+  html += `</tr></thead><tbody>`;
+  students.forEach(stu => {
+    html += `<tr><td data-label="Student">${stu.name}</td>`;
+    subjects.forEach(subj => {
+      const gb = (gradebookData[classId] && gradebookData[classId][stu.id] && gradebookData[classId][stu.id][subj.id]) || '-';
+      html += `<td data-label="${subj.name}">${gb}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('gradebook-table').innerHTML = html;
+}
 
 // --- Assignments ---
 function renderAssignments() {
@@ -1418,46 +1079,6 @@ document.getElementById('resultForm').onsubmit = function(e) {
 window.openResultModal = openResultModal;
 window.closeResultModal = closeResultModal;
 
-// --- Academics menu toggle logic ---
-function toggleAcademicsMenu(section) {
-  ['learning','exams','cbt'].forEach(id=>{
-    document.getElementById('academics-menu-'+id).style.display = (id===section && document.getElementById('academics-menu-'+id).style.display==='none')?'block':'none';
-  });
-}
-
-// --- Academics sub-section content logic ---
-function showAcademicsSubSection(sub) {
-  const content = document.getElementById('academics-content');
-  let html = '';
-  switch(sub) {
-    case 'subjects':
-      html = '<h3>Subjects</h3><div>List of subjects for your school and class. (Demo content)</div>'; break;
-    case 'schemes':
-      html = '<h3>Schemes</h3><div>Download or view termly/weekly schemes of work.</div>'; break;
-    case 'topics':
-      html = '<h3>Topics</h3><div>Browse topics and learning objectives.</div>'; break;
-    case 'exam-list':
-      html = '<h3>Exam List</h3><div>See all scheduled exams.</div>'; break;
-    case 'exam-timetable':
-      html = '<h3>Exam Timetable</h3><div>View exam timetables for your class.</div>'; break;
-    case 'exam-results':
-      html = '<h3>Exam Results</h3><div>Check published exam results.</div>'; break;
-    case 'question-bank':
-      html = '<h3>Question Bank</h3><div>Browse or add CBT questions.</div>'; break;
-    case 'instruction-sets':
-      html = '<h3>Instruction Sets</h3><div>View CBT instruction sets for exams.</div>'; break;
-    case 'cbt-schedules':
-      html = '<h3>CBT Schedules</h3><div>Scheduled CBT tests and exams.</div>'; break;
-    case 'cbt-scores':
-      html = '<h3>CBT Scores</h3><div>Scores from completed CBT exams.</div>'; break;
-    case 'cbt-practice':
-      html = '<h3>CBT Practice</h3><div>Practice questions for students.</div>'; break;
-    default:
-      html = '<div style="color:var(--muted);">Select an item from the menu to view details.</div>';
-  }
-  content.innerHTML = html;
-}
-
 // --- Draft Results ---
 function renderDraftResults() {
   const tbody = document.querySelector('#draft-results-table tbody');
@@ -1498,188 +1119,9 @@ document.getElementById('profile-form').onsubmit = function(e){
   alert('Profile updated!');
 };
 
-// --- E-Classroom Logic ---
-let videoClassLive = false;
-let videoClassStart = null;
-let videoClassTimerInterval = null;
-let videoParticipants = [
-  {name: 'John Doe', abbr: 'JD', color:'#e0f3f2'},
-  {name: 'Jane Adekunle', abbr:'JA', color:'#8fd3f4'},
-  {name: 'James Okoro', abbr:'JO', color:'#f9c784'}
-];
-let chatMessages = [
-  {sender: 'Mr. John Doe', time: '08:22', text: 'Hello class! Please join the video call above 👆'},
-  {sender: 'Jane Adekunle', time: '08:23', text: 'Good morning sir!'}
-];
-let chatOnline = [
-  {name:'JD', color:'#e0f3f2'},
-  {name:'JA', color:'#8fd3f4'},
-  {name:'JO', color:'#f9c784'}
-];
-let chatTyping = false;
-function renderEclassroom() {
-  // Video participants
-  const partDiv = document.getElementById('video-participants');
-  if (partDiv) {
-    partDiv.innerHTML = '';
-    videoParticipants.forEach(p => {
-      const span = document.createElement('span');
-      span.className = 'avatar';
-      span.style.width = '28px';
-      span.style.height = '28px';
-      span.style.fontSize = '0.95em';
-      span.style.background = p.color;
-      span.textContent = p.abbr;
-      partDiv.appendChild(span);
-    });
-  }
-  // Status
-  const status = document.getElementById('video-class-status');
-  if (status) {
-    status.textContent = videoClassLive ? 'Live' : 'Offline';
-    status.style.background = videoClassLive ? 'var(--accent)' : '#e8eaea';
-    status.style.color = videoClassLive ? '#fff' : '#7d8ba1';
-  }
-  updateVideoClassTimer();
-  // Show/hide video buttons
-  const joinBtn = document.getElementById('video-join-btn');
-  const endBtn = document.getElementById('video-toggle-btn');
-  if (joinBtn && endBtn) {
-    joinBtn.style.display = videoClassLive ? 'none' : '';
-    endBtn.style.display = videoClassLive ? '' : 'none';
-  }
-  // Chat online count
-  const onlineCount = document.getElementById('chat-online-count');
-  if (onlineCount) {
-    onlineCount.textContent = chatOnline.length + ' Online';
-  }
-  // Online avatars
-  const onlineAvatars = document.querySelectorAll('.eclassroom-chat .avatar');
-  if (onlineAvatars.length) {
-    onlineAvatars.forEach((av, idx) => {
-      if (chatOnline[idx]) {
-        av.textContent = chatOnline[idx].name;
-        av.style.background = chatOnline[idx].color;
-      }
-    });
-  }
-  // Chat messages
-  const chatDiv = document.getElementById('chat-messages');
-  if (chatDiv) {
-    chatDiv.innerHTML = '';
-    chatMessages.forEach(msg => {
-      const mdiv = document.createElement('div');
-      mdiv.style.marginBottom = '9px';
-      mdiv.innerHTML =
-        `<span style="font-weight:600;color:var(--primary);">${msg.sender}</span>
-         <span style="color:#a6b6d7;font-size:0.91em;">${msg.time}</span>
-         <div>${escapeHTML(msg.text)}</div>`;
-      chatDiv.appendChild(mdiv);
-    });
-    // Typing indicator
-    const typingDiv = document.createElement('div');
-    typingDiv.id = 'chat-typing';
-    typingDiv.style.fontStyle = 'italic';
-    typingDiv.style.fontSize = '0.95em';
-    typingDiv.style.color = '#7cb47a';
-    typingDiv.style.display = chatTyping ? '' : 'none';
-    typingDiv.textContent = 'Someone is typing...';
-    chatDiv.appendChild(typingDiv);
-    chatDiv.scrollTop = chatDiv.scrollHeight;
-  }
-}
-function startVideoClass() {
-  videoClassLive = true;
-  videoClassStart = new Date();
-  renderEclassroom();
-  videoClassTimerInterval = setInterval(updateVideoClassTimer, 1000);
-}
-function endVideoClass() {
-  videoClassLive = false;
-  videoClassStart = null;
-  clearInterval(videoClassTimerInterval);
-  renderEclassroom();
-}
-function updateVideoClassTimer() {
-  const timer = document.getElementById('video-class-timer');
-  if (!timer) return;
-  if (!videoClassLive || !videoClassStart) {
-    timer.textContent = "00:00:00";
-    return;
-  }
-  let diff = Math.floor((new Date() - videoClassStart) / 1000);
-  let h = String(Math.floor(diff/3600)).padStart(2,'0');
-  let m = String(Math.floor(diff/60)%60).padStart(2,'0');
-  let s = String(diff%60).padStart(2,'0');
-  timer.textContent = `${h}:${m}:${s}`;
-}
-const joinBtn = document.getElementById('video-join-btn');
-const endBtn = document.getElementById('video-toggle-btn');
-if (joinBtn) joinBtn.onclick = function() { startVideoClass(); };
-if (endBtn) endBtn.onclick = function() { endVideoClass(); };
-const chatInput = document.getElementById('chat-input');
-const chatSendBtn = document.getElementById('chat-send-btn');
-if (chatInput) {
-  chatInput.oninput = function() {
-    chatTyping = !!chatInput.value;
-    renderEclassroom();
-  };
-}
-if (chatSendBtn) {
-  chatSendBtn.onclick = function() {
-    if (chatInput.value.trim()) {
-      chatMessages.push({
-        sender: "Mr. John Doe",
-        time: (new Date()).toTimeString().slice(0,5),
-        text: chatInput.value
-      });
-      chatInput.value = '';
-      chatTyping = false;
-      renderEclassroom();
-    }
-  };
-}
-const chatAttach = document.getElementById('chat-attach');
-if (chatAttach) {
-  chatAttach.onchange = function() {
-    if (chatAttach.files && chatAttach.files.length > 0) {
-      const f = chatAttach.files[0];
-      chatMessages.push({
-        sender: "Mr. John Doe",
-        time: (new Date()).toTimeString().slice(0,5),
-        text: `<i>Attachment: ${escapeHTML(f.name)}</i>`
-      });
-      renderEclassroom();
-    }
-  };
-}
-const clearBtn = document.querySelector('.eclassroom-chat .btn.danger');
-if (clearBtn) {
-  clearBtn.onclick = function() {
-    if (confirm('Clear chat for everyone?')) {
-      chatMessages = [];
-      renderEclassroom();
-    }
-  };
-}
-function escapeHTML(str) {
-  if (!str) return '';
-  return str.replace(/[&<>"']/g, function(m) {
-    return ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#39;'
-    })[m];
-  });
-}
-
 // --- Initial Render ---
 renderClassesList();
 renderStudentsBlock();
-renderAttendanceCalendar();
-renderAttendance();
-</script>
+  </script>
 </body>
 </html>

@@ -165,35 +165,38 @@
         const url = new URL(window.location.href);
         return url.searchParams.get(name);
     }
-    const studentId = getQueryParam('student_Id');
+    const studentIdParam = getQueryParam('student_id');
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-    // Fetch and render profile (updated to support student_id or regNo, and robust field display)
+    // Fetch and render profile (robust logic: try both student_id and regNo, no paging/order when direct lookup)
     async function fetchAndRenderStudent() {
-        if (!studentId) {
-            document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
+        const profileContainer = document.getElementById('profile-container');
+        if (!studentIdParam) {
+            profileContainer.innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
             return;
         }
         try {
-            // Try with student_id first
-            let res = await fetch(`${API_BASE_URL}/api/students?student_Id=${encodeURIComponent(studentId)}`);
+            // Try student_id first (no orderBy)
+            let url = `${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentIdParam)}`;
+            let res = await fetch(url);
             let data = await res.json();
             let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
 
             // If not found, try as regNo
             if (!stu) {
-                res = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentId)}`);
+                url = `${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentIdParam)}`;
+                res = await fetch(url);
                 data = await res.json();
                 stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
             }
 
             if (!stu) {
-                document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
+                profileContainer.innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
                 return;
             }
             document.getElementById('student-avatar').src = stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
             document.getElementById('student-name').textContent = ((stu.firstname||'') + ' ' + (stu.surname||'')).trim();
-            document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentId);
+            document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentIdParam);
 
             // Render all available fields in a table
             const table = document.getElementById('profile-table');
@@ -221,7 +224,7 @@
             ];
             table.innerHTML = detailFields.map(f => `<tr><td><b>${f.label}</b></td><td>${f.value}</td></tr>`).join('');
         } catch (err) {
-            document.getElementById('profile-container').innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
+            profileContainer.innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
         }
     }
     fetchAndRenderStudent();
@@ -242,7 +245,7 @@
         Array.from(form.elements).forEach(el => {
             if (el.name) data[el.name] = el.value;
         });
-        data.student_id = studentId;
+        data.student_id = studentIdParam;
         document.getElementById('skillsStatus').textContent = "Saving...";
         try {
             setTimeout(() => {

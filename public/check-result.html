@@ -263,7 +263,7 @@
           try {
             // Get skills report for session+term
             const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
-              headers: { 'Authorization': '' } // You can add admin token here if needed for protection, else leave empty
+              headers: { 'Authorization': '' }
             });
             if (skillsRes.ok) {
               const skillsData = await skillsRes.json();
@@ -296,6 +296,44 @@
               classSize = studentSet.size;
             }
           } catch (e) {}
+
+          // ====== RANDOMIZE SKILLS RATINGS IF NOT PRESENT, ATTENDANCE LEFT FOR BACKEND ======
+          function randomRating() {
+            return Math.floor(Math.random() * 3) + 3; // 3,4,5
+          }
+
+          const affectiveNames = ["punctuality", "attentiveness", "neatness", "honesty", "politeness"];
+          const psychomotorNames = ["handwriting", "drawing", "sports", "organization"];
+
+          if (!skillsReport || !skillsReport.skills) {
+            skillsReport = {
+              skills: {
+                affective: {},
+                psychomotor: {}
+              },
+              // Do NOT randomize attendance, leave as undefined
+              comment: "Randomized for demo."
+            };
+            affectiveNames.forEach(name => {
+              skillsReport.skills.affective[name] = randomRating();
+            });
+            psychomotorNames.forEach(name => {
+              skillsReport.skills.psychomotor[name] = randomRating();
+            });
+          } else {
+            // If skillsReport exists but some fields are missing, patch them
+            if (!skillsReport.skills.affective) skillsReport.skills.affective = {};
+            if (!skillsReport.skills.psychomotor) skillsReport.skills.psychomotor = {};
+            affectiveNames.forEach(name => {
+              if (skillsReport.skills.affective[name] === undefined)
+                skillsReport.skills.affective[name] = randomRating();
+            });
+            psychomotorNames.forEach(name => {
+              if (skillsReport.skills.psychomotor[name] === undefined)
+                skillsReport.skills.psychomotor[name] = randomRating();
+            });
+            // Do NOT patch attendance!
+          }
 
           lastSkillsReport = skillsReport;
           lastClassSize = classSize;

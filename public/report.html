@@ -12,12 +12,28 @@
     }
     .report-container {
       background: #fff;
-      max-width: 950px;
-      margin: 30px auto;
+      max-width: 850px;
+      min-width: 750px;
+      width: 850px;
+      min-height: 1100px;
+      max-height: 1200px;
+      height: 1200px;
+      margin: 20px auto;
       border: 1.5px solid #0c4e8c;
       border-radius: 10px;
       box-shadow: 0 0 12px rgba(0,0,0,0.08);
-      padding: 30px 30px 15px 30px;
+      padding: 28px 26px 15px 26px;
+      box-sizing: border-box;
+      /* Forcing one page for PDF */
+      overflow: hidden;
+      position: relative;
+      page-break-after: avoid;
+    }
+    .no-print-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 50;
     }
     .school-header {
       display: flex;
@@ -25,8 +41,8 @@
       justify-content: space-between;
     }
     .school-logo, .coat-of-arms {
-      height: 75px;
-      width: 75px;
+      height: 70px;
+      width: 70px;
       object-fit: contain;
     }
     .school-info {
@@ -36,59 +52,59 @@
     .school-info h1 {
       color: #0c4e8c;
       margin: 0;
-      font-size: 2.1rem;
+      font-size: 2rem;
       font-weight: bold;
       letter-spacing: 1px;
     }
     .school-info p {
       margin: 6px 0 0 0;
-      font-size: 1.02rem;
+      font-size: 1rem;
       line-height: 1.5;
     }
     .term-title {
       background: #0c4e8c;
-      margin-top: 18px;
-      margin-bottom: 16px;
-      padding: 10px 0;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      padding: 8px 0;
       border-radius: 5px;
     }
     .term-title h2 {
       color: #fff;
       margin: 0;
-      font-size: 1.14rem;
+      font-size: 1.05rem;
       letter-spacing: 1.2px;
     }
     .student-info-section {
-      margin-bottom: 18px;
+      margin-bottom: 10px;
     }
     .student-info-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 1rem;
+      font-size: 0.97rem;
     }
     .student-info-table td {
-      padding: 4px 8px;
+      padding: 3px 7px;
       border: none;
     }
     .results-section {
       margin-top: 0;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     .results-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 8px;
-      font-size: 0.97rem;
+      margin-bottom: 3px;
+      font-size: 0.91rem;
     }
     .results-table th, .results-table td {
       border: 1px solid #d2dce6;
-      padding: 7px 5px;
+      padding: 5px 2px;
       text-align: center;
     }
     .results-table thead th {
       background: #e7f0fa;
       color: #0c4e8c;
-      font-size: 0.97rem;
+      font-size: 0.96rem;
       font-weight: bold;
     }
     .results-table tbody tr td:first-child {
@@ -99,13 +115,14 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      gap: 6px;
     }
     .skills-table {
       width: 31.5%;
       border-collapse: collapse;
-      margin-bottom: 10px;
-      font-size: 0.96rem;
+      margin-bottom: 6px;
+      font-size: 0.92rem;
       background: #fafcff;
       border: 1px solid #b6c8db;
       border-radius: 5px;
@@ -114,14 +131,14 @@
     .skills-table th {
       background: #0c4e8c;
       color: #fff;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: bold;
-      padding: 6px 0;
+      padding: 5px 0;
       border: none;
     }
     .skills-table td {
       border: 1px solid #d2dce6;
-      padding: 6px 8px;
+      padding: 5px 7px;
       text-align: left;
     }
     .skills-table tr td:last-child {
@@ -129,45 +146,45 @@
       font-weight: bold;
     }
     .grades-key-section {
-      margin: 8px 0 12px 0;
+      margin: 7px 0 7px 0;
     }
     .grades-key-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.97rem;
+      font-size: 0.92rem;
     }
     .grades-key-table th, .grades-key-table td {
       border: 1px solid #b6c8db;
-      padding: 6px 8px;
+      padding: 5px 7px;
       text-align: center;
     }
     .grades-key-table th {
       background: #e7f0fa;
       color: #0c4e8c;
-      font-size: 1.04rem;
+      font-size: 1rem;
       font-weight: bold;
     }
     .comments-section {
-      margin: 14px 0;
+      margin: 10px 0;
     }
     .principal-comment {
-      font-size: 1.07rem;
+      font-size: 1.01rem;
       font-weight: 500;
       color: #0c4e8c;
     }
     .principal-sign {
-      margin-top: 10px;
+      margin-top: 7px;
       display: flex;
       justify-content: space-between;
-      font-size: 1.03rem;
+      font-size: 0.95rem;
       color: #222;
     }
     .footer-section {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 22px;
-      font-size: 0.98rem;
+      margin-top: 12px;
+      font-size: 0.93rem;
       color: #212121;
     }
     .next-term {
@@ -176,14 +193,14 @@
     }
     .next-term-date {
       font-family: 'Segoe UI', 'Arial', sans-serif;
-      font-size: 1.1em;
+      font-size: 1em;
       font-weight: bold;
       margin-left: 5px;
       color: #0a3a6c;
     }
     .footer-meta {
       text-align: right;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
     }
     .powered-by {
       margin-left: 14px;
@@ -195,7 +212,12 @@
     }
     @media (max-width: 900px) {
       .report-container {
-        padding: 8px;
+        max-width: 99vw;
+        width: 98vw;
+        min-width: 0;
+        padding: 4px;
+        height: auto;
+        min-height: unset;
       }
       .skills-tables-section {
         flex-direction: column;
@@ -203,25 +225,37 @@
       }
       .skills-table {
         width: 100%;
-        margin-bottom: 12px;
+        margin-bottom: 7px;
       }
       .footer-section {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 7px;
       }
     }
     @media print {
-      .no-print, nav, .bottom-nav { display: none !important; }
+      .no-print-btn, nav, .bottom-nav { display: none !important; }
       body { background: #fff !important; }
+      .report-container {
+        box-shadow: none;
+        margin: 0 !important;
+        max-width: 850px;
+        width: 850px;
+        min-width: 750px;
+        min-height: 1100px;
+      }
     }
   </style>
+  <!-- jsPDF CDN and html2canvas for DOM rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <div class="report-container">
+  <div class="report-container" id="reportCardDom">
+    <button class="no-print-btn" onclick="downloadPDF()">Download as PDF</button>
     <header>
       <div class="school-header">
-        <img src="https://i.imgur.com/9n2gX1I.png" alt="Golding Schools Logo" class="school-logo">
+        <img src="logo-1679575828 (1).jpeg" alt="Golding Schools Logo" class="school-logo">
         <div class="school-info">
           <h1>GOLD AND LINC SCHOOLS</h1>
           <p>
@@ -232,7 +266,7 @@
             <span class="motto">Motto : FOR A SOLID BEGINNING...</span>
           </p>
         </div>
-        <img src="https://i.imgur.com/XQ4VwFQ.png" alt="Nigeria Coat of Arms" class="coat-of-arms">
+        <img src="logo-1679575828 (1).jpeg" alt="Nigeria Coat of Arms" class="coat-of-arms">
       </div>
       <div class="term-title">
         <h2 id="termTitle">FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
@@ -377,8 +411,7 @@
       </div>
       <div class="footer-meta">
         <span id="printDate">Printed : 18-12-2024 02:53 pm</span>
-        <span class="powered-by">Powered By : <a href="https://schoolsfocus.net">SchoolsFocus</a></span>
-      </div>
+              </div>
     </section>
   </div>
   <script>
@@ -466,11 +499,39 @@
 
     // Update printed date
     document.getElementById("printDate").innerText = getFormattedPrintDate();
-
-    // Auto-trigger print after a short delay
-    setTimeout(() => window.print(), 1200);
   }
   window.addEventListener('DOMContentLoaded', fillReport);
+
+  // jsPDF download logic
+  async function downloadPDF() {
+    const reportDom = document.getElementById('reportCardDom');
+    // Optionally hide button for snapshot
+    document.querySelector('.no-print-btn').style.visibility = 'hidden';
+    // Wait for styles to apply, then snapshot
+    await new Promise(r => setTimeout(r, 250));
+    html2canvas(reportDom, {scale:2, useCORS:true, backgroundColor: "#fff"}).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      // A4 page = 210mm x 297mm, jsPDF units are 'mm'
+      const pdf = new window.jspdf.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [297, 210] // height, width (jsPDF expects [height, width] for custom)
+      });
+      // Calculate image size to fit A4 in portrait
+      const pageWidth = 210;
+      const pageHeight = 297;
+      // Make image fill the width, adjust height proportionally
+      const imgWidth = pageWidth;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      const yOffset = Math.max(0, (pageHeight-imgHeight)/2);
+      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
+      pdf.save('ReportCard.pdf');
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
+    }).catch(e=>{
+      alert("Could not generate PDF: " + e.message);
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
+    });
+  }
   </script>
 </body>
 </html>

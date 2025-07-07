@@ -28,25 +28,29 @@
             <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" readonly disabled required>
           </div>
           <div class="result-form-group">
+            <label class="result-form-label" for="scratchCardInput">Scratch Card</label>
+            <input id="scratchCardInput" class="result-form-input" placeholder="Enter Scratch Card" autocomplete="off" required maxlength="8" style="text-transform:uppercase;">
+          </div>
+          <div class="result-form-group">
             <label class="result-form-label" for="classInput">Class</label>
             <select id="classInput" class="result-form-select" required>
               <option value="">Select Class</option>
-          <option>Creche</option>
-<option>Nursery 1</option>
-<option>Nursery 2</option>
-<option>Nursery 3</option>
-<option>Primary 1</option>
-<option>Primary 2</option>
-<option>Primary 3</option>
-<option>Primary 4</option>
-<option>Primary 5</option>
-<option>Primary 6</option>
-<option>JSS1</option>
-<option>JSS2</option>
-<option>JSS3</option>
-<option>SS1</option>
-<option>SS2</option>
-<option>SS3</option>
+              <option>Creche</option>
+              <option>Nursery 1</option>
+              <option>Nursery 2</option>
+              <option>Nursery 3</option>
+              <option>Primary 1</option>
+              <option>Primary 2</option>
+              <option>Primary 3</option>
+              <option>Primary 4</option>
+              <option>Primary 5</option>
+              <option>Primary 6</option>
+              <option>JSS1</option>
+              <option>JSS2</option>
+              <option>JSS3</option>
+              <option>SS1</option>
+              <option>SS2</option>
+              <option>SS3</option>
             </select>
           </div>
           <div class="result-form-group">
@@ -220,38 +224,38 @@
         if (arr[idx]) displayResult(arr[idx]);
       }
 
-      // Main: Handle result search using /api/results (admin endpoint)
+      // Main: Handle result search using /api/results/check
       async function handleResultSearch(e) {
         e.preventDefault();
         const regNo = document.getElementById("regNoInput").value.trim();
+        const scratchCard = document.getElementById("scratchCardInput").value.trim().toUpperCase();
         const klass = document.getElementById("classInput").value;
         const session = document.getElementById("sessionInput").value;
         const term = document.getElementById("termInput").value;
         const errorBox = document.getElementById("searchError");
         errorBox.style.display = "none";
 
-        if (!regNo || !klass || !session || !term) {
+        if (!regNo || !scratchCard || !klass || !session || !term) {
           errorBox.textContent = "All fields are required!";
           errorBox.style.display = "block";
           return false;
         }
 
         try {
-          // Backend API call to admin endpoint (status=Published)
+          // Backend API call to /api/results/check with scratch card
           const params = new URLSearchParams({
-            student_id: regNo,
+            regNo: regNo,
+            scratchCard: scratchCard,
             class: klass,
             session: session,
-            term: term,
-            status: "Published"
+            term: term
           });
-          const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
+          const response = await fetch(`${API_BASE_URL}/api/results/check?${params.toString()}`);
+          const data = await response.json();
           if (!response.ok) {
-            const data = await response.json();
             throw new Error(data.error || "Result not found or incorrect details.");
           }
-          const results = await response.json();
-          if (!results || !Array.isArray(results) || !results.length) {
+          if (!data.results || !Array.isArray(data.results) || !data.results.length) {
             errorBox.textContent = "No result found! Please check your details or contact the school.";
             errorBox.style.display = "block";
             document.getElementById("resultsDisplaySection").style.display = "none";
@@ -259,11 +263,26 @@
           }
           // Save to previous results
           saveViewedResult({
-            regNo, class: klass, session, term, results: results,
-            student: lastStudentProfile // attached for extra data
+            regNo,
+            class: klass,
+            session,
+            term,
+            results: data.results,
+            skillsReport: data.skillsReport || null,
+            classSize: data.classSize || null,
+            student: data.student || lastStudentProfile
           });
           // Display
-          displayResult({regNo, class: klass, session, term, results: results, student: lastStudentProfile});
+          displayResult({
+            regNo,
+            class: klass,
+            session,
+            term,
+            results: data.results,
+            skillsReport: data.skillsReport || null,
+            classSize: data.classSize || null,
+            student: data.student || lastStudentProfile
+          });
           renderPreviousResults();
         } catch (err) {
           errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
@@ -283,7 +302,7 @@
         const tbody = document.getElementById("resultsTable").querySelector("tbody");
         tbody.innerHTML = r.results.map(res => `
           <tr>
-            <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || "")}</td>
+            <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || "")}</td>
             <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
             <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
             <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
@@ -307,34 +326,38 @@
           return;
         }
 
-        // Example extra fields (can be customized or fetched)
-        const affectiveSkills = [
-          { name: "Punctuality", score: 3 },
-          { name: "Attentiveness", score: 3 },
-          { name: "Neatness", score: 3 },
-          { name: "Honesty", score: 3 },
-          { name: "Politeness", score: 3 },
-          { name: "Perseverance", score: 3 },
-          { name: "Relationship with Others", score: 3 },
-          { name: "Organization Ability", score: 3 }
-        ];
-        const psychomotorSkills = [
-          { name: "Hand Writing", score: 3 },
-          { name: "Drawing and Painting", score: 3 },
-          { name: "Speech / Verbal Fluency", score: 3 },
-          { name: "Quantitative Reasoning", score: 3 },
-          { name: "Processing Speed", score: 3 },
-          { name: "Retentiveness", score: 3 },
-          { name: "Visual Memory", score: 3 },
-          { name: "Public Speaking", score: 3 },
-          { name: "Sports and Games", score: 3 }
-        ];
-        const attendance = [
-          { label: "No. of School Days", value: 126 },
-          { label: "No. of Days Present", value: 122 },
-          { label: "No. of Days Absent", value: 4 },
-          { label: "% Attendance", value: "96.83%" }
-        ];
+        // Use real skills/attendance/class size from API response
+        const affectiveSkills = [];
+        const psychomotorSkills = [];
+        let attendance = [];
+        let principalComment = "This is an excellent result, do not rest on your oars.";
+        let principalName = "ABIODUN FESTUS ADENIYI";
+        let classSize = r.classSize || "N/A";
+
+        if (r.skillsReport && r.skillsReport.skills) {
+          if (r.skillsReport.skills.affective) {
+            for (const [k, v] of Object.entries(r.skillsReport.skills.affective)) {
+              affectiveSkills.push({ name: k, score: v });
+            }
+          }
+          if (r.skillsReport.skills.psychomotor) {
+            for (const [k, v] of Object.entries(r.skillsReport.skills.psychomotor)) {
+              psychomotorSkills.push({ name: k, score: v });
+            }
+          }
+        }
+        if (r.skillsReport && r.skillsReport.attendance) {
+          const a = r.skillsReport.attendance;
+          attendance = [
+            { label: "No. of School Days", value: a.total_days },
+            { label: "No. of Days Present", value: a.days_present },
+            { label: "No. of Days Absent", value: a.days_absent },
+            { label: "% Attendance", value: (a.total_days && a.days_present ? ((a.days_present/a.total_days)*100).toFixed(2) + "%" : "") }
+          ];
+        }
+        if (r.skillsReport && r.skillsReport.comment) {
+          principalComment = r.skillsReport.comment;
+        }
 
         // Summary fields: calculate from results if possible
         const numSubjects = r.results.length;
@@ -362,7 +385,7 @@
           session: r.session,
           term: r.term,
           results: r.results.map(res => ({
-            subject: res.subject && res.subject.name ? res.subject.name : (res.subject_name || ""),
+            subject: res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || ""),
             ca1_score: res.ca1_score !== undefined ? res.ca1_score : "",
             ca2_score: res.ca2_score !== undefined ? res.ca2_score : "",
             midterm_score: res.midterm_score !== undefined ? res.midterm_score : "",
@@ -383,14 +406,14 @@
             age: r.student.age || ""
           } : null,
           perfGrade: perfGrade,
-          classSize: 17,
+          classSize: classSize,
           numSubjects: numSubjects,
           stuTotalScore: `${totalScore} / ${totalMax}`,
           stuAverage: stuAverage,
           stuGPA: stuGPA,
           resultSummary: perfGrade.split('(')[1]?.replace(')','') || perfGrade,
-          principalComment: "This is an excellent result, do not rest on your oars.",
-          principalName: "ABIODUN FESTUS ADENIYI",
+          principalComment,
+          principalName,
           nextTermDate: "Monday 6th of January 2025.",
           affectiveSkills,
           psychomotorSkills,

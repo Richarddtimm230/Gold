@@ -543,6 +543,8 @@
     document.getElementById('editStudentModal').onclick = function(e) {
         if (e.target === this) closeEditModal();
     };
+        // Initial fetch
+    fetchStudents();
 // --- DOWNLOAD ALL STUDENTS AS PDF FUNCTIONALITY ---
     window.downloadAllStudentsPDF = function() {
         if (!filteredData || filteredData.length === 0) {
@@ -597,8 +599,7 @@
         // Download PDF
         doc.save("students_list.pdf");
     }
-    // Initial fetch
-    fetchStudents();
+
 </script>
 </body>
 </html>

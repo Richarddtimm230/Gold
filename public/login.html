@@ -379,7 +379,7 @@
     <div class="side">
       <button class="admission-btn" onclick="window.location.href='admission.html'">Admission</button>
       <div class="logo">
-        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="School Logo" style="width:100%;height:100%;">
+        <img src="logo-1679575828 (1).jpeg" alt="School Logo" style="width:100%;height:100%;">
       </div>
       <h1>GOLD AND LINC SCHOOLS</h1>
       <div class="info-row">
@@ -511,6 +511,7 @@
           if (res.ok && data?.token) {
             // Store JWT token
             localStorage.setItem('token', data.token);
+            localStorage.setItem('adminToken', data.token);
             localStorage.setItem('superadmin_token', data.token);
             localStorage.setItem('student_token', data.token); // Add this line
 
@@ -520,7 +521,7 @@
             if (role === 'superadmin') {
               window.location.href = 'admin.html';
             } else if (role === 'admin') {
-              window.location.href = 'admin.html';
+              window.location.href = 'students-view.html';
             } else if (role === 'teacher') {
               window.location.href = 'teacher-dashboard.html';
             } else if (role === 'student') {

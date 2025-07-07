@@ -681,11 +681,10 @@ router.put('/:studentId', adminAuth, upload.single('photo'), async (req, res) =>
   }
 });
 
-// --- Delete student by student_id or regNo (admin only) ---
-router.delete('/:studentId', adminAuth, async (req, res) => {
+// --- DELETE student by student_id or regNo (NO AUTH) ---
+router.delete('/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
-    // Find by student_id or regNo
     let snap = await studentsCollection().where('student_id', '==', studentId).limit(1).get();
     if (snap.empty) {
       snap = await studentsCollection().where('regNo', '==', studentId).limit(1).get();

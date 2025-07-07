@@ -518,7 +518,7 @@
             // Role-based redirect (robust and extensible)
             const role = data.user?.role?.toLowerCase();
             if (role === 'superadmin') {
-              window.location.href = 'students-view.html';
+              window.location.href = 'admin.html';
             } else if (role === 'admin') {
               window.location.href = 'admin.html';
             } else if (role === 'teacher') {

@@ -584,9 +584,10 @@
         doc.setFillColor(32, 201, 151);
         doc.setTextColor(255,255,255);
 
-        const colTitles = ["S/N", "Full Name", "Email", "Phone", "Class"];
-        const colWidths = [15, 70, 70, 40, 30];
-        let x = 15;
+        // New columns: Reg No, Student ID, Scratch Card
+        const colTitles = ["S/N", "Full Name", "Email", "Phone", "Class", "Reg No", "Student ID", "Scratch Card"];
+        const colWidths = [12, 50, 55, 32, 28, 32, 32, 34];
+        let x = 10;
         colTitles.forEach((title, i) => {
             doc.rect(x, y, colWidths[i], 8, 'F'); // filled cell
             doc.text(title, x + 2, y + 6);
@@ -601,7 +602,7 @@
         let rowHeight = 7;
         let serial = 1;
         filteredData.forEach((stu, idx) => {
-            x = 15;
+            x = 10;
             // Prevent overflow: new page if needed
             if (y + rowHeight > 200) {
                 doc.addPage();
@@ -611,12 +612,18 @@
             const email = stu.studentEmail || '';
             const phone = stu.studentPhone || '';
             const studentClass = (stu.class && stu.class.name) ? stu.class.name : (stu.class || '');
+            const regNo = stu.regNo || '';
+            const studentId = stu.student_id || '';
+            const scratchCard = stu.scratchCard || '';
             const cells = [
                 String(serial),
                 fullName,
                 email,
                 phone,
-                studentClass
+                studentClass,
+                regNo,
+                studentId,
+                scratchCard
             ];
             cells.forEach((cell, i) => {
                 doc.rect(x, y, colWidths[i], rowHeight);
@@ -636,7 +643,7 @@
             doc.setPage(i);
             doc.setFontSize(9);
             doc.setTextColor(100,100,100);
-            doc.text(`Page ${i} of ${pageCount}`, 282, 208, { align: "right" });
+            doc.text(`Page ${i} of ${pageCount}`, 292, 208, { align: "right" });
         }
 
         // Download PDF

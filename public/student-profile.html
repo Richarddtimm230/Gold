@@ -356,13 +356,10 @@ document.getElementById('skillsForm').onsubmit = async function(e){
     };
     const comment = form.principal_comment.value;
 
-    // You may get session/term from context or prompt user
-    let session = prompt("Enter Academic Session (e.g. 2024-2025):");
-    let term = prompt("Enter Term (e.g. First Term):");
-    if (!session || !term) {
-        document.getElementById('skillsStatus').textContent = "❌ Session and term are required!";
-        return;
-    }
+    // Hardcode session and term or get from context as needed
+    // Example: Adjust as needed or fetch from your UI/app context
+    const session = "2024-2025"; // <-- Change this as appropriate or get from context
+    const term = "First Term";   // <-- Change this as appropriate or get from context
 
     const payload = {
         session,
@@ -379,7 +376,7 @@ document.getElementById('skillsForm').onsubmit = async function(e){
 
     // NOTE: You must be logged in as admin and provide a valid token
     // For demonstration, we'll use a placeholder token variable
-    const ADMIN_TOKEN = localStorage.getItem("adminToken") || "token";
+    const ADMIN_TOKEN = localStorage.getItem("token") || "YOUR_ADMIN_TOKEN";
 
     try {
         const res = await fetch(`${API_BASE_URL}/api/students/${loadedStudent.regNo}/skills-report`, {

@@ -329,25 +329,78 @@
         document.getElementById('skillsModal').classList.remove('active');
     };
 
-    // Save skills report (simulate - change to real API as needed)
-    document.getElementById('skillsForm').onsubmit = async function(e){
-        e.preventDefault();
-        const form = e.target;
-        const data = {};
-        Array.from(form.elements).forEach(el => {
-            if (el.name) data[el.name] = el.value;
-        });
-        data.student_id = studentIdParam;
-        document.getElementById('skillsStatus').textContent = "Saving...";
-        try {
-            setTimeout(() => {
-                document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";
-                setTimeout(()=>{document.getElementById('skillsModal').classList.remove('active');},1000);
-            }, 900);
-        } catch (err) {
-            document.getElementById('skillsStatus').textContent = "❌ Failed to save.";
-        }
+document.getElementById('skillsForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = e.target;
+    if (!loadedStudent || !loadedStudent.regNo) {
+        document.getElementById('skillsStatus').textContent = "❌ Student not loaded!";
+        return;
+    }
+    // Structure data as backend expects
+    const affective = {
+        punctuality: form.affective_punctuality.value,
+        attentiveness: form.affective_attentiveness.value,
+        neatness: form.affective_neatness.value,
+        honesty: form.affective_honesty.value,
+        politeness: form.affective_politeness.value
     };
+    const psychomotor = {
+        handwriting: form.psycho_handwriting.value,
+        drawing: form.psycho_drawing.value,
+        sports: form.psycho_sports.value,
+        organization: form.psycho_organization.value
+    };
+    const attendance = {
+        days_present: form.attendance_days_present.value,
+        days_absent: form.attendance_days_absent.value
+    };
+    const comment = form.principal_comment.value;
+
+    // You may get session/term from context or prompt user
+    let session = prompt("Enter Academic Session (e.g. 2024-2025):");
+    let term = prompt("Enter Term (e.g. First Term):");
+    if (!session || !term) {
+        document.getElementById('skillsStatus').textContent = "❌ Session and term are required!";
+        return;
+    }
+
+    const payload = {
+        session,
+        term,
+        skills: {
+            affective,
+            psychomotor
+        },
+        attendance,
+        comment
+    };
+
+    document.getElementById('skillsStatus').textContent = "Saving...";
+
+    // NOTE: You must be logged in as admin and provide a valid token
+    // For demonstration, we'll use a placeholder token variable
+    const ADMIN_TOKEN = localStorage.getItem("adminToken") || "token";
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/students/${loadedStudent.regNo}/skills-report`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + ADMIN_TOKEN
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";
+            setTimeout(()=>{document.getElementById('skillsModal').classList.remove('active');},1000);
+        } else {
+            document.getElementById('skillsStatus').textContent = "❌ " + (data.error || "Failed to save.");
+        }
+    } catch (err) {
+        document.getElementById('skillsStatus').textContent = "❌ Failed to save.";
+    }
+};
 
     // ---- EDIT STUDENT MODAL LOGIC ----
     const editModal = document.getElementById('editStudentModal');

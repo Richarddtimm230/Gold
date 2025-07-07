@@ -22,7 +22,7 @@ async function ensureSuperAdmin(db) {
       await userDoc.ref.update({
         name: superName,
         password: hash,
-        role: 'admin'
+        role: 'superadmin'
       });
       console.log('Superadmin updated.');
     } else {

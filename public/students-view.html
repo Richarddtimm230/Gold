@@ -546,59 +546,101 @@
     };
         // Initial fetch
     fetchStudents();
-// --- DOWNLOAD ALL STUDENTS AS PDF FUNCTIONALITY ---
+
+
+    // --- DOWNLOAD ALL STUDENTS AS PDF FUNCTIONALITY ---
     window.downloadAllStudentsPDF = function() {
         if (!filteredData || filteredData.length === 0) {
             alert("No students to download.");
             return;
         }
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "landscape" });
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-        // Table headers
-        const headers = [["Full Name", "Email", "Phone Number", "Class"]];
-        const rows = [];
+        // SCHOOL HEADER
+        let y = 15;
+        doc.setFontSize(20);
+        doc.setTextColor(32, 201, 151);
+        doc.text("Gold and Linc Schools", 148, y, { align: "center" });
 
-        filteredData.forEach(stu => {
+        y += 8;
+        doc.setFontSize(11);
+        doc.setTextColor(80, 80, 80);
+        doc.text("Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa", 148, y, { align: "center" });
+
+        y += 7;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text("Email: goldlincschools@gmail.com  |  Phone: 08034430941", 148, y, { align: "center" });
+
+        y += 10;
+        doc.setFontSize(15);
+        doc.setTextColor(44,62,80);
+        doc.text("Students List", 148, y, { align: "center" });
+
+        // Table column headers
+        y += 10;
+        doc.setFontSize(11);
+        doc.setFillColor(32, 201, 151);
+        doc.setTextColor(255,255,255);
+
+        const colTitles = ["S/N", "Full Name", "Email", "Phone", "Class"];
+        const colWidths = [15, 70, 70, 40, 30];
+        let x = 15;
+        colTitles.forEach((title, i) => {
+            doc.rect(x, y, colWidths[i], 8, 'F'); // filled cell
+            doc.text(title, x + 2, y + 6);
+            x += colWidths[i];
+        });
+
+        // Table rows
+        y += 8;
+        doc.setFontSize(10);
+        doc.setTextColor(40, 40, 40);
+
+        let rowHeight = 7;
+        let serial = 1;
+        filteredData.forEach((stu, idx) => {
+            x = 15;
+            // Prevent overflow: new page if needed
+            if (y + rowHeight > 200) {
+                doc.addPage();
+                y = 15;
+            }
             const fullName = [stu.surname, stu.firstname, stu.othernames].filter(Boolean).join(' ');
             const email = stu.studentEmail || '';
             const phone = stu.studentPhone || '';
             const studentClass = (stu.class && stu.class.name) ? stu.class.name : (stu.class || '');
-            rows.push([fullName, email, phone, studentClass]);
-        });
-
-        // Simple table rendering with auto placement
-        let y = 20;
-        doc.setFontSize(16);
-        doc.text("Students List", 15, y);
-        y += 10;
-        doc.setFontSize(11);
-
-        // Draw table manually (since we don't use autotable plugin here)
-        // Headers
-        let x = 15, colWidths = [60, 70, 45, 35];
-        headers[0].forEach((h, i) => {
-            doc.text(h, x, y);
-            x += colWidths[i];
-        });
-        y += 8;
-        // Rows
-        rows.forEach(row => {
-            x = 15;
-            row.forEach((cell, i) => {
-                doc.text(String(cell), x, y);
+            const cells = [
+                String(serial),
+                fullName,
+                email,
+                phone,
+                studentClass
+            ];
+            cells.forEach((cell, i) => {
+                doc.rect(x, y, colWidths[i], rowHeight);
+                let txt = String(cell || '');
+                // Truncate long fields for PDF
+                if (txt.length > 32 && i !== 0) txt = txt.substring(0,30) + '...';
+                doc.text(txt, x + 2, y + rowHeight - 2);
                 x += colWidths[i];
             });
-            y += 7;
-            // If near bottom, create a new page
-            if (y > 190) {
-                doc.addPage();
-                y = 20;
-            }
+            y += rowHeight;
+            serial++;
         });
 
+        // Footer
+        let pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(9);
+            doc.setTextColor(100,100,100);
+            doc.text(`Page ${i} of ${pageCount}`, 282, 208, { align: "right" });
+        }
+
         // Download PDF
-        doc.save("students_list.pdf");
+        doc.save("goldlinc_students_list.pdf");
     }
 
 </script>

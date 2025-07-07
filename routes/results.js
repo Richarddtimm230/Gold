@@ -258,6 +258,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ...existing code above...
 
 router.get('/check', async (req, res) => {
   try {
@@ -331,9 +332,47 @@ router.get('/check', async (req, res) => {
       });
     }
 
+    // ==== PATCH: Fetch skills report for the session/term ====
+    let skillsReport = null;
+    if (Array.isArray(student.skillsReports)) {
+      skillsReport = student.skillsReports.find(r =>
+        r.session?.toLowerCase() === session.toLowerCase() &&
+        r.term?.toLowerCase() === term.toLowerCase()
+      );
+    }
+
+    // ==== PATCH: Calculate class size ====
+    const classmatesSnap = await resultCollection()
+      .where('class', '==', classId)
+      .where('session', '==', sessionId)
+      .where('term', '==', termId)
+      .where('status', '==', 'Published')
+      .get();
+    const studentIds = new Set();
+    classmatesSnap.forEach(doc => {
+      studentIds.add(doc.data().student);
+    });
+    const classSize = studentIds.size;
+
+    // ==== PATCH: Add extra student info ====
+    const studentInfo = {
+      name: student.name || student.surname + ' ' + student.firstname,
+      regNo: student.regNo,
+      gender: student.gender,
+      DOB: student.dob,
+      email: student.studentEmail,
+      age: student.age
+    };
+
+    // ==== PATCH: Compose response ====
     if (!results.length) return res.status(404).json({ error: 'No result found.' });
 
-    res.json({ results });
+    res.json({
+      results,
+      skillsReport: skillsReport || null,
+      classSize,
+      student: studentInfo
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

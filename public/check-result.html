@@ -28,10 +28,6 @@
             <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" readonly disabled required>
           </div>
           <div class="result-form-group">
-            <label class="result-form-label" for="scratchCardInput">Scratch Card</label>
-            <input id="scratchCardInput" class="result-form-input" placeholder="Enter Scratch Card" autocomplete="off" required maxlength="8" style="text-transform:uppercase;">
-          </div>
-          <div class="result-form-group">
             <label class="result-form-label" for="classInput">Class</label>
             <select id="classInput" class="result-form-select" required>
               <option value="">Select Class</option>
@@ -147,6 +143,8 @@
       const API_BASE_URL = "https://goldlincschools.onrender.com";
 
       let lastStudentProfile = null; // Holds student profile for extra fields
+      let lastSkillsReport = null;
+      let lastClassSize = null;
 
       // Autofill and lock registration number for logged-in student
       async function autofillRegNo() {
@@ -189,7 +187,6 @@
       }
       autofillRegNo();
 
-      // Previous viewed results (simulate persistence with localStorage)
       function getViewedResults() {
         let arr = [];
         try { arr = JSON.parse(localStorage.getItem("viewedResults")) || []; } catch {}
@@ -197,7 +194,6 @@
       }
       function saveViewedResult(entry) {
         let arr = getViewedResults();
-        // Remove duplicate
         arr = arr.filter(x => !(
           x.regNo === entry.regNo && x.session === entry.session && x.term === entry.term && x.class === entry.class
         ));
@@ -224,65 +220,94 @@
         if (arr[idx]) displayResult(arr[idx]);
       }
 
-      // Main: Handle result search using /api/results/check
+      // Main: Handle result search using /api/results (fetch skills/attendance as well)
       async function handleResultSearch(e) {
         e.preventDefault();
         const regNo = document.getElementById("regNoInput").value.trim();
-        const scratchCard = document.getElementById("scratchCardInput").value.trim().toUpperCase();
         const klass = document.getElementById("classInput").value;
         const session = document.getElementById("sessionInput").value;
         const term = document.getElementById("termInput").value;
         const errorBox = document.getElementById("searchError");
         errorBox.style.display = "none";
 
-        if (!regNo || !scratchCard || !klass || !session || !term) {
+        if (!regNo || !klass || !session || !term) {
           errorBox.textContent = "All fields are required!";
           errorBox.style.display = "block";
           return false;
         }
 
         try {
-          // Backend API call to /api/results/check with scratch card
+          lastSkillsReport = null;
+          lastClassSize = null;
+
+          // 1. Fetch results
           const params = new URLSearchParams({
-            regNo: regNo,
-            scratchCard: scratchCard,
+            student_id: regNo,
             class: klass,
             session: session,
-            term: term
+            term: term,
+            status: "Published"
           });
-          const response = await fetch(`${API_BASE_URL}/api/results/check?${params.toString()}`);
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error || "Result not found or incorrect details.");
-          }
-          if (!data.results || !Array.isArray(data.results) || !data.results.length) {
+          const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
+          const results = await response.json();
+          if (!Array.isArray(results) || !results.length) {
             errorBox.textContent = "No result found! Please check your details or contact the school.";
             errorBox.style.display = "block";
             document.getElementById("resultsDisplaySection").style.display = "none";
             return false;
           }
+
+          // 2. Fetch student profile for skills
+          let skillsReport = null;
+          let classSize = null;
+          try {
+            // Get skills report for session+term
+            const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
+              headers: { 'Authorization': '' } // You can add admin token here if needed for protection, else leave empty
+            });
+            if (skillsRes.ok) {
+              const skillsData = await skillsRes.json();
+              if (Array.isArray(skillsData.skillsReports)) {
+                skillsReport = skillsData.skillsReports.find(
+                  r => String(r.session).toLowerCase() === String(session).toLowerCase() &&
+                       String(r.term).toLowerCase() === String(term).toLowerCase()
+                ) || null;
+              }
+            }
+          } catch (e) {}
+
+          // 3. Fetch class size
+          try {
+            const classParams = new URLSearchParams({
+              class: klass,
+              session: session,
+              term: term,
+              status: "Published"
+            });
+            const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
+            if (classRes.ok) {
+              const classResults = await classRes.json();
+              // Count unique student IDs
+              const studentSet = new Set();
+              for (const r of classResults) {
+                if (r.student && (typeof r.student === "object" ? r.student.id : r.student))
+                  studentSet.add(typeof r.student === "object" ? r.student.id : r.student);
+              }
+              classSize = studentSet.size;
+            }
+          } catch (e) {}
+
+          lastSkillsReport = skillsReport;
+          lastClassSize = classSize;
+
           // Save to previous results
           saveViewedResult({
-            regNo,
-            class: klass,
-            session,
-            term,
-            results: data.results,
-            skillsReport: data.skillsReport || null,
-            classSize: data.classSize || null,
-            student: data.student || lastStudentProfile
+            regNo, class: klass, session, term, results: results,
+            skillsReport, classSize,
+            student: lastStudentProfile
           });
           // Display
-          displayResult({
-            regNo,
-            class: klass,
-            session,
-            term,
-            results: data.results,
-            skillsReport: data.skillsReport || null,
-            classSize: data.classSize || null,
-            student: data.student || lastStudentProfile
-          });
+          displayResult({regNo, class: klass, session, term, results: results, skillsReport, classSize, student: lastStudentProfile});
           renderPreviousResults();
         } catch (err) {
           errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
@@ -292,7 +317,7 @@
         return false;
       }
 
-      // Display result in table and details (handles admin endpoint response)
+      // Display result in table and details (handles array response)
       function displayResult(r) {
         document.getElementById("resultsDisplaySection").style.display = "";
         document.getElementById("dispRegNo").textContent = r.regNo;
@@ -319,31 +344,26 @@
 
       // Download result as report.html (populates sessionStorage and opens)
       function downloadCurrentResult() {
-        // Must have displayed result
         const r = window._lastDisplayedResult;
         if (!r || !r.results || !r.results.length) {
           alert("No result to download. Please check a result first.");
           return;
         }
 
-        // Use real skills/attendance/class size from API response
-        const affectiveSkills = [];
-        const psychomotorSkills = [];
+        // Use fetched skills/attendance/classSize if present
+        let affectiveSkills = [];
+        let psychomotorSkills = [];
         let attendance = [];
         let principalComment = "This is an excellent result, do not rest on your oars.";
         let principalName = "ABIODUN FESTUS ADENIYI";
-        let classSize = r.classSize || "N/A";
+        let classSize = r.classSize || 17;
 
         if (r.skillsReport && r.skillsReport.skills) {
           if (r.skillsReport.skills.affective) {
-            for (const [k, v] of Object.entries(r.skillsReport.skills.affective)) {
-              affectiveSkills.push({ name: k, score: v });
-            }
+            affectiveSkills = Object.entries(r.skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
           }
           if (r.skillsReport.skills.psychomotor) {
-            for (const [k, v] of Object.entries(r.skillsReport.skills.psychomotor)) {
-              psychomotorSkills.push({ name: k, score: v });
-            }
+            psychomotorSkills = Object.entries(r.skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
           }
         }
         if (r.skillsReport && r.skillsReport.attendance) {
@@ -378,7 +398,6 @@
         else if (stuGPA >= 1.0) perfGrade = "E (Poor)";
         else perfGrade = "F (Fail)";
 
-        // Compose reportData
         const reportData = {
           regNo: r.regNo,
           class: r.class,

@@ -75,33 +75,13 @@
                     <td>Drawing and Painting</td>
                     <td><input type="number" name="psycho_drawing" min="1" max="5" required></td>
                   </tr>
-                    <tr>
-                    <td>Speech and Verbal Fluency</td>
-                    <td><input type="number" name="psycho_speech" min="1" max="5" required></td>
-                  </tr>
-                    <tr>
-                    <td>Quantitative Reasoning</td>
-                    <td><input type="number" name="psycho_reason" min="1" max="5" required></td>
-                  </tr>
-                    <tr>
-                    <td>Processing Speed</td>
-                    <td><input type="number" name="psycho_processing" min="1" max="5" required></td>
-                  </tr>
-                    <tr>
-                    <td>Retentiveness</td>
-                    <td><input type="number" name="psycho_retentive" min="1" max="5" required></td>
-                  </tr>
-                    <tr>
-                    <td>Visual Memory</td>
-                    <td><input type="number" name="psycho_memory" min="1" max="5" required></td>
-                  </tr>
                   <tr>
                     <td>Sports and Games</td>
                     <td><input type="number" name="psycho_sports" min="1" max="5" required></td>
                   </tr>
                   <tr>
-                    <td>Public Speaker</td>
-                    <td><input type="number" name="psycho_speaker" min="1" max="5" required></td>
+                    <td>Organization Ability</td>
+                    <td><input type="number" name="psycho_organization" min="1" max="5" required></td>
                   </tr>
                 </table>
                 <label>Attendance Report</label>
@@ -239,12 +219,7 @@ document.getElementById('skillsForm').onsubmit = async function(e){
         handwriting: form.psycho_handwriting.value,
         drawing: form.psycho_drawing.value,
         sports: form.psycho_sports.value,
-        speech: form.psycho_speech.value,
-        reason: form.psycho_reason.value,
-        speed: form.psycho_speed.value,
-        retentive: form.psycho_retentive.value,
-        memory: form.psycho_memory.value,
-        speaker: form.psycho_speaker.value
+        organization: form.psycho_organization.value
     };
     const attendance = {
         days_present: form.attendance_days_present.value,

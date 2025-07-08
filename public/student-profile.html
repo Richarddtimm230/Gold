@@ -52,6 +52,18 @@
                      <td>Politeness</td>
                      <td><input type="number" name="affective_politeness" min="1" max="5" required></td>
                   </tr>
+                    <tr>
+                     <td>Perseverance</td>
+                     <td><input type="number" name="affective_perseverance" min="1" max="5" required></td>
+                             </tr>
+                    <tr>
+                     <td>Relationship With Others</td>
+                     <td><input type="number" name="affective_relationship" min="1" max="5" required></td>
+                  </tr>
+                    <tr>
+                     <td>Organisation Ability</td>
+                     <td><input type="number" name="affective_organisation" min="1" max="5" required></td>
+                  </tr>
                 </table>
                 <label>Psychomotor Skills (1-5)</label>
                 <table class="skills-section-table">
@@ -198,7 +210,10 @@ document.getElementById('skillsForm').onsubmit = async function(e){
         attentiveness: form.affective_attentiveness.value,
         neatness: form.affective_neatness.value,
         honesty: form.affective_honesty.value,
-        politeness: form.affective_politeness.value
+        politeness: form.affective_politeness.value,
+        perseverance: form.affective_perseverance.value,
+        relationship: form.affective_relationship.value,
+        organisation: form.affective_organisation.value
     };
     const psychomotor = {
         handwriting: form.psycho_handwriting.value,

@@ -252,7 +252,7 @@ body {
   .report-container {
     box-shadow: none;
     margin: 0 !important;
-    padding: 5px 3px 4px 3px;
+    padding: 5px 5px 4px 5px;
     width: 210mm;
     max-width: 210mm;
     border: none;

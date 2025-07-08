@@ -257,24 +257,31 @@
             return false;
           }
 
-          // 2. Fetch student profile for skills
-          let skillsReport = null;
-          let classSize = null;
-          try {
-            // Get skills report for session+term
-            const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
-              headers: { 'Authorization': '' }
-            });
-            if (skillsRes.ok) {
-              const skillsData = await skillsRes.json();
-              if (Array.isArray(skillsData.skillsReports)) {
-                skillsReport = skillsData.skillsReports.find(
-                  r => String(r.session).toLowerCase() === String(session).toLowerCase() &&
-                       String(r.term).toLowerCase() === String(term).toLowerCase()
-                ) || null;
-              }
-            }
-          } catch (e) {}
+         // 2. Fetch student profile for skills
+let skillsReport = null;
+let classSize = null;
+try {
+  const normalize = str =>
+    String(str || '')
+      .replace(/–/g, '-') // Convert en dash to hyphen
+      .trim()
+      .toLowerCase();
+
+  // Get skills report for session+term
+  const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
+    headers: { 'Authorization': '' }
+  });
+  if (skillsRes.ok) {
+    const skillsData = await skillsRes.json();
+    if (Array.isArray(skillsData.skillsReports)) {
+      skillsReport = skillsData.skillsReports.find(
+        r => normalize(r.session) === normalize(session) &&
+             normalize(r.term) === normalize(term)
+      ) || null;
+    }
+  }
+} catch (e) {}
+
 
           // 3. Fetch class size
           try {

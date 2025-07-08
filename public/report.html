@@ -414,8 +414,7 @@
               </div>
     </section>
   </div>
-  <script>
-  // Helper to format the date/time for "Printed" line
+<script>
   function getFormattedPrintDate() {
     const now = new Date();
     const dd = now.getDate().toString().padStart(2,'0');
@@ -429,30 +428,37 @@
     return `Printed : ${dd}-${mm}-${yyyy} ${h}:${min} ${ampm}`;
   }
 
-  // Main logic to fill fields from sessionStorage.reportData
+  function formatDate(d) {
+    try {
+      const date = new Date(d);
+      return date.toLocaleDateString();
+    } catch {
+      return d;
+    }
+  }
+
   function fillReport() {
     const dataStr = sessionStorage.getItem("reportData");
-    if (!dataStr) return; // fallback to static
+    if (!dataStr) return;
     const data = JSON.parse(dataStr);
 
-    // Fill session/term
     if (data.term && data.session) {
       document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
     }
-    // Fill basic student info
+
     if (data.student) {
       document.getElementById("stuName").innerText = data.student.name || "";
       document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
       document.getElementById("stuGender").innerText = data.student.gender || "";
-      document.getElementById("stuDOB").innerText = data.student.DOB || "";
-      document.getElementById("stuEmail").innerText = data.student.email || "";
+      document.getElementById("stuDOB").innerText = formatDate(data.student.dob || data.student.DOB || "");
+      document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || "";
       document.getElementById("stuClass").innerText = data.class || "";
       if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
     } else {
       document.getElementById("stuRegNo").innerText = data.regNo || "";
       document.getElementById("stuClass").innerText = data.class || "";
     }
-    // Fill summary fields if present
+
     if (data.perfGrade) document.getElementById("perfGrade").innerText = data.perfGrade;
     if (data.classSize) document.getElementById("classSize").innerText = data.classSize;
     if (data.numSubjects) document.getElementById("numSubjects").innerText = data.numSubjects;
@@ -464,7 +470,6 @@
     if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
     if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
 
-    // Fill results table
     const tbody = document.querySelector("#resultsTable tbody");
     if (tbody && Array.isArray(data.results)) {
       tbody.innerHTML = data.results.map(res => `
@@ -483,7 +488,6 @@
       `).join('');
     }
 
-    // Fill affective/psychomotor/attendance if provided (optional)
     if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
       const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
       document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
@@ -497,41 +501,10 @@
       document.querySelector("#attendanceTable tbody").innerHTML = rows;
     }
 
-    // Update printed date
     document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
   window.addEventListener('DOMContentLoaded', fillReport);
+</script>
 
-  // jsPDF download logic
-  async function downloadPDF() {
-    const reportDom = document.getElementById('reportCardDom');
-    // Optionally hide button for snapshot
-    document.querySelector('.no-print-btn').style.visibility = 'hidden';
-    // Wait for styles to apply, then snapshot
-    await new Promise(r => setTimeout(r, 250));
-    html2canvas(reportDom, {scale:2, useCORS:true, backgroundColor: "#fff"}).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      // A4 page = 210mm x 297mm, jsPDF units are 'mm'
-      const pdf = new window.jspdf.jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [297, 210] // height, width (jsPDF expects [height, width] for custom)
-      });
-      // Calculate image size to fit A4 in portrait
-      const pageWidth = 210;
-      const pageHeight = 297;
-      // Make image fill the width, adjust height proportionally
-      const imgWidth = pageWidth;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      const yOffset = Math.max(0, (pageHeight-imgHeight)/2);
-      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
-      pdf.save('ReportCard.pdf');
-      document.querySelector('.no-print-btn').style.visibility = 'visible';
-    }).catch(e=>{
-      alert("Could not generate PDF: " + e.message);
-      document.querySelector('.no-print-btn').style.visibility = 'visible';
-    });
-  }
-  </script>
 </body>
 </html>

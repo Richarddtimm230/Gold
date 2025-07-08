@@ -4,6 +4,31 @@
   <meta charset="UTF-8">
   <title>Gold and Linc Schools - Report Card</title>
 <link rel="stylesheet" href="report.css">
+  <style>
+    .report-container {
+  position: relative;
+  background-image: url('logo-1679575828 (1).jpeg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 300px;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+  opacity: 1;
+}
+
+.seal-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.seal-container img {
+  height: 80px;
+  width: auto;
+}
+
+  </style>
   <!-- jsPDF CDN and html2canvas for DOM rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -171,6 +196,10 @@
         <span id="printDate">Printed : 18-12-2024 02:53 pm</span>
               </div>
     </section>
+    <div class="seal-container">
+  <img src="red-seal.png" alt="Red Seal" />
+  </div>
+  
   </div>
 <script>
   function getFormattedPrintDate() {

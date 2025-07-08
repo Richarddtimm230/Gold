@@ -93,278 +93,141 @@
             </form>
         </div>
     </div>
-    <script>
-    // GET student_id from URL
-    function getQueryParam(name) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name);
+<script>
+// Extracted JS-only changes for quick preview
+const API_BASE_URL = "https://goldlincschools.onrender.com";
+const studentIdParam = new URL(window.location.href).searchParams.get('student_id');
+let loadedStudent = null;
+
+function showSpinner(show) {
+  const el = document.getElementById('profileSpinnerOverlay');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+async function fetchAndRenderStudent() {
+  showSpinner(true);
+  const profileContainer = document.getElementById('profile-container');
+  if (!studentIdParam) {
+    showSpinner(false);
+    profileContainer.innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
+    return;
+  }
+  try {
+    let url = `${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentIdParam)}`;
+    let res = await fetch(url);
+    let data = await res.json();
+    let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
+
+    if (!stu) {
+      url = `${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentIdParam)}`;
+      res = await fetch(url);
+      data = await res.json();
+      stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
     }
-    const studentIdParam = getQueryParam('student_id');
-    const API_BASE_URL = "https://goldlincschools.onrender.com";
-    let loadedStudent = null; // Will hold the loaded student data
 
-    // Show spinner
-    function showSpinner(show) {
-        const el = document.getElementById('profileSpinnerOverlay');
-        if (el) el.style.display = show ? 'flex' : 'none';
+    if (!stu) {
+      profileContainer.innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
+      return;
     }
 
-    // Fetch and render profile (robust logic: try both student_id and regNo, no paging/order when direct lookup)
-    async function fetchAndRenderStudent() {
-        const profileContainer = document.getElementById('profile-container');
-        showSpinner(true);
-        if (!studentIdParam) {
-            showSpinner(false);
-            profileContainer.innerHTML = "<p style='color:#dc3545;'>No student selected.</p>";
-            return;
-        }
-        try {
-            // Try student_id first (no orderBy)
-            let url = `${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentIdParam)}`;
-            let res = await fetch(url);
-            let data = await res.json();
-            let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
+    loadedStudent = stu;
+    document.getElementById('student-avatar').src = stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
+    document.getElementById('student-name').textContent = `${stu.firstname || ''} ${stu.surname || ''}`.trim();
+    document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentIdParam);
 
-            // If not found, try as regNo
-            if (!stu) {
-                url = `${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentIdParam)}`;
-                res = await fetch(url);
-                data = await res.json();
-                stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
-            }
+    const detailFields = [
+      {label: "Class", value: stu.class?.name || stu.class || ''},
+      {label: "Class Arm", value: stu.classArm || ''},
+      {label: "Scratch Card", value: stu.scratchCard || ''},
+      {label: "Date of Birth", value: stu.dob ? new Date(stu.dob).toLocaleDateString() : ''},
+      {label: "Gender", value: stu.gender || ''},
+      {label: "Parent Name", value: stu.parentName || ''},
+      {label: "Parent Relationship", value: stu.parentRelationship || ''},
+      {label: "Parent Phone", value: stu.parentPhone || ''},
+      {label: "Parent Email", value: stu.parentEmail || ''},
+      {label: "Parent Address", value: stu.parentAddress || ''},
+      {label: "Parent Occupation", value: stu.parentOccupation || ''},
+      {label: "Student Email", value: stu.studentEmail || ''},
+      {label: "Student Phone", value: stu.studentPhone || ''},
+      {label: "Address", value: stu.address || ''},
+      {label: "Nationality", value: stu.nationality || ''},
+      {label: "State", value: stu.state || ''},
+      {label: "LGA", value: stu.lga || ''},
+      {label: "Previous School", value: stu.previousSchool || ''},
+      {label: "Admission Date", value: stu.admissionDate ? new Date(stu.admissionDate).toLocaleDateString() : ''},
+      {label: "Academic Session", value: stu.academicSession || ''},
+    ];
+    const table = document.getElementById('profile-table');
+    table.innerHTML = detailFields.map(f => `<tr><td><b>${f.label}</b></td><td>${f.value}</td></tr>`).join('');
+  } catch (err) {
+    profileContainer.innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
+  } finally {
+    showSpinner(false);
+  }
+}
 
-            if (!stu) {
-                showSpinner(false);
-                profileContainer.innerHTML = "<p style='color:#dc3545;'>Student not found.</p>";
-                return;
-            }
-            loadedStudent = stu;
-            document.getElementById('student-avatar').src = stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
-            document.getElementById('student-name').textContent = ((stu.firstname||'') + ' ' + (stu.surname||'')).trim();
-            document.getElementById('student-reg').textContent = 'Reg No: ' + (stu.regNo || stu.student_id || studentIdParam);
+fetchAndRenderStudent();
 
-            // Render all available fields in a table
-            const table = document.getElementById('profile-table');
-            const detailFields = [
-                {label: "Class", value: stu.class && stu.class.name ? stu.class.name : (stu.class || '')},
-                {label: "Class Arm", value: stu.classArm || ''},
-                {label: "Scratch Card", value: stu.scratchCard || ''},
-                {label: "Date of Birth", value: stu.dob ? (new Date(stu.dob)).toLocaleDateString() : ''},
-                {label: "Gender", value: stu.gender || ''},
-                {label: "Parent Name", value: stu.parentName || ''},
-                {label: "Parent Relationship", value: stu.parentRelationship || ''},
-                {label: "Parent Phone", value: stu.parentPhone || ''},
-                {label: "Parent Email", value: stu.parentEmail || ''},
-                {label: "Parent Address", value: stu.parentAddress || ''},
-                {label: "Parent Occupation", value: stu.parentOccupation || ''},
-                {label: "Student Email", value: stu.studentEmail || ''},
-                {label: "Student Phone", value: stu.studentPhone || ''},
-                {label: "Address", value: stu.address || ''},
-                {label: "Nationality", value: stu.nationality || ''},
-                {label: "State", value: stu.state || ''},
-                {label: "LGA", value: stu.lga || ''},
-                {label: "Previous School", value: stu.previousSchool || ''},
-                {label: "Admission Date", value: stu.admissionDate ? (new Date(stu.admissionDate)).toLocaleDateString() : ''},
-                {label: "Academic Session", value: stu.academicSession || ''}
-            ];
-            table.innerHTML = detailFields.map(f => `<tr><td><b>${f.label}</b></td><td>${f.value}</td></tr>`).join('');
-        } catch (err) {
-            profileContainer.innerHTML = "<p style='color:#dc3545;'>Failed to load student.</p>";
-        } finally {
-            showSpinner(false);
-        }
-    }
-    fetchAndRenderStudent();
+// Skills form without token header
+const form = document.getElementById('skillsForm');
+form.onsubmit = async function(e){
+  e.preventDefault();
+  if (!loadedStudent || !loadedStudent.regNo) {
+    document.getElementById('skillsStatus').textContent = "❌ Student not loaded!";
+    return;
+  }
 
-    // Modal logic
-    document.getElementById('skillsBtn').onclick = () => {
-        document.getElementById('skillsModal').classList.add('active');
-    };
-    document.getElementById('closeSkillsModal').onclick = () => {
-        document.getElementById('skillsModal').classList.remove('active');
-    };
-
-document.getElementById('skillsForm').onsubmit = async function(e){
-    e.preventDefault();
-    const form = e.target;
-    if (!loadedStudent || !loadedStudent.regNo) {
-        document.getElementById('skillsStatus').textContent = "❌ Student not loaded!";
-        return;
-    }
-    // Structure data as backend expects
-    const affective = {
+  const payload = {
+    session: "2024-2025",
+    term: "First Term",
+    skills: {
+      affective: {
         punctuality: form.affective_punctuality.value,
         attentiveness: form.affective_attentiveness.value,
         neatness: form.affective_neatness.value,
         honesty: form.affective_honesty.value,
-        politeness: form.affective_politeness.value
-    };
-    const psychomotor = {
+        politeness: form.affective_politeness.value,
+      },
+      psychomotor: {
         handwriting: form.psycho_handwriting.value,
         drawing: form.psycho_drawing.value,
         sports: form.psycho_sports.value,
-        organization: form.psycho_organization.value
-    };
-    const attendance = {
-        days_present: form.attendance_days_present.value,
-        days_absent: form.attendance_days_absent.value
-    };
-    const comment = form.principal_comment.value;
+        organization: form.psycho_organization.value,
+      },
+    },
+    attendance: {
+      days_present: form.attendance_days_present.value,
+      days_absent: form.attendance_days_absent.value,
+    },
+    comment: form.principal_comment.value,
+  };
 
-    // Hardcode session and term or get from context as needed
-    // Example: Adjust as needed or fetch from your UI/app context
-    const session = "2024-2025"; // <-- Change this as appropriate or get from context
-    const term = "First Term";   // <-- Change this as appropriate or get from context
+  const studentIdentifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
 
-    const payload = {
-        session,
-        term,
-        skills: {
-            affective,
-            psychomotor
-        },
-        attendance,
-        comment
-    };
+  document.getElementById('skillsStatus').textContent = "Saving...";
 
-    document.getElementById('skillsStatus').textContent = "Saving...";
-
-    // NOTE: You must be logged in as admin and provide a valid token
-    // For demonstration, we'll use a placeholder token variable
-    const ADMIN_TOKEN = localStorage.getItem("token") || "YOUR_ADMIN_TOKEN";
-
-    try {
-       const studentIdentifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
-const res = await fetch(`${API_BASE_URL}/api/students/${studentIdentifier}/skills-report`, {
-
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + ADMIN_TOKEN
-            },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (res.ok) {
-            document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";
-            setTimeout(()=>{document.getElementById('skillsModal').classList.remove('active');},1000);
-        } else {
-            document.getElementById('skillsStatus').textContent = "❌ " + (data.error || "Failed to save.");
-        }
-    } catch (err) {
-        document.getElementById('skillsStatus').textContent = "❌ Failed to save.";
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/students/${studentIdentifier}/skills-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+        // No Authorization
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";
+      setTimeout(() => {
+        document.getElementById('skillsModal').classList.remove('active');
+      }, 1000);
+    } else {
+      document.getElementById('skillsStatus').textContent = "❌ " + (data.error || "Failed to save.");
     }
+  } catch (err) {
+    document.getElementById('skillsStatus').textContent = "❌ Failed to save.";
+  }
 };
-
-    // ---- EDIT STUDENT MODAL LOGIC ----
-    const editModal = document.getElementById('editStudentModal');
-    const editBtn = document.getElementById('editBtn');
-    const closeEditModalBtn = document.getElementById('closeEditModal');
-    const editFieldsWrapper = document.getElementById('editFieldsWrapper');
-    const editForm = document.getElementById('editStudentForm');
-    const editModalSpinner = document.getElementById('editModalSpinner');
-
-    // Which fields to show in the edit modal
-    const editableFields = [
-        {label: "Surname", name: "surname", type: "text", required: true},
-        {label: "First Name", name: "firstname", type: "text", required: true},
-        {label: "Other Names", name: "othernames", type: "text"},
-        {label: "Gender", name: "gender", type: "text", required: true},
-        {label: "DOB", name: "dob", type: "date", required: true},
-        {label: "Nationality", name: "nationality", type: "text"},
-        {label: "State of Origin", name: "state", type: "text"},
-        {label: "LGA", name: "lga", type: "text"},
-        {label: "Home Address", name: "address", type: "text"},
-        {label: "Reg No", name: "regNo", type: "text", readonly: true},
-        {label: "Scratch Card", name: "scratchCard", type: "text", readonly: true},
-        {label: "Class", name: "class", type: "text", required: true},
-        {label: "Class Arm", name: "classArm", type: "text"},
-        {label: "Previous School", name: "previousSchool", type: "text"},
-        {label: "Admission Date", name: "admissionDate", type: "date"},
-        {label: "Academic Session", name: "academicSession", type: "text"},
-        {label: "Parent Name", name: "parentName", type: "text", required: true},
-        {label: "Parent Relationship", name: "parentRelationship", type: "text"},
-        {label: "Parent Phone", name: "parentPhone", type: "text"},
-        {label: "Parent Email", name: "parentEmail", type: "email"},
-        {label: "Parent Address", name: "parentAddress", type: "text"},
-        {label: "Parent Occupation", name: "parentOccupation", type: "text"},
-        {label: "Student Email", name: "studentEmail", type: "email"},
-        {label: "Student Phone", name: "studentPhone", type: "text"},
-        {label: "Religion", name: "religion", type: "text"},
-        {label: "Blood Group", name: "bloodGroup", type: "text"},
-        {label: "Genotype", name: "genotype", type: "text"},
-        {label: "Medical", name: "medical", type: "text"}
-    ];
-
-    editBtn.onclick = function() {
-        if (!loadedStudent) return;
-        // Fill the form
-        editFieldsWrapper.innerHTML = '';
-        editableFields.forEach(field => {
-            let val = loadedStudent[field.name] || '';
-            if (field.type === "date" && val) {
-                val = (new Date(val)).toISOString().slice(0,10);
-            }
-            editFieldsWrapper.innerHTML += `
-            <div class="edit-row">
-                <label>${field.label}${field.required ? ' *' : ''}</label>
-                <input name="${field.name}" type="${field.type}" value="${val}" ${field.readonly ? 'readonly' : ''} ${field.required ? 'required' : ''} />
-            </div>`;
-        });
-        editModalSpinner.style.display = "none";
-        editModal.classList.add('active');
-    };
-
-    closeEditModalBtn.onclick = function() {
-        editModal.classList.remove('active');
-    };
-
-    // Save changes (fixed: only send allowed fields)
-    editForm.onsubmit = async function(e) {
-        e.preventDefault();
-        if (!loadedStudent) return;
-        editModalSpinner.style.display = "block";
-        const formData = new FormData(editForm);
-        let editData = {};
-        // Only allow fields that are actually updatable (as in the backend)
-        const allowedFields = [
-            "surname", "firstname", "othernames", "dob", "gender", "nationality", "state", "lga", "address",
-            "class", "classArm", "previousSchool", "admissionDate", "academicSession",
-            "parentName", "parentRelationship", "parentPhone", "parentEmail", "parentAddress", "parentOccupation",
-            "studentEmail", "studentPhone", "religion", "bloodGroup", "genotype", "medical"
-        ];
-        for (const [k, v] of formData.entries()) {
-            if (allowedFields.includes(k)) editData[k] = v;
-        }
-        try {
-            // Use student_id or regNo for update
-            const identifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
-
-            let res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(identifier)}`, {
-                method: "PUT",
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(editData)
-            });
-            if (res.ok) {
-                editModalSpinner.style.display = "none";
-                editModal.classList.remove('active');
-                alert('Student updated!');
-                fetchAndRenderStudent();
-            } else {
-                editModalSpinner.style.display = "none";
-                alert('Failed to update student.');
-            }
-        } catch (err) {
-            editModalSpinner.style.display = "none";
-            alert('Network error.');
-        }
-    };
-
-    // Close modal on background click
-    document.getElementById('editStudentModal').onclick = function(e) {
-        if (e.target === this) editModal.classList.remove('active');
-    };
-
-    </script>
+</script>
 </body>
 </html>

@@ -417,22 +417,23 @@
 <script>
   function getFormattedPrintDate() {
     const now = new Date();
-    const dd = now.getDate().toString().padStart(2, '0');
-    const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+    const dd = now.getDate().toString().padStart(2,'0');
+    const mm = (now.getMonth()+1).toString().padStart(2,'0');
     const yyyy = now.getFullYear();
     let h = now.getHours();
-    const ampm = h >= 12 ? 'pm' : 'am';
-    h = h % 12 || 12;
-    const min = now.getMinutes().toString().padStart(2, '0');
+    let ampm = "am";
+    if (h > 12) { h = h - 12; ampm = "pm"; }
+    else if (h === 0) { h = 12; }
+    const min = now.getMinutes().toString().padStart(2,'0');
     return `Printed : ${dd}-${mm}-${yyyy} ${h}:${min} ${ampm}`;
   }
 
-  function formatDOB(dob) {
+  function formatDate(d) {
     try {
-      const d = new Date(dob);
-      return isNaN(d) ? dob : d.toLocaleDateString();
+      const date = new Date(d);
+      return date.toLocaleDateString();
     } catch {
-      return dob || '';
+      return d;
     }
   }
 
@@ -446,39 +447,39 @@
     }
 
     if (data.student) {
-      document.getElementById("stuName").innerText = data.student.name || '';
-      document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || '';
-      document.getElementById("stuGender").innerText = data.student.gender || '';
-      document.getElementById("stuDOB").innerText = formatDOB(data.student.DOB || '');
-      document.getElementById("stuEmail").innerText = data.student.email || '';
-      document.getElementById("stuClass").innerText = data.class || '';
-      document.getElementById("stuAge").innerText = data.student.age || '';
+      document.getElementById("stuName").innerText = data.student.name || "";
+      document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
+      document.getElementById("stuGender").innerText = data.student.gender || "";
+      document.getElementById("stuDOB").innerText = formatDate(data.student.dob || data.student.DOB || "");
+      document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || "";
+      document.getElementById("stuClass").innerText = data.class || "";
+      if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
     } else {
-      document.getElementById("stuRegNo").innerText = data.regNo || '';
-      document.getElementById("stuClass").innerText = data.class || '';
+      document.getElementById("stuRegNo").innerText = data.regNo || "";
+      document.getElementById("stuClass").innerText = data.class || "";
     }
 
-    document.getElementById("perfGrade").innerText = data.perfGrade || '';
-    document.getElementById("classSize").innerText = data.classSize || '';
-    document.getElementById("numSubjects").innerText = data.numSubjects || '';
-    document.getElementById("stuTotalScore").innerText = data.stuTotalScore || '';
-    document.getElementById("stuAverage").innerText = data.stuAverage || '';
-    document.getElementById("stuGPA").innerText = data.stuGPA || '';
-    document.getElementById("resultSummary").innerText = data.resultSummary || '';
-    document.getElementById("principalComment").innerText = data.principalComment || '';
-    document.getElementById("principalName").innerText = data.principalName || '';
-    document.getElementById("nextTermDate").innerText = data.nextTermDate || '';
+    if (data.perfGrade) document.getElementById("perfGrade").innerText = data.perfGrade;
+    if (data.classSize) document.getElementById("classSize").innerText = data.classSize;
+    if (data.numSubjects) document.getElementById("numSubjects").innerText = data.numSubjects;
+    if (data.stuTotalScore) document.getElementById("stuTotalScore").innerText = data.stuTotalScore;
+    if (data.stuAverage) document.getElementById("stuAverage").innerText = data.stuAverage;
+    if (data.stuGPA) document.getElementById("stuGPA").innerText = data.stuGPA;
+    if (data.resultSummary) document.getElementById("resultSummary").innerText = data.resultSummary;
+    if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
+    if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
+    if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
 
     const tbody = document.querySelector("#resultsTable tbody");
     if (tbody && Array.isArray(data.results)) {
       tbody.innerHTML = data.results.map(res => `
         <tr>
           <td>${res.subject || ""}</td>
-          <td>${parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0)}</td>
+          <td>${parseFloat(res.ca1_score||0) + parseFloat(res.ca2_score||0)}</td>
           <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
           <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
           <td>${res.total !== undefined ? res.total :
-            (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
+               (parseFloat(res.ca1_score||0) + parseFloat(res.ca2_score||0) + parseFloat(res.midterm_score||0) + parseFloat(res.exam_score||0))}</td>
           <td>${res.grade || ""}</td>
           <td>${res.remarks || res.remark || ""}</td>
           <td>${res.grade_point || ""}</td>
@@ -487,46 +488,22 @@
       `).join('');
     }
 
-    if (Array.isArray(data.affectiveSkills)) {
-      document.querySelector("#affectiveSkillsTable tbody").innerHTML =
-        data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+    if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
+      const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
     }
-
-    if (Array.isArray(data.psychomotorSkills)) {
-      document.querySelector("#psychomotorSkillsTable tbody").innerHTML =
-        data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+    if (data.psychomotorSkills && Array.isArray(data.psychomotorSkills)) {
+      const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
     }
-
-    if (Array.isArray(data.attendance)) {
-      document.querySelector("#attendanceTable tbody").innerHTML =
-        data.attendance.map(row => `<tr><td>${row.label}</td><td>${row.value}</td></tr>`).join('');
+    if (data.attendance && Array.isArray(data.attendance)) {
+      const rows = data.attendance.map(a => `<tr><td>${a.label}</td><td>${a.value}</td></tr>`).join('');
+      document.querySelector("#attendanceTable tbody").innerHTML = rows;
     }
 
     document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
-
   window.addEventListener('DOMContentLoaded', fillReport);
-
-  async function downloadPDF() {
-    const reportDom = document.getElementById('reportCardDom');
-    document.querySelector('.no-print-btn').style.visibility = 'hidden';
-    await new Promise(r => setTimeout(r, 250));
-    html2canvas(reportDom, { scale: 2, useCORS: true, backgroundColor: "#fff" }).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: [297, 210] });
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const imgWidth = pageWidth;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      const yOffset = Math.max(0, (pageHeight - imgHeight) / 2);
-      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
-      pdf.save('ReportCard.pdf');
-      document.querySelector('.no-print-btn').style.visibility = 'visible';
-    }).catch(e => {
-      alert("Could not generate PDF: " + e.message);
-      document.querySelector('.no-print-btn').style.visibility = 'visible';
-    });
-  }
 </script>
 
 </body>

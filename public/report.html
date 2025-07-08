@@ -504,6 +504,37 @@
     document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
   window.addEventListener('DOMContentLoaded', fillReport);
+
+    // jsPDF download logic
+  async function downloadPDF() {
+    const reportDom = document.getElementById('reportCardDom');
+    // Optionally hide button for snapshot
+    document.querySelector('.no-print-btn').style.visibility = 'hidden';
+    // Wait for styles to apply, then snapshot
+    await new Promise(r => setTimeout(r, 250));
+    html2canvas(reportDom, {scale:2, useCORS:true, backgroundColor: "#fff"}).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      // A4 page = 210mm x 297mm, jsPDF units are 'mm'
+      const pdf = new window.jspdf.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [297, 210] // height, width (jsPDF expects [height, width] for custom)
+      });
+      // Calculate image size to fit A4 in portrait
+      const pageWidth = 210;
+      const pageHeight = 297;
+      // Make image fill the width, adjust height proportionally
+      const imgWidth = pageWidth;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      const yOffset = Math.max(0, (pageHeight-imgHeight)/2);
+      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
+      pdf.save('ReportCard.pdf');
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
+    }).catch(e=>{
+      alert("Could not generate PDF: " + e.message);
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
+    });
+  }
 </script>
 
 </body>

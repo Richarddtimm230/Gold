@@ -235,15 +235,14 @@ document.getElementById('skillsForm').onsubmit = async function(e){
     const ADMIN_TOKEN = ""; // Skip token for now
 
     try {
-       const studentIdentifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
-const res = await fetch(`${API_BASE_URL}/api/students/${studentIdentifier}/skills-report`, {
+       const studentIdentifier = encodeURIComponent(loadedStudent.regNo);
 
-            method: "POST",
-            headers: {
-  "Content-Type": "application/json"
-},
-            body: JSON.stringify(payload)
-        });
+const res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(loadedStudent.regNo)}/skills-report`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload)
+});
+
         const data = await res.json();
         if (res.ok) {
             document.getElementById('skillsStatus').textContent = "✔️ Skills and report saved!";

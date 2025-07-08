@@ -257,7 +257,7 @@
             return false;
           }
 
-         // 2. Fetch student profile for skills
+        // 2. Fetch student profile for skills
 let skillsReport = null;
 let classSize = null;
 try {
@@ -267,7 +267,9 @@ try {
       .trim()
       .toLowerCase();
 
-  // Get skills report for session+term
+  const normalizedSession = normalize(session);
+  const normalizedTerm = normalize(term);
+
   const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
     headers: { 'Authorization': '' }
   });
@@ -275,12 +277,13 @@ try {
     const skillsData = await skillsRes.json();
     if (Array.isArray(skillsData.skillsReports)) {
       skillsReport = skillsData.skillsReports.find(
-        r => normalize(r.session) === normalize(session) &&
-             normalize(r.term) === normalize(term)
+        r => normalize(r.session) === normalizedSession &&
+             normalize(r.term) === normalizedTerm
       ) || null;
     }
   }
 } catch (e) {}
+
 
 
           // 3. Fetch class size

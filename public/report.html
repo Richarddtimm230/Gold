@@ -5,16 +5,38 @@
   <title>Gold and Linc Schools - Report Card</title>
 <link rel="stylesheet" href="report.css">
   <style>
-    .report-container {
+.report-container {
+  background: #fff;
+  max-width: 850px;
+  min-width: 750px;
+  width: 850px;
+  min-height: 1100px;
+  max-height: 1200px;
+  height: 1200px;
+  margin: 20px auto;
+  border: 1.5px solid #0c4e8c;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  padding: 28px 26px 15px 26px;
+  box-sizing: border-box;
+  overflow: hidden;
   position: relative;
-  background-image: url('logo-1679575828 (1).jpeg');
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 300px;
-  background-attachment: fixed;
-  background-blend-mode: multiply;
-  opacity: 1;
+  page-break-after: avoid;
 }
+
+.background-blur {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%; /* Scale to container */
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: blur(20px);
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
+
 
 .seal-container {
   position: relative;
@@ -35,6 +57,7 @@
 </head>
 <body>
   <div class="report-container" id="reportCardDom">
+    <img class="background-blur" src="logo-1679575828 (1).jpeg" alt="Blurred background">
     <button class="no-print-btn" onclick="downloadPDF()">Download as PDF</button>
     <header>
       <div class="school-header">

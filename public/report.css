@@ -252,7 +252,7 @@ body {
   .report-container {
     box-shadow: none;
     margin: 0 !important;
-    padding: 10px 5px 8px 5px;
+    padding: 5px 3px 4px 3px;
     width: 210mm;
     max-width: 210mm;
     border: none;
@@ -276,7 +276,7 @@ body {
     max-width: 98vw;
     width: 98vw;
     min-width: 0;
-    padding: 4px;
+    padding: 2px;
   }
   .skills-tables-section {
     flex-direction: column;

@@ -376,7 +376,7 @@ document.getElementById('skillsForm').onsubmit = async function(e){
 
     // NOTE: You must be logged in as admin and provide a valid token
     // For demonstration, we'll use a placeholder token variable
-    const ADMIN_TOKEN = localStorage.getItem("adminToken") || "YOUR_ADMIN_TOKEN";
+    const ADMIN_TOKEN = localStorage.getItem("token") || "YOUR_ADMIN_TOKEN";
 
     try {
         const res = await fetch(`${API_BASE_URL}/api/students/${loadedStudent.regNo}/skills-report`, {

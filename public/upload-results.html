@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Manual Upload Results - Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <link rel="stylesheet" href="manual.css" />
 </head>
 <body>
     <div id="pageSpinnerOverlay">
@@ -68,31 +69,27 @@
                     Class:
                     <select id="classSelect" name="class" required>
                         <option>Creche</option>
-<option>Nursery 1</option>
-<option>Nursery 2</option>
-<option>Nursery 3</option>
-<option>Primary 1</option>
-<option>Primary 2</option>
-<option>Primary 3</option>
-<option>Primary 4</option>
-<option>Primary 5</option>
-<option>Primary 6</option>
-<option>JSS1</option>
-<option>JSS2</option>
-<option>JSS3</option>
-<option>SS1</option>
-<option>SS2</option>
-<option>SS3</option>
+                        <option>Nursery 1</option>
+                        <option>Nursery 2</option>
+                        <option>Nursery 3</option>
+                        <option>Primary 1</option>
+                        <option>Primary 2</option>
+                        <option>Primary 3</option>
+                        <option>Primary 4</option>
+                        <option>Primary 5</option>
+                        <option>Primary 6</option>
+                        <option>JSS1</option>
+                        <option>JSS2</option>
+                        <option>JSS3</option>
+                        <option>SS1</option>
+                        <option>SS2</option>
+                        <option>SS3</option>
                     </select>
                 </label>
                 <label>
                     Subject:
                     <select id="subjectSelect" name="subject" required>
-                        <option>Mathematics</option>
-                        <option>English Language</option>
-                        <option>Biology</option>
-                        <option>Physics</option>
-                        <option>Chemistry</option>
+                        <!-- Subjects will be dynamically populated -->
                     </select>
                 </label>
                 <!-- NEW: Result Type Drop-down -->
@@ -166,6 +163,64 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeSidebar();
         });
+
+        // Class-based subjects mapping (JSS1–JSS3 subjects from image1)
+        const jssSubjects = [
+            "Mathematics",
+            "English Language",
+            "Christian Religious Studies",
+            "Business Studies",
+            "Music",
+            "Cultural and Creative Art",
+            "PRE-VOCATIONAL STUDIES",
+            "N.V.E",
+            "BASIC SCIENCE AND TECHNOLOGY",
+            "Basic Science",
+            "Computer Science",
+            "Physical And Health Education",
+            "Yoruba",
+            "DICTION"
+        ];
+
+        // Example: other class to subjects mapping (add more per school curriculum)
+        const subjectOptionsByClass = {
+            "JSS1": jssSubjects,
+            "JSS2": jssSubjects,
+            "JSS3": jssSubjects,
+            // Extend for other classes as needed:
+            "Creche": [],
+            "Nursery 1": [],
+            "Nursery 2": [],
+            "Nursery 3": [],
+            "Primary 1": [],
+            "Primary 2": [],
+            "Primary 3": [],
+            "Primary 4": [],
+            "Primary 5": [],
+            "Primary 6": [],
+            "SS1": ["Mathematics", "English Language", "Biology", "Physics", "Chemistry"], // Example, update as needed
+            "SS2": ["Mathematics", "English Language", "Biology", "Physics", "Chemistry"], // Example, update as needed
+            "SS3": ["Mathematics", "English Language", "Biology", "Physics", "Chemistry"]  // Example, update as needed
+        };
+
+        // Dynamically update subject options when class changes
+        function updateSubjectOptions() {
+            const classSelect = document.getElementById('classSelect');
+            const subjectSelect = document.getElementById('subjectSelect');
+            const selectedClass = classSelect.value;
+            subjectSelect.innerHTML = "";
+            const subjects = subjectOptionsByClass[selectedClass] || [];
+            if (subjects.length === 0) {
+                subjectSelect.innerHTML = `<option disabled selected>No subjects available</option>`;
+            } else {
+                subjects.forEach(subj => {
+                    subjectSelect.innerHTML += `<option>${subj}</option>`;
+                });
+            }
+        }
+        document.getElementById('classSelect').addEventListener('change', updateSubjectOptions);
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', updateSubjectOptions);
 
         // Change the score column header based on Result Type
         document.getElementById('resultTypeSelect').addEventListener('change', function() {
@@ -276,4 +331,4 @@
         });
     </script>
 </body>
-    </html>
+</html>

@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="students.css" />
   <link rel="stylesheet" href="enroll-responsive.css" />
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 </head>
 <body>
   <div class="sidebar">
@@ -158,7 +157,14 @@
           <div class="form-fields">
             <div class="step-section-title">Contact & Health Info</div>
             <div class="form-row">
-              <div class="form-group"><label>Email</label><input type="email" name="studentEmail" /></div>
+              <div class="form-group" style="position: relative;">
+                <label>Email *</label>
+                <input type="email" name="studentEmail" id="studentEmail" required />
+                <div class="checkbox-inline" style="margin-top:5px;">
+                  <input type="checkbox" id="auto-email" />
+                  <label for="auto-email">Auto Generate Email</label>
+                </div>
+              </div>
               <div class="form-group"><label>Phone Number</label><input type="tel" name="studentPhone" /></div>
               <div class="form-group"><label>Religion</label><input type="text" name="religion" /></div>
             </div>
@@ -169,16 +175,16 @@
             </div>
             <div class="form-row">
               <div class="form-group" style="position: relative;">
-  <label>Password *</label>
-  <input type="password" name="password" id="password" required style="padding-right: 36px;" />
-  <span id="toggle-password" style="position:absolute;right:10px;top:40px;cursor:pointer;">
-    <i class="fa fa-eye" id="eye-icon"></i>
-  </span>
-  <div class="checkbox-inline">
-    <input type="checkbox" id="auto-pass" />
-    <label for="auto-pass">Auto Generate Password</label>
-  </div>
-</div>
+                <label>Password *</label>
+                <input type="password" name="password" id="password" required style="padding-right: 36px;" />
+                <span id="toggle-password" style="position:absolute;right:10px;top:40px;cursor:pointer;">
+                  <i class="fa fa-eye" id="eye-icon"></i>
+                </span>
+                <div class="checkbox-inline">
+                  <input type="checkbox" id="auto-pass" />
+                  <label for="auto-pass">Auto Generate Password</label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -250,10 +256,44 @@
       return Math.random().toString(36).slice(-8) + Math.floor(Math.random() * 100);
     }
 
+    // Auto generate student email based on first name and surname
+    document.getElementById('auto-email').onchange = function() {
+      if (this.checked) {
+        const surname = document.querySelector('input[name="surname"]').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        const firstname = document.querySelector('input[name="firstname"]').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        let email = '';
+        if (firstname && surname) {
+          email = firstname + surname + '@goldlincschools.com';
+        }
+        document.getElementById('studentEmail').value = email;
+        document.getElementById('studentEmail').readOnly = true;
+      } else {
+        document.getElementById('studentEmail').readOnly = false;
+        document.getElementById('studentEmail').value = '';
+      }
+    };
+
+    // If surname or firstname changes and auto-email is checked, update email
+    function updateAutoEmail() {
+      const autoEmail = document.getElementById('auto-email');
+      if (autoEmail.checked) {
+        const surname = document.querySelector('input[name="surname"]').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        const firstname = document.querySelector('input[name="firstname"]').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        let email = '';
+        if (firstname && surname) {
+          email = firstname + surname + '@goldlincschools.com';
+        }
+        document.getElementById('studentEmail').value = email;
+      }
+    }
+    document.querySelector('input[name="surname"]').addEventListener('input', updateAutoEmail);
+    document.querySelector('input[name="firstname"]').addEventListener('input', updateAutoEmail);
+
     function validateStep(step) {
       const form = document.forms[0];
       if (step === 1) return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
       if (step === 2) return form.regNo.value && form.scratchCard.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
+      if (step === 3) return form.studentEmail.value; // Make sure student email is required
       return true;
     }
 
@@ -339,18 +379,18 @@
     };
 
     document.getElementById('toggle-password').addEventListener('click', function() {
-  const passwordInput = document.getElementById('password');
-  const eyeIcon = document.getElementById('eye-icon');
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    eyeIcon.classList.remove('fa-eye');
-    eyeIcon.classList.add('fa-eye-slash');
-  } else {
-    passwordInput.type = 'password';
-    eyeIcon.classList.remove('fa-eye-slash');
-    eyeIcon.classList.add('fa-eye');
-  }
-});
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,242 @@
+
+    body {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+    }
+    .report-container {
+      background: #fff;
+      max-width: 850px;
+      min-width: 750px;
+      width: 850px;
+      min-height: 1100px;
+      max-height: 1200px;
+      height: 1200px;
+      margin: 20px auto;
+      border: 1.5px solid #0c4e8c;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
+      padding: 28px 26px 15px 26px;
+      box-sizing: border-box;
+      /* Forcing one page for PDF */
+      overflow: hidden;
+      position: relative;
+      page-break-after: avoid;
+    }
+    .no-print-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 50;
+    }
+    .school-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .school-logo, .coat-of-arms {
+      height: 70px;
+      width: 70px;
+      object-fit: contain;
+    }
+    .school-info {
+      flex: 1;
+      text-align: center;
+    }
+    .school-info h1 {
+      color: #0c4e8c;
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .school-info p {
+      margin: 6px 0 0 0;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .term-title {
+      background: #0c4e8c;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-radius: 5px;
+    }
+    .term-title h2 {
+      color: #fff;
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 1.2px;
+    }
+    .student-info-section {
+      margin-bottom: 10px;
+    }
+    .student-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.97rem;
+    }
+    .student-info-table td {
+      padding: 3px 7px;
+      border: none;
+    }
+    .results-section {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 3px;
+      font-size: 0.91rem;
+    }
+    .results-table th, .results-table td {
+      border: 1px solid #d2dce6;
+      padding: 5px 2px;
+      text-align: center;
+    }
+    .results-table thead th {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      font-size: 0.96rem;
+      font-weight: bold;
+    }
+    .results-table tbody tr td:first-child {
+      text-align: left;
+      font-weight: 500;
+    }
+    .skills-tables-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 6px;
+    }
+    .skills-table {
+      width: 31.5%;
+      border-collapse: collapse;
+      margin-bottom: 6px;
+      font-size: 0.92rem;
+      background: #fafcff;
+      border: 1px solid #b6c8db;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .skills-table th {
+      background: #0c4e8c;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: bold;
+      padding: 5px 0;
+      border: none;
+    }
+    .skills-table td {
+      border: 1px solid #d2dce6;
+      padding: 5px 7px;
+      text-align: left;
+    }
+    .skills-table tr td:last-child {
+      text-align: center;
+      font-weight: bold;
+    }
+    .grades-key-section {
+      margin: 7px 0 7px 0;
+    }
+    .grades-key-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .grades-key-table th, .grades-key-table td {
+      border: 1px solid #b6c8db;
+      padding: 5px 7px;
+      text-align: center;
+    }
+    .grades-key-table th {
+      background: #e7f0fa;
+      color: #0c4e8c;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .comments-section {
+      margin: 10px 0;
+    }
+    .principal-comment {
+      font-size: 1.01rem;
+      font-weight: 500;
+      color: #0c4e8c;
+    }
+    .principal-sign {
+      margin-top: 7px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #222;
+    }
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 0.93rem;
+      color: #212121;
+    }
+    .next-term {
+      font-weight: bold;
+      color: #0c4e8c;
+    }
+    .next-term-date {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      font-size: 1em;
+      font-weight: bold;
+      margin-left: 5px;
+      color: #0a3a6c;
+    }
+    .footer-meta {
+      text-align: right;
+      font-size: 0.88rem;
+    }
+    .powered-by {
+      margin-left: 14px;
+    }
+    .powered-by a {
+      color: #0c4e8c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    @media (max-width: 900px) {
+      .report-container {
+        max-width: 99vw;
+        width: 98vw;
+        min-width: 0;
+        padding: 4px;
+        height: auto;
+        min-height: unset;
+      }
+      .skills-tables-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .skills-table {
+        width: 100%;
+        margin-bottom: 7px;
+      }
+      .footer-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+      }
+    }
+    @media print {
+      .no-print-btn, nav, .bottom-nav { display: none !important; }
+      body { background: #fff !important; }
+      .report-container {
+        box-shadow: none;
+        margin: 0 !important;
+        max-width: 850px;
+        width: 850px;
+        min-width: 750px;
+        min-height: 1100px;
+      }
+    }

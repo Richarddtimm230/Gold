@@ -234,7 +234,9 @@ document.getElementById('skillsForm').onsubmit = async function(e){
     const ADMIN_TOKEN = localStorage.getItem("token") || "YOUR_ADMIN_TOKEN";
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/students/${loadedStudent.regNo}/skills-report`, {
+       const studentIdentifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
+const res = await fetch(`${API_BASE_URL}/api/students/${studentIdentifier}/skills-report`, {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -336,7 +338,8 @@ document.getElementById('skillsForm').onsubmit = async function(e){
         }
         try {
             // Use student_id or regNo for update
-            const identifier = loadedStudent.student_id || loadedStudent.regNo;
+            const identifier = encodeURIComponent(loadedStudent.student_id || loadedStudent.regNo);
+
             let res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(identifier)}`, {
                 method: "PUT",
                 headers: {'Content-Type': 'application/json'},

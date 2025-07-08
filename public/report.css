@@ -242,7 +242,7 @@ body {
 /* Print styles to force single-page, shrink content if needed */
 @media print {
   html, body {
-    width: 210mm !important;
+    width: 240mm !important;
     height: 297mm !important;
     background: #fff !important;
     -webkit-print-color-adjust: exact;
@@ -253,8 +253,8 @@ body {
     box-shadow: none;
     margin: 0 !important;
     padding: 20mm 15mm 20mm 15mm; /* top, right, bottom, left */
-    width: 210mm;
-    max-width: 210mm;
+    width: 240mm;
+    max-width: 240mm;
     border: none;
     background: #fff !important;
     /* If needed, scale content to fit single page */

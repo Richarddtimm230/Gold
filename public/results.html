@@ -821,58 +821,64 @@ td.status-pending { color: #ffc107; }
     });
   }
 
-  // Toggle expand/collapse logic
-  document.getElementById('resultsTbody').onclick = function(e) {
-    // Expand/collapse
-    if (e.target.classList.contains('expand-btn')) {
-      const btn = e.target;
-      const tr = btn.closest('tr');
-      const detailTr = tr.nextElementSibling;
-      const expanded = detailTr.style.display !== "none";
-      detailTr.style.display = expanded ? "none" : "";
-      btn.textContent = expanded ? "+" : "−";
-      return;
+  // Chart
+  function renderStatsChart(results) {
+    const gradeCounts = {};
+    if (Array.isArray(results)) {
+      results.forEach(r => {
+        let grade = r.grade || "Others";
+        if (!gradeCounts[grade]) gradeCounts[grade] = 0;
+        gradeCounts[grade]++;
+      });
     }
-    // View details shortcut (optional, acts like expand)
-    if (e.target.classList.contains('view-details-btn')) {
-      const idx = e.target.getAttribute('data-idx');
-      const btn = document.querySelector(`.expand-btn[data-idx="${idx}"]`);
-      if (btn) btn.click();
-      return;
+    if (!Object.keys(gradeCounts).length) {
+      gradeCounts["No Data"] = 1;
     }
-    // Results actions: Edit, Delete, Publish (delegate to details-row buttons)
-    if (e.target.classList.contains('edit') ||
-        e.target.classList.contains('delete') ||
-        e.target.classList.contains('publish')) {
-      // Original event handler logic for actions
-      const tr = e.target.closest('tr');
-      const id = e.target.getAttribute('data-id');
-      if (e.target.classList.contains('edit')) {
-        _editResultData = { id, tr };
-        document.getElementById('editResultId').value = id;
-        document.getElementById('editCA1').value = tr.children[1].textContent.trim();
-        document.getElementById('editCA2').value = tr.children[2].textContent.trim();
-        document.getElementById('editMidTerm').value = tr.children[3].textContent.trim();
-        document.getElementById('editExam').value = tr.children[4].textContent.trim();
-        document.getElementById('editGrade').value = tr.children[6].textContent.trim();
-        document.getElementById('editRemarks').value = tr.children[7].textContent.trim();
-        document.getElementById('editResultStatus').textContent = '';
-        openModal('editResultModal');
-      }
-      if (e.target.classList.contains('delete')) {
-        _deleteResultData = { id, tr };
-        document.getElementById('deleteResultStatus').textContent = '';
-        openModal('deleteResultModal');
-      }
-      if (e.target.classList.contains('publish')) {
-        _publishResultData = { id, tr };
-        document.getElementById('publishResultStatus').textContent = '';
-        openModal('publishResultModal');
-      }
+    if (window.resultsStatsChart && typeof window.resultsStatsChart.destroy === "function") {
+      window.resultsStatsChart.destroy();
     }
-  };
+    const ctx = document.getElementById('resultsStatsChart').getContext('2d');
+    window.resultsStatsChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(gradeCounts),
+        datasets: [{
+          label: 'Number of Students',
+          data: Object.values(gradeCounts),
+          backgroundColor: [
+            '#20c997', '#007bff', '#ffc107', '#888', '#6f42c1', '#ff9800', '#b22234'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Number of Students' }
+          }
+        }
+      }
+    });
+  }
 
-  // Patch: fetchResultsAndRender now uses grouped rendering
+  // Modal helpers
+  function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+  }
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
+
+  // Results actions: Edit, Delete, Publish
+  let _editResultData = null;
+  let _deleteResultData = null;
+  let _publishResultData = null;
+
+  // Fetch and render logic
   async function fetchResultsAndRender() {
     const statusEl = document.getElementById('resultsStatus');
     try {
@@ -890,102 +896,117 @@ td.status-pending { color: #ffc107; }
     }
   }
 
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchResultsAndRender();
 
-
-    document.addEventListener('DOMContentLoaded', function() {
-      fetchResultsAndRender();
-      document.getElementById('selectAll').addEventListener('change', function(e) {
+    // Filter select all (if you use it)
+    const selectAllBox = document.getElementById('selectAll');
+    if (selectAllBox) {
+      selectAllBox.addEventListener('change', function(e) {
         document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
       });
-      document.getElementById('filterBtn').onclick = async function() {
-        const classVal = document.getElementById('classSelect').value;
-        const subjectVal = document.getElementById('subjectSelect').value;
-        const sessionVal = document.getElementById('sessionSelect').value;
-        const termVal = document.getElementById('termSelect').value;
-        const searchVal = document.getElementById('searchStudentInput').value.trim().toLowerCase();
-        let query = [];
-        if (classVal !== "All Classes") query.push(`class=${encodeURIComponent(classVal)}`);
-        if (subjectVal !== "All Subjects") query.push(`subject=${encodeURIComponent(subjectVal)}`);
-        if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
-        if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
-        if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
-        const url = 'https://goldlincschools.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
-        try {
-          const response = await fetch(url);
-          if (!response.ok) throw new Error('Network response was not ok');
-          const filtered = await response.json();
-          renderResultsTable(filtered);
-          renderStatsChart(filtered);
-        } catch (err) {
-          const statusEl = document.getElementById('resultsStatus');
-          if (statusEl) {
-            statusEl.style.color = "#dc3545";
-            statusEl.textContent = "❌ Failed to filter results: " + err.message;
-          }
+    }
+
+    // Filter button
+    document.getElementById('filterBtn').onclick = async function() {
+      const classVal = document.getElementById('classSelect').value;
+      const subjectVal = document.getElementById('subjectSelect').value;
+      const sessionVal = document.getElementById('sessionSelect').value;
+      const termVal = document.getElementById('termSelect').value;
+      const searchVal = document.getElementById('searchStudentInput').value.trim().toLowerCase();
+      let query = [];
+      if (classVal !== "All Classes") query.push(`class=${encodeURIComponent(classVal)}`);
+      if (subjectVal !== "All Subjects") query.push(`subject=${encodeURIComponent(subjectVal)}`);
+      if (sessionVal) query.push(`session=${encodeURIComponent(sessionVal)}`);
+      if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
+      if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
+      const url = 'https://goldlincschools.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const filtered = await response.json();
+        renderResultsTable(filtered);
+        renderStatsChart(filtered);
+      } catch (err) {
+        const statusEl = document.getElementById('resultsStatus');
+        if (statusEl) {
+          statusEl.style.color = "#dc3545";
+          statusEl.textContent = "❌ Failed to filter results: " + err.message;
         }
-      };
-      document.getElementById('uploadResultsBtn').onclick = () => window.location.href = "upload-results.html";
-      document.getElementById('bulkEditBtn').onclick = () => window.location.href = "bulk-edit-results.html";
-      document.getElementById('publishResultsBtn').onclick = () => window.location.href = "publish-results.html";
-      document.getElementById('exportCSVBtn').onclick = () => window.location.href = "export-csv.html";
-      document.getElementById('manageTemplatesBtn').onclick = () => window.location.href = "manage-templates.html";
-      const statsModal = document.getElementById('statisticsModal');
-      document.getElementById('viewStatsBtn').onclick = function() {
-        statsModal.style.display = 'block';
-      };
-      document.getElementById('closeStatsModal').onclick = function() {
+      }
+    };
+
+    // Top action buttons
+    document.getElementById('uploadResultsBtn').onclick = () => window.location.href = "upload-results.html";
+    document.getElementById('bulkEditBtn').onclick = () => window.location.href = "bulk-edit-results.html";
+    document.getElementById('publishResultsBtn').onclick = () => window.location.href = "publish-results.html";
+    document.getElementById('exportCSVBtn').onclick = () => window.location.href = "export-csv.html";
+    document.getElementById('manageTemplatesBtn').onclick = () => window.location.href = "manage-templates.html";
+    const statsModal = document.getElementById('statisticsModal');
+    document.getElementById('viewStatsBtn').onclick = function() {
+      statsModal.style.display = 'block';
+    };
+    document.getElementById('closeStatsModal').onclick = function() {
+      statsModal.style.display = 'none';
+    };
+    window.onclick = function(event) {
+      if (event.target == statsModal) statsModal.style.display = 'none';
+    };
+    document.getElementById('closeStatsModal').addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') {
         statsModal.style.display = 'none';
-      };
-      window.onclick = function(event) {
-        if (event.target == statsModal) statsModal.style.display = 'none';
-      };
-      document.getElementById('closeStatsModal').addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.key === ' ') {
-          statsModal.style.display = 'none';
-        }
-      });
+      }
     });
 
-    // Results actions: Edit, Delete, Publish
-    let _editResultData = null;
-    let _deleteResultData = null;
-    let _publishResultData = null;
-    document.getElementById('resultsTbody').addEventListener('click', function(e) {
-      // Edit
-      if (e.target.classList.contains('edit')) {
-        e.preventDefault();
+    // Only ONE click handler for resultsTbody
+    document.getElementById('resultsTbody').onclick = function(e) {
+      // Expand/collapse
+      if (e.target.classList.contains('expand-btn')) {
+        const btn = e.target;
+        const tr = btn.closest('tr');
+        const detailTr = tr.nextElementSibling;
+        const expanded = detailTr.style.display !== "none";
+        detailTr.style.display = expanded ? "none" : "";
+        btn.textContent = expanded ? "+" : "−";
+        return;
+      }
+      // View details shortcut (optional, acts like expand)
+      if (e.target.classList.contains('view-details-btn')) {
+        const idx = e.target.getAttribute('data-idx');
+        const btn = document.querySelector(`.expand-btn[data-idx="${idx}"]`);
+        if (btn) btn.click();
+        return;
+      }
+      // Results actions: Edit, Delete, Publish (from details-row)
+      if (e.target.classList.contains('edit') ||
+          e.target.classList.contains('delete') ||
+          e.target.classList.contains('publish')) {
         const tr = e.target.closest('tr');
         const id = e.target.getAttribute('data-id');
-        _editResultData = { id, tr };
-        document.getElementById('editResultId').value = id;
-        document.getElementById('editCA1').value = tr.children[5].textContent.trim();
-        document.getElementById('editCA2').value = tr.children[6].textContent.trim();
-        document.getElementById('editMidTerm').value = tr.children[7].textContent.trim();
-        document.getElementById('editExam').value = tr.children[8].textContent.trim();
-        document.getElementById('editGrade').value = tr.children[10].textContent.trim();
-        document.getElementById('editRemarks').value = tr.children[11].textContent.trim();
-        document.getElementById('editResultStatus').textContent = '';
-        openModal('editResultModal');
+        if (e.target.classList.contains('edit')) {
+          _editResultData = { id, tr };
+          document.getElementById('editResultId').value = id;
+          document.getElementById('editCA1').value = tr.children[1].textContent.trim();
+          document.getElementById('editCA2').value = tr.children[2].textContent.trim();
+          document.getElementById('editMidTerm').value = tr.children[3].textContent.trim();
+          document.getElementById('editExam').value = tr.children[4].textContent.trim();
+          document.getElementById('editGrade').value = tr.children[6].textContent.trim();
+          document.getElementById('editRemarks').value = tr.children[7].textContent.trim();
+          document.getElementById('editResultStatus').textContent = '';
+          openModal('editResultModal');
+        }
+        if (e.target.classList.contains('delete')) {
+          _deleteResultData = { id, tr };
+          document.getElementById('deleteResultStatus').textContent = '';
+          openModal('deleteResultModal');
+        }
+        if (e.target.classList.contains('publish')) {
+          _publishResultData = { id, tr };
+          document.getElementById('publishResultStatus').textContent = '';
+          openModal('publishResultModal');
+        }
       }
-      // Delete
-      if (e.target.classList.contains('delete')) {
-        e.preventDefault();
-        const tr = e.target.closest('tr');
-        const id = e.target.getAttribute('data-id');
-        _deleteResultData = { id, tr };
-        document.getElementById('deleteResultStatus').textContent = '';
-        openModal('deleteResultModal');
-      }
-      // Publish
-      if (e.target.classList.contains('publish')) {
-        e.preventDefault();
-        const tr = e.target.closest('tr');
-        const id = e.target.getAttribute('data-id');
-        _publishResultData = { id, tr };
-        document.getElementById('publishResultStatus').textContent = '';
-        openModal('publishResultModal');
-      }
-    });
+    };
 
     // Edit form submit
     document.getElementById('editResultForm').onsubmit = async function(e) {
@@ -1069,57 +1090,7 @@ td.status-pending { color: #ffc107; }
         closeModal(btn.closest('.modal').id);
       };
     });
-
-    // Chart
-    function renderStatsChart(results) {
-      const gradeCounts = {};
-      if (Array.isArray(results)) {
-        results.forEach(r => {
-          let grade = r.grade || "Others";
-          if (!gradeCounts[grade]) gradeCounts[grade] = 0;
-          gradeCounts[grade]++;
-        });
-      }
-      if (!Object.keys(gradeCounts).length) {
-        gradeCounts["No Data"] = 1;
-      }
-      if (window.resultsStatsChart && typeof window.resultsStatsChart.destroy === "function") {
-        window.resultsStatsChart.destroy();
-      }
-      const ctx = document.getElementById('resultsStatsChart').getContext('2d');
-      window.resultsStatsChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(gradeCounts),
-          datasets: [{
-            label: 'Number of Students',
-            data: Object.values(gradeCounts),
-            backgroundColor: [
-              '#20c997', '#007bff', '#ffc107', '#888', '#6f42c1', '#ff9800', '#b22234'
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Number of Students' }
-            }
-          }
-        }
-      });
-    }
-    // Modal helpers
-    function openModal(modalId) {
-      document.getElementById(modalId).style.display = 'block';
-    }
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-  </script>
+  });
+</script>
 </body>
 </html>

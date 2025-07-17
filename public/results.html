@@ -579,28 +579,22 @@ td.status-pending { color: #ffc107; }
     </form>
     <div class="mobile-scroll-hint">Scroll horizontally for more columns</div>
     <div class="results-table-container" tabindex="0" aria-label="Results Table">
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="selectAll" aria-label="Select all"/></th>
-            <th>Student ID</th>
-            <th>Student Name</th>
-            <th>Class</th>
-            <th>Subject</th>
-            <th>CA1</th>
-            <th>CA2</th>
-            <th>Mid Term</th>
-            <th>Exam</th>
-            <th>Total</th>
-            <th>Grade</th>
-            <th>Remarks</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="resultsTbody"></tbody>
-      </table>
-    </div>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Student ID</th>
+        <th>Student Name</th>
+        <th>Class</th>
+        <th># Subjects</th>
+        <th>Average</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTbody"></tbody>
+  </table>
+</div>
     <div id="resultsStatus" style="margin:1.2em 0 0.5em 0; color: #007bff; min-height: 22px;"></div>
     <!-- Statistics Modal -->
     <div id="statisticsModal" class="modal" aria-modal="true" role="dialog">

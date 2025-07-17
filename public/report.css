@@ -238,37 +238,64 @@ body {
   right: 14px;
   z-index: 50;
 }
+<!-- Add the following CSS in your <style>... section, ideally at the end: -->
 
-/* Print styles to force single-page, shrink content if needed */
+
+
+/* Remove default print margins and make background white */
 @media print {
   html, body {
-    width: 240mm !important;
-    height: 297mm !important;
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    overflow: hidden;
+    box-shadow: none !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
   }
   .report-container {
-    box-shadow: none;
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
     margin: 0 !important;
-    padding: 20mm 15mm 20mm 15mm; /* top, right, bottom, left */
-    width: 240mm;
-    max-width: 240mm;
-    border: none;
+    padding: 0 !important;
+    box-shadow: none !important;
     background: #fff !important;
-    /* If needed, scale content to fit single page */
-    transform: scale(0.97);
-    transform-origin: top left;
   }
-  .no-print-btn, nav, .bottom-nav {
+  /* Ensure content inside container also stretches */
+  .results-table,
+  .student-info-table,
+  .grades-key-table,
+  .skills-table,
+  .attendance,
+  .skills-tables-section {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  /* Hide buttons and other no-print items */
+  .no-print-btn {
     display: none !important;
   }
-  /* Avoid page breaks inside tables/sections */
-  .results-section, .skills-tables-section, .grades-key-section, .comments-section, .footer-section {
-    page-break-inside: avoid;
+  /* Remove extra spacing/margins from sections */
+  section, .seal-container {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
+
+/* Optional: Make sure .report-container always expands in normal view too */
+.report-container {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 auto;
+  background: #fff;
+}
+
 
 /* Responsive for screen only */
 @media (max-width: 900px) {

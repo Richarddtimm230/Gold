@@ -3,6 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <title>Gold and Linc Schools - Report Card</title>
+  <!-- Add the following CSS in your <style>... section, ideally at the end: -->
+
+<style>
+/* PRINT FULL WIDTH PATCH */
+
+/* Remove default print margins and make background white */
+@media print {
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  .report-container {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  /* Ensure content inside container also stretches */
+  .results-table,
+  .student-info-table,
+  .grades-key-table,
+  .skills-table,
+  .attendance,
+  .skills-tables-section {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  /* Hide buttons and other no-print items */
+  .no-print-btn {
+    display: none !important;
+  }
+  /* Remove extra spacing/margins from sections */
+  section, .seal-container {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Optional: Make sure .report-container always expands in normal view too */
+.report-container {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 auto;
+  background: #fff;
+}
+</style>
 <link rel="stylesheet" href="report.css">
   <style>
 

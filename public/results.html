@@ -711,70 +711,199 @@ td.status-pending { color: #ffc107; }
       if (e.key === 'Escape') closeSidebar();
     });
 
-    // Utility for total score calculation
-    function calcTotal(result) {
+  // Utility: Calculate average total for student's subjects
+  function calcStudentAverage(results) {
+    if (!results || !results.length) return '';
+    let sum = 0, count = 0;
+    results.forEach(r => {
       let total = 0;
-      if (!result) return '';
-      if (result.ca1_score) total += parseFloat(result.ca1_score) || 0;
-      if (result.ca2_score) total += parseFloat(result.ca2_score) || 0;
-      if (result.midterm_score) total += parseFloat(result.midterm_score) || 0;
-      if (result.exam_score) total += parseFloat(result.exam_score) || 0;
-      // fallback for legacy
-      if (!result.ca1_score && !result.ca2_score && !result.midterm_score && !result.exam_score && result.score) total = parseFloat(result.score) || '';
-      return total || '';
-    }
+      if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
+      if (r.ca2_score) total += parseFloat(r.ca2_score) || 0;
+      if (r.midterm_score) total += parseFloat(r.midterm_score) || 0;
+      if (r.exam_score) total += parseFloat(r.exam_score) || 0;
+      if (!r.ca1_score && !r.ca2_score && !r.midterm_score && !r.exam_score && r.score) total = parseFloat(r.score) || 0;
+      sum += total;
+      count++;
+    });
+    return count ? (sum / count).toFixed(2) : '';
+  }
 
-    // Render and fetch logic
-    async function fetchResultsAndRender() {
-      const statusEl = document.getElementById('resultsStatus');
-      try {
-        const response = await fetch('https://goldlincschools.onrender.com/api/results');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const results = await response.json();
-        renderResultsTable(results);
-        if (statusEl) statusEl.textContent = '';
-        renderStatsChart(results);
-      } catch (err) {
-        if (statusEl) {
-          statusEl.style.color = "#dc3545";
-          statusEl.textContent = "❌ Failed to load results: " + err.message;
-        }
+  // Group results by student
+  function groupResultsByStudent(results) {
+    const grouped = {};
+    results.forEach(r => {
+      const studentId = r.student_id || (r.student && r.student.student_id) || '';
+      if (!studentId) return;
+      if (!grouped[studentId]) grouped[studentId] = {student: r, subjects: []};
+      grouped[studentId].subjects.push(r);
+    });
+    return grouped;
+  }
+
+  function renderResultsTable(results) {
+    const tbody = document.getElementById('resultsTbody');
+    tbody.innerHTML = '';
+    const grouped = groupResultsByStudent(results);
+    Object.keys(grouped).forEach((studentId, idx) => {
+      const group = grouped[studentId];
+      const student = group.student;
+      const subjects = group.subjects;
+
+      const tr = document.createElement('tr');
+      tr.className = "student-row";
+      tr.innerHTML = `
+        <td>
+          <button class="expand-btn" aria-label="Expand details" data-idx="${idx}">+</button>
+        </td>
+        <td>${studentId}</td>
+        <td>${student.student_name || (student.student && (student.student.firstname || student.student.name)) || ''}</td>
+        <td>${student.class_name || (student.class && student.class.name) || ''}</td>
+        <td>${subjects.length}</td>
+        <td>${calcStudentAverage(subjects)}</td>
+        <td>
+          ${
+            // Show "Published" if any subject result is published, else "Draft"
+            subjects.some(s => (s.status || '').toLowerCase() === "published")
+              ? '<span class="status-published">Published</span>'
+              : '<span class="status-draft">Draft</span>'
+          }
+        </td>
+        <td>
+          <button class="view-details-btn" data-idx="${idx}">👁️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+
+      // Hidden details row
+      const detailTr = document.createElement('tr');
+      detailTr.className = "details-row";
+      detailTr.style.display = "none";
+      detailTr.innerHTML = `
+        <td colspan="8" style="background: #f5f8fd;">
+          <b>Subjects & Results:</b>
+          <table style="margin: 8px 0; width: 100%; background: #fff;">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>CA1</th>
+                <th>CA2</th>
+                <th>Mid Term</th>
+                <th>Exam</th>
+                <th>Total</th>
+                <th>Grade</th>
+                <th>Remarks</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${subjects.map((result, resIdx) => `
+                <tr>
+                  <td>${result.subject_name || (result.subject && result.subject.name) || ''}</td>
+                  <td>${result.ca1_score ?? ''}</td>
+                  <td>${result.ca2_score ?? ''}</td>
+                  <td>${result.midterm_score ?? ''}</td>
+                  <td>${result.exam_score ?? ''}</td>
+                  <td>${
+                    (() => {
+                      let total = 0;
+                      if (result.ca1_score) total += parseFloat(result.ca1_score) || 0;
+                      if (result.ca2_score) total += parseFloat(result.ca2_score) || 0;
+                      if (result.midterm_score) total += parseFloat(result.midterm_score) || 0;
+                      if (result.exam_score) total += parseFloat(result.exam_score) || 0;
+                      if (!result.ca1_score && !result.ca2_score && !result.midterm_score && !result.exam_score && result.score) total = parseFloat(result.score) || 0;
+                      return total || '';
+                    })()
+                  }</td>
+                  <td>${result.grade || ''}</td>
+                  <td>${result.remarks || ''}</td>
+                  <td class="status-${(result.status || '').toLowerCase()}">${result.status || ''}</td>
+                  <td>
+                    <button class="action-btn edit" title="Edit" data-id="${result.id}" aria-label="Edit result">✏️</button>
+                    <button class="action-btn delete" title="Delete" data-id="${result.id}" aria-label="Delete result">🗑️</button>
+                    <button class="action-btn publish" title="Publish" data-id="${result.id}" aria-label="Publish result">📢</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </td>
+      `;
+      tbody.appendChild(detailTr);
+    });
+  }
+
+  // Toggle expand/collapse logic
+  document.getElementById('resultsTbody').onclick = function(e) {
+    // Expand/collapse
+    if (e.target.classList.contains('expand-btn')) {
+      const btn = e.target;
+      const tr = btn.closest('tr');
+      const detailTr = tr.nextElementSibling;
+      const expanded = detailTr.style.display !== "none";
+      detailTr.style.display = expanded ? "none" : "";
+      btn.textContent = expanded ? "+" : "−";
+      return;
+    }
+    // View details shortcut (optional, acts like expand)
+    if (e.target.classList.contains('view-details-btn')) {
+      const idx = e.target.getAttribute('data-idx');
+      const btn = document.querySelector(`.expand-btn[data-idx="${idx}"]`);
+      if (btn) btn.click();
+      return;
+    }
+    // Results actions: Edit, Delete, Publish (delegate to details-row buttons)
+    if (e.target.classList.contains('edit') ||
+        e.target.classList.contains('delete') ||
+        e.target.classList.contains('publish')) {
+      // Original event handler logic for actions
+      const tr = e.target.closest('tr');
+      const id = e.target.getAttribute('data-id');
+      if (e.target.classList.contains('edit')) {
+        _editResultData = { id, tr };
+        document.getElementById('editResultId').value = id;
+        document.getElementById('editCA1').value = tr.children[1].textContent.trim();
+        document.getElementById('editCA2').value = tr.children[2].textContent.trim();
+        document.getElementById('editMidTerm').value = tr.children[3].textContent.trim();
+        document.getElementById('editExam').value = tr.children[4].textContent.trim();
+        document.getElementById('editGrade').value = tr.children[6].textContent.trim();
+        document.getElementById('editRemarks').value = tr.children[7].textContent.trim();
+        document.getElementById('editResultStatus').textContent = '';
+        openModal('editResultModal');
+      }
+      if (e.target.classList.contains('delete')) {
+        _deleteResultData = { id, tr };
+        document.getElementById('deleteResultStatus').textContent = '';
+        openModal('deleteResultModal');
+      }
+      if (e.target.classList.contains('publish')) {
+        _publishResultData = { id, tr };
+        document.getElementById('publishResultStatus').textContent = '';
+        openModal('publishResultModal');
       }
     }
-    function renderResultsTable(results) {
-      const tbody = document.getElementById('resultsTbody');
-      tbody.innerHTML = '';
-      results.forEach((result, idx) => {
-        const ca1 = result.ca1_score !== undefined ? result.ca1_score : '';
-        const ca2 = result.ca2_score !== undefined ? result.ca2_score : '';
-        const midterm = result.midterm_score !== undefined ? result.midterm_score : '';
-        const exam = result.exam_score !== undefined ? result.exam_score : '';
-        const total = calcTotal(result);
+  };
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input type="checkbox" class="row-check" data-idx="${idx}" aria-label="Select row"></td>
-          <td>${result.student_id || (result.student && result.student.student_id) || ''}</td>
-          <td>${result.student_name || (result.student && (result.student.firstname || result.student.name)) || ''}</td>
-          <td>${result.class_name || (result.class && result.class.name) || ''}</td>
-          <td>${result.subject_name || (result.subject && result.subject.name) || ''}</td>
-          <td>${ca1}</td>
-          <td>${ca2}</td>
-          <td>${midterm}</td>
-          <td>${exam}</td>
-          <td>${total}</td>
-          <td>${result.grade || ''}</td>
-          <td>${result.remarks || ''}</td>
-          <td class="status-${(result.status || '').toLowerCase()}">${result.status || ''}</td>
-          <td>
-            <button class="action-btn edit" title="Edit" data-id="${result.id}" aria-label="Edit result">✏️</button>
-            <button class="action-btn delete" title="Delete" data-id="${result.id}" aria-label="Delete result">🗑️</button>
-            <button class="action-btn publish" title="Publish" data-id="${result.id}" aria-label="Publish result">📢</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+  // Patch: fetchResultsAndRender now uses grouped rendering
+  async function fetchResultsAndRender() {
+    const statusEl = document.getElementById('resultsStatus');
+    try {
+      const response = await fetch('https://goldlincschools.onrender.com/api/results');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const results = await response.json();
+      renderResultsTable(results);
+      if (statusEl) statusEl.textContent = '';
+      renderStatsChart(results);
+    } catch (err) {
+      if (statusEl) {
+        statusEl.style.color = "#dc3545";
+        statusEl.textContent = "❌ Failed to load results: " + err.message;
+      }
     }
+  }
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
       fetchResultsAndRender();
       document.getElementById('selectAll').addEventListener('change', function(e) {

@@ -141,8 +141,7 @@
         <i class="fa fa-user"></i>
         <div class="bottom-nav-label">Me</div>
       </button>
-    </nav>
-    <script>
+    </nav><script>
       const API_BASE_URL = "https://goldlincschools.onrender.com";
 
       let lastStudentProfile = null;
@@ -223,6 +222,35 @@
         if (arr[idx]) displayResult(arr[idx]);
       }
 
+      // Date of birth to age
+      function calcAge(dobStr) {
+        if (!dobStr) return "";
+        let date;
+        if (typeof dobStr === "string") {
+          const parts = dobStr.split(/[-\/]/);
+          if (parts.length === 3) {
+            let year, month, day;
+            if (parts[0].length === 4) {
+              year = +parts[0]; month = +parts[1]; day = +parts[2];
+            } else {
+              day = +parts[0]; month = +parts[1]; year = +parts[2];
+            }
+            date = new Date(year, month-1, day);
+          } else {
+            date = new Date(dobStr);
+          }
+        } else {
+          date = new Date(dobStr);
+        }
+        if (!date || isNaN(date.getTime())) return "";
+        const now = new Date();
+        let age = now.getFullYear() - date.getFullYear();
+        if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
+          age--;
+        }
+        return age;
+      }
+
       // Main: Handle result search using /api/results (fetch skills/attendance as well)
       async function handleResultSearch(e) {
         e.preventDefault();
@@ -253,7 +281,6 @@
           });
           const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
           const results = await response.json();
-          // Filter results to only those for the given regNo/student
           const filteredResults = Array.isArray(results)
             ? results.filter(r =>
                 (r.student_id === regNo) ||
@@ -269,7 +296,18 @@
             return false;
           }
 
-          // 2. Fetch skills report for this student/session/term
+          // 2. Fetch student profile (for DOB, email, photo)
+          let studentProfile = lastStudentProfile;
+          if (!studentProfile) {
+            try {
+              const studentResp = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(regNo)}`);
+              const studentJson = await studentResp.json();
+              studentProfile = Array.isArray(studentJson.students) ? studentJson.students[0] : null;
+              lastStudentProfile = studentProfile;
+            } catch (err) {}
+          }
+
+          // 3. Fetch skills report for this student/session/term
           let skillsReport = null;
           try {
             const normalize = str =>
@@ -293,7 +331,7 @@
             }
           } catch (e) {}
 
-          // 3. Fetch class size for the selected class/session/term
+          // 4. Fetch class size for the selected class/session/term
           let classSize = null;
           try {
             const classParams = new URLSearchParams({
@@ -305,7 +343,6 @@
             const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
             if (classRes.ok) {
               const classResults = await classRes.json();
-              // Count unique student IDs
               const studentSet = new Set();
               for (const r of classResults) {
                 if (r.student_id) studentSet.add(r.student_id);
@@ -317,11 +354,10 @@
             }
           } catch (e) {}
 
-          // ====== RANDOMIZE SKILLS RATINGS IF NOT PRESENT, ATTENDANCE LEFT FOR BACKEND ======
+          // ====== RANDOMIZE SKILLS RATINGS IF NOT PRESENT ======
           function randomRating() {
             return Math.floor(Math.random() * 3) + 3; // 3,4,5
           }
-
           const affectiveNames = ["punctuality", "attentiveness", "neatness", "honesty", "politeness"];
           const psychomotorNames = ["handwriting", "drawing", "sports", "organization"];
 
@@ -340,7 +376,6 @@
               skillsReport.skills.psychomotor[name] = randomRating();
             });
           } else {
-            // If skillsReport exists but some fields are missing, patch them
             if (!skillsReport.skills.affective) skillsReport.skills.affective = {};
             if (!skillsReport.skills.psychomotor) skillsReport.skills.psychomotor = {};
             affectiveNames.forEach(name => {
@@ -356,18 +391,16 @@
           lastSkillsReport = skillsReport;
           lastClassSize = classSize;
 
-          // Save to previous results
           saveViewedResult({
             regNo, class: klass, session, term, results: filteredResults,
             skillsReport, classSize,
-            student: lastStudentProfile
+            student: studentProfile
           });
-          // Display
           displayResult({
             regNo, class: klass, session, term,
             results: filteredResults,
             skillsReport, classSize,
-            student: lastStudentProfile
+            student: studentProfile
           });
           renderPreviousResults();
         } catch (err) {
@@ -378,7 +411,6 @@
         return false;
       }
 
-      // Display result in table and details (handles array response)
       function displayResult(r) {
         document.getElementById("resultsDisplaySection").style.display = "";
         document.getElementById("dispRegNo").textContent = r.regNo;
@@ -399,11 +431,9 @@
             <td>${res.remarks || res.remark || ""}</td>
           </tr>
         `).join("");
-        // Store last viewed result for download
         window._lastDisplayedResult = r;
       }
 
-      // Download result as report.html (populates sessionStorage and opens)
       function downloadCurrentResult() {
         const r = window._lastDisplayedResult;
         if (!r || !r.results || !r.results.length) {
@@ -411,7 +441,6 @@
           return;
         }
 
-        // Use fetched skills/attendance/classSize if present
         let affectiveSkills = [];
         let psychomotorSkills = [];
         let attendance = [];
@@ -459,6 +488,25 @@
         else if (stuGPA >= 1.0) perfGrade = "E (Poor)";
         else perfGrade = "F (Fail)";
 
+        // --- Save DOB, calculate age, photo, and email ---
+        let studentObj = null;
+        if (r.student) {
+          // Find DOB, Email, Photo, Age
+          let dobVal = r.student.dob || r.student.DOB || "";
+          let ageVal = r.student.age || calcAge(dobVal);
+          let emailVal = r.student.studentEmail || r.student.email || r.student.parentEmail || "";
+          let photoVal = r.student.photoBase64 || r.student.photo || "";
+          studentObj = {
+            name: r.student.name || r.student.fullname || "",
+            regNo: r.student.regNo || r.student.student_id || r.regNo,
+            gender: r.student.gender || "",
+            DOB: dobVal,
+            email: emailVal,
+            photoBase64: photoVal,
+            age: ageVal
+          };
+        }
+
         const reportData = {
           regNo: r.regNo,
           class: r.class,
@@ -477,14 +525,7 @@
             grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
             teacher_comment: res.teacher_comment || res.comment || ""
           })),
-          student: r.student ? {
-            name: r.student.name || r.student.fullname || "",
-            regNo: r.student.regNo || r.student.student_id || r.regNo,
-            gender: r.student.gender || "",
-            DOB: r.student.DOB || "",
-            email: r.student.email || "",
-            age: r.student.age || ""
-          } : null,
+          student: studentObj,
           perfGrade: perfGrade,
           classSize: classSize,
           numSubjects: numSubjects,

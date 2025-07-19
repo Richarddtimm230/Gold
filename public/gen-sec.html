@@ -88,6 +88,7 @@
           <span><b>Class:</b> <span id="dispClass"></span></span>
           <span><b>Session:</b> <span id="dispSession"></span></span>
           <span><b>Term:</b> <span id="dispTerm"></span></span>
+          <span><b>Class Size:</b> <span id="dispClassSize"></span></span>
         </div>
         <div class="results-table-container">
           <table class="results-table" id="resultsTable">
@@ -239,24 +240,24 @@
             // Optional: show error, or just ignore and continue
           }
 
-// After fetching results, fetch class size
-let classSize = null;
-try {
-  const classSizeResp = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(klass)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`);
-  const classStudents = await classSizeResp.json();
-  classSize = Array.isArray(classStudents.students) ? classStudents.students.length : null;
-} catch (err) {}
-          
+          // Fetch class size
+          let classSize = null;
+          try {
+            const classSizeResp = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(klass)}`);
+            const classStudents = await classSizeResp.json();
+            classSize = Array.isArray(classStudents.students) ? classStudents.students.length : null;
+          } catch (err) {}
+
           // Save to previous results
           saveViewedResult({
             userId, regNo, class: klass, session, term, results: results,
-            skillsReport: null, classSize: null,
+            skillsReport: null, classSize,
             student
           });
           // Display
           displayResult({
             userId, regNo, class: klass, session, term, results: results,
-            skillsReport: null, classSize: null,
+            skillsReport: null, classSize,
             student
           });
           renderPreviousResults();
@@ -277,7 +278,7 @@ try {
         const studentProfileEl = document.getElementById("studentProfileDetails");
         if (student) {
           studentProfileEl.innerHTML = `
-            <span><b>Name:</b> ${student.firstname || ""} ${student.surname || ""}</span>
+            <span><b>Name:</b> ${student.firstname || ""} ${student.othernames ? student.othernames + " " : ""}${student.surname || ""}</span>
             <span><b>Gender:</b> ${student.gender || ""}</span>
             <span><b>DOB:</b> ${student.dob || ""}</span>
             <span><b>Class:</b> ${student.class || ""} ${student.classArm || ""}</span>
@@ -299,20 +300,33 @@ try {
         document.getElementById("dispClass").textContent = r.class;
         document.getElementById("dispSession").textContent = r.session;
         document.getElementById("dispTerm").textContent = r.term;
+        document.getElementById("dispClassSize").textContent = r.classSize !== null && r.classSize !== undefined ? r.classSize : "";
+
         const tbody = document.getElementById("resultsTable").querySelector("tbody");
-        tbody.innerHTML = r.results.map(res => `
-          <tr>
-            <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || "")}</td>
-            <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
-            <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
-            <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
-            <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
-            <td>${res.total !== undefined ? res.total :
-              (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
-            <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
-            <td>${res.remarks || res.remark || ""}</td>
-          </tr>
-        `).join("");
+        tbody.innerHTML = r.results.map(res => {
+          let subjectName = "";
+          if (res.subject && typeof res.subject === "object" && res.subject.name) {
+            subjectName = res.subject.name;
+          } else if (typeof res.subject === "string") {
+            subjectName = res.subject;
+          } else if (res.subject_name) {
+            subjectName = res.subject_name;
+          }
+
+          return `
+            <tr>
+              <td>${subjectName}</td>
+              <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
+              <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
+              <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
+              <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
+              <td>${res.total !== undefined ? res.total :
+                (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
+              <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
+              <td>${res.remarks || res.remark || ""}</td>
+            </tr>
+          `;
+        }).join("");
         window._lastDisplayedResult = r;
       }
 

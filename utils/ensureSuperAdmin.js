@@ -1,10 +1,12 @@
+// scripts/ensureSuperAdmin.js
+
 const bcrypt = require('bcryptjs');
+const User = require('../models/User');
 
 /**
- * Ensures that a superadmin user exists in Firestore.
- * @param {FirebaseFirestore.Firestore} db - The Firestore instance.
+ * Ensures that a superadmin user exists in MongoDB.
  */
-async function ensureSuperAdmin(db) {
+async function ensureSuperAdmin() {
   const superEmail = process.env.SUPERADMIN_EMAIL || 'Nadmin@goldlincschools.com';
   const superPassword = process.env.SUPERADMIN_PASSWORD || 'GoldLinc123';
   const superName = process.env.SUPERADMIN_NAME || 'Super Admin';
@@ -12,26 +14,20 @@ async function ensureSuperAdmin(db) {
   try {
     const hash = await bcrypt.hash(superPassword, 10);
 
-    const usersCollection = db.collection('users');
-    const q = usersCollection.where('email', '==', superEmail).limit(1);
-    const snapshot = await q.get();
+    const existingUser = await User.findOne({ email: superEmail });
 
-    if (!snapshot.empty) {
-      // Update existing superadmin
-      const userDoc = snapshot.docs[0];
-      await userDoc.ref.update({
-        name: superName,
-        password: hash,
-        role: 'superadmin'
-      });
+    if (existingUser) {
+      existingUser.name = superName;
+      existingUser.password = hash;
+      existingUser.role = 'superadmin';
+      await existingUser.save();
       console.log('Superadmin updated.');
     } else {
-      // Create new superadmin
-      await usersCollection.add({
+      await User.create({
         name: superName,
         email: superEmail,
         password: hash,
-        role: 'admin'
+        role: 'superadmin'
       });
       console.log('Superadmin created.');
     }
@@ -41,7 +37,7 @@ async function ensureSuperAdmin(db) {
     console.log('Password:', superPassword);
   } catch (error) {
     console.error('Error in ensureSuperAdmin:', error);
-    throw error; // Ensures calling code knows this failed
+    throw error;
   }
 }
 

@@ -819,9 +819,9 @@ function renderResultsTable(results) {
                 <td>${result.remarks || ''}</td>
                 <td class="status-${(result.status || '').toLowerCase()}">${result.status || ''}</td>
                 <td>
-                  <button class="action-btn edit" title="Edit" data-id="${result.id}" aria-label="Edit result">✏️</button>
-                  <button class="action-btn delete" title="Delete" data-id="${result.id}" aria-label="Delete result">🗑️</button>
-                  <button class="action-btn publish" title="Publish" data-id="${result.id}" aria-label="Publish result">📢</button>
+                  <button class="action-btn edit" title="Edit" data-id="${result._id}" aria-label="Edit result">✏️</button>
+<button class="action-btn delete" title="Delete" data-id="${result._id}" aria-label="Delete result">🗑️</button>
+<button class="action-btn publish" title="Publish" data-id="${result._id}" aria-label="Publish result">📢</button>
                 </td>
               </tr>
             `).join('')}

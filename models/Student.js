@@ -59,6 +59,8 @@ const transportSchema = new mongoose.Schema({}, { strict: false }); // Flexible 
 const StudentSchema = new mongoose.Schema({
   student_id: { type: String, unique: true, required: true },
   surname: { type: String, required: true },
+  accountStatus: String,
+  subscriptionStatus: String,
   firstname: { type: String, required: true },
   othernames: { type: String, default: '' },
   dob: { type: String, required: true },

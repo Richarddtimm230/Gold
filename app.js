@@ -22,10 +22,10 @@ const { router: authRoute, authMiddleware } = require('./routes/auth');
 
 
 const dashboardRoute = require('./routes/dashboard');
-const siteContentRouter = require('./routes/siteContent');
+
 const adminRoute = require('./routes/admin');
 const staffRoute = require('./routes/staff');
-const teachersRoute = require('./routes/teachers');
+
 const subjectsRoute = require('./routes/subjects');
 
 // Route mounting
@@ -34,12 +34,14 @@ app.use('/api/staff', staffRoute);
 app.use('/api', dashboardRoute);
 
 
-app.use('/api/teachers', teachersRoute);
+
 app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/students', studentsRoute);
-app.use('/api/site', siteContentRouter);
+
+
+
 app.use('/api/admin', adminRoute);
 
 // Super Admin protected route

@@ -442,38 +442,36 @@
       const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
       document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
     }
+// Attendance table (show summary only, no duplication)
+if (data.attendance && Array.isArray(data.attendance)) {
+  let presentDays = 0, absentDays = 0;
+  // Try to extract present/absent from labels or from keys
+  data.attendance.forEach(a => {
+    let labelLower = a.label ? a.label.toLowerCase() : "";
+    if (labelLower.includes("present")) presentDays = Number(a.value) || presentDays;
+    if (labelLower.includes("absent")) absentDays = Number(a.value) || absentDays;
+    // Prefer direct keys if available
+    if (typeof a.present === "number") presentDays = a.present;
+    if (typeof a.absent === "number") absentDays = a.absent;
+  });
+  // If attendance array is a single object: {present, absent}
+  if (data.attendance.length === 1 && typeof data.attendance[0] === "object") {
+    const att = data.attendance[0];
+    presentDays = att.present || presentDays;
+    absentDays = att.absent || absentDays;
+  }
+  let totalDays = presentDays + absentDays;
+  let attendanceRows = "";
+  attendanceRows += `<tr><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
+  attendanceRows += `<tr><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
+  attendanceRows += `<tr><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
+  if (totalDays > 0 && presentDays > 0) {
+    const pct = ((presentDays / totalDays) * 100).toFixed(2);
+    attendanceRows += `<tr><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
+  }
+  document.querySelector("#attendanceTable tbody").innerHTML = attendanceRows;
+}
 
-    // Attendance table with total and percentage
-    if (data.attendance && Array.isArray(data.attendance)) {
-      let presentDays = 0, absentDays = 0, totalDays = 0;
-      let rows = data.attendance.map(a => {
-        let labelLower = a.label ? a.label.toLowerCase() : "";
-        if (labelLower.includes("present")) presentDays = Number(a.value) || presentDays;
-        if (labelLower.includes("absent")) absentDays = Number(a.value) || absentDays;
-        return `<tr><td>${a.label}</td><td>${a.value}</td></tr>`;
-      }).join('');
-      // If attendance array consists of objects like {present, absent}
-      if ((!presentDays && !absentDays) && data.attendance.length && typeof data.attendance[0] === "object") {
-        const att = data.attendance[0];
-        presentDays = att.present || presentDays;
-        absentDays = att.absent || absentDays;
-      }
-      totalDays = presentDays + absentDays;
-      if (totalDays) {
-        rows += `<tr><td><b>No. of School Days</b></td><td>${totalDays}</td></tr>`;
-      }
-      if (presentDays) {
-        rows += `<tr><td><b>Days Present</b></td><td>${presentDays}</td></tr>`;
-      }
-      if (absentDays) {
-        rows += `<tr><td><b>Days Absent</b></td><td>${absentDays}</td></tr>`;
-      }
-      if (presentDays && totalDays) {
-        const pct = ((presentDays / totalDays) * 100).toFixed(2);
-        rows += `<tr><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
-      }
-      document.querySelector("#attendanceTable tbody").innerHTML = rows;
-    }
 
     document.getElementById("printDate").innerText = getFormattedPrintDate();
   }

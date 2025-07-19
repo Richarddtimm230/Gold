@@ -26,10 +26,9 @@ const resultSchema = new mongoose.Schema({
   score: { type: Number, default: 0 },
   grade: { type: String, default: "" },
   remarks: { type: String, default: "" },
-  status: { type: String, default: "Draft" },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  status: { type: String, default: "Draft" }
+}, { timestamps: true });
+
 
 
 module.exports = mongoose.model('Result', resultSchema);

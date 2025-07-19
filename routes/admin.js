@@ -1,36 +1,25 @@
 // routes/admin.js
 
 const express = require('express');
-const admin = require('firebase-admin'); // Still needed for Firestore operations
-const multer = require('multer'); // For handling file uploads
-const cloudinary = require('cloudinary').v2; // Import Cloudinary SDK
-
-// Assuming authMiddleware is exported from your auth route file
-// Adjust the path if your auth.js is in a different location relative to admin.js
-const { authMiddleware } = require('./auth'); 
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { authMiddleware } = require('./auth');
+const SiteContent = require('../models/SiteContent');
 
 const router = express.Router();
 
-// --- Configure Cloudinary using CLOUDINARY_URL environment variable ---
-cloudinary.config(); 
+cloudinary.config();
 
-// --- Multer setup for image uploads ---
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // Limit file size to 5MB
-  },
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF, WebP) are allowed.'), false);
-    }
+    if (allowedTypes.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Invalid file type.'), false);
   }
 });
 
-// --- Middleware to ensure Super Admin role ---
 const ensureSuperAdminRole = (req, res, next) => {
   if (!req.user || req.user.role !== 'superadmin') {
     return res.status(403).json({ error: 'Forbidden: Super Admin access required.' });
@@ -38,39 +27,29 @@ const ensureSuperAdminRole = (req, res, next) => {
   next();
 };
 
-// Apply authMiddleware and ensureSuperAdminRole to all admin routes
 router.use(authMiddleware, ensureSuperAdminRole);
 
-// ====================================================================
-// GET /api/admin/homepage - Fetch homepage content (Firestore)
-// ====================================================================
+// GET /api/admin/homepage
 router.get('/homepage', async (req, res) => {
   try {
-    const db = req.app.locals.firestoreDB; // Access Firestore instance from app.js
-    const homepageDocRef = db.collection('siteContent').doc('homepage');
-    const doc = await homepageDocRef.get();
-
-    if (!doc.exists) {
-      // If no homepage content exists, return a default empty structure
+    const data = await SiteContent.findOne({ type: 'homepage' }).lean();
+    if (!data) {
       return res.status(200).json({
         heroTitle: '',
         heroSubtitle: '',
         heroMotto: '',
         heroImages: [],
         aboutSection: '',
-        carouselSlides: [] // NEW: Default empty array for carousel slides
+        carouselSlides: []
       });
     }
-
-    // Return existing data, ensuring new fields default to empty if not present
-    const data = doc.data();
     res.status(200).json({
       heroTitle: data.heroTitle || '',
       heroSubtitle: data.heroSubtitle || '',
       heroMotto: data.heroMotto || '',
       heroImages: data.heroImages || [],
       aboutSection: data.aboutSection || '',
-      carouselSlides: data.carouselSlides || [] // NEW: Ensure carouselSlides is an array
+      carouselSlides: data.carouselSlides || []
     });
   } catch (error) {
     console.error('Error fetching homepage content:', error);
@@ -78,28 +57,29 @@ router.get('/homepage', async (req, res) => {
   }
 });
 
-// ====================================================================
-// PUT /api/admin/homepage - Update homepage content (Firestore)
-// ====================================================================
+// PUT /api/admin/homepage
 router.put('/homepage', async (req, res) => {
   try {
-    const db = req.app.locals.firestoreDB; // Access Firestore instance
-    const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection, carouselSlides } = req.body; // NEW: Destructure carouselSlides
+    const { heroTitle, heroSubtitle, heroMotto, heroImages, aboutSection, carouselSlides } = req.body;
 
-    // Basic validation (you can add more robust validation here)
-    if (typeof heroTitle !== 'string' || !Array.isArray(heroImages) || typeof aboutSection !== 'string' || !Array.isArray(carouselSlides)) { // NEW: Validate carouselSlides
-      return res.status(400).json({ error: 'Invalid data format for homepage update.' });
+    if (typeof heroTitle !== 'string' || !Array.isArray(heroImages) ||
+        typeof aboutSection !== 'string' || !Array.isArray(carouselSlides)) {
+      return res.status(400).json({ error: 'Invalid data format.' });
     }
 
-    const homepageDocRef = db.collection('siteContent').doc('homepage');
-    await homepageDocRef.set({
-      heroTitle: heroTitle || '',
-      heroSubtitle: heroSubtitle || '',
-      heroMotto: heroMotto || '',
-      heroImages: heroImages, // Array of image URLs
-      aboutSection: aboutSection || '',
-      carouselSlides: carouselSlides // NEW: Save carouselSlides
-    }, { merge: true }); // Use merge: true to only update specified fields
+    await SiteContent.findOneAndUpdate(
+      { type: 'homepage' },
+      {
+        type: 'homepage',
+        heroTitle: heroTitle || '',
+        heroSubtitle: heroSubtitle || '',
+        heroMotto: heroMotto || '',
+        heroImages,
+        aboutSection: aboutSection || '',
+        carouselSlides
+      },
+      { upsert: true, new: true }
+    );
 
     res.status(200).json({ message: 'Homepage content updated successfully!' });
   } catch (error) {
@@ -108,9 +88,7 @@ router.put('/homepage', async (req, res) => {
   }
 });
 
-// ====================================================================
-// POST /api/admin/upload-image - Upload an image to Cloudinary
-// ====================================================================
+// POST /api/admin/upload-image
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -118,17 +96,16 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
     }
 
     const b64 = Buffer.from(req.file.buffer).toString('base64');
-    let dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
+    const dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
 
     const result = await cloudinary.uploader.upload(dataURI, {
-      folder: 'goldlinc_homepage_images', // Optional: organize uploads in a folder
+      folder: 'goldlinc_homepage_images',
       resource_type: 'image'
     });
 
     res.status(200).json({ url: result.secure_url });
-
   } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
+    console.error('Error uploading image:', error);
     res.status(500).json({ error: error.message || 'Failed to upload image.' });
   }
 });

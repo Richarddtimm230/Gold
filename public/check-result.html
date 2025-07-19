@@ -307,13 +307,35 @@
           } catch (e) {}
 
           lastClassSize = classSize;
+// Fetch skills report for the student/term/session
+let affectiveSkills = [], psychomotorSkills = [], attendance = [];
+try {
+  const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`);
+  if (skillsRes.ok) {
+    const skillsData = await skillsRes.json();
+    // Find the matching term/session report
+    const report = skillsData.skillsReports?.find(r =>
+      r.session === session && r.term === term
+    );
+    if (report) {
+      // Assume report.skills is { affective: [...], psychomotor: [...] }
+      affectiveSkills = report.skills?.affective || [];
+      psychomotorSkills = report.skills?.psychomotor || [];
+      attendance = report.attendance || [];
+    }
+  }
+} catch (err) { /* ignore errors for skills */ }
 
-          // Save to previous results
-          saveViewedResult({
-            regNo, class: klass, session, term, results: results,
-            classSize,
-            student: lastStudentProfile
-          });
+
+
+// For download, also include these
+
+          // Now, include these in the data you pass to report.html
+saveViewedResult({
+  regNo, class: klass, session, term, results,
+  classSize, student: lastStudentProfile,
+  affectiveSkills, psychomotorSkills, attendance
+});
           // Display
           displayResult({regNo, class: klass, session, term, results: results, classSize, student: lastStudentProfile});
           renderPreviousResults();
@@ -380,16 +402,21 @@
         window._lastDisplayedResult = r;
       }
 
-      // Download result as report.html (populates sessionStorage and opens)
       function downloadCurrentResult() {
-        const r = window._lastDisplayedResult;
-        if (!r || !r.results || !r.results.length) {
-          alert("No result to download. Please check a result first.");
-          return;
-        }
-        sessionStorage.setItem("reportData", JSON.stringify(r));
-        window.open('report.html', '_blank');
-      }
+  const r = window._lastDisplayedResult;
+  if (!r || !r.results || !r.results.length) {
+    alert("No result to download. Please check a result first.");
+    return;
+  }
+  // Add skills and attendance
+  sessionStorage.setItem("reportData", JSON.stringify({
+    ...r,
+    affectiveSkills: r.affectiveSkills || [],
+    psychomotorSkills: r.psychomotorSkills || [],
+    attendance: r.attendance || []
+  }));
+  window.open('report.html', '_blank');
+}
 
       renderPreviousResults();
     </script>

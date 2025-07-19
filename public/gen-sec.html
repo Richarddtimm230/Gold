@@ -80,6 +80,8 @@
       <!-- Results Display Section (hidden by default until search) -->
       <section class="results-section" id="resultsDisplaySection" style="display:none;">
         <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
+        <!-- Student Details Section -->
+        <div class="student-profile-details" id="studentProfileDetails" style="margin-bottom:12px;"></div>
         <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:18px;">
           <span><b>User ID:</b> <span id="dispUserId"></span></span>
           <span><b>Reg. No:</b> <span id="dispRegNo"></span></span>
@@ -151,8 +153,6 @@
       let lastStudentProfile = null;
       let lastSkillsReport = null;
       let lastClassSize = null;
-
-      // Remove autofillRegNo, allow manual entry
 
       function getViewedResults() {
         let arr = [];
@@ -229,16 +229,28 @@
             return false;
           }
 
-          // Optionally add skills/class size logic here if needed
+          // Fetch student profile
+          let student = null;
+          try {
+            const studentResp = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(regNo)}`);
+            const studentJson = await studentResp.json();
+            student = Array.isArray(studentJson.students) ? studentJson.students[0] : null;
+          } catch (err) {
+            // Optional: show error, or just ignore and continue
+          }
 
           // Save to previous results
           saveViewedResult({
             userId, regNo, class: klass, session, term, results: results,
             skillsReport: null, classSize: null,
-            student: null
+            student
           });
           // Display
-          displayResult({userId, regNo, class: klass, session, term, results: results, skillsReport: null, classSize: null, student: null});
+          displayResult({
+            userId, regNo, class: klass, session, term, results: results,
+            skillsReport: null, classSize: null,
+            student
+          });
           renderPreviousResults();
         } catch (err) {
           errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
@@ -251,6 +263,29 @@
       // Display result in table and details (handles array response)
       function displayResult(r) {
         document.getElementById("resultsDisplaySection").style.display = "";
+
+        // Student details
+        const student = r.student;
+        const studentProfileEl = document.getElementById("studentProfileDetails");
+        if (student) {
+          studentProfileEl.innerHTML = `
+            <span><b>Name:</b> ${student.firstname || ""} ${student.surname || ""}</span>
+            <span><b>Gender:</b> ${student.gender || ""}</span>
+            <span><b>DOB:</b> ${student.dob || ""}</span>
+            <span><b>Class:</b> ${student.class || ""} ${student.classArm || ""}</span>
+            <span><b>Parent Name:</b> ${student.parentName || ""}</span>
+            <span><b>Parent Phone:</b> ${student.parentPhone || ""}</span>
+            <span><b>Address:</b> ${student.address || ""}</span>
+            <span><b>Nationality:</b> ${student.nationality || ""}</span>
+            <span><b>LGA:</b> ${student.lga || ""}</span>
+            <span><b>State:</b> ${student.state || ""}</span>
+            <span><b>Religion:</b> ${student.religion || ""}</span>
+            <span><b>Photo:</b> ${student.photoBase64 ? `<img src="${student.photoBase64}" style="height:50px;border-radius:6px;">` : "N/A"}</span>
+          `;
+        } else {
+          studentProfileEl.innerHTML = "<span style='color:#888;'>Student details not found.</span>";
+        }
+
         document.getElementById("dispUserId").textContent = r.userId;
         document.getElementById("dispRegNo").textContent = r.regNo;
         document.getElementById("dispClass").textContent = r.class;
@@ -280,7 +315,6 @@
           alert("No result to download. Please check a result first.");
           return;
         }
-        // You may want to update this if you need userId or other fields in reportData
         sessionStorage.setItem("reportData", JSON.stringify(r));
         window.open('report.html', '_blank');
       }

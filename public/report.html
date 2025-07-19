@@ -5,7 +5,6 @@
   <title>Gold and Linc Schools - Report Card</title>
   <link rel="stylesheet" href="report.css">
   <style>
-    /* PRINT FULL WIDTH PATCH */
     @media print {
       html, body {
         width: 100%;
@@ -75,6 +74,20 @@
       height: 80px;
       width: auto;
     }
+    .student-info-table img#stuPhoto {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      box-shadow: 0 2px 7px #eee;
+      background: #fafafa;
+      margin: 0 auto;
+      display: block;
+    }
+    .student-info-table td {
+      vertical-align: middle;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -106,6 +119,9 @@
       <table class="student-info-table" id="studentInfoTable">
         <tr>
           <td><strong>Name:</strong> <span id="stuName"></span></td>
+          <td rowspan="8" style="text-align:center; vertical-align:middle;">
+            <img id="stuPhoto" src="" alt="Student Photo">
+          </td>
           <td><strong>Performance Grade:</strong> <span id="perfGrade"></span></td>
         </tr>
         <tr>
@@ -245,7 +261,6 @@
 
   function formatDate(d) {
     if (!d) return "";
-    // Accept 'YYYY-MM-DD', 'DD-MM-YYYY', 'DD/MM/YYYY', etc.
     let date;
     if (typeof d === "string") {
       const parts = d.split(/[-\/]/);
@@ -306,6 +321,7 @@
     }
 
     // Student name & info
+    let studentPhoto = "";
     if (data.student) {
       let name = "";
       if (data.student.firstname || data.student.surname || data.student.othernames) {
@@ -318,16 +334,20 @@
       document.getElementById("stuGender").innerText = data.student.gender || "";
       let dobVal = data.student.dob || data.student.DOB || "";
       document.getElementById("stuDOB").innerText = formatDate(dobVal);
-      // Age calculation
       let ageVal = data.student.age || calcAge(dobVal);
       document.getElementById("stuAge").innerText = ageVal ? ageVal : "";
-      // Email fallback
       document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || data.student.parentEmail || "";
       document.getElementById("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
+      // Student photo
+      if (data.student.photoBase64) {
+        studentPhoto = data.student.photoBase64;
+      }
     } else {
       document.getElementById("stuRegNo").innerText = data.regNo || "";
       document.getElementById("stuClass").innerText = data.class || "";
     }
+    document.getElementById("stuPhoto").src = studentPhoto || "images/default-avatar.png";
+    document.getElementById("stuPhoto").alt = studentPhoto ? "Student Photo" : "No Photo";
 
     // Class size
     document.getElementById("classSize").innerText = data.classSize || "";
@@ -422,23 +442,32 @@
       const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
       document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
     }
+
     // Attendance table with total and percentage
     if (data.attendance && Array.isArray(data.attendance)) {
-      let totalDays = 0, presentDays = 0;
+      let presentDays = 0, absentDays = 0, totalDays = 0;
       let rows = data.attendance.map(a => {
-        if (a.label && typeof a.value === "number") {
-          if (a.label.toLowerCase().includes("present")) presentDays = a.value;
-          if (a.label.toLowerCase().includes("total")) totalDays = a.value;
-        }
+        let labelLower = a.label ? a.label.toLowerCase() : "";
+        if (labelLower.includes("present")) presentDays = Number(a.value) || presentDays;
+        if (labelLower.includes("absent")) absentDays = Number(a.value) || absentDays;
         return `<tr><td>${a.label}</td><td>${a.value}</td></tr>`;
       }).join('');
-      // If attendance array consists of objects like {present, total}
-      if ((!totalDays || !presentDays) && data.attendance.length && typeof data.attendance[0] === "object") {
+      // If attendance array consists of objects like {present, absent}
+      if ((!presentDays && !absentDays) && data.attendance.length && typeof data.attendance[0] === "object") {
         const att = data.attendance[0];
         presentDays = att.present || presentDays;
-        totalDays = att.total || totalDays;
+        absentDays = att.absent || absentDays;
       }
-      if (totalDays) rows += `<tr><td><b>Total Days</b></td><td>${totalDays}</td></tr>`;
+      totalDays = presentDays + absentDays;
+      if (totalDays) {
+        rows += `<tr><td><b>No. of School Days</b></td><td>${totalDays}</td></tr>`;
+      }
+      if (presentDays) {
+        rows += `<tr><td><b>Days Present</b></td><td>${presentDays}</td></tr>`;
+      }
+      if (absentDays) {
+        rows += `<tr><td><b>Days Absent</b></td><td>${absentDays}</td></tr>`;
+      }
       if (presentDays && totalDays) {
         const pct = ((presentDays / totalDays) * 100).toFixed(2);
         rows += `<tr><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;

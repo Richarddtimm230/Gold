@@ -228,7 +228,8 @@
     <div class="seal-container">
       <img src="images (6).jpeg" alt="Red Seal" />
     </div>
-  </div><script>
+  </div>
+<script>
   function getFormattedPrintDate() {
     const now = new Date();
     const dd = now.getDate().toString().padStart(2,'0');
@@ -247,11 +248,9 @@
     // Accept 'YYYY-MM-DD', 'DD-MM-YYYY', 'DD/MM/YYYY', etc.
     let date;
     if (typeof d === "string") {
-      // Try splitting
       const parts = d.split(/[-\/]/);
       if (parts.length === 3) {
         let year, month, day;
-        // If first part is 4 digits, it's likely YYYY-MM-DD
         if (parts[0].length === 4) {
           year = +parts[0]; month = +parts[1]; day = +parts[2];
         } else {
@@ -268,6 +267,34 @@
     return date.toLocaleDateString();
   }
 
+  function calcAge(dobStr) {
+    if (!dobStr) return "";
+    let date;
+    if (typeof dobStr === "string") {
+      const parts = dobStr.split(/[-\/]/);
+      if (parts.length === 3) {
+        let year, month, day;
+        if (parts[0].length === 4) {
+          year = +parts[0]; month = +parts[1]; day = +parts[2];
+        } else {
+          day = +parts[0]; month = +parts[1]; year = +parts[2];
+        }
+        date = new Date(year, month-1, day);
+      } else {
+        date = new Date(dobStr);
+      }
+    } else {
+      date = new Date(dobStr);
+    }
+    if (!date || isNaN(date.getTime())) return "";
+    const now = new Date();
+    let age = now.getFullYear() - date.getFullYear();
+    if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
   function fillReport() {
     const dataStr = sessionStorage.getItem("reportData");
     if (!dataStr) return;
@@ -278,7 +305,7 @@
       document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
     }
 
-    // Student name
+    // Student name & info
     if (data.student) {
       let name = "";
       if (data.student.firstname || data.student.surname || data.student.othernames) {
@@ -289,10 +316,14 @@
       document.getElementById("stuName").innerText = name;
       document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
       document.getElementById("stuGender").innerText = data.student.gender || "";
-      document.getElementById("stuDOB").innerText = formatDate(data.student.dob || data.student.DOB || "");
+      let dobVal = data.student.dob || data.student.DOB || "";
+      document.getElementById("stuDOB").innerText = formatDate(dobVal);
+      // Age calculation
+      let ageVal = data.student.age || calcAge(dobVal);
+      document.getElementById("stuAge").innerText = ageVal ? ageVal : "";
+      // Email fallback
       document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || data.student.parentEmail || "";
       document.getElementById("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
-      if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
     } else {
       document.getElementById("stuRegNo").innerText = data.regNo || "";
       document.getElementById("stuClass").innerText = data.class || "";
@@ -395,7 +426,6 @@
     if (data.attendance && Array.isArray(data.attendance)) {
       let totalDays = 0, presentDays = 0;
       let rows = data.attendance.map(a => {
-        // Try to find keys for present/total
         if (a.label && typeof a.value === "number") {
           if (a.label.toLowerCase().includes("present")) presentDays = a.value;
           if (a.label.toLowerCase().includes("total")) totalDays = a.value;
@@ -403,14 +433,11 @@
         return `<tr><td>${a.label}</td><td>${a.value}</td></tr>`;
       }).join('');
       // If attendance array consists of objects like {present, total}
-      if (!totalDays || !presentDays) {
+      if ((!totalDays || !presentDays) && data.attendance.length && typeof data.attendance[0] === "object") {
         const att = data.attendance[0];
-        if (att && typeof att === "object") {
-          presentDays = att.present || presentDays;
-          totalDays = att.total || totalDays;
-        }
+        presentDays = att.present || presentDays;
+        totalDays = att.total || totalDays;
       }
-      // Add row for total
       if (totalDays) rows += `<tr><td><b>Total Days</b></td><td>${totalDays}</td></tr>`;
       if (presentDays && totalDays) {
         const pct = ((presentDays / totalDays) * 100).toFixed(2);

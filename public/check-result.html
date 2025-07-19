@@ -32,9 +32,9 @@
             <select id="classInput" class="result-form-select" required>
               <option value="">Select Class</option>
               <option>Beginner</option>
-                  <option>KG1</option>
-                  <option>KG2</option>
-                 <option>Creche</option>
+              <option>KG1</option>
+              <option>KG2</option>
+              <option>Creche</option>
               <option>Nursery 1</option>
               <option>Nursery 2</option>
               <option>Nursery 3</option>
@@ -145,7 +145,7 @@
     <script>
       const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-      let lastStudentProfile = null; // Holds student profile for extra fields
+      let lastStudentProfile = null;
       let lastSkillsReport = null;
       let lastClassSize = null;
 
@@ -243,7 +243,7 @@
           lastSkillsReport = null;
           lastClassSize = null;
 
-          // 1. Fetch results
+          // 1. Fetch results FOR THIS SPECIFIC STUDENT ONLY!
           const params = new URLSearchParams({
             student_id: regNo,
             class: klass,
@@ -253,43 +253,48 @@
           });
           const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
           const results = await response.json();
-          if (!Array.isArray(results) || !results.length) {
+          // Filter results to only those for the given regNo/student
+          const filteredResults = Array.isArray(results)
+            ? results.filter(r =>
+                (r.student_id === regNo) ||
+                (r.student && (r.student.student_id === regNo || r.student.regNo === regNo)) ||
+                (r.regNo === regNo)
+              )
+            : [];
+
+          if (!filteredResults.length) {
             errorBox.textContent = "No result found! Please check your details or contact the school.";
             errorBox.style.display = "block";
             document.getElementById("resultsDisplaySection").style.display = "none";
             return false;
           }
 
-        // 2. Fetch student profile for skills
-let skillsReport = null;
-let classSize = null;
-try {
-  const normalize = str =>
-    String(str || '')
-      .replace(/–/g, '-') // Convert en dash to hyphen
-      .trim()
-      .toLowerCase();
+          // 2. Fetch skills report for this student/session/term
+          let skillsReport = null;
+          try {
+            const normalize = str =>
+              String(str || '')
+                .replace(/–/g, '-') // Convert en dash to hyphen
+                .trim()
+                .toLowerCase();
 
-  const normalizedSession = normalize(session);
-  const normalizedTerm = normalize(term);
+            const normalizedSession = normalize(session);
+            const normalizedTerm = normalize(term);
 
-  const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`, {
-    headers: { 'Authorization': '' }
-  });
-  if (skillsRes.ok) {
-    const skillsData = await skillsRes.json();
-    if (Array.isArray(skillsData.skillsReports)) {
-      skillsReport = skillsData.skillsReports.find(
-        r => normalize(r.session) === normalizedSession &&
-             normalize(r.term) === normalizedTerm
-      ) || null;
-    }
-  }
-} catch (e) {}
+            const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`);
+            if (skillsRes.ok) {
+              const skillsData = await skillsRes.json();
+              if (Array.isArray(skillsData.skillsReports)) {
+                skillsReport = skillsData.skillsReports.find(
+                  r => normalize(r.session) === normalizedSession &&
+                       normalize(r.term) === normalizedTerm
+                ) || null;
+              }
+            }
+          } catch (e) {}
 
-
-
-          // 3. Fetch class size
+          // 3. Fetch class size for the selected class/session/term
+          let classSize = null;
           try {
             const classParams = new URLSearchParams({
               class: klass,
@@ -303,8 +308,10 @@ try {
               // Count unique student IDs
               const studentSet = new Set();
               for (const r of classResults) {
-                if (r.student && (typeof r.student === "object" ? r.student.id : r.student))
-                  studentSet.add(typeof r.student === "object" ? r.student.id : r.student);
+                if (r.student_id) studentSet.add(r.student_id);
+                else if (r.student && r.student.student_id) studentSet.add(r.student.student_id);
+                else if (r.student && r.student.regNo) studentSet.add(r.student.regNo);
+                else if (r.regNo) studentSet.add(r.regNo);
               }
               classSize = studentSet.size;
             }
@@ -324,7 +331,6 @@ try {
                 affective: {},
                 psychomotor: {}
               },
-              // Do NOT randomize attendance, leave as undefined
               comment: "Randomized for demo."
             };
             affectiveNames.forEach(name => {
@@ -345,7 +351,6 @@ try {
               if (skillsReport.skills.psychomotor[name] === undefined)
                 skillsReport.skills.psychomotor[name] = randomRating();
             });
-            // Do NOT patch attendance!
           }
 
           lastSkillsReport = skillsReport;
@@ -353,12 +358,17 @@ try {
 
           // Save to previous results
           saveViewedResult({
-            regNo, class: klass, session, term, results: results,
+            regNo, class: klass, session, term, results: filteredResults,
             skillsReport, classSize,
             student: lastStudentProfile
           });
           // Display
-          displayResult({regNo, class: klass, session, term, results: results, skillsReport, classSize, student: lastStudentProfile});
+          displayResult({
+            regNo, class: klass, session, term,
+            results: filteredResults,
+            skillsReport, classSize,
+            student: lastStudentProfile
+          });
           renderPreviousResults();
         } catch (err) {
           errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";

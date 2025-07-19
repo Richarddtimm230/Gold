@@ -19,13 +19,8 @@ const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const studentsRoute = require('./routes/students');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
-const academicsRoute = require('./routes/academics');
-const examsRoute = require('./routes/exams');
-const cbtRoute = require('./routes/cbt');
-const assignmentsRoute = require('./routes/assignments');
-const attendanceRoute = require('./routes/attendance');
-const notificationsRoute = require('./routes/notifications');
-const profileRoute = require('./routes/profile');
+
+
 const dashboardRoute = require('./routes/dashboard');
 const siteContentRouter = require('./routes/siteContent');
 const adminRoute = require('./routes/admin');
@@ -37,13 +32,8 @@ const subjectsRoute = require('./routes/subjects');
 app.use('/api/auth', authRoute);
 app.use('/api/staff', staffRoute);
 app.use('/api', dashboardRoute);
-app.use('/api/academics', academicsRoute);
-app.use('/api/exams', examsRoute);
-app.use('/api/cbt', cbtRoute);
-app.use('/api/assignments', assignmentsRoute);
-app.use('/api/attendance', attendanceRoute);
-app.use('/api/notifications', notificationsRoute);
-app.use('/api/profile', profileRoute);
+
+
 app.use('/api/teachers', teachersRoute);
 app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);

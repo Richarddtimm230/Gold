@@ -2,99 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  
   <title>Gold and Linc Schools - Report Card</title>
-  <!-- Add the following CSS in your <style>... section, ideally at the end: -->
-
-<style>
-/* PRINT FULL WIDTH PATCH */
-
-/* Remove default print margins and make background white */
-@media print {
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-    box-shadow: none !important;
-  }
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-  .report-container {
-    width: 100vw !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    background: #fff !important;
-  }
-  /* Ensure content inside container also stretches */
-  .results-table,
-  .student-info-table,
-  .grades-key-table,
-  .skills-table,
-  .attendance,
-  .skills-tables-section {
-    width: 100% !important;
-    max-width: 100vw !important;
-  }
-  /* Hide buttons and other no-print items */
-  .no-print-btn {
-    display: none !important;
-  }
-  /* Remove extra spacing/margins from sections */
-  section, .seal-container {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-}
-
-/* Optional: Make sure .report-container always expands in normal view too */
-.report-container {
-  width: 100vw;
-  max-width: 100vw;
-  margin: 0 auto;
-  background: #fff;
-}
-</style>
-<link rel="stylesheet" href="report.css">
+  <link rel="stylesheet" href="report.css">
   <style>
-
-
-.background-blur {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 60%; /* Scale to container */
-  height: 60%;
-  transform: translate(-50%, -50%);
-  filter: blur(30px);
-  opacity: 0.08;
-  z-index: 0;
-  pointer-events: none;
-}
-
-
-.seal-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  margin-top: 40px;
-}
-
-.seal-container img {
-  height: 80px;
-  width: auto;
-}
-
+    /* PRINT FULL WIDTH PATCH */
+    @media print {
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      .report-container {
+        width: 100vw !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+      }
+      .results-table,
+      .student-info-table,
+      .grades-key-table,
+      .skills-table,
+      .attendance,
+      .skills-tables-section {
+        width: 100% !important;
+        max-width: 100vw !important;
+      }
+      .no-print-btn {
+        display: none !important;
+      }
+      section, .seal-container {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+    }
+    .report-container {
+      width: 100vw;
+      max-width: 100vw;
+      margin: 0 auto;
+      background: #fff;
+    }
+    .background-blur {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60%;
+      height: 60%;
+      transform: translate(-50%, -50%);
+      filter: blur(30px);
+      opacity: 0.08;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .seal-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .seal-container img {
+      height: 80px;
+      width: auto;
+    }
   </style>
-  <!-- jsPDF CDN and html2canvas for DOM rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -124,32 +105,32 @@
     <section class="student-info-section">
       <table class="student-info-table" id="studentInfoTable">
         <tr>
-          <td><strong>Name:</strong> <span id="stuName">OLAREWAJU TESTIMONY</span></td>
-          <td><strong>Performance Grade:</strong> <span id="perfGrade">A (Excellent)</span></td>
+          <td><strong>Name:</strong> <span id="stuName"></span></td>
+          <td><strong>Performance Grade:</strong> <span id="perfGrade"></span></td>
         </tr>
         <tr>
-          <td><strong>Reg. No:</strong> <span id="stuRegNo">2024/000838</span></td>
-          <td><strong>Class Size:</strong> <span id="classSize">17</span></td>
+          <td><strong>Reg. No:</strong> <span id="stuRegNo"></span></td>
+          <td><strong>Class Size:</strong> <span id="classSize"></span></td>
         </tr>
         <tr>
-          <td><strong>Gender:</strong> <span id="stuGender">F</span></td>
-          <td><strong>No. of Subjects:</strong> <span id="numSubjects">13</span></td>
+          <td><strong>Gender:</strong> <span id="stuGender"></span></td>
+          <td><strong>No. of Subjects:</strong> <span id="numSubjects"></span></td>
         </tr>
         <tr>
-          <td><strong>Age:</strong> <span id="stuAge">11</span></td>
-          <td><strong>Student Total Score:</strong> <span id="stuTotalScore">911 / 1300</span></td>
+          <td><strong>Age:</strong> <span id="stuAge"></span></td>
+          <td><strong>Student Total Score:</strong> <span id="stuTotalScore"></span></td>
         </tr>
         <tr>
-          <td><strong>DOB:</strong> <span id="stuDOB">17-03-2013</span></td>
-          <td><strong>Student Average (%):</strong> <span id="stuAverage">70.08%</span></td>
+          <td><strong>DOB:</strong> <span id="stuDOB"></span></td>
+          <td><strong>Student Average (%):</strong> <span id="stuAverage"></span></td>
         </tr>
         <tr>
-          <td><strong>Class:</strong> <span id="stuClass">JSS2 - A</span></td>
-          <td><strong>Grade Point Average:</strong> <span id="stuGPA">4.38</span></td>
+          <td><strong>Class:</strong> <span id="stuClass"></span></td>
+          <td><strong>Grade Point Average:</strong> <span id="stuGPA"></span></td>
         </tr>
         <tr>
-          <td><strong>Email:</strong> <span id="stuEmail">testimony.olarewaju@goldlincschools.com</span></td>
-          <td><strong>Result Summary:</strong> <span id="resultSummary">Excellent</span></td>
+          <td><strong>Email:</strong> <span id="stuEmail"></span></td>
+          <td><strong>Result Summary:</strong> <span id="resultSummary"></span></td>
         </tr>
       </table>
     </section>
@@ -181,14 +162,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>Punctuality</td><td>3</td></tr>
-          <tr><td>Attentiveness</td><td>3</td></tr>
-          <tr><td>Neatness</td><td>3</td></tr>
-          <tr><td>Honesty</td><td>3</td></tr>
-          <tr><td>Politeness</td><td>3</td></tr>
-          <tr><td>Perseverance</td><td>3</td></tr>
-          <tr><td>Relationship with Others</td><td>3</td></tr>
-          <tr><td>Organization Ability</td><td>3</td></tr>
+          <!-- Populated by JS -->
         </tbody>
       </table>
       <table class="skills-table psychomotor-skills" id="psychomotorSkillsTable">
@@ -198,15 +172,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>Hand Writing</td><td>3</td></tr>
-          <tr><td>Drawing and Painting</td><td>3</td></tr>
-          <tr><td>Speech / Verbal Fluency</td><td>3</td></tr>
-          <tr><td>Quantitative Reasoning</td><td>3</td></tr>
-          <tr><td>Processing Speed</td><td>3</td></tr>
-          <tr><td>Retentiveness</td><td>3</td></tr>
-          <tr><td>Visual Memory</td><td>3</td></tr>
-          <tr><td>Public Speaking</td><td>3</td></tr>
-          <tr><td>Sports and Games</td><td>3</td></tr>
+          <!-- Populated by JS -->
         </tbody>
       </table>
       <table class="skills-table attendance" id="attendanceTable">
@@ -216,10 +182,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>No. of School Days</td><td>126</td></tr>
-          <tr><td>No. of Days Present</td><td>122</td></tr>
-          <tr><td>No. of Days Absent</td><td>4</td></tr>
-          <tr><td>% Attendance</td><td>96.83%</td></tr>
+          <!-- Populated by JS -->
         </tbody>
       </table>
     </section>
@@ -247,25 +210,24 @@
     </section>
     <section class="comments-section">
       <p class="principal-comment">
-        <strong>Principal's Comment :</strong> <span id="principalComment">This is an excellent result, do not rest on your oars.</span>
+        <strong>Principal's Comment :</strong> <span id="principalComment"></span>
       </p>
       <div class="principal-sign">
-        <span><strong>Principal:</strong> <span id="principalName">ABIODUN FESTUS ADENIYI</span></span>
+        <span><strong>Principal:</strong> <span id="principalName"></span></span>
         <span><strong>Principal's Signature :</strong> ____________________</span>
       </div>
     </section>
     <section class="footer-section">
       <div class="next-term">
-        <strong>Next Term Begins:</strong> <span class="next-term-date" id="nextTermDate">Monday 6th of January 2025.</span>
+        <strong>Next Term Begins:</strong> <span class="next-term-date" id="nextTermDate"></span>
       </div>
       <div class="footer-meta">
-        <span id="printDate">Printed : 18-12-2024 02:53 pm</span>
-              </div>
+        <span id="printDate"></span>
+      </div>
     </section>
     <div class="seal-container">
-  <img src="images (6).jpeg" alt="Red Seal" />
-  </div>
-  
+      <img src="images (6).jpeg" alt="Red Seal" />
+    </div>
   </div>
 <script>
   function getFormattedPrintDate() {
@@ -289,146 +251,168 @@
       return d;
     }
   }
-function fillReport() {
-  const dataStr = sessionStorage.getItem("reportData");
-  if (!dataStr) return;
-  const data = JSON.parse(dataStr);
 
-  if (data.term && data.session) {
-    document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
+  function fillReport() {
+    const dataStr = sessionStorage.getItem("reportData");
+    if (!dataStr) return;
+    const data = JSON.parse(dataStr);
+
+    // Set term & session
+    if (data.term && data.session) {
+      document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
+    }
+
+    // Student name
+    if (data.student) {
+      let name = "";
+      if (data.student.firstname || data.student.surname || data.student.othernames) {
+        name = [data.student.firstname, data.student.othernames, data.student.surname].filter(Boolean).join(" ");
+      } else if (data.student.name) {
+        name = data.student.name;
+      }
+      document.getElementById("stuName").innerText = name;
+      document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
+      document.getElementById("stuGender").innerText = data.student.gender || "";
+      document.getElementById("stuDOB").innerText = formatDate(data.student.dob || "");
+      document.getElementById("stuEmail").innerText = data.student.studentEmail || "";
+      document.getElementById("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
+      if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
+    } else {
+      document.getElementById("stuRegNo").innerText = data.regNo || "";
+      document.getElementById("stuClass").innerText = data.class || "";
+    }
+
+    // Class size
+    document.getElementById("classSize").innerText = data.classSize || "";
+
+    // Number of subjects
+    let numSubjects = Array.isArray(data.results) ? data.results.length : "";
+    document.getElementById("numSubjects").innerText = numSubjects;
+
+    // Principal's comment, name, next term date
+    if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
+    if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
+    if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
+
+    // Results table
+    const tbody = document.querySelector("#resultsTable tbody");
+    let totalScore = 0;
+    let totalGradePoints = 0;
+    let subjectCount = 0;
+    const maxPerSubject = 100;
+
+    if (tbody && Array.isArray(data.results)) {
+      tbody.innerHTML = data.results.map(res => {
+        let subjectName = "";
+        if (res.subject && typeof res.subject === "object" && res.subject.name) {
+          subjectName = res.subject.name;
+        } else if (typeof res.subject === "string") {
+          subjectName = res.subject;
+        } else if (res.subject_name) {
+          subjectName = res.subject_name;
+        }
+
+        const ca1 = parseFloat(res.ca1_score || 0);
+        const ca2 = parseFloat(res.ca2_score || 0);
+        const mid = parseFloat(res.midterm_score || 0);
+        const exam = parseFloat(res.exam_score || 0);
+        const total = ca1 + ca2 + mid + exam;
+        const gradePoint = parseFloat(res.grade_point || 0);
+        totalScore += total;
+        totalGradePoints += gradePoint;
+        subjectCount++;
+
+        return `
+          <tr>
+            <td>${subjectName}</td>
+            <td>${ca1 + ca2}</td>
+            <td>${mid}</td>
+            <td>${exam}</td>
+            <td>${res.total !== undefined ? res.total : total}</td>
+            <td>${res.grade || ""}</td>
+            <td>${res.remarks || res.remark || ""}</td>
+            <td>${res.grade_point || ""}</td>
+            <td>${res.teacher_comment || res.comment || ""}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    const maxTotal = subjectCount * maxPerSubject;
+    const avgScore = subjectCount > 0 ? (totalScore / subjectCount) : 0;
+    const gpa = subjectCount > 0 ? (totalGradePoints / subjectCount) : 0;
+
+    // Auto-grade based on average score
+    let perfGrade = "";
+    if (avgScore >= 70) perfGrade = "A (Excellent)";
+    else if (avgScore >= 60) perfGrade = "B (Very Good)";
+    else if (avgScore >= 50) perfGrade = "C (Good)";
+    else if (avgScore >= 45) perfGrade = "D (Pass)";
+    else if (avgScore >= 40) perfGrade = "E (Poor)";
+    else perfGrade = "F (Fail)";
+
+    // Auto-remark based on GPA
+    let gpaRemark = "";
+    if (gpa >= 4.5) gpaRemark = "Excellent";
+    else if (gpa >= 3.5) gpaRemark = "Very Good";
+    else if (gpa >= 2.5) gpaRemark = "Good";
+    else if (gpa >= 1.5) gpaRemark = "Pass";
+    else if (gpa > 0) gpaRemark = "Poor";
+    else gpaRemark = "Fail";
+
+    document.getElementById("stuTotalScore").innerText = `${totalScore} / ${maxTotal}`;
+    document.getElementById("stuAverage").innerText = `${avgScore.toFixed(2)}%`;
+    document.getElementById("stuGPA").innerText = gpa.toFixed(2);
+    document.getElementById("perfGrade").innerText = perfGrade;
+    document.getElementById("resultSummary").innerText = gpaRemark;
+
+    // Fill skills tables if available
+    if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
+      const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
+    }
+    if (data.psychomotorSkills && Array.isArray(data.psychomotorSkills)) {
+      const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
+      document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
+    }
+    if (data.attendance && Array.isArray(data.attendance)) {
+      const rows = data.attendance.map(a => `<tr><td>${a.label}</td><td>${a.value}</td></tr>`).join('');
+      document.querySelector("#attendanceTable tbody").innerHTML = rows;
+    }
+
+    document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
 
-  if (data.student) {
-    document.getElementById("stuName").innerText = data.student.name || "";
-    document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
-    document.getElementById("stuGender").innerText = data.student.gender || "";
-    document.getElementById("stuDOB").innerText = formatDate(data.student.dob || data.student.DOB || "");
-    document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || "";
-    document.getElementById("stuClass").innerText = data.class || "";
-    if (data.student.age) document.getElementById("stuAge").innerText = data.student.age;
-  } else {
-    document.getElementById("stuRegNo").innerText = data.regNo || "";
-    document.getElementById("stuClass").innerText = data.class || "";
-  }
-
-  if (data.classSize) document.getElementById("classSize").innerText = data.classSize;
-  if (data.numSubjects) document.getElementById("numSubjects").innerText = data.numSubjects;
-  if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
-  if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
-  if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
-
-  const tbody = document.querySelector("#resultsTable tbody");
-  let totalScore = 0;
-  let totalGradePoints = 0;
-  let subjectCount = 0;
-  const maxPerSubject = 100;
-
-  if (tbody && Array.isArray(data.results)) {
-    tbody.innerHTML = data.results.map(res => {
-      const ca1 = parseFloat(res.ca1_score || 0);
-      const ca2 = parseFloat(res.ca2_score || 0);
-      const mid = parseFloat(res.midterm_score || 0);
-      const exam = parseFloat(res.exam_score || 0);
-      const total = ca1 + ca2 + mid + exam;
-
-      const gradePoint = parseFloat(res.grade_point || 0);
-      totalScore += total;
-      totalGradePoints += gradePoint;
-      subjectCount++;
-
-      return `
-        <tr>
-          <td>${res.subject || ""}</td>
-          <td>${ca1 + ca2}</td>
-          <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
-          <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
-          <td>${res.total !== undefined ? res.total : total}</td>
-          <td>${res.grade || ""}</td>
-          <td>${res.remarks || res.remark || ""}</td>
-          <td>${res.grade_point || ""}</td>
-          <td>${res.teacher_comment || res.comment || ""}</td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  const maxTotal = subjectCount * maxPerSubject;
-  const avgScore = subjectCount > 0 ? (totalScore / subjectCount) : 0;
-  const gpa = subjectCount > 0 ? (totalGradePoints / subjectCount) : 0;
-
-  // Auto-grade based on average score
-  let perfGrade = "";
-  if (avgScore >= 70) perfGrade = "A (Excellent)";
-  else if (avgScore >= 60) perfGrade = "B (Very Good)";
-  else if (avgScore >= 50) perfGrade = "C (Good)";
-  else if (avgScore >= 45) perfGrade = "D (Pass)";
-  else if (avgScore >= 40) perfGrade = "E (Poor)";
-  else perfGrade = "F (Fail)";
-
-  // Auto-remark based on GPA
-  let gpaRemark = "";
-  if (gpa >= 4.5) gpaRemark = "Excellent";
-  else if (gpa >= 3.5) gpaRemark = "Very Good";
-  else if (gpa >= 2.5) gpaRemark = "Good";
-  else if (gpa >= 1.5) gpaRemark = "Pass";
-  else if (gpa > 0) gpaRemark = "Poor";
-  else gpaRemark = "Fail";
-
-  document.getElementById("stuTotalScore").innerText = `${totalScore} / ${maxTotal}`;
-  document.getElementById("stuAverage").innerText = `${avgScore.toFixed(2)}%`;
-  document.getElementById("stuGPA").innerText = gpa.toFixed(2);
-  document.getElementById("perfGrade").innerText = perfGrade;
-  document.getElementById("resultSummary").innerText = gpaRemark;
-
-  if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
-    const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
-    document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
-  }
-  if (data.psychomotorSkills && Array.isArray(data.psychomotorSkills)) {
-    const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
-    document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
-  }
-  if (data.attendance && Array.isArray(data.attendance)) {
-    const rows = data.attendance.map(a => `<tr><td>${a.label}</td><td>${a.value}</td></tr>`).join('');
-    document.querySelector("#attendanceTable tbody").innerHTML = rows;
-  }
-
-  document.getElementById("printDate").innerText = getFormattedPrintDate();
-}
-
-  
   window.addEventListener('DOMContentLoaded', fillReport);
 
-    // jsPDF download logic
   async function downloadPDF() {
-  const reportDom = document.getElementById('reportCardDom');
-  document.querySelector('.no-print-btn').style.visibility = 'hidden';
-  await new Promise(r => setTimeout(r, 250));
-  html2canvas(reportDom, {scale:2, useCORS:true, backgroundColor: "#fff"}).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new window.jspdf.jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: [297, 210] // height, width (A4)
+    const reportDom = document.getElementById('reportCardDom');
+    document.querySelector('.no-print-btn').style.visibility = 'hidden';
+    await new Promise(r => setTimeout(r, 250));
+    html2canvas(reportDom, {scale:2, useCORS:true, backgroundColor: "#fff"}).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new window.jspdf.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [297, 210]
+      });
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgOriginalWidth = canvas.width;
+      const imgOriginalHeight = canvas.height;
+      const scale = Math.min(pageWidth / imgOriginalWidth, pageHeight / imgOriginalHeight);
+      const imgWidth = imgOriginalWidth * scale;
+      const imgHeight = imgOriginalHeight * scale;
+      const xOffset = (pageWidth - imgWidth) / 2;
+      const yOffset = (pageHeight - imgHeight) / 2;
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+      pdf.save('ReportCard.pdf');
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
+    }).catch(e=>{
+      alert("Could not generate PDF: " + e.message);
+      document.querySelector('.no-print-btn').style.visibility = 'visible';
     });
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const imgOriginalWidth = canvas.width;
-    const imgOriginalHeight = canvas.height;
-    const scale = Math.min(pageWidth / imgOriginalWidth, pageHeight / imgOriginalHeight);
-    const imgWidth = imgOriginalWidth * scale;
-    const imgHeight = imgOriginalHeight * scale;
-    const xOffset = (pageWidth - imgWidth) / 2;
-    const yOffset = (pageHeight - imgHeight) / 2;
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
-    pdf.save('ReportCard.pdf');
-    document.querySelector('.no-print-btn').style.visibility = 'visible';
-  }).catch(e=>{
-    alert("Could not generate PDF: " + e.message);
-    document.querySelector('.no-print-btn').style.visibility = 'visible';
-  });
-}
+  }
 </script>
-
 </body>
 </html>

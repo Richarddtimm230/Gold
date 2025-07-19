@@ -1,14 +1,10 @@
-// Converted to Mongoose-compatible version (patched _id usage)
+// Complete Result API using Mongoose (fully Firestore-free)
 const express = require('express');
 const router = express.Router();
 
-// Mongoose models
 const Result = require('../models/Result');
 const Student = require('../models/Student');
-const Session = require('../models/Session');
-const Term = require('../models/Term');
-const Class = require('../models/Class');
-const Subject = require('../models/Subject');
+
 
 async function findOrCreateByName(Model, name, extra = {}) {
   if (!name) return null;
@@ -63,8 +59,6 @@ router.post('/upload', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
-
 
 router.get('/', async (req, res) => {
   try {

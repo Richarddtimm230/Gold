@@ -1,7 +1,7 @@
 // middleware/studentAuthMiddleware.js
 
 const jwt = require('jsonwebtoken');
-const { Student } = require('../models/Entities');
+const Student = require('../models/Student');
 
 async function studentAuthMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];

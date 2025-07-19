@@ -36,24 +36,31 @@ router.post('/upload', async (req, res) => {
     const classObj = await findOrCreateByName(Class, className);
     const subjectObj = await findOrCreateByName(Subject, subject);
 
+
     const insertedResults = [];
     for (const row of results) {
-      const student = await findOrCreateStudent(row, classObj?._id);
-      const resultData = {
-        student: student?._id,
-        session: sessionObj?._id,
-        term: termObj?._id,
-        class: classObj?._id,
-        subject: subjectObj?._id,
-        grade: row.grade,
-        remarks: row.remarks,
-        status: row.status || 'Draft'
-      };
-      resultData[`${resultType}_score`] = row.score;
-      const result = new Result(resultData);
-      await result.save();
-      insertedResults.push(result);
-    }
+  const student = await findOrCreateStudent(row, classObj?._id);
+  if (!student || !sessionObj || !termObj || !classObj || !subjectObj) {
+    throw new Error(`Missing required reference: student=${!!student}, session=${!!sessionObj}, term=${!!termObj}, class=${!!classObj}, subject=${!!subjectObj}`);
+  }
+
+  const resultData = {
+    student: student._id,
+    session: sessionObj._id,
+    term: termObj._id,
+    class: classObj._id,
+    subject: subjectObj._id,
+    grade: row.grade,
+    remarks: row.remarks,
+    status: row.status || 'Draft'
+  };
+
+  resultData[`${resultType}_score`] = row.score;
+  const result = new Result(resultData);
+  await result.save();
+  insertedResults.push(result);
+}
+
     res.json({ success: true, inserted: insertedResults.length, results: insertedResults });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

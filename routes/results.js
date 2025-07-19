@@ -1,4 +1,4 @@
-// Converted to Mongoose-compatible version (replace Firestore with Mongoose models)
+// Converted to Mongoose-compatible version (patched _id usage)
 const express = require('express');
 const router = express.Router();
 
@@ -42,13 +42,13 @@ router.post('/upload', async (req, res) => {
 
     const insertedResults = [];
     for (const row of results) {
-      const student = await findOrCreateStudent(row, classObj._id);
+      const student = await findOrCreateStudent(row, classObj?._id);
       const resultData = {
-        student: student._id,
-        session: sessionObj._id,
-        term: termObj._id,
-        class: classObj._id,
-        subject: subjectObj._id,
+        student: student?._id,
+        session: sessionObj?._id,
+        term: termObj?._id,
+        class: classObj?._id,
+        subject: subjectObj?._id,
         grade: row.grade,
         remarks: row.remarks,
         status: row.status || 'Draft'
@@ -63,6 +63,8 @@ router.post('/upload', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
 
 router.get('/', async (req, res) => {
   try {

@@ -1,80 +1,78 @@
 const express = require('express');
 const router = express.Router();
 
-// Firestore instance
-const db = require('../firestore');
-
-// Collection helpers
-const resultCollection = () => db.collection('results');
-const studentCollection = () => db.collection('students');
-const sessionCollection = () => db.collection('sessions');
-const termCollection = () => db.collection('terms');
-const classCollection = () => db.collection('classes');
-const subjectCollection = () => db.collection('subjects');
+const mongoose = require('mongoose');
+const Result = require('../models/Result');
+const Student = require('../models/Student');
 
 // Helper: Find or create by name for Session, Term, Class, Subject
-async function findOrCreateByName(collection, name, extra = {}) {
-  if (!name) return null;
-  const snap = await collection().where('name', '==', name).limit(1).get();
-  if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-  const docRef = await collection().add({ name, ...extra });
-  return { id: docRef.id, name, ...extra };
+async function findOrCreate(model, field, value, extra = {}) {
+  if (!value) return null;
+  let doc = await model.findOne({ [field]: value });
+  if (doc) return doc;
+  doc = await model.create({ [field]: value, ...extra });
+  return doc;
 }
 
 // Helper: Find or create student by student_id
-async function findOrCreateStudent(row, classId) {
+async function findOrCreateStudent(row, className) {
   if (!row.student_id) return null;
-  const snap = await studentCollection().where('student_id', '==', row.student_id).limit(1).get();
-  if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-  const docRef = await studentCollection().add({
+  let student = await Student.findOne({ student_id: row.student_id });
+  if (student) return student;
+  student = await Student.create({
     student_id: row.student_id,
-    name: row.student_name,
-    class: classId || null
+    surname: row.surname || "",
+    firstname: row.firstname || "",
+    class: className || "",
+    name: row.student_name || (row.firstname || "") + " " + (row.surname || ""),
+    regNo: row.regNo || "",
   });
-  return { id: docRef.id, student_id: row.student_id, name: row.student_name, class: classId || null };
+  return student;
 }
 
 // POST /api/results/upload - Bulk/manual upload of student results
 router.post('/upload', async (req, res) => {
   try {
     const { session, term, class: className, subject, resultType, results } = req.body;
-    // Find or create session, term, class, subject
-    const sessionObj = await findOrCreateByName(sessionCollection, session);
-    const termObj = await findOrCreateByName(termCollection, term);
-    const classObj = await findOrCreateByName(classCollection, className);
-    const subjectObj = await findOrCreateByName(subjectCollection, subject);
-
     let insertedResults = [];
     for (const row of results) {
-      let student = await findOrCreateStudent(row, classObj.id);
+      // Find or create student
+      let student = await findOrCreateStudent(row, className);
 
-      // Build the result object by type
-      let newResult = {
-        student: student.id,
-        session: sessionObj.id,
-        term: termObj.id,
-        class: classObj.id,
-        subject: subjectObj.id,
+      // Build subjects array for Result model
+      const subjectEntry = {
+        name: subject,
+        score: row.score,
         grade: row.grade,
         remarks: row.remarks,
-        status: row.status || 'Draft'
       };
+      // Support resultType (exam, ca1, ca2, midterm)
+      if (resultType === "exam") subjectEntry.exam_score = row.score;
+      else if (resultType === "ca1") subjectEntry.ca1_score = row.score;
+      else if (resultType === "ca2") subjectEntry.ca2_score = row.score;
+      else if (resultType === "midterm") subjectEntry.midterm_score = row.score;
 
-      // Store resultType-specific score field
-      if (resultType === "exam") {
-        newResult.exam_score = row.score;
-      } else if (resultType === "ca1") {
-        newResult.ca1_score = row.score;
-      } else if (resultType === "ca2") {
-        newResult.ca2_score = row.score;
-      } else if (resultType === "midterm") {
-        newResult.midterm_score = row.score;
-      } else {
-        newResult.score = row.score;
-      }
-
-      const resultRef = await resultCollection().add(newResult);
-      insertedResults.push({ id: resultRef.id, ...newResult });
+      // Compose the result
+      const newResult = await Result.create({
+        student_id: student.student_id,
+        regNo: student.regNo,
+        session: session,
+        term: term,
+        class: className,
+        classArm: row.classArm || "",
+        subjects: [subjectEntry],
+        total: row.total || row.score || 0,
+        average: row.average || 0,
+        position: row.position || 0,
+        comments: row.remarks,
+        teacherRemarks: row.teacherRemarks || "",
+        principalRemarks: row.principalRemarks || "",
+        published: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: row.status || "Draft",
+      });
+      insertedResults.push(newResult);
     }
     res.json({ success: true, inserted: insertedResults.length, results: insertedResults });
   } catch (err) {
@@ -86,60 +84,32 @@ router.post('/upload', async (req, res) => {
 // GET /api/results - Fetch all results with populated references
 router.get('/', async (req, res) => {
   try {
-    // Optional query params: student_id, class, session, term, subject
-    let studentId, classId, sessionId, termId, subjectId;
+    const { student_id, class: className, session, term, subject } = req.query;
+    let query = {};
+    if (student_id) query.student_id = student_id;
+    if (className) query.class = className;
+    if (session) query.session = session;
+    if (term) query.term = term;
+    if (subject) query['subjects.name'] = subject;
 
-    if (req.query.student_id) {
-      const snap = await studentCollection().where('student_id', '==', req.query.student_id).limit(1).get();
-      if (!snap.empty) studentId = snap.docs[0].id;
-    }
-    if (req.query.class) {
-      const snap = await classCollection().where('name', '==', req.query.class).limit(1).get();
-      if (!snap.empty) classId = snap.docs[0].id;
-    }
-    if (req.query.session) {
-      const snap = await sessionCollection().where('name', '==', req.query.session).limit(1).get();
-      if (!snap.empty) sessionId = snap.docs[0].id;
-    }
-    if (req.query.term) {
-      const snap = await termCollection().where('name', '==', req.query.term).limit(1).get();
-      if (!snap.empty) termId = snap.docs[0].id;
-    }
-    if (req.query.subject) {
-      const snap = await subjectCollection().where('name', '==', req.query.subject).limit(1).get();
-      if (!snap.empty) subjectId = snap.docs[0].id;
-    }
+    const results = await Result.find(query).sort({ createdAt: -1 });
 
-    let query = resultCollection();
-    if (studentId) query = query.where('student', '==', studentId);
-    if (classId) query = query.where('class', '==', classId);
-    if (sessionId) query = query.where('session', '==', sessionId);
-    if (termId) query = query.where('term', '==', termId);
-    if (subjectId) query = query.where('subject', '==', subjectId);
-
-    const snap = await query.orderBy('__name__', 'desc').get();
-    const results = [];
-    for (const doc of snap.docs) {
-      const result = doc.data();
-      result.id = doc.id;
-
-      // Populate references
-      const [studentDoc, sessionDoc, termDoc, classDoc, subjectDoc] = await Promise.all([
-        result.student ? studentCollection().doc(result.student).get() : null,
-        result.session ? sessionCollection().doc(result.session).get() : null,
-        result.term ? termCollection().doc(result.term).get() : null,
-        result.class ? classCollection().doc(result.class).get() : null,
-        result.subject ? subjectCollection().doc(result.subject).get() : null,
-      ]);
-      result.student = studentDoc && studentDoc.exists ? { id: studentDoc.id, ...studentDoc.data() } : null;
-      result.session = sessionDoc && sessionDoc.exists ? { id: sessionDoc.id, ...sessionDoc.data() } : null;
-      result.term = termDoc && termDoc.exists ? { id: termDoc.id, ...termDoc.data() } : null;
-      result.class = classDoc && classDoc.exists ? { id: classDoc.id, ...classDoc.data() } : null;
-      result.subject = subjectDoc && subjectDoc.exists ? { id: subjectDoc.id, ...subjectDoc.data() } : null;
-
-      results.push(result);
-    }
-    res.json(results);
+    // Populate student details
+    const populatedResults = await Promise.all(results.map(async (result) => {
+      let student = await Student.findOne({ student_id: result.student_id });
+      return {
+        ...result.toObject(),
+        student: student ? {
+          student_id: student.student_id,
+          name: (student.firstname || "") + " " + (student.surname || ""),
+          regNo: student.regNo,
+          gender: student.gender,
+          dob: student.dob,
+          email: student.studentEmail,
+        } : null
+      };
+    }));
+    res.json(populatedResults);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -148,28 +118,22 @@ router.get('/', async (req, res) => {
 // GET /api/results/:id - Fetch a single result by ID
 router.get('/:id', async (req, res) => {
   try {
-    const doc = await resultCollection().doc(req.params.id).get();
-    if (!doc.exists) {
-      return res.status(404).json({ error: 'Result not found' });
-    }
-    const result = doc.data();
-    result.id = doc.id;
+    const result = await Result.findById(req.params.id);
+    if (!result) return res.status(404).json({ error: 'Result not found' });
 
-    // Populate references
-    const [studentDoc, sessionDoc, termDoc, classDoc, subjectDoc] = await Promise.all([
-      result.student ? studentCollection().doc(result.student).get() : null,
-      result.session ? sessionCollection().doc(result.session).get() : null,
-      result.term ? termCollection().doc(result.term).get() : null,
-      result.class ? classCollection().doc(result.class).get() : null,
-      result.subject ? subjectCollection().doc(result.subject).get() : null,
-    ]);
-    result.student = studentDoc && studentDoc.exists ? { id: studentDoc.id, ...studentDoc.data() } : null;
-    result.session = sessionDoc && sessionDoc.exists ? { id: sessionDoc.id, ...sessionDoc.data() } : null;
-    result.term = termDoc && termDoc.exists ? { id: termDoc.id, ...termDoc.data() } : null;
-    result.class = classDoc && classDoc.exists ? { id: classDoc.id, ...classDoc.data() } : null;
-    result.subject = subjectDoc && subjectDoc.exists ? { id: subjectDoc.id, ...subjectDoc.data() } : null;
-
-    res.json(result);
+    let student = await Student.findOne({ student_id: result.student_id });
+    const output = {
+      ...result.toObject(),
+      student: student ? {
+        student_id: student.student_id,
+        name: (student.firstname || "") + " " + (student.surname || ""),
+        regNo: student.regNo,
+        gender: student.gender,
+        dob: student.dob,
+        email: student.studentEmail,
+      } : null
+    };
+    res.json(output);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -179,30 +143,23 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const update = req.body;
-    const docRef = resultCollection().doc(req.params.id);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: 'Result not found' });
-    }
-    await docRef.update(update);
-    const updated = (await docRef.get()).data();
-    updated.id = req.params.id;
+    update.updatedAt = new Date();
+    const result = await Result.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!result) return res.status(404).json({ error: 'Result not found' });
 
-    // Populate references
-    const [studentDoc, sessionDoc, termDoc, classDoc, subjectDoc] = await Promise.all([
-      updated.student ? studentCollection().doc(updated.student).get() : null,
-      updated.session ? sessionCollection().doc(updated.session).get() : null,
-      updated.term ? termCollection().doc(updated.term).get() : null,
-      updated.class ? classCollection().doc(updated.class).get() : null,
-      updated.subject ? subjectCollection().doc(updated.subject).get() : null,
-    ]);
-    updated.student = studentDoc && studentDoc.exists ? { id: studentDoc.id, ...studentDoc.data() } : null;
-    updated.session = sessionDoc && sessionDoc.exists ? { id: sessionDoc.id, ...sessionDoc.data() } : null;
-    updated.term = termDoc && termDoc.exists ? { id: termDoc.id, ...termDoc.data() } : null;
-    updated.class = classDoc && classDoc.exists ? { id: classDoc.id, ...classDoc.data() } : null;
-    updated.subject = subjectDoc && subjectDoc.exists ? { id: subjectDoc.id, ...subjectDoc.data() } : null;
-
-    res.json(updated);
+    let student = await Student.findOne({ student_id: result.student_id });
+    const output = {
+      ...result.toObject(),
+      student: student ? {
+        student_id: student.student_id,
+        name: (student.firstname || "") + " " + (student.surname || ""),
+        regNo: student.regNo,
+        gender: student.gender,
+        dob: student.dob,
+        email: student.studentEmail,
+      } : null
+    };
+    res.json(output);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -212,15 +169,10 @@ router.put('/:id', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   try {
     const update = req.body;
-    const docRef = resultCollection().doc(req.params.id);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: 'Result not found' });
-    }
-    await docRef.update(update);
-    const updated = (await docRef.get()).data();
-    updated.id = req.params.id;
-    res.json(updated);
+    update.updatedAt = new Date();
+    const result = await Result.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!result) return res.status(404).json({ error: 'Result not found' });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -229,15 +181,13 @@ router.patch('/:id', async (req, res) => {
 // POST /api/results/:id/publish - Set status = "Published"
 router.post('/:id/publish', async (req, res) => {
   try {
-    const docRef = resultCollection().doc(req.params.id);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: 'Result not found' });
-    }
-    await docRef.update({ status: 'Published' });
-    const updated = (await docRef.get()).data();
-    updated.id = req.params.id;
-    res.json(updated);
+    const result = await Result.findByIdAndUpdate(
+      req.params.id,
+      { published: true, status: "Published", publishedAt: new Date(), updatedAt: new Date() },
+      { new: true }
+    );
+    if (!result) return res.status(404).json({ error: 'Result not found' });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -246,20 +196,15 @@ router.post('/:id/publish', async (req, res) => {
 // DELETE /api/results/:id - Delete a result
 router.delete('/:id', async (req, res) => {
   try {
-    const docRef = resultCollection().doc(req.params.id);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: 'Result not found' });
-    }
-    await docRef.delete();
+    const result = await Result.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).json({ error: 'Result not found' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ...existing code above...
-
+// GET /api/results/check - Result check endpoint
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
@@ -267,17 +212,11 @@ router.get('/check', async (req, res) => {
       return res.status(400).json({ error: 'Missing required parameters.' });
 
     // Find student by regNo or student_id (case-insensitive)
-    let studentSnap = await studentCollection().where('regNo', '==', regNo).limit(1).get();
-    if (studentSnap.empty) {
-      studentSnap = await studentCollection().where('student_id', '==', regNo).limit(1).get();
-    }
-    if (studentSnap.empty) {
-      return res.status(404).json({ error: 'Student not found.' });
-    }
-    const studentDoc = studentSnap.docs[0];
-    const student = studentDoc.data();
+    let student = await Student.findOne({ regNo });
+    if (!student) student = await Student.findOne({ student_id: regNo });
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
 
-    // Scratch card logic: use student's scratchCard if set, else default to ABCD
+    // Scratch card logic
     const defaultScratch = 'ABCD';
     const studentScratch = student.scratchCard && student.scratchCard.trim().length > 0
       ? student.scratchCard.trim().toUpperCase()
@@ -286,53 +225,31 @@ router.get('/check', async (req, res) => {
       return res.status(401).json({ error: 'Invalid scratch card' });
     }
 
-    // Lookup class, session, term by name to get IDs
-    const classSnap = await classCollection().where('name', '==', className).limit(1).get();
-    if (classSnap.empty) return res.status(404).json({ error: 'Class not found.' });
-    const classId = classSnap.docs[0].id;
+    // Query results for the student, class, session, term, published
+    const results = await Result.find({
+      student_id: student.student_id,
+      class: className,
+      session: session,
+      term: term,
+      published: true,
+      status: "Published"
+    });
 
-    const sessionSnap = await sessionCollection().where('name', '==', session).limit(1).get();
-    if (sessionSnap.empty) return res.status(404).json({ error: 'Session not found.' });
-    const sessionId = sessionSnap.docs[0].id;
+    // Compose table of subjects & scores
+    const formattedResults = results.flatMap(result =>
+      (result.subjects || []).map(subject => ({
+        subject: subject.name || "",
+        ca1_score: subject.ca1_score || "",
+        ca2_score: subject.ca2_score || "",
+        midterm_score: subject.midterm_score || "",
+        exam_score: subject.exam_score || "",
+        total: subject.total || subject.score || "",
+        grade: subject.grade || "",
+        remark: subject.remarks || ""
+      }))
+    );
 
-    const termSnap = await termCollection().where('name', '==', term).limit(1).get();
-    if (termSnap.empty) return res.status(404).json({ error: 'Term not found.' });
-    const termId = termSnap.docs[0].id;
-
-    // Query results for the IDs and status 'Published'
-    let query = resultCollection()
-      .where('student', '==', studentDoc.id)
-      .where('class', '==', classId)
-      .where('session', '==', sessionId)
-      .where('term', '==', termId)
-      .where('status', '==', 'Published'); // <<--- Only show published
-
-    const snap = await query.get();
-
-    // Prepare results for table
-    const results = [];
-    for (const doc of snap.docs) {
-      const r = doc.data();
-      let subjectName = '';
-      if (r.subject) {
-        try {
-          const subj = await db.collection('subjects').doc(r.subject).get();
-          if (subj.exists) subjectName = subj.data().name;
-        } catch {}
-      }
-      results.push({
-        subject: subjectName || r.subject_name || '',
-        ca1_score: r.ca1_score || '',
-        ca2_score: r.ca2_score || '',
-        midterm_score: r.midterm_score || '',
-        exam_score: r.exam_score || '',
-        total: (['ca1_score','ca2_score','midterm_score','exam_score'].map(k=>parseFloat(r[k]||0)).reduce((a,b)=>a+b,0)) || r.score || '',
-        grade: r.grade || '',
-        remark: r.remarks || ''
-      });
-    }
-
-    // ==== PATCH: Fetch skills report for the session/term ====
+    // Skills report for the session/term
     let skillsReport = null;
     if (Array.isArray(student.skillsReports)) {
       skillsReport = student.skillsReports.find(r =>
@@ -341,20 +258,18 @@ router.get('/check', async (req, res) => {
       );
     }
 
-    // ==== PATCH: Calculate class size ====
-    const classmatesSnap = await resultCollection()
-      .where('class', '==', classId)
-      .where('session', '==', sessionId)
-      .where('term', '==', termId)
-      .where('status', '==', 'Published')
-      .get();
-    const studentIds = new Set();
-    classmatesSnap.forEach(doc => {
-      studentIds.add(doc.data().student);
+    // Calculate class size
+    const classmates = await Result.find({
+      class: className,
+      session: session,
+      term: term,
+      published: true,
+      status: "Published"
     });
+    const studentIds = new Set(classmates.map(r => r.student_id));
     const classSize = studentIds.size;
 
-    // ==== PATCH: Add extra student info ====
+    // Extra student info
     const studentInfo = {
       name: student.name || student.surname + ' ' + student.firstname,
       regNo: student.regNo,
@@ -364,11 +279,10 @@ router.get('/check', async (req, res) => {
       age: student.age
     };
 
-    // ==== PATCH: Compose response ====
-    if (!results.length) return res.status(404).json({ error: 'No result found.' });
+    if (!formattedResults.length) return res.status(404).json({ error: 'No result found.' });
 
     res.json({
-      results,
+      results: formattedResults,
       skillsReport: skillsReport || null,
       classSize,
       student: studentInfo
@@ -379,4 +293,3 @@ router.get('/check', async (req, res) => {
 });
 
 module.exports = router;
-

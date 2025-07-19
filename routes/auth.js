@@ -3,8 +3,10 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Firestore DB instance (adjust if you use app.locals or another export)
-const db = require('../firestore');
+// Mongoose models
+const User = require('../models/User');
+const Staff = require('../models/Staff');
+const Student = require('../models/Student');
 
 // --- UNIFIED LOGIN ROUTE ---
 router.post('/login', async (req, res) => {
@@ -14,108 +16,90 @@ router.post('/login', async (req, res) => {
   }
   try {
     // 1. Try User (admin/superadmin)
-    let userDoc = null;
-    let userSnap = null;
+    let user = null;
     if (email) {
-      userSnap = await db.collection('users').where('email', '==', email).limit(1).get();
+      user = await User.findOne({ email });
     } else if (regNo) {
-      userSnap = await db.collection('users').where('regNo', '==', regNo).limit(1).get();
+      user = await User.findOne({ regNo });
     }
-    if (userSnap && !userSnap.empty) {
-      userDoc = userSnap.docs[0];
-      const user = userDoc.data();
-      if (await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign(
-          {
-            id: userDoc.id,
-            role: user.role,
-            email: user.email,
-            regNo: user.regNo || null
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: '7d' }
-        );
-        return res.json({
-          token,
-          user: {
-            id: userDoc.id,
-            name: user.name,
-            email: user.email,
-            regNo: user.regNo || null,
-            role: user.role
-          }
-        });
-      }
+    if (user && await bcrypt.compare(password, user.password)) {
+      const token = jwt.sign(
+        {
+          id: user._id,
+          role: user.role,
+          email: user.email,
+          regNo: user.regNo || null
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          regNo: user.regNo || null,
+          role: user.role
+        }
+      });
     }
 
     // 2. Try Staff (by login_email or email)
-    let staffDoc = null;
-    let staffSnap = null;
+    let staff = null;
     if (email) {
-      staffSnap = await db.collection('staff').where('login_email', '==', email).limit(1).get();
-      if (staffSnap.empty) {
-        staffSnap = await db.collection('staff').where('email', '==', email).limit(1).get();
-      }
+      staff = await Staff.findOne({ login_email: email }) || await Staff.findOne({ email });
     }
     // Staff can ONLY login with email (not regNo)
-    if (staffSnap && !staffSnap.empty) {
-      staffDoc = staffSnap.docs[0];
-      const staff = staffDoc.data();
-      if (await bcrypt.compare(password, staff.login_password)) {
-        const token = jwt.sign(
-          {
-            id: staffDoc.id,
-            role: staff.access_level || 'staff',
-            email: staff.login_email || staff.email
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: '7d' }
-        );
-        return res.json({
-          token,
-          user: {
-            id: staffDoc.id,
-            name: `${staff.first_name} ${staff.last_name}`,
-            email: staff.login_email || staff.email,
-            role: staff.access_level || 'staff',
-            department: staff.department,
-            designation: staff.designation
-          }
-        });
-      }
+    if (staff && await bcrypt.compare(password, staff.login_password)) {
+      const token = jwt.sign(
+        {
+          id: staff._id,
+          role: staff.access_level || 'staff',
+          email: staff.login_email || staff.email
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        token,
+        user: {
+          id: staff._id,
+          name: `${staff.first_name} ${staff.last_name}`,
+          email: staff.login_email || staff.email,
+          role: staff.access_level || 'staff',
+          department: staff.department,
+          designation: staff.designation
+        }
+      });
     }
 
     // 3. Try Student (by regNo or studentEmail)
-    let studentDoc = null;
-    let studentSnap = null;
+    let student = null;
     if (regNo) {
-      studentSnap = await db.collection('students').where('regNo', '==', regNo).limit(1).get();
+      student = await Student.findOne({ regNo });
     } else if (email) {
-      studentSnap = await db.collection('students').where('studentEmail', '==', email).limit(1).get();
+      student = await Student.findOne({ studentEmail: email });
     }
-    if (studentSnap && !studentSnap.empty) {
-      studentDoc = studentSnap.docs[0];
-      const student = studentDoc.data();
-      if (await bcrypt.compare(password, student.password)) {
-        const token = jwt.sign(
-          {
-            id: studentDoc.id,
-            role: 'student',
-            regNo: student.regNo
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: '7d' }
-        );
-        return res.json({
-          token,
-          user: {
-            id: studentDoc.id,
-            name: `${student.firstname} ${student.surname}`,
-            regNo: student.regNo,
-            role: 'student'
-          }
-        });
-      }
+    if (student && await bcrypt.compare(password, student.password)) {
+      const token = jwt.sign(
+        {
+          id: student._id,
+          role: 'student',
+          regNo: student.regNo
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        token,
+        user: {
+          id: student._id,
+          name: `${student.firstname} ${student.surname}`,
+          regNo: student.regNo,
+          role: 'student'
+        }
+      });
     }
 
     // If none matched, invalid credentials
@@ -137,11 +121,10 @@ async function authMiddleware(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 1. Try fetching user (admin/superadmin)
-    let userDoc = await db.collection('users').doc(decoded.id).get();
-    if (userDoc.exists) {
-      const user = userDoc.data();
+    let user = await User.findById(decoded.id);
+    if (user) {
       req.user = {
-        id: userDoc.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         regNo: user.regNo || null,
@@ -150,11 +133,10 @@ async function authMiddleware(req, res, next) {
       return next();
     }
     // 2. Try fetching staff
-    let staffDoc = await db.collection('staff').doc(decoded.id).get();
-    if (staffDoc.exists) {
-      const staff = staffDoc.data();
+    let staff = await Staff.findById(decoded.id);
+    if (staff) {
       req.user = {
-        id: staffDoc.id,
+        id: staff._id,
         name: `${staff.first_name} ${staff.last_name}`,
         email: staff.login_email || staff.email,
         role: staff.access_level || 'staff',
@@ -164,11 +146,10 @@ async function authMiddleware(req, res, next) {
       return next();
     }
     // 3. Fallback: Try fetching student
-    let studentDoc = await db.collection('students').doc(decoded.id).get();
-    if (studentDoc.exists) {
-      const student = studentDoc.data();
+    let student = await Student.findById(decoded.id);
+    if (student) {
       req.user = {
-        id: studentDoc.id,
+        id: student._id,
         name: `${student.firstname} ${student.surname}`,
         regNo: student.regNo,
         role: 'student'

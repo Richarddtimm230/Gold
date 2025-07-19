@@ -1,42 +1,103 @@
 const mongoose = require('mongoose');
 
+const guardianSchema = new mongoose.Schema({
+  name: String,
+  relationship: String,
+  phone: String,
+  email: String,
+  address: String,
+  occupation: String,
+});
+
+const docSchema = new mongoose.Schema({
+  label: String,
+  value: String,
+  base64: String,
+  uploadedAt: Date,
+});
+
+const academicSchema = new mongoose.Schema({
+  session: String,
+  term: String,
+  class: String,
+  subject: String,
+  score: Number,
+  grade: String,
+  remarks: String,
+  date: Date,
+});
+
+const attendanceSchema = new mongoose.Schema({
+  session: String,
+  term: String,
+  present: Number,
+  total: Number,
+  date: Date,
+});
+
+const feeSchema = new mongoose.Schema({
+  session: String,
+  term: String,
+  type: String,
+  amount: Number,
+  status: String,
+  date: Date,
+});
+
+const skillsReportSchema = new mongoose.Schema({
+  session: String,
+  term: String,
+  skills: mongoose.Schema.Types.Mixed, // e.g. { leadership: 'A', teamwork: 'B+' }
+  attendance: mongoose.Schema.Types.Mixed,
+  comment: String,
+  updatedAt: Date,
+});
+
+const hostelSchema = new mongoose.Schema({}, { strict: false }); // Flexible for hostel info
+const transportSchema = new mongoose.Schema({}, { strict: false }); // Flexible for transport info
+
 const StudentSchema = new mongoose.Schema({
-  student_id: { type: String, required: true, unique: true }, // e.g., 'STU001'
+  student_id: { type: String, unique: true, required: true },
   surname: { type: String, required: true },
   firstname: { type: String, required: true },
-  othernames: { type: String },
-  dob: { type: Date, required: true },
+  othernames: { type: String, default: '' },
+  dob: { type: String, required: true },
   gender: { type: String, required: true },
-  nationality: { type: String },
-  state: { type: String },
-  lga: { type: String },
-  address: { type: String },
-  photo: { type: String }, // Store URL or base64 string, or use Buffer for binary
-
-  regNo: { type: String, required: true, unique: true }, // Admission/Registration Number
+  nationality: { type: String, default: '' },
+  state: { type: String, default: '' },
+  lga: { type: String, default: '' },
+  address: { type: String, default: '' },
+  photoBase64: { type: String, default: '' },
+  regNo: { type: String, unique: true, required: true },
+  scratchCard: { type: String, unique: true, required: true },
   class: { type: String, required: true },
-  classArm: { type: String },
-  previousSchool: { type: String },
+  classArm: { type: String, default: '' },
+  previousSchool: { type: String, default: '' },
   admissionDate: { type: Date },
-  academicSession: { type: String },
-
+  academicSession: { type: String, default: '' },
   parentName: { type: String, required: true },
   parentRelationship: { type: String, required: true },
   parentPhone: { type: String, required: true },
-  parentEmail: { type: String },
-  parentAddress: { type: String },
-  parentOccupation: { type: String },
-
-  studentEmail: { type: String },
-  studentPhone: { type: String },
-
-  religion: { type: String },
-  bloodGroup: { type: String },
-  genotype: { type: String },
-  medical: { type: String },
-
-  password: { type: String, required: true }, // Should be hashed before saving!
-  created_at: { type: Date, default: Date.now }
+  parentEmail: { type: String, default: '' },
+  parentAddress: { type: String, default: '' },
+  parentOccupation: { type: String, default: '' },
+  studentEmail: { type: String, default: '' },
+  studentPhone: { type: String, default: '' },
+  religion: { type: String, default: '' },
+  bloodGroup: { type: String, default: '' },
+  genotype: { type: String, default: '' },
+  medical: { type: String, default: '' },
+  password: { type: String, required: true },
+  academic: [academicSchema],
+  attendance: [attendanceSchema],
+  guardians: [guardianSchema],
+  hostel: hostelSchema,
+  transport: transportSchema,
+  fees: [feeSchema],
+  docs: [docSchema],
+  skillsReports: [skillsReportSchema],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Student', StudentSchema);

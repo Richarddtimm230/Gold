@@ -239,6 +239,14 @@
             // Optional: show error, or just ignore and continue
           }
 
+// After fetching results, fetch class size
+let classSize = null;
+try {
+  const classSizeResp = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(klass)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`);
+  const classStudents = await classSizeResp.json();
+  classSize = Array.isArray(classStudents.students) ? classStudents.students.length : null;
+} catch (err) {}
+          
           // Save to previous results
           saveViewedResult({
             userId, regNo, class: klass, session, term, results: results,

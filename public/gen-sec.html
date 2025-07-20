@@ -326,29 +326,56 @@
     `).join("") : "";
   }
 
-  function downloadCurrentResult() {
+  async function fetchSkillsReportForStudent(regNo, session, term) {
+    try {
+      const skillsParams = new URLSearchParams({ session, term });
+      const resp = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report?${skillsParams}`);
+      if (resp.ok) {
+        const skillsJson = await resp.json();
+        if (Array.isArray(skillsJson.skillsReports)) {
+          return skillsJson.skillsReports.find(
+            r => (r.session || '').toLowerCase() === session.toLowerCase() &&
+                 (r.term || '').toLowerCase() === term.toLowerCase()
+          );
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  async function downloadCurrentResult() {
     const r = window._lastDisplayedResult;
     if (!r || !r.results || !r.results.length) {
       alert("No result to download. Please check a result first.");
       return;
     }
 
+    // --- Always fetch the latest skills report before building reportData ---
+    let skillsReport = r.skillsReport;
+    let studentReg = r.student?.regNo || r.regNo;
+    let session = r.session, term = r.term;
+
+    if (studentReg && session && term) {
+      const fetchedSkills = await fetchSkillsReportForStudent(studentReg, session, term);
+      if (fetchedSkills) skillsReport = fetchedSkills;
+    }
+
     let affectiveSkills = [];
     let psychomotorSkills = [];
     let attendanceArr = [];
-    let principalComment = r.principalComment || "This is an excellent result, do not rest on your oars.";
+    let principalComment = r.principalComment || skillsReport?.comment || "This is an excellent result, do not rest on your oars.";
     let principalName = "ABIODUN FESTUS ADENIYI";
     let classSize = r.classSize || 17;
 
-    if (r.skillsReport && r.skillsReport.skills) {
-      if (r.skillsReport.skills.affective) {
-        affectiveSkills = Object.entries(r.skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
+    if (skillsReport && skillsReport.skills) {
+      if (skillsReport.skills.affective) {
+        affectiveSkills = Object.entries(skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
       }
-      if (r.skillsReport.skills.psychomotor) {
-        psychomotorSkills = Object.entries(r.skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
+      if (skillsReport.skills.psychomotor) {
+        psychomotorSkills = Object.entries(skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
       }
     }
-    let att = r.attendance || r.skillsReport?.attendance || {};
+    let att = r.attendance || skillsReport?.attendance || {};
     if (att && Object.keys(att).length) {
       attendanceArr = [
         { label: "No. of School Days", value: att.total_days },

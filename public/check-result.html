@@ -368,25 +368,13 @@
           const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
           const results = await response.json();
           
-function normalize(str) {
-  return String(str || '').replace(/\s|–|—/g, '').toLowerCase(); // removes spaces and dashes, lowercase
-}
-
-const normalizedRegNo = normalize(regNo);
-const normalizedClass = normalize(klass);
-const normalizedSession = normalize(session);
-const normalizedTerm = normalize(term);
-
 const filteredResults = Array.isArray(results)
-  ? results.filter(r =>
-      (normalize(r.student_id) === normalizedRegNo ||
-       (r.student && (normalize(r.student.student_id) === normalizedRegNo || normalize(r.student.regNo) === normalizedRegNo)) ||
-       normalize(r.regNo) === normalizedRegNo)
-      && normalize(r.class_name || r.class) === normalizedClass
-      && normalize(r.session) === normalizedSession
-      && normalize(r.term) === normalizedTerm
-    )
-  : [];
+      ? results.filter(r =>
+          (r.student_id === regNo) ||
+          (r.student && (r.student.student_id === regNo || r.student.regNo === regNo)) ||
+          (r.regNo === regNo)
+        )
+      : [];
           if (!filteredResults.length) {
             errorBox.textContent = "No result found! Please check your details or contact the school.";
             errorBox.style.display = "block";

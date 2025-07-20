@@ -29,8 +29,8 @@ body {
 }
 
 .school-logo, .coat-of-arms {
-  height: 95px;
-  width: 95px;
+  height: 100px;
+  width: 100px;
   object-fit: contain;
 }
 
@@ -42,14 +42,14 @@ body {
 .school-info h1 {
   color: #0c4e8c;
   margin: 0;
-  font-size: 1.90rem;
+  font-size: 1.50rem;
   font-weight: bold;
   letter-spacing: 1px;
 }
 
 .school-info p {
   margin: 6px 0 0 0;
-  font-size: 1.04rem;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 

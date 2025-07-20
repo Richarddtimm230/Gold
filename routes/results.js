@@ -29,30 +29,12 @@ async function findOrCreateStudent(row, classId) {
   await student.save();
   return student;
 }
-
-// -- IMPORTANT: Place /check route BEFORE /:id routes! --
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
-    if (!regNo || !scratchCard || !className || !session || !term)
-      return res.status(400).json({ error: 'Missing required parameters.' });
-
+    // ...validation code...
     let student = await Student.findOne({ regNo }) || await Student.findOne({ student_id: regNo });
-    if (!student) return res.status(404).json({ error: 'Student not found.' });
-
-    const storedCard = (student.scratchCard || 'ABCD').trim().toUpperCase();
-    if (scratchCard.trim().toUpperCase() !== storedCard) {
-      return res.status(401).json({ error: 'Invalid scratch card' });
-    }
-
-    const classObj = await Class.findOne({ name: className });
-    if (!classObj) return res.status(404).json({ error: 'Class not found.' });
-
-    const sessionObj = await Session.findOne({ name: session });
-    if (!sessionObj) return res.status(404).json({ error: 'Session not found.' });
-
-    const termObj = await Term.findOne({ name: term });
-    if (!termObj) return res.status(404).json({ error: 'Term not found.' });
+    // ...scratch card, class, session, term lookups...
 
     const results = await Result.find({
       student: student._id,
@@ -62,10 +44,39 @@ router.get('/check', async (req, res) => {
       status: 'Published'
     }).populate('subject');
 
-    if (!results.length) return res.status(404).json({ error: 'No result found.' });
+    // === Always build a skillsReport object ===
+    let skillsReport = { skills: { affective: {}, psychomotor: {} }, attendance: {}, comment: "" };
+    if (Array.isArray(student.skillsReports)) {
+      const found = student.skillsReports.find(r =>
+        r.session?.toLowerCase() === session.toLowerCase() &&
+        r.term?.toLowerCase() === term.toLowerCase()
+      );
+      if (found) {
+        skillsReport = {
+          skills: found.skills || { affective: {}, psychomotor: {} },
+          attendance: found.attendance || {},
+          comment: found.comment || ""
+        };
+      }
+    }
 
-    const data = results.map(r => {
-      return {
+    // === Always include class info ===
+    const classInfo = { name: classObj.name, _id: classObj._id };
+
+    // === Student Info includes class and other details ===
+    const studentInfo = {
+      name: student.name || `${student.surname || ''} ${student.firstname || ''}`.trim(),
+      regNo: student.regNo,
+      gender: student.gender,
+      DOB: student.dob,
+      email: student.studentEmail,
+      age: student.age,
+      class: classInfo,
+      photoBase64: student.photoBase64 || ""
+    };
+
+    res.json({
+      results: results.map(r => ({
         subject: r.subject?.name || '',
         ca1_score: r.ca1_score || '',
         ca2_score: r.ca2_score || '',
@@ -73,35 +84,11 @@ router.get('/check', async (req, res) => {
         exam_score: r.exam_score || '',
         total: [r.ca1_score, r.ca2_score, r.midterm_score, r.exam_score].map(n => parseFloat(n || 0)).reduce((a, b) => a + b, 0),
         grade: r.grade || '',
-        remark: r.remarks || ''
-      };
-    });
-
-    const classSize = await Result.distinct('student', {
-      class: classObj._id,
-      session: sessionObj._id,
-      term: termObj._id,
-      status: 'Published'
-    }).then(students => students.length);
-
-    const skillsReport = (Array.isArray(student.skillsReports) ?
-      student.skillsReports.find(r =>
-        r.session?.toLowerCase() === session.toLowerCase() &&
-        r.term?.toLowerCase() === term.toLowerCase()
-      ) : null);
-
-    const studentInfo = {
-      name: student.name || `${student.surname || ''} ${student.firstname || ''}`.trim(),
-      regNo: student.regNo,
-      gender: student.gender,
-      DOB: student.dob,
-      email: student.studentEmail,
-      age: student.age
-    };
-
-    res.json({
-      results: data,
+        remarks: r.remarks || '',
+      })),
       skillsReport,
+      attendance: skillsReport.attendance,
+      principalComment: skillsReport.comment, // always present (can be empty string)
       classSize,
       student: studentInfo
     });

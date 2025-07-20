@@ -108,6 +108,7 @@
                 <th>Total</th>
                 <th>Grade</th>
                 <th>Remark</th>
+                <th>Position</th>
               </tr>
             </thead>
             <tbody>
@@ -193,6 +194,23 @@ function getStudentFullName(student) {
   return parts.join(" ").trim();
 }
 
+// --- FETCH SUBJECT POSITION FOR EACH RESULT ---
+async function fetchSubjectPositions(results) {
+  // If subject_position is already present, don't re-fetch
+  // Otherwise, try to fetch via /api/results/:id
+  for (const r of results) {
+    if (r.subject_position) continue;
+    if (!r._id) continue;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.subject_position) r.subject_position = data.subject_position;
+      }
+    } catch {}
+  }
+}
+
 async function handleResultSearch(e) {
   e.preventDefault();
   const regNo = document.getElementById("regNoInput").value.trim();
@@ -243,6 +261,9 @@ async function handleResultSearch(e) {
           (r.regNo === regNo)
         )
       : [];
+
+    // --- FETCH SUBJECT POSITIONS ---
+    await fetchSubjectPositions(filteredResults);
 
     if (!filteredResults.length) {
       showLoader(false);
@@ -390,6 +411,7 @@ function displayResult(r) {
         (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
       <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
       <td>${res.remarks || res.remark || ""}</td>
+      <td>${res.subject_position || ""}</td>
     </tr>
   `).join("") : "";
 }
@@ -407,6 +429,21 @@ function getSkillsReportForStudent(regNo, session, term) {
     }).catch(() => null);
 }
 
+// --- FETCH SUBJECT POSITION FOR EACH RESULT (for download too) ---
+async function fetchSubjectPositionsForDownload(results) {
+  for (const r of results) {
+    if (r.subject_position) continue;
+    if (!r._id) continue;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.subject_position) r.subject_position = data.subject_position;
+      }
+    } catch {}
+  }
+}
+
 async function downloadCurrentResult() {
   const r = window._lastDisplayedResult;
   if (!r || !r.results || !r.results.length) {
@@ -422,6 +459,9 @@ async function downloadCurrentResult() {
     const fetchedSkills = await getSkillsReportForStudent(studentReg, session, term);
     if (fetchedSkills) skillsReport = fetchedSkills;
   }
+
+  // Fetch subject positions before download
+  await fetchSubjectPositionsForDownload(r.results);
 
   let affectiveSkills = [];
   let psychomotorSkills = [];
@@ -501,7 +541,8 @@ async function downloadCurrentResult() {
       grade: res.grade || "",
       remarks: res.remarks || res.remark || "",
       grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
-      teacher_comment: res.teacher_comment || res.comment || ""
+      teacher_comment: res.teacher_comment || res.comment || "",
+      subject_position: res.subject_position || ""
     })),
     student: studentObj,
     perfGrade: perfGrade,

@@ -32,9 +32,25 @@ async function findOrCreateStudent(row, classId) {
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
-    // ...validation code...
+    if (!regNo || !scratchCard || !className || !session || !term)
+      return res.status(400).json({ error: 'Missing required parameters.' });
+
     let student = await Student.findOne({ regNo }) || await Student.findOne({ student_id: regNo });
-    // ...scratch card, class, session, term lookups...
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+    const storedCard = (student.scratchCard || 'ABCD').trim().toUpperCase();
+    if (scratchCard.trim().toUpperCase() !== storedCard) {
+      return res.status(401).json({ error: 'Invalid scratch card' });
+    }
+
+    const classObj = await Class.findOne({ name: className });
+    if (!classObj) return res.status(404).json({ error: 'Class not found.' });
+
+    const sessionObj = await Session.findOne({ name: session });
+    if (!sessionObj) return res.status(404).json({ error: 'Session not found.' });
+
+    const termObj = await Term.findOne({ name: term });
+    if (!termObj) return res.status(404).json({ error: 'Term not found.' });
 
     const results = await Result.find({
       student: student._id,
@@ -44,7 +60,27 @@ router.get('/check', async (req, res) => {
       status: 'Published'
     }).populate('subject');
 
-    // === Always build a skillsReport object ===
+    if (!results.length) return res.status(404).json({ error: 'No result found.' });
+
+    const data = results.map(r => ({
+      subject: r.subject?.name || '',
+      ca1_score: r.ca1_score || '',
+      ca2_score: r.ca2_score || '',
+      midterm_score: r.midterm_score || '',
+      exam_score: r.exam_score || '',
+      total: [r.ca1_score, r.ca2_score, r.midterm_score, r.exam_score].map(n => parseFloat(n || 0)).reduce((a, b) => a + b, 0),
+      grade: r.grade || '',
+      remarks: r.remarks || ''
+    }));
+
+    const classSize = await Result.distinct('student', {
+      class: classObj._id,
+      session: sessionObj._id,
+      term: termObj._id,
+      status: 'Published'
+    }).then(students => students.length);
+
+    // --- improved skillsReport and attendance extraction ---
     let skillsReport = { skills: { affective: {}, psychomotor: {} }, attendance: {}, comment: "" };
     if (Array.isArray(student.skillsReports)) {
       const found = student.skillsReports.find(r =>
@@ -60,10 +96,11 @@ router.get('/check', async (req, res) => {
       }
     }
 
-    // === Always include class info ===
-    const classInfo = { name: classObj.name, _id: classObj._id };
+    // --- Always send principalComment and attendance at top-level too ---
+    const principalComment = skillsReport.comment || "";
+    const attendance = skillsReport.attendance || {};
 
-    // === Student Info includes class and other details ===
+    // --- Add class info to student object ---
     const studentInfo = {
       name: student.name || `${student.surname || ''} ${student.firstname || ''}`.trim(),
       regNo: student.regNo,
@@ -71,24 +108,15 @@ router.get('/check', async (req, res) => {
       DOB: student.dob,
       email: student.studentEmail,
       age: student.age,
-      class: classInfo,
+      class: { name: classObj.name, _id: classObj._id },
       photoBase64: student.photoBase64 || ""
     };
 
     res.json({
-      results: results.map(r => ({
-        subject: r.subject?.name || '',
-        ca1_score: r.ca1_score || '',
-        ca2_score: r.ca2_score || '',
-        midterm_score: r.midterm_score || '',
-        exam_score: r.exam_score || '',
-        total: [r.ca1_score, r.ca2_score, r.midterm_score, r.exam_score].map(n => parseFloat(n || 0)).reduce((a, b) => a + b, 0),
-        grade: r.grade || '',
-        remarks: r.remarks || '',
-      })),
+      results: data,
       skillsReport,
-      attendance: skillsReport.attendance,
-      principalComment: skillsReport.comment, // always present (can be empty string)
+      attendance,
+      principalComment,
       classSize,
       student: studentInfo
     });

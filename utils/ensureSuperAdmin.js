@@ -27,7 +27,7 @@ async function ensureSuperAdmin() {
         name: superName,
         email: superEmail,
         password: hash,
-        role: 'superadmin'
+        role: 'registrar'
       });
       console.log('Superadmin created.');
     }

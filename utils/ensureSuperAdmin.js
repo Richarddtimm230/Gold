@@ -7,9 +7,9 @@ const User = require('../models/User');
  * Ensures that a superadmin user exists in MongoDB.
  */
 async function ensureSuperAdmin() {
-  const superEmail = process.env.SUPERADMIN_EMAIL || 'Nadmin@goldlincschools.com';
-  const superPassword = process.env.SUPERADMIN_PASSWORD || 'GoldLinc123';
-  const superName = process.env.SUPERADMIN_NAME || 'Super Admin';
+  const superEmail = process.env.SUPERADMIN_EMAIL || 'registrar@goldlincschools.com';
+  const superPassword = process.env.SUPERADMIN_PASSWORD || 'Registrar';
+  const superName = process.env.SUPERADMIN_NAME || 'School Registrar';
 
   try {
     const hash = await bcrypt.hash(superPassword, 10);
@@ -19,7 +19,7 @@ async function ensureSuperAdmin() {
     if (existingUser) {
       existingUser.name = superName;
       existingUser.password = hash;
-      existingUser.role = 'superadmin';
+      existingUser.role = 'registrar';
       await existingUser.save();
       console.log('Superadmin updated.');
     } else {

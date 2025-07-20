@@ -8,6 +8,67 @@ const Term = require('../models/Term');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
+// UTILITY: Assign grade/remark based on total score
+function getGradeAndRemark(totalScore) {
+  if (totalScore >= 70) return { grade: 'A', remark: 'Excellent' };
+  if (totalScore >= 60) return { grade: 'B', remark: 'Very Good' };
+  if (totalScore >= 50) return { grade: 'C', remark: 'Good' };
+  if (totalScore >= 45) return { grade: 'D', remark: 'Pass' };
+  if (totalScore >= 40) return { grade: 'E', remark: 'Poor' };
+  return { grade: 'F', remark: 'Fail' };
+}
+function ordinalSuffix(pos) {
+  if (typeof pos !== "number") pos = parseInt(pos);
+  if (pos % 100 >= 11 && pos % 100 <= 13) return pos + "th";
+  switch (pos % 10) {
+    case 1: return pos + "st";
+    case 2: return pos + "nd";
+    case 3: return pos + "rd";
+    default: return pos + "th";
+  }
+}
+
+// Calculate and persist subject positions for a class/session/term/subject
+async function computeAndPersistSubjectPositions({ classId, sessionId, termId, subjectId }) {
+  // Get all results for this subject in this class/session/term
+  const filter = {
+    class: classId,
+    session: sessionId,
+    term: termId,
+    subject: subjectId,
+    status: 'Published'
+  };
+  const results = await Result.find(filter);
+  // Map: [{_id, total}]
+  const arr = results.map(r => {
+    let total = 0;
+    if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
+    if (r.ca2_score) total += parseFloat(r.ca2_score) || 0;
+    if (r.midterm_score) total += parseFloat(r.midterm_score) || 0;
+    if (r.exam_score) total += parseFloat(r.exam_score) || 0;
+    if (!r.ca1_score && !r.ca2_score && !r.midterm_score && !r.exam_score && r.score) total = parseFloat(r.score) || 0;
+    return { id: r._id.toString(), total };
+  });
+  arr.sort((a, b) => b.total - a.total);
+  let posMap = {};
+  let currentPos = 1, prevTotal = null, skip = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (prevTotal !== null && arr[i].total < prevTotal) {
+      currentPos = i + 1; skip = 0;
+    } else if (prevTotal !== null && arr[i].total === prevTotal) { skip++; }
+    posMap[arr[i].id] = { position: ordinalSuffix(currentPos), numeric: currentPos };
+    prevTotal = arr[i].total;
+  }
+  // Persist to DB
+  for (const id in posMap) {
+    await Result.findByIdAndUpdate(id, {
+      subject_position: posMap[id].position,
+      subject_position_num: posMap[id].numeric
+    });
+  }
+  return posMap;
+}
+
 async function findOrCreateByName(Model, name, extra = {}) {
   if (!name) return null;
   let doc = await Model.findOne({ name });
@@ -16,7 +77,6 @@ async function findOrCreateByName(Model, name, extra = {}) {
   await doc.save();
   return doc;
 }
-
 async function findOrCreateStudent(row, classId) {
   if (!row.student_id) return null;
   let student = await Student.findOne({ student_id: row.student_id });
@@ -29,6 +89,8 @@ async function findOrCreateStudent(row, classId) {
   await student.save();
   return student;
 }
+
+// --- MAIN CHECK ROUTE (GET /check) ---
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
@@ -52,6 +114,7 @@ router.get('/check', async (req, res) => {
     const termObj = await Term.findOne({ name: term });
     if (!termObj) return res.status(404).json({ error: 'Term not found.' });
 
+    // Find results and populate subject
     const results = await Result.find({
       student: student._id,
       class: classObj._id,
@@ -62,16 +125,56 @@ router.get('/check', async (req, res) => {
 
     if (!results.length) return res.status(404).json({ error: 'No result found.' });
 
-    const data = results.map(r => ({
-      subject: r.subject?.name || '',
-      ca1_score: r.ca1_score || '',
-      ca2_score: r.ca2_score || '',
-      midterm_score: r.midterm_score || '',
-      exam_score: r.exam_score || '',
-      total: [r.ca1_score, r.ca2_score, r.midterm_score, r.exam_score].map(n => parseFloat(n || 0)).reduce((a, b) => a + b, 0),
-      grade: r.grade || '',
-      remarks: r.remarks || ''
-    }));
+    // --- For position calculation, get all subject IDs for this class/session/term ---
+    const allSubjects = await Subject.find({});
+    const subjectIdMap = {};
+    allSubjects.forEach(sub => { subjectIdMap[sub.name] = sub._id; });
+
+    // --- Compose result data, auto-fill grade/remark/position ---
+    const data = [];
+    for (const r of results) {
+      let total = 0;
+      if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
+      if (r.ca2_score) total += parseFloat(r.ca2_score) || 0;
+      if (r.midterm_score) total += parseFloat(r.midterm_score) || 0;
+      if (r.exam_score) total += parseFloat(r.exam_score) || 0;
+      if (!r.ca1_score && !r.ca2_score && !r.midterm_score && !r.exam_score && r.score) total = parseFloat(r.score) || 0;
+
+      // Assign grade/remark if missing or incorrect in DB
+      const { grade, remark } = getGradeAndRemark(total);
+
+      // --- Calculate and persist subject position for this subject ---
+      let subjectPos = '';
+      if (r.subject && r.subject.name) {
+        const posMap = await computeAndPersistSubjectPositions({
+          classId: classObj._id,
+          sessionId: sessionObj._id,
+          termId: termObj._id,
+          subjectId: r.subject._id
+        });
+        subjectPos = posMap[r._id.toString()]?.position || r.subject_position || '';
+        // Update result doc with grade/remark/position if needed
+        if (r.grade !== grade || r.remarks !== remark || r.subject_position !== subjectPos) {
+          await Result.findByIdAndUpdate(r._id, {
+            grade: grade,
+            remarks: remark,
+            subject_position: subjectPos
+          });
+        }
+      }
+
+      data.push({
+        subject: r.subject?.name || '',
+        ca1_score: r.ca1_score || '',
+        ca2_score: r.ca2_score || '',
+        midterm_score: r.midterm_score || '',
+        exam_score: r.exam_score || '',
+        total,
+        grade,
+        remarks: remark,
+        subject_position: subjectPos
+      });
+    }
 
     const classSize = await Result.distinct('student', {
       class: classObj._id,
@@ -125,6 +228,7 @@ router.get('/check', async (req, res) => {
   }
 });
 
+// --- REMAINING ROUTES (UNCHANGED) ---
 router.post('/upload', async (req, res) => {
   try {
     const { session, term, class: className, subject, resultType, results } = req.body;
@@ -201,7 +305,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// All :id routes are below /check route!
 router.get('/:id', async (req, res) => {
   try {
     const result = await Result.findById(req.params.id)
@@ -216,7 +319,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true })
@@ -231,7 +333,6 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 router.patch('/:id', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -241,7 +342,6 @@ router.patch('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 router.post('/:id/publish', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, { status: 'Published' }, { new: true });
@@ -251,7 +351,6 @@ router.post('/:id/publish', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Result.findByIdAndDelete(req.params.id);

@@ -8,8 +8,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="check-results.css">
+  <style>
+    .spinner-overlay {
+      display: none;
+      position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(255,255,255,0.72); align-items: center; justify-content: center;
+    }
+    .spinner {
+      border: 6px solid #e5e5e5;
+      border-top: 6px solid #007bff;
+      border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { 100% {transform: rotate(360deg);} }
+  </style>
 </head>
 <body>
+  <div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner"></div>
+  </div>
   <div class="results-root">
     <!-- Header & Main Actions -->
     <div class="results-header">
@@ -20,7 +37,7 @@
     </div>
     <main class="results-main">
       <!-- Search Section -->
-      <section class="results-section">
+      <section class="results-section" id="searchSection">
         <div class="section-title"><i class="fa fa-search"></i> Check Your Result</div>
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
           <div class="result-form-group">
@@ -95,6 +112,7 @@
                 <th>Total</th>
                 <th>Grade</th>
                 <th>Remark</th>
+                <th>Position</th>
               </tr>
             </thead>
             <tbody>
@@ -141,21 +159,34 @@
         <i class="fa fa-user"></i>
         <div class="bottom-nav-label">Me</div>
       </button>
-    </nav><script>
+    </nav>
+    <script>
       const API_BASE_URL = "https://goldlincschools.onrender.com";
 
       let lastStudentProfile = null;
       let lastSkillsReport = null;
       let lastClassSize = null;
 
-      // Autofill and lock registration number for logged-in student
-      async function autofillRegNo() {
+      // Spinner helpers
+      function showSpinner() {
+        document.getElementById('spinnerOverlay').style.display = 'flex';
+      }
+      function hideSpinner() {
+        document.getElementById('spinnerOverlay').style.display = 'none';
+      }
+
+      // Affixed values (could be fetched from server, here using global vars for demo)
+      let affixedClass = null, affixedSession = null, affixedTerm = null;
+
+      // Autofill and lock registration number and affix class/session/term for logged-in student
+      async function autofillRegNoAndAffix() {
         const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+        const regNoInput = document.getElementById('regNoInput');
         if (!token) {
-          document.getElementById('regNoInput').value = '';
-          document.getElementById('regNoInput').placeholder = 'Login required';
-          document.getElementById('regNoInput').disabled = true;
-          document.getElementById('regNoInput').readOnly = true;
+          regNoInput.value = '';
+          regNoInput.placeholder = 'Login required';
+          regNoInput.disabled = true;
+          regNoInput.readOnly = true;
           document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
           return;
         }
@@ -168,26 +199,67 @@
             lastStudentProfile = student;
             // Prefer regNo, else student_id, else blank
             const regNo = student.regNo || student.student_id || '';
-            document.getElementById('regNoInput').value = regNo;
-            document.getElementById('regNoInput').disabled = true;
-            document.getElementById('regNoInput').readOnly = true;
+            regNoInput.value = regNo;
+            regNoInput.disabled = true;
+            regNoInput.readOnly = true;
             document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = false;
+            // Affix class/session/term if available in student profile
+            affixedClass = student.class_name || student.class || null;
+            affixedSession = student.session || null;
+            affixedTerm = student.term || null;
+            // Optionally, you might fetch current session/term from config/api
+            // affixedSession = "2024–2025", affixedTerm = "SECOND TERM", etc.
+
+            // Set and lock class/session/term if affixed
+            if (affixedClass) {
+              const classInput = document.getElementById('classInput');
+              classInput.value = affixedClass;
+              classInput.disabled = true;
+            }
+            if (affixedSession) {
+              const sessionInput = document.getElementById('sessionInput');
+              sessionInput.value = affixedSession;
+              sessionInput.disabled = true;
+            }
+            if (affixedTerm) {
+              const termInput = document.getElementById('termInput');
+              termInput.value = affixedTerm;
+              termInput.disabled = true;
+            }
           } else {
-            document.getElementById('regNoInput').value = '';
-            document.getElementById('regNoInput').placeholder = 'Login required';
-            document.getElementById('regNoInput').disabled = true;
-            document.getElementById('regNoInput').readOnly = true;
+            regNoInput.value = '';
+            regNoInput.placeholder = 'Login required';
+            regNoInput.disabled = true;
+            regNoInput.readOnly = true;
             document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
           }
         } catch {
-          document.getElementById('regNoInput').value = '';
-          document.getElementById('regNoInput').placeholder = 'Login required';
-          document.getElementById('regNoInput').disabled = true;
-          document.getElementById('regNoInput').readOnly = true;
+          regNoInput.value = '';
+          regNoInput.placeholder = 'Login required';
+          regNoInput.disabled = true;
+          regNoInput.readOnly = true;
           document.getElementById('resultSearchForm').querySelector('button[type="submit"]').disabled = true;
         }
       }
-      autofillRegNo();
+
+      autofillRegNoAndAffix();
+
+      // Only show result search if all affixed values present
+      function checkShowSearch() {
+        let show = true;
+        if (affixedClass && affixedSession && affixedTerm) {
+          // All affixed, show as locked fields
+          show = true;
+        } else if (affixedClass || affixedSession || affixedTerm) {
+          // Partial affix, allow selection of others
+          show = true;
+        }
+        // else, default: show search
+        if (!show) document.getElementById('searchSection').style.display = 'none';
+        else document.getElementById('searchSection').style.display = '';
+      }
+
+      setTimeout(checkShowSearch, 1000);
 
       function getViewedResults() {
         let arr = [];
@@ -254,6 +326,7 @@
       // Main: Handle result search using /api/results (fetch skills/attendance as well)
       async function handleResultSearch(e) {
         e.preventDefault();
+        showSpinner();
         const regNo = document.getElementById("regNoInput").value.trim();
         const klass = document.getElementById("classInput").value;
         const session = document.getElementById("sessionInput").value;
@@ -261,9 +334,22 @@
         const errorBox = document.getElementById("searchError");
         errorBox.style.display = "none";
 
+        // Only allow search if values match affixed, if affixed is set
+        if (
+          (affixedClass && klass !== affixedClass) ||
+          (affixedSession && session !== affixedSession) ||
+          (affixedTerm && term !== affixedTerm)
+        ) {
+          errorBox.textContent = "You can only check results for your assigned class, session and term.";
+          errorBox.style.display = "block";
+          hideSpinner();
+          return false;
+        }
+
         if (!regNo || !klass || !session || !term) {
           errorBox.textContent = "All fields are required!";
           errorBox.style.display = "block";
+          hideSpinner();
           return false;
         }
 
@@ -293,7 +379,24 @@
             errorBox.textContent = "No result found! Please check your details or contact the school.";
             errorBox.style.display = "block";
             document.getElementById("resultsDisplaySection").style.display = "none";
+            hideSpinner();
             return false;
+          }
+
+          // --- FETCH SUBJECT POSITIONS ---
+          // If subject_position is not present, you may fetch for each result by /api/results/:id
+          // Otherwise, just use subject_position from result
+          for (const r of filteredResults) {
+            if (r.subject_position) continue; // Already present
+            // Try to fetch the single result for subject_position (skip if not needed)
+            try {
+              const detailRes = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
+              if (detailRes.ok) {
+                const data = await detailRes.json();
+                if (data.subject_position)
+                  r.subject_position = data.subject_position;
+              }
+            } catch {}
           }
 
           // 2. Fetch student profile (for DOB, email, photo)
@@ -408,6 +511,7 @@
           errorBox.style.display = "block";
           document.getElementById("resultsDisplaySection").style.display = "none";
         }
+        hideSpinner();
         return false;
       }
 
@@ -429,6 +533,7 @@
               (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
             <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
             <td>${res.remarks || res.remark || ""}</td>
+            <td>${res.subject_position || ""}</td>
           </tr>
         `).join("");
         window._lastDisplayedResult = r;
@@ -523,7 +628,8 @@
             grade: res.grade || "",
             remarks: res.remarks || res.remark || "",
             grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
-            teacher_comment: res.teacher_comment || res.comment || ""
+            teacher_comment: res.teacher_comment || res.comment || "",
+            subject_position: res.subject_position || ""
           })),
           student: studentObj,
           perfGrade: perfGrade,

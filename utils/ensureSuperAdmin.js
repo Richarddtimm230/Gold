@@ -19,7 +19,7 @@ async function ensureSuperAdmin() {
     if (existingUser) {
       existingUser.name = superName;
       existingUser.password = hash;
-      existingUser.role = 'registrar';
+      existingUser.role = 'staff';
       await existingUser.save();
       console.log('Superadmin updated.');
     } else {
@@ -27,7 +27,7 @@ async function ensureSuperAdmin() {
         name: superName,
         email: superEmail,
         password: hash,
-        role: 'registrar'
+        role: 'staff'
       });
       console.log('Superadmin created.');
     }

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Check Results | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="check-results-admin.css">
@@ -15,6 +16,7 @@
       <div class="spinner"></div>
       <div class="loader-text">Searching for results...</div>
     </div>
+    <!-- Header & Main Actions -->
     <div class="results-header">
       <div class="results-title">Check Results (Admin)</div>
       <div class="results-actions">
@@ -22,6 +24,7 @@
       </div>
     </div>
     <main class="results-main">
+      <!-- Search Section -->
       <section class="results-section">
         <div class="section-title"><i class="fa fa-search"></i> Check Result (Admin)</div>
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
@@ -179,6 +182,17 @@ function calcAge(dobStr) {
   return age;
 }
 
+function getStudentFullName(student) {
+  if (!student) return "";
+  if (student.name) return student.name;
+  let parts = [];
+  if (student.firstname) parts.push(student.firstname);
+  if (student.othernames) parts.push(student.othernames);
+  if (student.surname) parts.push(student.surname);
+  if (student.lastname) parts.push(student.lastname);
+  return parts.join(" ").trim();
+}
+
 async function handleResultSearch(e) {
   e.preventDefault();
   const regNo = document.getElementById("regNoInput").value.trim();
@@ -324,7 +338,7 @@ function displayResult(r) {
   document.getElementById("dispClass").textContent = r.class;
   document.getElementById("dispSession").textContent = r.session;
   document.getElementById("dispTerm").textContent = r.term;
-  document.getElementById("dispName").textContent = r.student?.name || "";
+  document.getElementById("dispName").textContent = getStudentFullName(r.student);
   document.getElementById("dispPrincipalComment").textContent = r.skillsReport?.comment || "";
   document.getElementById("dispClassSize").textContent = r.classSize || "";
 
@@ -461,7 +475,7 @@ async function downloadCurrentResult() {
     let emailVal = r.student.studentEmail || r.student.email || r.student.parentEmail || "";
     let photoVal = r.student.photoBase64 || r.student.photo || "";
     studentObj = {
-      name: r.student.name || r.student.fullname || "",
+      name: getStudentFullName(r.student),
       regNo: r.student.regNo || r.student.student_id || r.regNo,
       gender: r.student.gender || "",
       DOB: dobVal,

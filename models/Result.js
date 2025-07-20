@@ -9,7 +9,9 @@ const subjectSchema = new mongoose.Schema({
   exam_score: { type: Number, default: 0 },
   score: { type: Number, default: 0 }, // total or direct score
   grade: { type: String, default: "" },
-  remarks: { type: String, default: "" }
+  remarks: { type: String, default: "" },
+  subject_position: { type: String, default: "" },        // <-- NEW
+  subject_position_num: { type: Number, default: 0 }      // <-- NEW
 }, { _id: false });
 
 // --- Result Schema ---
@@ -26,9 +28,9 @@ const resultSchema = new mongoose.Schema({
   score: { type: Number, default: 0 },
   grade: { type: String, default: "" },
   remarks: { type: String, default: "" },
+  subject_position: { type: String, default: "" },        // <-- NEW
+  subject_position_num: { type: Number, default: 0 },     // <-- NEW
   status: { type: String, default: "Draft" }
 }, { timestamps: true });
-
-
 
 module.exports = mongoose.model('Result', resultSchema);

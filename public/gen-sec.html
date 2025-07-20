@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Check Results | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="check-results-admin.css">
@@ -16,7 +15,6 @@
       <div class="spinner"></div>
       <div class="loader-text">Searching for results...</div>
     </div>
-    <!-- Header & Main Actions -->
     <div class="results-header">
       <div class="results-title">Check Results (Admin)</div>
       <div class="results-actions">
@@ -24,7 +22,6 @@
       </div>
     </div>
     <main class="results-main">
-      <!-- Search Section -->
       <section class="results-section">
         <div class="section-title"><i class="fa fa-search"></i> Check Result (Admin)</div>
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
@@ -83,7 +80,6 @@
         </form>
         <div class="result-search-error" id="searchError" style="display:none;"></div>
       </section>
-      <!-- Results Display Section (hidden by default until search) -->
       <section class="results-section" id="resultsDisplaySection" style="display:none;">
         <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
         <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:18px;">
@@ -112,13 +108,11 @@
               </tr>
             </thead>
             <tbody>
-              <!-- JS fills rows -->
             </tbody>
           </table>
         </div>
         <button class="download-btn" onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
       </section>
-      <!-- News Section -->
       <section class="news-section">
         <div class="news-title"><i class="fa fa-newspaper"></i> Result News & Announcements</div>
         <div class="news-list" id="newsList">
@@ -128,7 +122,6 @@
         </div>
       </section>
     </main>
-    <!-- Sticky Bottom Nav (matches dashboard) -->
     <nav class="bottom-nav">
       <button class="bottom-nav-btn" title="Home" onclick="window.location.href='dashboard.html'">
         <i class="fa fa-home"></i>
@@ -152,341 +145,370 @@
       </button>
     </nav>
     <script>
-  const API_BASE_URL = "https://goldlincschools.onrender.com";
+const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-  function showLoader(show) {
-    document.getElementById("loader").style.display = show ? "flex" : "none";
-  }
+function showLoader(show) {
+  document.getElementById("loader").style.display = show ? "flex" : "none";
+}
 
-  function calcAge(dobStr) {
-    if (!dobStr) return "";
-    let date;
-    if (typeof dobStr === "string") {
-      const parts = dobStr.split(/[-\/]/);
-      if (parts.length === 3) {
-        let year, month, day;
-        if (parts[0].length === 4) {
-          year = +parts[0]; month = +parts[1]; day = +parts[2];
-        } else {
-          day = +parts[0]; month = +parts[1]; year = +parts[2];
-        }
-        date = new Date(year, month-1, day);
+function calcAge(dobStr) {
+  if (!dobStr) return "";
+  let date;
+  if (typeof dobStr === "string") {
+    const parts = dobStr.split(/[-\/]/);
+    if (parts.length === 3) {
+      let year, month, day;
+      if (parts[0].length === 4) {
+        year = +parts[0]; month = +parts[1]; day = +parts[2];
       } else {
-        date = new Date(dobStr);
+        day = +parts[0]; month = +parts[1]; year = +parts[2];
       }
+      date = new Date(year, month-1, day);
     } else {
       date = new Date(dobStr);
     }
-    if (!date || isNaN(date.getTime())) return "";
-    const now = new Date();
-    let age = now.getFullYear() - date.getFullYear();
-    if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
-      age--;
-    }
-    return age;
+  } else {
+    date = new Date(dobStr);
   }
-
-  // Robust skills fetcher with fallback to random/dummy
-  async function getSkillsReportOrFallback(regNo, session, term) {
-    try {
-      const skillsParams = new URLSearchParams({ session, term });
-      const skillsResp = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report?${skillsParams}`);
-      if (skillsResp.ok) {
-        const json = await skillsResp.json();
-        if (Array.isArray(json.skillsReports)) {
-          const found = json.skillsReports.find(
-            r => (r.session || '').toLowerCase() === session.toLowerCase() &&
-                 (r.term || '').toLowerCase() === term.toLowerCase()
-          );
-          if (found) return found;
-        }
-      }
-    } catch {}
-    // Fallback: generate dummy skills (like in student page)
-    function randomRating() { return Math.floor(Math.random() * 3) + 3; } // 3,4,5
-    const affectiveNames = ["punctuality", "attentiveness", "neatness", "honesty", "politeness"];
-    const psychomotorNames = ["handwriting", "drawing", "sports", "organization"];
-    const fallbackSkills = {
-      skills: { affective: {}, psychomotor: {} },
-      comment: "Randomized for demo (admin fallback)."
-    };
-    affectiveNames.forEach(name => fallbackSkills.skills.affective[name] = randomRating());
-    psychomotorNames.forEach(name => fallbackSkills.skills.psychomotor[name] = randomRating());
-    return fallbackSkills;
+  if (!date || isNaN(date.getTime())) return "";
+  const now = new Date();
+  let age = now.getFullYear() - date.getFullYear();
+  if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
+    age--;
   }
+  return age;
+}
 
-  async function handleResultSearch(e) {
-    e.preventDefault();
-    const regNo = document.getElementById("regNoInput").value.trim();
-    const scratchCard = document.getElementById("scratchCardInput").value.trim();
-    const klass = document.getElementById("classInput").value;
-    const session = document.getElementById("sessionInput").value;
-    const term = document.getElementById("termInput").value;
-    const errorBox = document.getElementById("searchError");
-    errorBox.style.display = "none";
+async function handleResultSearch(e) {
+  e.preventDefault();
+  const regNo = document.getElementById("regNoInput").value.trim();
+  const scratchCard = document.getElementById("scratchCardInput").value.trim();
+  const klass = document.getElementById("classInput").value;
+  const session = document.getElementById("sessionInput").value;
+  const term = document.getElementById("termInput").value;
+  const errorBox = document.getElementById("searchError");
+  errorBox.style.display = "none";
 
-    if (!regNo || !scratchCard || !klass || !session || !term) {
-      errorBox.textContent = "All fields are required!";
-      errorBox.style.display = "block";
-      return false;
-    }
-
-    showLoader(true);
-
-    try {
-      // First API call for result check
-      const params = new URLSearchParams({
-        regNo,
-        scratchCard,
-        class: klass,
-        session,
-        term
-      });
-      const response = await fetch(`${API_BASE_URL}/api/results/check?${params.toString()}`);
-      const respJson = await response.json();
-
-      if (response.status !== 200) {
-        showLoader(false);
-        errorBox.textContent = respJson.error || "No result found! Please check your details or contact the school.";
-        errorBox.style.display = "block";
-        document.getElementById("resultsDisplaySection").style.display = "none";
-        return false;
-      }
-
-      // --- Always fetch skills report robustly ---
-      let studentReg = respJson.student?.regNo || regNo;
-      let skillsReport = await getSkillsReportOrFallback(studentReg, session, term);
-
-      // Optionally, fetch class size (like student page)
-      let classSize = null;
-      try {
-        const classParams = new URLSearchParams({
-          class: klass,
-          session: session,
-          term: term,
-          status: "Published"
-        });
-        const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
-        if (classRes.ok) {
-          const classResults = await classRes.json();
-          const studentSet = new Set();
-          for (const r of classResults) {
-            if (r.student_id) studentSet.add(r.student_id);
-            else if (r.student && r.student.student_id) studentSet.add(r.student.student_id);
-            else if (r.student && r.student.regNo) studentSet.add(r.student.regNo);
-            else if (r.regNo) studentSet.add(r.regNo);
-          }
-          classSize = studentSet.size;
-        }
-      } catch (e) {}
-
-      showLoader(false);
-
-      // Use the fetched skillsReport for display and report, always present (real or dummy)
-      window._lastDisplayedResult = {
-        ...respJson,
-        skillsReport,
-        regNo,
-        class: klass,
-        session,
-        term,
-        classSize
-      };
-
-      displayResult(window._lastDisplayedResult);
-    } catch (err) {
-      showLoader(false);
-      errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
-      errorBox.style.display = "block";
-      document.getElementById("resultsDisplaySection").style.display = "none";
-    }
+  if (!regNo || !scratchCard || !klass || !session || !term) {
+    errorBox.textContent = "All fields are required!";
+    errorBox.style.display = "block";
     return false;
   }
 
-  function displayResult(r) {
-    document.getElementById("resultsDisplaySection").style.display = "";
-    document.getElementById("dispRegNo").textContent = r.regNo;
-    document.getElementById("dispClass").textContent = r.class;
-    document.getElementById("dispSession").textContent = r.session;
-    document.getElementById("dispTerm").textContent = r.term;
-    document.getElementById("dispName").textContent = r.student?.name || "";
-    document.getElementById("dispPrincipalComment").textContent = r.principalComment || r.skillsReport?.comment || "";
-    document.getElementById("dispClassSize").textContent = r.classSize || "";
+  showLoader(true);
 
-    // Skills section
-    let skillsHTML = "";
-    if (r.skillsReport && r.skillsReport.skills) {
-      if (r.skillsReport.skills.affective && Object.keys(r.skillsReport.skills.affective).length) {
-        skillsHTML += `<b>Affective Skills:</b><ul>`;
-        for (const [skill, score] of Object.entries(r.skillsReport.skills.affective)) {
-          skillsHTML += `<li>${skill}: ${score}</li>`;
-        }
-        skillsHTML += `</ul>`;
-      }
-      if (r.skillsReport.skills.psychomotor && Object.keys(r.skillsReport.skills.psychomotor).length) {
-        skillsHTML += `<b>Psychomotor Skills:</b><ul>`;
-        for (const [skill, score] of Object.entries(r.skillsReport.skills.psychomotor)) {
-          skillsHTML += `<li>${skill}: ${score}</li>`;
-        }
-        skillsHTML += `</ul>`;
-      }
-    }
-    document.getElementById("skillsSection").innerHTML = skillsHTML;
-
-    // Attendance section
-    let attendanceHTML = "";
-    let att = r.attendance || r.skillsReport?.attendance || {};
-    if (att && Object.keys(att).length) {
-      attendanceHTML += `<b>Attendance:</b><ul>`;
-      if (att.total_days !== undefined) attendanceHTML += `<li>Total Days: ${att.total_days}</li>`;
-      if (att.days_present !== undefined) attendanceHTML += `<li>Days Present: ${att.days_present}</li>`;
-      if (att.days_absent !== undefined) attendanceHTML += `<li>Days Absent: ${att.days_absent}</li>`;
-      if (att.days_present !== undefined && att.total_days !== undefined) {
-        attendanceHTML += `<li>Attendance %: ${((att.days_present / att.total_days) * 100).toFixed(2)}%</li>`;
-      }
-      attendanceHTML += `</ul>`;
-    }
-    document.getElementById("attendanceSection").innerHTML = attendanceHTML;
-
-    // Results table
-    const tbody = document.getElementById("resultsTable").querySelector("tbody");
-    tbody.innerHTML = Array.isArray(r.results) ? r.results.map(res => `
-      <tr>
-        <td>${res.subject || ""}</td>
-        <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
-        <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
-        <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
-        <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
-        <td>${res.total !== undefined ? res.total :
-          (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
-        <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
-        <td>${res.remarks || res.remark || ""}</td>
-      </tr>
-    `).join("") : "";
-  }
-
-  async function fetchSkillsReportForStudent(regNo, session, term) {
-    // Now always returns a robust fallback if not found!
-    return await getSkillsReportOrFallback(regNo, session, term);
-  }
-
-  async function downloadCurrentResult() {
-    const r = window._lastDisplayedResult;
-    if (!r || !r.results || !r.results.length) {
-      alert("No result to download. Please check a result first.");
-      return;
-    }
-
-    // --- Always fetch the latest skills report before building reportData ---
-    let skillsReport = r.skillsReport;
-    let studentReg = r.student?.regNo || r.regNo;
-    let session = r.session, term = r.term;
-
-    if (studentReg && session && term) {
-      const fetchedSkills = await fetchSkillsReportForStudent(studentReg, session, term);
-      if (fetchedSkills) skillsReport = fetchedSkills;
-    }
-
-    let affectiveSkills = [];
-    let psychomotorSkills = [];
-    let attendanceArr = [];
-    let principalComment = r.principalComment || skillsReport?.comment || "This is an excellent result, do not rest on your oars.";
-    let principalName = "ABIODUN FESTUS ADENIYI";
-    let classSize = r.classSize || 17;
-
-    if (skillsReport && skillsReport.skills) {
-      if (skillsReport.skills.affective) {
-        affectiveSkills = Object.entries(skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
-      }
-      if (skillsReport.skills.psychomotor) {
-        psychomotorSkills = Object.entries(skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
-      }
-    }
-    let att = r.attendance || skillsReport?.attendance || {};
-    if (att && Object.keys(att).length) {
-      attendanceArr = [
-        { label: "No. of School Days", value: att.total_days },
-        { label: "No. of Days Present", value: att.days_present },
-        { label: "No. of Days Absent", value: att.days_absent },
-        { label: "% Attendance", value: (att.total_days && att.days_present ? ((att.days_present/att.total_days)*100).toFixed(2) + "%" : "") }
-      ];
-    }
-
-    // Summary fields: calculate from results if possible
-    const numSubjects = r.results.length;
-    let totalScore = 0, totalMax = numSubjects * 100, gpaSum = 0;
-    let gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
-    let perfGrade = "N/A";
-    r.results.forEach(res => {
-      const tot = parseFloat(res.total || 0);
-      totalScore += tot;
-      if (res.grade && gradeMap[res.grade] !== undefined) gpaSum += gradeMap[res.grade];
+  try {
+    // 1. Validate scratch card against /api/results/check (you may skip this for admin, or keep it for parity)
+    const checkParams = new URLSearchParams({
+      regNo, scratchCard, class: klass, session, term
     });
-    const stuAverage = numSubjects ? ((totalScore / totalMax) * 100).toFixed(2) + "%" : "";
-    const stuGPA = numSubjects ? (gpaSum / numSubjects).toFixed(2) : "";
-    if (stuGPA >= 4.5) perfGrade = "A (Excellent)";
-    else if (stuGPA >= 4.0) perfGrade = "B (Very Good)";
-    else if (stuGPA >= 3.0) perfGrade = "C (Good)";
-    else if (stuGPA >= 2.0) perfGrade = "D (Pass)";
-    else if (stuGPA >= 1.0) perfGrade = "E (Poor)";
-    else perfGrade = "F (Fail)";
-
-    // --- Save DOB, calculate age, photo, and email ---
-    let studentObj = null;
-    if (r.student) {
-      let dobVal = r.student.DOB || r.student.dob || "";
-      let ageVal = r.student.age || calcAge(dobVal);
-      let emailVal = r.student.email || r.student.studentEmail || r.student.parentEmail || "";
-      let photoVal = r.student.photoBase64 || r.student.photo || "";
-      studentObj = {
-        name: r.student.name || r.student.fullname || "",
-        regNo: r.student.regNo || r.student.student_id || r.regNo,
-        gender: r.student.gender || "",
-        DOB: dobVal,
-        email: emailVal,
-        photoBase64: photoVal,
-        age: ageVal
-      };
+    const checkResp = await fetch(`${API_BASE_URL}/api/results/check?${checkParams}`);
+    const checkJson = await checkResp.json();
+    if (checkResp.status !== 200) {
+      showLoader(false);
+      errorBox.textContent = checkJson.error || "No result found! Please check your details or contact the school.";
+      errorBox.style.display = "block";
+      document.getElementById("resultsDisplaySection").style.display = "none";
+      return false;
     }
 
-    const reportData = {
-      regNo: r.regNo,
-      class: r.class,
-      session: r.session,
-      term: r.term,
-      results: r.results.map(res => ({
-        subject: res.subject || "",
-        ca1_score: res.ca1_score !== undefined ? res.ca1_score : "",
-        ca2_score: res.ca2_score !== undefined ? res.ca2_score : "",
-        midterm_score: res.midterm_score !== undefined ? res.midterm_score : "",
-        exam_score: res.exam_score !== undefined ? res.exam_score : "",
-        total: res.total !== undefined ? res.total :
-          (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0)),
-        grade: res.grade || "",
-        remarks: res.remarks || res.remark || "",
-        grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
-        teacher_comment: res.teacher_comment || res.comment || ""
-      })),
-      student: studentObj,
-      perfGrade: perfGrade,
-      classSize: classSize,
-      numSubjects: numSubjects,
-      stuTotalScore: `${totalScore} / ${totalMax}`,
-      stuAverage: stuAverage,
-      stuGPA: stuGPA,
-      resultSummary: perfGrade.split('(')[1]?.replace(')','') || perfGrade,
-      principalComment,
-      principalName,
-      nextTermDate: "Monday 6th of January 2025.",
-      affectiveSkills,
-      psychomotorSkills,
-      attendance: attendanceArr
+    // 2. Fetch results for this student (like student page)
+    const params = new URLSearchParams({
+      student_id: regNo,
+      class: klass,
+      session: session,
+      term: term,
+      status: "Published"
+    });
+    const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
+    const results = await response.json();
+    const filteredResults = Array.isArray(results)
+      ? results.filter(r =>
+          (r.student_id === regNo) ||
+          (r.student && (r.student.student_id === regNo || r.student.regNo === regNo)) ||
+          (r.regNo === regNo)
+        )
+      : [];
+
+    if (!filteredResults.length) {
+      showLoader(false);
+      errorBox.textContent = "No result found! Please check your details or contact the school.";
+      errorBox.style.display = "block";
+      document.getElementById("resultsDisplaySection").style.display = "none";
+      return false;
+    }
+
+    // 3. Fetch student profile
+    let studentProfile = null;
+    try {
+      const studentResp = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(regNo)}`);
+      const studentJson = await studentResp.json();
+      studentProfile = Array.isArray(studentJson.students) ? studentJson.students[0] : null;
+    } catch (err) {}
+
+    // 4. Fetch skills report for this student/session/term
+    let skillsReport = null;
+    try {
+      const normalize = str =>
+        String(str || "")
+          .replace(/–/g, "-")
+          .trim()
+          .toLowerCase();
+
+      const normalizedSession = normalize(session);
+      const normalizedTerm = normalize(term);
+
+      const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`);
+      if (skillsRes.ok) {
+        const skillsData = await skillsRes.json();
+        if (Array.isArray(skillsData.skillsReports)) {
+          skillsReport = skillsData.skillsReports.find(
+            r => normalize(r.session) === normalizedSession &&
+                 normalize(r.term) === normalizedTerm
+          ) || null;
+        }
+      }
+    } catch (e) {}
+
+    // 5. Fetch class size
+    let classSize = null;
+    try {
+      const classParams = new URLSearchParams({
+        class: klass,
+        session: session,
+        term: term,
+        status: "Published"
+      });
+      const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
+      if (classRes.ok) {
+        const classResults = await classRes.json();
+        const studentSet = new Set();
+        for (const r of classResults) {
+          if (r.student_id) studentSet.add(r.student_id);
+          else if (r.student && r.student.student_id) studentSet.add(r.student.student_id);
+          else if (r.student && r.student.regNo) studentSet.add(r.student.regNo);
+          else if (r.regNo) studentSet.add(r.regNo);
+        }
+        classSize = studentSet.size;
+      }
+    } catch (e) {}
+
+    showLoader(false);
+
+    // Use the fetched skillsReport for display and report
+    window._lastDisplayedResult = {
+      regNo,
+      class: klass,
+      session,
+      term,
+      results: filteredResults,
+      skillsReport,
+      classSize,
+      student: studentProfile
     };
 
-    sessionStorage.setItem("reportData", JSON.stringify(reportData));
-    window.open('report.html', '_blank');
+    displayResult(window._lastDisplayedResult);
+
+  } catch (err) {
+    showLoader(false);
+    errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
+    errorBox.style.display = "block";
+    document.getElementById("resultsDisplaySection").style.display = "none";
   }
-</script>
+  return false;
+}
+
+function displayResult(r) {
+  document.getElementById("resultsDisplaySection").style.display = "";
+  document.getElementById("dispRegNo").textContent = r.regNo;
+  document.getElementById("dispClass").textContent = r.class;
+  document.getElementById("dispSession").textContent = r.session;
+  document.getElementById("dispTerm").textContent = r.term;
+  document.getElementById("dispName").textContent = r.student?.name || "";
+  document.getElementById("dispPrincipalComment").textContent = r.skillsReport?.comment || "";
+  document.getElementById("dispClassSize").textContent = r.classSize || "";
+
+  // Skills section
+  let skillsHTML = "";
+  if (r.skillsReport && r.skillsReport.skills) {
+    if (r.skillsReport.skills.affective && Object.keys(r.skillsReport.skills.affective).length) {
+      skillsHTML += `<b>Affective Skills:</b><ul>`;
+      for (const [skill, score] of Object.entries(r.skillsReport.skills.affective)) {
+        skillsHTML += `<li>${skill}: ${score}</li>`;
+      }
+      skillsHTML += `</ul>`;
+    }
+    if (r.skillsReport.skills.psychomotor && Object.keys(r.skillsReport.skills.psychomotor).length) {
+      skillsHTML += `<b>Psychomotor Skills:</b><ul>`;
+      for (const [skill, score] of Object.entries(r.skillsReport.skills.psychomotor)) {
+        skillsHTML += `<li>${skill}: ${score}</li>`;
+      }
+      skillsHTML += `</ul>`;
+    }
+  }
+  document.getElementById("skillsSection").innerHTML = skillsHTML;
+
+  // Attendance section
+  let attendanceHTML = "";
+  let att = r.skillsReport?.attendance || {};
+  if (att && Object.keys(att).length) {
+    attendanceHTML += `<b>Attendance:</b><ul>`;
+    if (att.total_days !== undefined) attendanceHTML += `<li>Total Days: ${att.total_days}</li>`;
+    if (att.days_present !== undefined) attendanceHTML += `<li>Days Present: ${att.days_present}</li>`;
+    if (att.days_absent !== undefined) attendanceHTML += `<li>Days Absent: ${att.days_absent}</li>`;
+    if (att.days_present !== undefined && att.total_days !== undefined) {
+      attendanceHTML += `<li>Attendance %: ${((att.days_present / att.total_days) * 100).toFixed(2)}%</li>`;
+    }
+    attendanceHTML += `</ul>`;
+  }
+  document.getElementById("attendanceSection").innerHTML = attendanceHTML;
+
+  // Results table
+  const tbody = document.getElementById("resultsTable").querySelector("tbody");
+  tbody.innerHTML = Array.isArray(r.results) ? r.results.map(res => `
+    <tr>
+      <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || "")}</td>
+      <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
+      <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
+      <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
+      <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
+      <td>${res.total !== undefined ? res.total :
+        (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
+      <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
+      <td>${res.remarks || res.remark || ""}</td>
+    </tr>
+  `).join("") : "";
+}
+
+function getSkillsReportForStudent(regNo, session, term) {
+  // Used for download, always matches /api/students/{regNo}/skills-report, no fallback here
+  return fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`)
+    .then(resp => resp.ok ? resp.json() : Promise.reject())
+    .then(data => {
+      if (!Array.isArray(data.skillsReports)) return null;
+      const normalize = s => ("" + s).replace(/–/g, "-").trim().toLowerCase();
+      return data.skillsReports.find(
+        r => normalize(r.session) === normalize(session) && normalize(r.term) === normalize(term)
+      ) || null;
+    }).catch(() => null);
+}
+
+async function downloadCurrentResult() {
+  const r = window._lastDisplayedResult;
+  if (!r || !r.results || !r.results.length) {
+    alert("No result to download. Please check a result first.");
+    return;
+  }
+  // Always fetch the latest skills report before building reportData
+  let skillsReport = r.skillsReport;
+  let studentReg = r.student?.regNo || r.regNo;
+  let session = r.session, term = r.term;
+
+  if (studentReg && session && term) {
+    const fetchedSkills = await getSkillsReportForStudent(studentReg, session, term);
+    if (fetchedSkills) skillsReport = fetchedSkills;
+  }
+
+  let affectiveSkills = [];
+  let psychomotorSkills = [];
+  let attendanceArr = [];
+  let principalComment = skillsReport?.comment || "This is an excellent result, do not rest on your oars.";
+  let principalName = "ABIODUN FESTUS ADENIYI";
+  let classSize = r.classSize || 17;
+
+  if (skillsReport && skillsReport.skills) {
+    if (skillsReport.skills.affective) {
+      affectiveSkills = Object.entries(skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
+    }
+    if (skillsReport.skills.psychomotor) {
+      psychomotorSkills = Object.entries(skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
+    }
+  }
+  let att = skillsReport?.attendance || {};
+  if (att && Object.keys(att).length) {
+    attendanceArr = [
+      { label: "No. of School Days", value: att.total_days },
+      { label: "No. of Days Present", value: att.days_present },
+      { label: "No. of Days Absent", value: att.days_absent },
+      { label: "% Attendance", value: (att.total_days && att.days_present ? ((att.days_present/att.total_days)*100).toFixed(2) + "%" : "") }
+    ];
+  }
+
+  // Summary fields: calculate from results if possible
+  const numSubjects = r.results.length;
+  let totalScore = 0, totalMax = numSubjects * 100, gpaSum = 0;
+  let gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
+  let perfGrade = "N/A";
+  r.results.forEach(res => {
+    const tot = parseFloat(res.total || 0);
+    totalScore += tot;
+    if (res.grade && gradeMap[res.grade] !== undefined) gpaSum += gradeMap[res.grade];
+  });
+  const stuAverage = numSubjects ? ((totalScore / totalMax) * 100).toFixed(2) + "%" : "";
+  const stuGPA = numSubjects ? (gpaSum / numSubjects).toFixed(2) : "";
+  if (stuGPA >= 4.5) perfGrade = "A (Excellent)";
+  else if (stuGPA >= 4.0) perfGrade = "B (Very Good)";
+  else if (stuGPA >= 3.0) perfGrade = "C (Good)";
+  else if (stuGPA >= 2.0) perfGrade = "D (Pass)";
+  else if (stuGPA >= 1.0) perfGrade = "E (Poor)";
+  else perfGrade = "F (Fail)";
+
+  // Save DOB, calculate age, photo, and email
+  let studentObj = null;
+  if (r.student) {
+    let dobVal = r.student.dob || r.student.DOB || "";
+    let ageVal = r.student.age || calcAge(dobVal);
+    let emailVal = r.student.studentEmail || r.student.email || r.student.parentEmail || "";
+    let photoVal = r.student.photoBase64 || r.student.photo || "";
+    studentObj = {
+      name: r.student.name || r.student.fullname || "",
+      regNo: r.student.regNo || r.student.student_id || r.regNo,
+      gender: r.student.gender || "",
+      DOB: dobVal,
+      email: emailVal,
+      photoBase64: photoVal,
+      age: ageVal
+    };
+  }
+
+  const reportData = {
+    regNo: r.regNo,
+    class: r.class,
+    session: r.session,
+    term: r.term,
+    results: r.results.map(res => ({
+      subject: res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || ""),
+      ca1_score: res.ca1_score !== undefined ? res.ca1_score : "",
+      ca2_score: res.ca2_score !== undefined ? res.ca2_score : "",
+      midterm_score: res.midterm_score !== undefined ? res.midterm_score : "",
+      exam_score: res.exam_score !== undefined ? res.exam_score : "",
+      total: res.total !== undefined ? res.total :
+        (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0)),
+      grade: res.grade || "",
+      remarks: res.remarks || res.remark || "",
+      grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
+      teacher_comment: res.teacher_comment || res.comment || ""
+    })),
+    student: studentObj,
+    perfGrade: perfGrade,
+    classSize: classSize,
+    numSubjects: numSubjects,
+    stuTotalScore: `${totalScore} / ${totalMax}`,
+    stuAverage: stuAverage,
+    stuGPA: stuGPA,
+    resultSummary: perfGrade.split('(')[1]?.replace(')','') || perfGrade,
+    principalComment,
+    principalName,
+    nextTermDate: "Monday 6th of January 2025.",
+    affectiveSkills,
+    psychomotorSkills,
+    attendance: attendanceArr
+  };
+
+  sessionStorage.setItem("reportData", JSON.stringify(reportData));
+  window.open('report.html', '_blank');
+}
+    </script>
   </div>
 </body>
 </html>

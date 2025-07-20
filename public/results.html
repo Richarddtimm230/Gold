@@ -10,6 +10,22 @@
     <style>
       /* Add style for subject position */
       .position-badge { font-weight: bold; color: #007bff; }
+      #pageSpinnerOverlay { 
+        display: none; 
+        position: fixed; 
+        z-index: 9999; 
+        left: 0; top: 0; width: 100vw; height: 100vh; 
+        background: rgba(255,255,255,0.75); 
+        align-items: center; 
+        justify-content: center; 
+      }
+      .spinner {
+        border: 6px solid #e5e5e5;
+        border-top: 6px solid #007bff;
+        border-radius: 50%; width: 56px; height: 56px; animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin { 100% {transform: rotate(360deg);} }
     </style>
 </head>
 <body>
@@ -43,7 +59,7 @@
     <header>
       <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
       <div class="school-title">
-        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <img src="logo-1679575828 (1).jpeg" alt="School Logo" class="logo">
       </div>
       <div class="header-actions">
         <span class="icon" title="Notifications">🔔</span>
@@ -123,7 +139,7 @@
         <tbody id="resultsTbody"></tbody>
       </table>
     </div>
-    <div id="resultsStatus" style="margin:1.2em 0 0.5em 0; color: #007bff; min-height: 22px;"></div>
+    <div id="resultsStatus" style="margin:1.2em 0 0.5em 0; color: #007bff; min-height: 22px;" aria-live="polite"></div>
     <!-- Statistics Modal -->
     <div id="statisticsModal" class="modal" aria-modal="true" role="dialog">
       <div class="modal-content">
@@ -204,7 +220,15 @@
   <button class="support-tab" aria-label="Open Support">Support</button>
   <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
     <script>
-        // --- GRADE, REMARK, POSITION LOGIC ---
+        // --- SPINNER HELPERS ---
+function showSpinner() {
+  document.getElementById('pageSpinnerOverlay').style.display = 'flex';
+}
+function hideSpinner() {
+  document.getElementById('pageSpinnerOverlay').style.display = 'none';
+}
+
+// --- GRADE, REMARK, POSITION LOGIC ---
 function getGradeAndRemark(totalScore) {
   if (totalScore >= 70) return { grade: 'A', remark: 'Excellent' };
   if (totalScore >= 60) return { grade: 'B', remark: 'Very Good' };
@@ -429,6 +453,7 @@ function renderStatsChart(results) {
 // --- FETCH AND RENDER LOGIC ---
 async function fetchResultsAndRender() {
   const statusEl = document.getElementById('resultsStatus');
+  showSpinner();
   try {
     const response = await fetch('https://goldlincschools.onrender.com/api/results');
     if (!response.ok) throw new Error('Network response was not ok');
@@ -441,6 +466,8 @@ async function fetchResultsAndRender() {
       statusEl.style.color = "#dc3545";
       statusEl.textContent = "❌ Failed to load results: " + err.message;
     }
+  } finally {
+    hideSpinner();
   }
 }
 document.addEventListener('DOMContentLoaded', function() {
@@ -483,18 +510,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (termVal) query.push(`term=${encodeURIComponent(termVal)}`);
     if (searchVal) query.push(`search=${encodeURIComponent(searchVal)}`);
     const url = 'https://goldlincschools.onrender.com/api/results' + (query.length ? '?' + query.join('&') : '');
+    const statusEl = document.getElementById('resultsStatus');
+    showSpinner();
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Network response was not ok');
       const filtered = await response.json();
       await renderResultsTable(filtered);
       renderStatsChart(filtered);
+      if (statusEl) statusEl.textContent = '';
     } catch (err) {
-      const statusEl = document.getElementById('resultsStatus');
       if (statusEl) {
         statusEl.style.color = "#dc3545";
         statusEl.textContent = "❌ Failed to filter results: " + err.message;
       }
+    } finally {
+      hideSpinner();
     }
   };
 
@@ -590,6 +621,7 @@ document.getElementById('editResultForm').onsubmit = async function(e) {
   const statusDiv = document.getElementById('editResultStatus');
   statusDiv.style.color = "#888";
   statusDiv.textContent = "Saving...";
+  showSpinner();
   try {
     const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {
       method: 'PATCH',
@@ -608,6 +640,8 @@ document.getElementById('editResultForm').onsubmit = async function(e) {
   } catch (err) {
     statusDiv.style.color = "#dc3545";
     statusDiv.textContent = "❌ " + err.message;
+  } finally {
+    hideSpinner();
   }
 };
 document.getElementById('confirmDeleteBtn').onclick = async function() {
@@ -615,6 +649,7 @@ document.getElementById('confirmDeleteBtn').onclick = async function() {
   const statusDiv = document.getElementById('deleteResultStatus');
   statusDiv.style.color = "#888";
   statusDiv.textContent = "Deleting...";
+  showSpinner();
   try {
     const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {method:'DELETE'});
     if (!res.ok) {
@@ -626,6 +661,8 @@ document.getElementById('confirmDeleteBtn').onclick = async function() {
   } catch(err) {
     statusDiv.style.color = "#dc3545";
     statusDiv.textContent = "❌ " + err.message;
+  } finally {
+    hideSpinner();
   }
 };
 document.getElementById('cancelDeleteBtn').onclick = function() {
@@ -636,6 +673,7 @@ document.getElementById('confirmPublishBtn').onclick = async function() {
   const statusDiv = document.getElementById('publishResultStatus');
   statusDiv.style.color = "#888";
   statusDiv.textContent = "Publishing...";
+  showSpinner();
   try {
     const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}/publish`, {method:'POST'});
     if (!res.ok) {
@@ -647,6 +685,8 @@ document.getElementById('confirmPublishBtn').onclick = async function() {
   } catch(err) {
     statusDiv.style.color = "#dc3545";
     statusDiv.textContent = "❌ " + err.message;
+  } finally {
+    hideSpinner();
   }
 };
 document.getElementById('cancelPublishBtn').onclick = function() {
@@ -673,20 +713,26 @@ async function publishAllResultsOnTable() {
     return;
   }
   if (!confirm(`Publish ALL (${resultIds.length}) displayed results? This cannot be undone!`)) return;
-  document.getElementById('resultsStatus').style.color = "#007bff";
-  document.getElementById('resultsStatus').textContent = "Publishing all results...";
+  const statusEl = document.getElementById('resultsStatus');
+  statusEl.style.color = "#007bff";
+  statusEl.textContent = "Publishing all results...";
+  showSpinner();
   let failed = 0;
-  for (const id of resultIds) {
+  for (let i = 0; i < resultIds.length; i++) {
+    const id = resultIds[i];
     try {
       const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}/publish`, {method:'POST'});
       if (!res.ok) failed++;
     } catch {
       failed++;
     }
+    // Show progress feedback
+    statusEl.textContent = `Publishing ${i + 1}/${resultIds.length}...${failed ? ` (Failed: ${failed})` : ""}`;
   }
   await fetchResultsAndRender();
-  document.getElementById('resultsStatus').style.color = failed > 0 ? "#dc3545" : "#20c997";
-  document.getElementById('resultsStatus').textContent =
+  hideSpinner();
+  statusEl.style.color = failed > 0 ? "#dc3545" : "#20c997";
+  statusEl.textContent =
     failed > 0
       ? `❌ Some results (${failed}) failed to publish.`
       : "✅ All visible results published successfully!";
@@ -698,10 +744,13 @@ async function unpublishAllResultsOnTable() {
     return;
   }
   if (!confirm(`Unpublish (convert to draft) ALL (${resultIds.length}) displayed results?`)) return;
-  document.getElementById('resultsStatus').style.color = "#007bff";
-  document.getElementById('resultsStatus').textContent = "Unpublishing all results (setting to draft)...";
+  const statusEl = document.getElementById('resultsStatus');
+  statusEl.style.color = "#007bff";
+  statusEl.textContent = "Unpublishing all results (setting to draft)...";
+  showSpinner();
   let failed = 0;
-  for (const id of resultIds) {
+  for (let i = 0; i < resultIds.length; i++) {
+    const id = resultIds[i];
     try {
       const res = await fetch(`https://goldlincschools.onrender.com/api/results/${id}`, {
         method: 'PATCH',
@@ -712,10 +761,12 @@ async function unpublishAllResultsOnTable() {
     } catch {
       failed++;
     }
+    statusEl.textContent = `Unpublishing ${i + 1}/${resultIds.length}...${failed ? ` (Failed: ${failed})` : ""}`;
   }
   await fetchResultsAndRender();
-  document.getElementById('resultsStatus').style.color = failed > 0 ? "#dc3545" : "#20c997";
-  document.getElementById('resultsStatus').textContent =
+  hideSpinner();
+  statusEl.style.color = failed > 0 ? "#dc3545" : "#20c997";
+  statusEl.textContent =
     failed > 0
       ? `❌ Some results (${failed}) failed to unpublish.`
       : "✅ All visible results set to draft successfully!";

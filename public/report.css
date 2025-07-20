@@ -29,8 +29,8 @@ body {
 }
 
 .school-logo, .coat-of-arms {
-  height: 65px;
-  width: 65px;
+  height: 75px;
+  width: 85px;
   object-fit: contain;
 }
 
@@ -42,7 +42,7 @@ body {
 .school-info h1 {
   color: #0c4e8c;
   margin: 0;
-  font-size: 2.1rem;
+  font-size: 1.90rem;
   font-weight: bold;
   letter-spacing: 1px;
 }
@@ -58,6 +58,7 @@ body {
   margin-top: 15px;
   margin-bottom: 10px;
   padding: 8px 0;
+  text-align: center;
   border-radius: 5px;
 }
 

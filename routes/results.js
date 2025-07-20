@@ -30,7 +30,6 @@ function ordinalSuffix(pos) {
 
 // Calculate and persist subject positions for a class/session/term/subject
 async function computeAndPersistSubjectPositions({ classId, sessionId, termId, subjectId }) {
-  // Get all results for this subject in this class/session/term
   const filter = {
     class: classId,
     session: sessionId,
@@ -39,7 +38,6 @@ async function computeAndPersistSubjectPositions({ classId, sessionId, termId, s
     status: 'Published'
   };
   const results = await Result.find(filter);
-  // Map: [{_id, total}]
   const arr = results.map(r => {
     let total = 0;
     if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
@@ -59,7 +57,6 @@ async function computeAndPersistSubjectPositions({ classId, sessionId, termId, s
     posMap[arr[i].id] = { position: ordinalSuffix(currentPos), numeric: currentPos };
     prevTotal = arr[i].total;
   }
-  // Persist to DB
   for (const id in posMap) {
     await Result.findByIdAndUpdate(id, {
       subject_position: posMap[id].position,
@@ -106,13 +103,13 @@ router.get('/check', async (req, res) => {
     }
 
     const classObj = await Class.findOne({ name: className });
-    if (!classObj) return res.status(404).json({ error: 'Class not found.' });
+    if (!classObj) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
     const sessionObj = await Session.findOne({ name: session });
-    if (!sessionObj) return res.status(404).json({ error: 'Session not found.' });
+    if (!sessionObj) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
     const termObj = await Term.findOne({ name: term });
-    if (!termObj) return res.status(404).json({ error: 'Term not found.' });
+    if (!termObj) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
     // Find results and populate subject
     const results = await Result.find({
@@ -123,12 +120,7 @@ router.get('/check', async (req, res) => {
       status: 'Published'
     }).populate('subject');
 
-    if (!results.length) return res.status(404).json({ error: 'No result found.' });
-
-    // --- For position calculation, get all subject IDs for this class/session/term ---
-    const allSubjects = await Subject.find({});
-    const subjectIdMap = {};
-    allSubjects.forEach(sub => { subjectIdMap[sub.name] = sub._id; });
+    if (!results.length) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
     // --- Compose result data, auto-fill grade/remark/position ---
     const data = [];
@@ -153,7 +145,6 @@ router.get('/check', async (req, res) => {
           subjectId: r.subject._id
         });
         subjectPos = posMap[r._id.toString()]?.position || r.subject_position || '';
-        // Update result doc with grade/remark/position if needed
         if (r.grade !== grade || r.remarks !== remark || r.subject_position !== subjectPos) {
           await Result.findByIdAndUpdate(r._id, {
             grade: grade,
@@ -228,7 +219,6 @@ router.get('/check', async (req, res) => {
   }
 });
 
-// --- REMAINING ROUTES (UNCHANGED) ---
 router.post('/upload', async (req, res) => {
   try {
     const { session, term, class: className, subject, resultType, results } = req.body;
@@ -270,6 +260,21 @@ router.post('/upload', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const query = {};
+    // Strict session and term filtering: both must be found, else return unavailable
+    if (req.query.session) {
+      const sess = await Session.findOne({ name: req.query.session });
+      if (!sess) {
+        return res.status(404).json({ error: "Result unavailable for selected session and term." });
+      }
+      query.session = sess._id;
+    }
+    if (req.query.term) {
+      const term = await Term.findOne({ name: req.query.term });
+      if (!term) {
+        return res.status(404).json({ error: "Result unavailable for selected session and term." });
+      }
+      query.term = term._id;
+    }
     if (req.query.student_id) {
       const student = await Student.findOne({ student_id: req.query.student_id });
       if (student) query.student = student._id;
@@ -277,14 +282,6 @@ router.get('/', async (req, res) => {
     if (req.query.class) {
       const klass = await Class.findOne({ name: req.query.class });
       if (klass) query.class = klass._id;
-    }
-    if (req.query.session) {
-      const sess = await Session.findOne({ name: req.query.session });
-      if (sess) query.session = sess._id;
-    }
-    if (req.query.term) {
-      const term = await Term.findOne({ name: req.query.term });
-      if (term) query.term = term._id;
     }
     if (req.query.subject) {
       const subject = await Subject.findOne({ name: req.query.subject });
@@ -298,6 +295,10 @@ router.get('/', async (req, res) => {
       .populate('term')
       .populate('subject')
       .sort({ _id: -1 });
+
+    if (!results.length) {
+      return res.status(404).json({ error: "Result unavailable for selected session and term." });
+    }
 
     res.json(results);
   } catch (err) {

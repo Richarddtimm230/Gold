@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Check Results | Gold and Linc Schools</title>
-  <meta name="viewport" content="width=device-width, initial-scale=0.85">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="stylesheet" href="check-results.css">
+  <link rel="stylesheet" href="check-results-admin.css">
 </head>
 <body>
   <div class="results-root">
@@ -24,16 +24,15 @@
         <div class="section-title"><i class="fa fa-search"></i> Check Result (Admin)</div>
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
           <div class="result-form-group">
-            <label class="result-form-label" for="regNoInput">Registration Number</label>
-            <!-- Make this field fillable for admin -->
+            <label for="regNoInput">Registration Number</label>
             <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" required>
           </div>
           <div class="result-form-group">
-            <label class="result-form-label" for="scratchCardInput">Scratch Card</label>
+            <label for="scratchCardInput">Scratch Card</label>
             <input id="scratchCardInput" class="result-form-input" placeholder="Enter Scratch Card" maxlength="8" required>
           </div>
           <div class="result-form-group">
-            <label class="result-form-label" for="classInput">Class</label>
+            <label for="classInput">Class</label>
             <select id="classInput" class="result-form-select" required>
               <option value="">Select Class</option>
               <option>Beginner</option>
@@ -58,7 +57,7 @@
             </select>
           </div>
           <div class="result-form-group">
-            <label class="result-form-label" for="sessionInput">Session</label>
+            <label for="sessionInput">Session</label>
             <select id="sessionInput" class="result-form-select" required>
               <option value="">Select Session</option>
               <option>2024–2025</option>
@@ -67,7 +66,7 @@
             </select>
           </div>
           <div class="result-form-group">
-            <label class="result-form-label" for="termInput">Term</label>
+            <label for="termInput">Term</label>
             <select id="termInput" class="result-form-select" required>
               <option value="">Select Term</option>
               <option>FIRST TERM</option>
@@ -87,7 +86,12 @@
           <span><b>Class:</b> <span id="dispClass"></span></span>
           <span><b>Session:</b> <span id="dispSession"></span></span>
           <span><b>Term:</b> <span id="dispTerm"></span></span>
+          <span><b>Student Name:</b> <span id="dispName"></span></span>
+          <span><b>Principal's Comment:</b> <span id="dispPrincipalComment"></span></span>
+          <span><b>Class Size:</b> <span id="dispClassSize"></span></span>
         </div>
+        <div id="skillsSection" style="margin-bottom:16px;"></div>
+        <div id="attendanceSection" style="margin-bottom:16px;"></div>
         <div class="results-table-container">
           <table class="results-table" id="resultsTable">
             <thead>
@@ -145,7 +149,6 @@
     <script>
       const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-      // --- Helper for date of birth to age ---
       function calcAge(dobStr) {
         if (!dobStr) return "";
         let date;
@@ -174,7 +177,6 @@
         return age;
       }
 
-      // --- Main: Handle result search using /api/results/check ---
       async function handleResultSearch(e) {
         e.preventDefault();
         const regNo = document.getElementById("regNoInput").value.trim();
@@ -192,7 +194,6 @@
         }
 
         try {
-          // Use /api/results/check for scratch card validation
           const params = new URLSearchParams({
             regNo,
             scratchCard,
@@ -210,20 +211,23 @@
             return false;
           }
 
-          // Fill all data needed for report page
-          window._lastDisplayedResult = respJson;
+          // Extract details
+          const { results, skillsReport, attendance, principalComment, classSize, student } = respJson;
 
-          // Display result
-          displayResult({
+          window._lastDisplayedResult = {
             regNo,
             class: klass,
             session,
             term,
-            results: respJson.results,
-            skillsReport: respJson.skillsReport,
-            classSize: respJson.classSize,
-            student: respJson.student
-          });
+            results,
+            skillsReport,
+            attendance,
+            principalComment,
+            classSize,
+            student
+          };
+
+          displayResult(window._lastDisplayedResult);
         } catch (err) {
           errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
           errorBox.style.display = "block";
@@ -238,6 +242,46 @@
         document.getElementById("dispClass").textContent = r.class;
         document.getElementById("dispSession").textContent = r.session;
         document.getElementById("dispTerm").textContent = r.term;
+        document.getElementById("dispName").textContent = r.student?.name || "";
+        document.getElementById("dispPrincipalComment").textContent = r.principalComment || r.skillsReport?.comment || "";
+        document.getElementById("dispClassSize").textContent = r.classSize || "";
+
+        // Skills section
+        let skillsHTML = "";
+        if (r.skillsReport && r.skillsReport.skills) {
+          if (r.skillsReport.skills.affective && Object.keys(r.skillsReport.skills.affective).length) {
+            skillsHTML += `<b>Affective Skills:</b><ul>`;
+            for (const [skill, score] of Object.entries(r.skillsReport.skills.affective)) {
+              skillsHTML += `<li>${skill}: ${score}</li>`;
+            }
+            skillsHTML += `</ul>`;
+          }
+          if (r.skillsReport.skills.psychomotor && Object.keys(r.skillsReport.skills.psychomotor).length) {
+            skillsHTML += `<b>Psychomotor Skills:</b><ul>`;
+            for (const [skill, score] of Object.entries(r.skillsReport.skills.psychomotor)) {
+              skillsHTML += `<li>${skill}: ${score}</li>`;
+            }
+            skillsHTML += `</ul>`;
+          }
+        }
+        document.getElementById("skillsSection").innerHTML = skillsHTML;
+
+        // Attendance section
+        let attendanceHTML = "";
+        let att = r.attendance || r.skillsReport?.attendance || {};
+        if (att && Object.keys(att).length) {
+          attendanceHTML += `<b>Attendance:</b><ul>`;
+          if (att.total_days !== undefined) attendanceHTML += `<li>Total Days: ${att.total_days}</li>`;
+          if (att.days_present !== undefined) attendanceHTML += `<li>Days Present: ${att.days_present}</li>`;
+          if (att.days_absent !== undefined) attendanceHTML += `<li>Days Absent: ${att.days_absent}</li>`;
+          if (att.days_present !== undefined && att.total_days !== undefined) {
+            attendanceHTML += `<li>Attendance %: ${((att.days_present / att.total_days) * 100).toFixed(2)}%</li>`;
+          }
+          attendanceHTML += `</ul>`;
+        }
+        document.getElementById("attendanceSection").innerHTML = attendanceHTML;
+
+        // Results table
         const tbody = document.getElementById("resultsTable").querySelector("tbody");
         tbody.innerHTML = Array.isArray(r.results) ? r.results.map(res => `
           <tr>
@@ -263,8 +307,8 @@
 
         let affectiveSkills = [];
         let psychomotorSkills = [];
-        let attendance = [];
-        let principalComment = "This is an excellent result, do not rest on your oars.";
+        let attendanceArr = [];
+        let principalComment = r.principalComment || "This is an excellent result, do not rest on your oars.";
         let principalName = "ABIODUN FESTUS ADENIYI";
         let classSize = r.classSize || 17;
 
@@ -276,17 +320,14 @@
             psychomotorSkills = Object.entries(r.skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
           }
         }
-        if (r.skillsReport && r.skillsReport.attendance) {
-          const a = r.skillsReport.attendance;
-          attendance = [
-            { label: "No. of School Days", value: a.total_days },
-            { label: "No. of Days Present", value: a.days_present },
-            { label: "No. of Days Absent", value: a.days_absent },
-            { label: "% Attendance", value: (a.total_days && a.days_present ? ((a.days_present/a.total_days)*100).toFixed(2) + "%" : "") }
+        let att = r.attendance || r.skillsReport?.attendance || {};
+        if (att && Object.keys(att).length) {
+          attendanceArr = [
+            { label: "No. of School Days", value: att.total_days },
+            { label: "No. of Days Present", value: att.days_present },
+            { label: "No. of Days Absent", value: att.days_absent },
+            { label: "% Attendance", value: (att.total_days && att.days_present ? ((att.days_present/att.total_days)*100).toFixed(2) + "%" : "") }
           ];
-        }
-        if (r.skillsReport && r.skillsReport.comment) {
-          principalComment = r.skillsReport.comment;
         }
 
         // Summary fields: calculate from results if possible
@@ -357,7 +398,7 @@
           nextTermDate: "Monday 6th of January 2025.",
           affectiveSkills,
           psychomotorSkills,
-          attendance
+          attendance: attendanceArr
         };
 
         sessionStorage.setItem("reportData", JSON.stringify(reportData));

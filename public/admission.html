@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admission Management | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + Flowbite + Tailwind + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f6f8fa; color: #22305a; min-height: 100vh; }
+    .admission-bg { background: linear-gradient(180deg, #ddeaff 0%, #f6f8fa 100%); }
+    .modal-overlay { background: rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body class="admission-bg">
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-[#2647a6]">Admission Management</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-[#2647a6] text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='admin.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Admin Dashboard
+      </button>
+    </div>
+  </nav>
+  <main class="max-w-6xl mx-auto mt-6 px-2">
+    <!-- Admission Setup Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-cogs"></i> Set Up Admission</h2>
+      <form id="admissionSetupForm" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+        <div>
+          <label class="block text-sm font-bold mb-1">Session</label>
+          <select name="session" id="sessionSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option value="">Select Session</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Term</label>
+          <select name="term" id="termSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option value="">Select Term</option>
+            <option>First Term</option>
+            <option>Second Term</option>
+            <option>Third Term</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Class</label>
+          <select name="classId" id="classSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option value="">Select Class</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Arm</label>
+          <select name="armId" id="armSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option value="">Select Arm</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Start Date</label>
+          <input type="date" name="startDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">End Date</label>
+          <input type="date" name="endDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Application Fee (₦)</label>
+          <input type="number" name="applicationFee" min="0" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div class="md:col-span-6">
+          <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+            <i class="fa fa-save mr-1"></i> Save Setup
+          </button>
+        </div>
+      </form>
+      <div id="admissionSetupMessage" class="mt-3 text-sm"></div>
+    </div>
+    <!-- Review Applications Table -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-file-alt"></i> Review Applications</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm" id="applicationsTable">
+          <thead class="bg-[#e9f0fe]">
+            <tr>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Applicant Name</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Session</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Term</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Class</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Arm</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Date Applied</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Status</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="applicationsTableBody" class="bg-white divide-y divide-[#e9f0fe]">
+            <tr><td colspan="8" class="py-2 px-4">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Application Modal -->
+    <div id="applicationModal" tabindex="-1" class="hidden modal-overlay fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full">
+      <div class="bg-white rounded-xl shadow-md p-6 w-full max-w-lg">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-[#2647a6] flex items-center gap-2"><i class="fa fa-user"></i> Application Details</h3>
+          <button type="button" class="text-gray-400 hover:text-gray-900" onclick="closeModal('applicationModal')">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div id="applicationModalContent"></div>
+        <div class="flex gap-2 mt-4">
+          <button id="approveBtn" class="px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition"><i class="fa fa-check mr-1"></i> Approve</button>
+          <button id="rejectBtn" class="px-6 py-2 rounded-lg bg-[#e74c3c] text-white font-bold hover:bg-[#c0392b] transition"><i class="fa fa-times mr-1"></i> Reject</button>
+        </div>
+        <div id="applicationModalMessage" class="mt-3 text-sm"></div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    const API_BASE = "/api";
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
+    // ========== Fetch dropdown options ==========
+    async function loadDropdowns() {
+      // Sessions
+      const sessionRes = await fetch(API_BASE + "/sessions", { headers: { Authorization: "Bearer " + token }});
+      const sessions = await sessionRes.json();
+      const sessionSelect = document.getElementById('sessionSelect');
+      sessionSelect.innerHTML = '<option value="">Select Session</option>' + sessions.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+
+      // Classes
+      const classRes = await fetch(API_BASE + "/classes", { headers: { Authorization: "Bearer " + token }});
+      const classes = await classRes.json();
+      const classSelect = document.getElementById('classSelect');
+      classSelect.innerHTML = '<option value="">Select Class</option>' + classes.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+
+      // Arms
+      const armRes = await fetch(API_BASE + "/arms", { headers: { Authorization: "Bearer " + token }});
+      const arms = await armRes.json();
+      const armSelect = document.getElementById('armSelect');
+      armSelect.innerHTML = '<option value="">Select Arm</option>' + arms.map(a => `<option value="${a._id}">${a.name}</option>`).join('');
+    }
+    loadDropdowns();
+
+    // Admission Setup
+    document.getElementById('admissionSetupForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('admissionSetupMessage').textContent = "Saving...";
+      try {
+        const res = await fetch(API_BASE + "/admission/setup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          document.getElementById('admissionSetupMessage').textContent = "Admission setup saved!";
+        } else {
+          const err = await res.json();
+          document.getElementById('admissionSetupMessage').textContent = err.error || "Error saving setup.";
+        }
+      } catch {
+        document.getElementById('admissionSetupMessage').textContent = "Network error.";
+      }
+    };
+
+    // Applications Table
+    async function loadApplications() {
+      const tbody = document.getElementById('applicationsTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Loading...</td></tr>';
+      try {
+        const res = await fetch(API_BASE + "/admission/applications", { headers: { Authorization: "Bearer " + token } });
+        if (res.ok) {
+          const applications = await res.json();
+          if (!applications.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">No applications found.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = '';
+          applications.forEach(app => {
+            tbody.innerHTML += `
+              <tr>
+                <td class="py-2 px-4">${app.name}</td>
+                <td class="py-2 px-4">${app.sessionName || '-'}</td>
+                <td class="py-2 px-4">${app.term || '-'}</td>
+                <td class="py-2 px-4">${app.className || '-'}</td>
+                <td class="py-2 px-4">${app.armName || '-'}</td>
+                <td class="py-2 px-4">${app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : ''}</td>
+                <td class="py-2 px-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                    app.status === 'Approved' ? 'bg-[#18ba89] text-white' :
+                    app.status === 'Rejected' ? 'bg-[#e74c3c] text-white' :
+                    'bg-[#e9f0fe] text-[#22305a]'
+                  }">${app.status}</span>
+                </td>
+                <td class="py-2 px-4 flex gap-2">
+                  <button class="px-2 py-1 rounded-lg bg-[#2647a6] text-white text-xs font-bold hover:bg-[#18308b]" onclick="showApplicationModal('${app._id}')">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Error loading applications.</td></tr>';
+        }
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Network error.</td></tr>';
+      }
+    }
+    loadApplications();
+
+    // Application Modal
+    window.showApplicationModal = async function(applicationId) {
+      document.getElementById('applicationModalContent').innerHTML = "Loading...";
+      openModal('applicationModal');
+      try {
+        const res = await fetch(API_BASE + "/admission/application/" + applicationId, { headers: { Authorization: "Bearer " + token } });
+        if (!res.ok) throw new Error("Failed");
+        const app = await res.json();
+        document.getElementById('applicationModalContent').innerHTML = `
+          <div><b>Name:</b> ${app.name}</div>
+          <div><b>Session:</b> ${app.sessionName || '-'}</div>
+          <div><b>Term:</b> ${app.term || '-'}</div>
+          <div><b>Class:</b> ${app.className || '-'}</div>
+          <div><b>Arm:</b> ${app.armName || '-'}</div>
+          <div><b>Date Applied:</b> ${app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : ''}</div>
+          <div><b>Status:</b> ${app.status}</div>
+          <div><b>Email:</b> ${app.email || '-'}</div>
+          <div><b>Phone:</b> ${app.phone || '-'}</div>
+          <div><b>Documents:</b> ${app.documents ? `<a target="_blank" href="${app.documents}">View</a>` : '-'}</div>
+        `;
+        document.getElementById('approveBtn').onclick = async function() {
+          await updateApplicationStatus(applicationId, "Approved");
+        };
+        document.getElementById('rejectBtn').onclick = async function() {
+          await updateApplicationStatus(applicationId, "Rejected");
+        };
+      } catch {
+        document.getElementById('applicationModalContent').innerHTML = "Could not load application details.";
+      }
+    };
+
+    async function updateApplicationStatus(applicationId, status) {
+      document.getElementById('applicationModalMessage').textContent = "Updating...";
+      try {
+        const res = await fetch(API_BASE + "/admission/application/" + applicationId, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          document.getElementById('applicationModalMessage').textContent = "Application " + status + "!";
+          closeModal('applicationModal');
+          loadApplications();
+        } else {
+          const err = await res.json();
+          document.getElementById('applicationModalMessage').textContent = err.error || "Error updating status.";
+        }
+      } catch {
+        document.getElementById('applicationModalMessage').textContent = "Network error.";
+      }
+    }
+
+    // Responsive: close modal on outside click (mobile)
+    window.onclick = function(event) {
+      const modal = document.getElementById('applicationModal');
+      if (modal && !modal.classList.contains('hidden') && event.target === modal) closeModal('applicationModal');
+    };
+  </script>
+</body>
+</html>

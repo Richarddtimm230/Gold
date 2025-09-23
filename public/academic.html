@@ -1,476 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Academic Management - Admin Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap 5 CDN for modals and nice styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-      body {
-        margin: 0;
-        font-family: 'Segoe UI', Arial, sans-serif;
-        background: #f4f8fb;
-        color: #222;
-      }
-      .sidebar {
-          width: 210px;
-          background: #fff;
-          border-right: 1px solid #ececec;
-          min-height: 100vh;
-          position: fixed;
-          left: 0; top: 0;
-          padding-bottom: 40px;
-          z-index: 2;
-      }
-      .sidebar .profile {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 22px 18px 10px 18px;
-          border-bottom: 1px solid #f3f3f3;
-      }
-      .sidebar .avatar {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          object-fit: cover;
-          background: #f5f5f5;
-      }
-      .sidebar .name {
-          font-weight: bold;
-          font-size: 15px;
-          margin-bottom: 2px;
-      }
-      .sidebar .role {
-          font-size: 12px;
-          color: #888;
-      }
-      .sidebar nav {
-          margin-top: 25px;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          padding-left: 10px;
-      }
-      .sidebar nav a {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          color: #222;
-          text-decoration: none;
-          padding: 9px 15px;
-          border-radius: 5px 0 0 5px;
-          font-size: 15px;
-          font-weight: 500;
-          transition: background .13s;
-      }
-      .sidebar nav a.active, .sidebar nav a:hover {
-          background: #e6f0fa;
-          color: #007bff;
-      }
-
-      .main-content {
-          margin-left: 210px;
-          padding: 0 0 30px 0;
-          min-height: 100vh;
-      }
-      header {
-          background: #fff;
-          padding: 18px 30px 6px 30px;
-          border-bottom: 1px solid #ececec;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-      }
-      .school-title {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 17px;
-          font-weight: bold;
-          color: #007bff;
-      }
-      .school-title .logo {
-          width: 28px;
-          height: 28px;
-          border-radius: 6px;
-      }
-      .header-actions {
-          display: flex;
-          gap: 16px;
-          font-size: 21px;
-          color: #666;
-      }
-      .page-title {
-          padding: 20px 30px 10px 30px;
-          border-bottom: 1px solid #f2f2f2;
-          background: #f8fafc;
-      }
-      .page-title h2 {
-          margin: 0;
-          font-size: 23px;
-          font-weight: 600;
-          color: #222;
-      }
-      .admin-badge {
-          background: #20c997;
-          color: #fff;
-          font-size: 13px;
-          padding: 2px 10px;
-          border-radius: 12px;
-          margin-left: 10px;
-      }
-      @media (max-width: 800px) {
-          .sidebar { position: static; width: 100%; min-height: unset; border-right: none; }
-          .main-content { margin-left: 0; }
-          .academic-section, .academic-actions, .page-title { margin-left: 0; margin-right: 0; }
-      }
-    </style>
+  <meta charset="UTF-8">
+  <title>Academics | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + Flowbite + Tailwind + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f6f8fa; color: #22305a; min-height: 100vh; }
+    .academics-bg { background: linear-gradient(180deg, #ddeaff 0%, #f6f8fa 100%); }
+    .sidebar { width: 250px; background: #fff; border-right: 1px solid #e3e8ee; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; transition: left 0.3s; }
+    .sidebar.hide { left: -260px; }
+    .sidebar nav a { display: flex; align-items: center; gap: 12px; font-size: 17px; padding: 13px 20px; color: #455a64; text-decoration: none; border-left: 4px solid transparent; transition: background 0.2s, border 0.2s;}
+    .sidebar nav a.active, .sidebar nav a:hover { background: #e3e8ee; border-left: 4px solid #007bff; color: #007bff;}
+    .sidebar .profile { display: flex; align-items: center; padding: 20px 18px; border-bottom: 1px solid #e3e8ee;}
+    .sidebar .avatar { width: 44px; height: 44px; border-radius: 50%; margin-right: 13px;}
+    @media (max-width: 900px) { .sidebar { left: -260px; position: fixed; } .sidebar.show { left: 0; } }
+    .main-content { margin-left: 250px; padding: 24px 18px 40px 18px; transition: margin-left 0.3s;}
+    @media (max-width: 900px) { .main-content { margin-left: 0; padding: 70px 8px 40px 8px;} }
+    .mobile-navbar { position: fixed; top: 0; left: 0; right: 0; background: #fff; z-index: 45; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+    .mobile-navbar .flex { min-height: 60px; }
+    .tablist { display: flex; gap: 6px; margin-top: 18px; flex-wrap: wrap;}
+    .tablist button { background: #f1f6fb; color: #2647a6; padding: 9px 23px; border-radius: 7px; font-weight: 600; font-size: 16px; transition: all 0.2s;}
+    .tablist button.active { background: #2647a6; color: #fff;}
+    .tablist button:hover:not(.active) { background: #e3e8ee;}
+    .tab-content { margin-top: 28px;}
+    .section-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); padding: 21px 24px; margin-bottom: 30px;}
+    .section-title { font-size: 19px; font-weight: bold; color: #2647a6; display: flex; gap: 10px; align-items: center; margin-bottom: 13px;}
+    .dropdown { min-width: 190px; }
+    .modal-overlay { background: rgba(0,0,0,0.25);}
+  </style>
 </head>
-<body>
-    <div class="sidebar">
-        <div class="profile">
-            <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+<body class="academics-bg">
+  <!-- Mobile Navbar -->
+  <nav class="mobile-navbar md:hidden">
+    <div class="flex justify-between items-center px-4 py-2">
+      <div class="flex items-center gap-2">
+        <button id="menuToggleBtn" class="text-2xl text-[#2647a6]"><i class="fa fa-bars"></i></button>
+        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+        <span class="text-lg font-bold text-[#2647a6]">Academics</span>
+      </div>
+      <button onclick="window.location.href='admin.html'" class="px-3 py-1 rounded bg-[#2647a6] text-white text-sm font-semibold hover:bg-[#18308b]"><i class="fa fa-arrow-left"></i> Admin</button>
+    </div>
+  </nav>
+  <!-- Desktop Sidebar -->
+  <aside class="sidebar hide md:block" id="academicsSidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Admin&background=2647a6&color=fff" class="avatar" alt="Admin">
+      <div>
+        <div class="font-bold">ADMIN</div>
+        <div class="text-xs text-[#2647a6]">Academics Panel</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#" class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</a>
+      <a href="#" data-tab="terms"><i class="fa fa-clock"></i> Terms</a>
+      <a href="#" data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</a>
+      <a href="#" data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</a>
+      <a href="#" data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</a>
+    </nav>
+  </aside>
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="tablist" id="academicsTabs">
+      <button class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</button>
+      <button data-tab="terms"><i class="fa fa-clock"></i> Terms</button>
+      <button data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</button>
+      <button data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</button>
+      <button data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</button>
+    </div>
+    <div class="tab-content" id="academicsTabContent">
+      <!-- Sessions Section -->
+      <div class="section-card" data-section="sessions">
+        <div class="section-title"><i class="fa fa-calendar"></i> Session Setup & Update</div>
+        <form id="sessionForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Session Name</label>
+            <input type="text" name="name" placeholder="2025/2026" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Start Date</label>
+            <input type="date" name="startDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">End Date</label>
+            <input type="date" name="endDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div class="md:col-span-3">
+            <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+              <i class="fa fa-save mr-1"></i> Save Session
+            </button>
+          </div>
+        </form>
+        <div id="sessionMessage" class="text-sm mb-4"></div>
+        <div>
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#e9f0fe]">
+              <tr>
+                <th class="py-2 px-3">Session</th>
+                <th class="py-2 px-3">Start</th>
+                <th class="py-2 px-3">End</th>
+                <th class="py-2 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sessionsTableBody">
+              <tr><td class="py-2 px-3" colspan="4">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Terms Section -->
+      <div class="section-card hidden" data-section="terms">
+        <div class="section-title"><i class="fa fa-clock"></i> Term Management</div>
+        <form id="termForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Term Name</label>
+            <select name="name" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              <option>First Term</option>
+              <option>Second Term</option>
+              <option>Third Term</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Session</label>
+            <select name="sessionId" id="termSessionSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Start Date</label>
+            <input type="date" name="startDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">End Date</label>
+            <input type="date" name="endDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div class="md:col-span-3">
+            <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+              <i class="fa fa-save mr-1"></i> Save Term
+            </button>
+          </div>
+        </form>
+        <div id="termMessage" class="text-sm mb-4"></div>
+        <div>
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#e9f0fe]">
+              <tr>
+                <th class="py-2 px-3">Term</th>
+                <th class="py-2 px-3">Session</th>
+                <th class="py-2 px-3">Start</th>
+                <th class="py-2 px-3">End</th>
+                <th class="py-2 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="termsTableBody">
+              <tr><td class="py-2 px-3" colspan="5">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Examinations Section -->
+      <div class="section-card hidden" data-section="exams">
+        <div class="section-title"><i class="fa fa-file-alt"></i> Examinations</div>
+        <div class="tablist" id="examTabs">
+          <button class="active" data-examtab="schedule"><i class="fa fa-calendar-alt"></i> Schedule</button>
+          <button data-examtab="mode"><i class="fa fa-wrench"></i> Mode Settings</button>
+        </div>
+        <div class="tab-content" id="examTabContent">
+          <!-- Exam Schedule -->
+          <div data-examsection="schedule">
+            <form id="examScheduleForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+              <div>
+                <label class="block text-sm font-bold mb-1">Exam Title</label>
+                <input type="text" name="title" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-1">Term</label>
+                <select name="termId" id="examTermSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-1">Class</label>
+                <select name="classId" id="examClassSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-1">Date</label>
+                <input type="date" name="date" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              </div>
+              <div class="md:col-span-4">
+                <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+                  <i class="fa fa-save mr-1"></i> Save Exam Schedule
+                </button>
+              </div>
+            </form>
+            <div id="examScheduleMessage" class="text-sm mb-4"></div>
             <div>
-                <div class="name">RICHARD TIMOTHY</div>
-                <div class="role">System Administrator</div>
+              <table class="min-w-full text-sm">
+                <thead class="bg-[#e9f0fe]">
+                  <tr>
+                    <th class="py-2 px-3">Title</th>
+                    <th class="py-2 px-3">Term</th>
+                    <th class="py-2 px-3">Class</th>
+                    <th class="py-2 px-3">Date</th>
+                    <th class="py-2 px-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="examScheduleTableBody">
+                  <tr><td class="py-2 px-3" colspan="5">Loading...</td></tr>
+                </tbody>
+              </table>
             </div>
+          </div>
+          <!-- Exam Mode Settings -->
+          <div data-examsection="mode" class="hidden">
+            <form id="examModeForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
+              <div>
+                <label class="block text-sm font-bold mb-1">Exam</label>
+                <select name="examId" id="modeExamSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-1">Mode</label>
+                <select name="mode" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+                  <option>Paper</option>
+                  <option>CBT</option>
+                  <option>Oral</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-1">Duration (minutes)</label>
+                <input type="number" name="duration" min="1" max="300" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              </div>
+              <div class="md:col-span-3">
+                <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+                  <i class="fa fa-save mr-1"></i> Update Mode
+                </button>
+              </div>
+            </form>
+            <div id="examModeMessage" class="text-sm mb-4"></div>
+            <div>
+              <table class="min-w-full text-sm">
+                <thead class="bg-[#e9f0fe]">
+                  <tr>
+                    <th class="py-2 px-3">Exam Title</th>
+                    <th class="py-2 px-3">Mode</th>
+                    <th class="py-2 px-3">Duration</th>
+                    <th class="py-2 px-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="examModeTableBody">
+                  <tr><td class="py-2 px-3" colspan="4">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <nav>
-            <a href="index.html"><span>🏠</span> Dashboard</a>
-            <a href="#"><span>🎓</span> Admission</a>
-            <a class="active" href="academic.html"><span>📚</span> Academics</a>
-            <a href="results.html"><span>📄</span> Results</a>
-            <a href="#"><span>💰</span> Finance</a>
-            <a href="#"><span>⚙️</span> Admin</a>
-        </nav>
-    </div>
-    <div class="main-content">
-        <header>
-            <div class="school-title">
-                <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
-                <span>GOLD AND LINC SCHOOLS</span>
-            </div>
-            <div class="header-actions">
-                <span class="icon">🔔</span>
-                <span class="icon">❓</span>
-                <span class="icon">⚙️</span>
-            </div>
-        </header>
-        <div class="page-title">
-            <h2>Academic Management <span class="admin-badge">Admin</span></h2>
+      </div>
+      <!-- CBT & Mocks Section -->
+      <div class="section-card hidden" data-section="cbt">
+        <div class="section-title"><i class="fa fa-desktop"></i> CBT & Mock Exams Setup</div>
+        <form id="cbtForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Mock Title</label>
+            <input type="text" name="title" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Class</label>
+            <select name="classId" id="cbtClassSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">CBT Mode</label>
+            <select name="mode" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              <option>Multiple Choice</option>
+              <option>Essay</option>
+              <option>Mixed</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Date</label>
+            <input type="date" name="date" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          </div>
+          <div class="md:col-span-4">
+            <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+              <i class="fa fa-save mr-1"></i> Setup CBT/Mock
+            </button>
+          </div>
+        </form>
+        <div id="cbtMessage" class="text-sm mb-4"></div>
+        <div>
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#e9f0fe]">
+              <tr>
+                <th class="py-2 px-3">Title</th>
+                <th class="py-2 px-3">Class</th>
+                <th class="py-2 px-3">Mode</th>
+                <th class="py-2 px-3">Date</th>
+                <th class="py-2 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cbtTableBody">
+              <tr><td class="py-2 px-3" colspan="5">Loading...</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <div class="container mt-4">
-            <div class="d-flex mb-4 gap-2">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">➕ Add Class</button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addArmModal">➕ Allocate Arm</button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">➕ Allocate Class Subjects</button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">➕ Allocate Class Teacher</button>
-            </div>
-            <div id="academicStatus" class="alert alert-success d-none"></div>
-            <div class="academic-section">
-                <h3>Classes</h3>
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Class Name</th>
-                            <th>Category</th>
-                            <th>Arms</th>
-                            <th>Subjects</th>
-                            <th>Class Teacher(s)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="classesTbody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
+      </div>
+      <!-- Results Section -->
+      <div class="section-card hidden" data-section="results">
+        <div class="section-title"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</div>
+        <form id="resultsFilterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-sm font-bold mb-1">Session</label>
+            <select name="sessionId" id="resultsSessionSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Class</label>
+            <select name="classId" id="resultsClassSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1">Exam Type</label>
+            <select name="type" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]">
+              <option value="">All</option>
+              <option>CBT</option>
+              <option>Mock</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#2647a6] text-white font-bold hover:bg-[#18308b] transition">
+              <i class="fa fa-search mr-1"></i> Filter Results
+            </button>
+          </div>
+        </form>
+        <div id="resultsMessage" class="text-sm mb-4"></div>
+        <div>
+          <table class="min-w-full text-sm">
+            <thead class="bg-[#e9f0fe]">
+              <tr>
+                <th class="py-2 px-3">Student</th>
+                <th class="py-2 px-3">Class</th>
+                <th class="py-2 px-3">Type</th>
+                <th class="py-2 px-3">Exam</th>
+                <th class="py-2 px-3">Score</th>
+                <th class="py-2 px-3">Date</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody">
+              <tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>
+            </tbody>
+          </table>
         </div>
-    </div>
-
-    <!-- Add Class Modal -->
-    <div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <form class="modal-content" id="addClassForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addClassModalLabel">Add Class</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label for="className" class="form-label">Class Name</label>
-                  <input type="text" class="form-control" id="className" name="className" required placeholder="e.g. JSS1">
-              </div>
-              <div class="mb-3">
-                  <label for="classCategory" class="form-label">Class Category</label>
-                  <input type="text" class="form-control" id="classCategory" name="classCategory" placeholder="e.g. Junior Secondary">
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Add</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-          </div>
-        </form>
       </div>
     </div>
-
-    <!-- Add Arm Modal -->
-    <div class="modal fade" id="addArmModal" tabindex="-1" aria-labelledby="addArmModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <form class="modal-content" id="addArmForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addArmModalLabel">Allocate Arm to Class</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label for="armClassSelect" class="form-label">Select Class</label>
-                  <select class="form-select" id="armClassSelect" required></select>
-              </div>
-              <div class="mb-3">
-                  <label for="armNames" class="form-label">Arm Name(s) (comma-separated)</label>
-                  <input type="text" class="form-control" id="armNames" required placeholder="e.g. A, B, C">
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Allocate Arm(s)</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Add Subject Modal -->
-    <div class="modal fade" id="addSubjectModal" tabindex="-1" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <form class="modal-content" id="addSubjectForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addSubjectModalLabel">Add Subject to Class(es)</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body row">
-              <div class="col-md-6 mb-3">
-                  <label for="subjectName" class="form-label">Subject Name (to add new)</label>
-                  <input type="text" class="form-control" id="subjectName" placeholder="e.g. Mathematics">
-              </div>
-              <div class="col-md-6 mb-3">
-                  <label for="subjectClassSelect" class="form-label">Add to Class(es)</label>
-                  <select class="form-select" id="subjectClassSelect" multiple required></select>
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Add Subject</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Add Teacher Modal -->
-    <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <form class="modal-content" id="addTeacherForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addTeacherModalLabel">Allocate Class Teacher</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label for="teacherClassSelect" class="form-label">Select Class</label>
-                  <select class="form-select" id="teacherClassSelect" required></select>
-              </div>
-              <div class="mb-3">
-                  <label for="teacherArmSelect" class="form-label">Select Arm (optional)</label>
-                  <select class="form-select" id="teacherArmSelect">
-                      <option value="">-- Whole Class --</option>
-                  </select>
-              </div>
-              <div class="mb-3">
-                  <label for="teacherName" class="form-label">Teacher Name</label>
-                  <input type="text" class="form-control" id="teacherName" required placeholder="e.g. Mrs. Okafor">
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Allocate Teacher</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <script>
-    let classes = [];
-    let subjectsList = [];
-
-    async function fetchClasses() {
-      const res = await fetch('/api/classes');
-      classes = await res.json();
-      renderClassesTable();
-      populateClassSelects();
-    }
-
-    async function fetchSubjects() {
-      const res = await fetch('/api/subjects');
-      subjectsList = await res.json();
-    }
-
-    // Initial load
-    fetchSubjects().then(fetchClasses);
-
-    function renderClassesTable() {
-      const tbody = document.getElementById('classesTbody');
-      tbody.innerHTML = '';
-      classes.forEach(cls => {
-        const arms = cls.arms && cls.arms.length ? cls.arms.join(', ') : '-';
-        const subjects = cls.subjects && cls.subjects.length ? cls.subjects.map(s => s.name || s).join(', ') : '-';
-        const teachers = cls.teachers && cls.teachers.length
-          ? cls.teachers.map(t => t.arm ? `${t.name} (${t.arm})` : t.name).join(', ')
-          : '-';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${cls.name}</td>
-          <td>${cls.category || '-'}</td>
-          <td>${arms}</td>
-          <td>${subjects}</td>
-          <td>${teachers}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function populateClassSelects() {
-      ['armClassSelect', 'subjectClassSelect', 'teacherClassSelect'].forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        select.innerHTML = '';
-        classes.forEach(cls => {
-          let option = document.createElement('option');
-          option.value = cls._id || cls.id;
-          option.textContent = cls.name;
-          select.appendChild(option);
-        });
-        if (id === 'teacherClassSelect') updateArmsSelect();
-      });
-    }
-
-    function updateArmsSelect() {
-      const classId = document.getElementById('teacherClassSelect').value;
-      const cls = classes.find(c => (c._id || c.id) == classId);
-      const select = document.getElementById('teacherArmSelect');
-      select.innerHTML = '<option value="">-- Whole Class --</option>';
-      if (cls && cls.arms) {
-        cls.arms.forEach(arm => {
-          let option = document.createElement('option');
-          option.value = arm;
-          option.textContent = arm;
-          select.appendChild(option);
-        });
+  </div>
+  <script>
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('academicsSidebar');
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    menuToggleBtn.onclick = function(){ sidebar.classList.toggle('show'); };
+    document.addEventListener('click', function(e){
+      if(window.innerWidth <= 900 && sidebar.classList.contains('show')){
+        if (!sidebar.contains(e.target) && e.target !== menuToggleBtn) sidebar.classList.remove('show');
       }
-    }
-    document.getElementById('teacherClassSelect').onchange = updateArmsSelect;
-
-    document.getElementById('addClassForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const name = document.getElementById('className').value.trim();
-      const category = document.getElementById('classCategory').value.trim();
-      if (!name) return;
-      const res = await fetch('/api/classes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, category })
-      });
-      if (res.ok) {
-        await fetchClasses();
-        bootstrap.Modal.getInstance(document.getElementById('addClassModal')).hide();
-        showStatus(`Class "${name}" created.`);
-        e.target.reset();
-      } else {
-        alert('Error creating class');
-      }
-    };
-
-    document.getElementById('addArmForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const classId = document.getElementById('armClassSelect').value;
-      const names = document.getElementById('armNames').value.split(',').map(a => a.trim()).filter(a => a);
-      const res = await fetch(`/api/classes/${classId}/arms`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arms: names })
-      });
-      if (res.ok) {
-        await fetchClasses();
-        bootstrap.Modal.getInstance(document.getElementById('addArmModal')).hide();
-        showStatus(`Arms allocated.`);
-        e.target.reset();
-      } else {
-        alert('Error allocating arms');
-      }
-    };
-
-    document.getElementById('addSubjectForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const subjectName = document.getElementById('subjectName').value.trim();
-      const classIds = Array.from(document.getElementById('subjectClassSelect').selectedOptions).map(opt => opt.value);
-      if (subjectName) {
-        // First, create subject if not exists
-        await fetch('/api/subjects', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: subjectName })
-        });
-        await fetchSubjects();
-      }
-      // Then, assign subject to classes
-      for (const classId of classIds) {
-        const res = await fetch(`/api/classes/${classId}/subjects`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subjects: [subjectName] })
-        });
-        if (!res.ok) alert('Error allocating subject');
-      }
-      await fetchClasses();
-      bootstrap.Modal.getInstance(document.getElementById('addSubjectModal')).hide();
-      showStatus(`Subject(s) allocated to class(es).`);
-      e.target.reset();
-    };
-
-    document.getElementById('addTeacherForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const classId = document.getElementById('teacherClassSelect').value;
-      const arm = document.getElementById('teacherArmSelect').value;
-      const teacherName = document.getElementById('teacherName').value.trim();
-      if (!teacherName) return;
-      const res = await fetch(`/api/classes/${classId}/teachers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teacher: { name: teacherName, arm } })
-      });
-      if (res.ok) {
-        await fetchClasses();
-        bootstrap.Modal.getInstance(document.getElementById('addTeacherModal')).hide();
-        showStatus(`Teacher allocated.`);
-        e.target.reset();
-      } else {
-        alert('Error allocating teacher');
-      }
-    };
-
-    function showStatus(msg) {
-      const status = document.getElementById('academicStatus');
-      status.textContent = msg;
-      status.classList.remove('d-none');
-      setTimeout(()=>status.classList.add('d-none'), 3000);
-    }
-
-    // Re-populate selects when any modal is opened
-    document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('show.bs.modal', populateClassSelects);
     });
+    window.addEventListener('resize', function(){
+      if(window.innerWidth > 900) sidebar.classList.remove('show');
+    });
+
+    // Tab logic
+    function showTab(tab) {
+      document.querySelectorAll('.tablist button').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      document.querySelectorAll('.section-card').forEach(sec => sec.classList.toggle('hidden', sec.dataset.section !== tab));
+      // Sidebar nav as well (desktop)
+      document.querySelectorAll('.sidebar nav a').forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tab));
+    }
+    document.querySelectorAll('.tablist button').forEach(btn => {
+      btn.onclick = () => showTab(btn.dataset.tab);
+    });
+    document.querySelectorAll('.sidebar nav a').forEach(nav => {
+      nav.onclick = (e) => { e.preventDefault(); showTab(nav.dataset.tab); };
+    });
+
+    // Exam section tabs
+    function showExamTab(tab){
+      document.querySelectorAll('#examTabs button').forEach(btn => btn.classList.toggle('active', btn.dataset.examtab === tab));
+      document.querySelectorAll('#examTabContent > div').forEach(sec => sec.classList.toggle('hidden', sec.dataset.examsection !== tab));
+    }
+    document.querySelectorAll('#examTabs button').forEach(btn => {
+      btn.onclick = () => showExamTab(btn.dataset.examtab);
+    });
+
+    // API base
+    const API_BASE = "/api";
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
+    // Utility: Fill dropdowns
+    async function fillDropdown(endpoint, selectId, valueKey='name') {
+      try {
+        const res = await fetch(API_BASE + endpoint, { headers: { Authorization: "Bearer " + token }});
+        const data = await res.json();
+        document.getElementById(selectId).innerHTML = data.map(d => `<option value="${d._id}">${d[valueKey]}</option>`).join('');
+      } catch{ }
+    }
+
+    // Sessions Table
+    async function loadSessions() {
+      await fillDropdown("/sessions", "termSessionSelect");
+      await fillDropdown("/sessions", "resultsSessionSelect");
+      const tbody = document.getElementById('sessionsTableBody');
+      try {
+        const res = await fetch(API_BASE + "/sessions", { headers: { Authorization: "Bearer " + token }});
+        const sessions = await res.json();
+        if (!sessions.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">No sessions found.</td></tr>'; return;}
+        tbody.innerHTML = sessions.map(s =>
+          `<tr>
+            <td class="py-2 px-3">${s.name}</td>
+            <td class="py-2 px-3">${s.startDate ? s.startDate.slice(0,10) : ''}</td>
+            <td class="py-2 px-3">${s.endDate ? s.endDate.slice(0,10) : ''}</td>
+            <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editSession('${s._id}')"><i class="fa fa-edit"></i></button></td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">Error loading sessions.</td></tr>'; }
+    }
+    loadSessions();
+
+    // Save Session
+    document.getElementById('sessionForm').onsubmit = async function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('sessionMessage').textContent = "Saving...";
+      try{
+        const res = await fetch(API_BASE + "/sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('sessionMessage').textContent = res.ok ? "Saved!" : "Failed!";
+        loadSessions();
+      }catch{ document.getElementById('sessionMessage').textContent = "Network error."; }
+    };
+
+    // Terms Table
+    async function loadTerms() {
+      const tbody = document.getElementById('termsTableBody');
+      try {
+        const res = await fetch(API_BASE + "/terms", { headers: { Authorization: "Bearer " + token }});
+        const terms = await res.json();
+        if (!terms.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">No terms found.</td></tr>'; return;}
+        tbody.innerHTML = terms.map(t =>
+          `<tr>
+            <td class="py-2 px-3">${t.name}</td>
+            <td class="py-2 px-3">${t.session?.name || '-'}</td>
+            <td class="py-2 px-3">${t.startDate ? t.startDate.slice(0,10) : ''}</td>
+            <td class="py-2 px-3">${t.endDate ? t.endDate.slice(0,10) : ''}</td>
+            <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editTerm('${t._id}')"><i class="fa fa-edit"></i></button></td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading terms.</td></tr>'; }
+    }
+    loadTerms();
+
+    // Save Term
+    document.getElementById('termForm').onsubmit = async function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('termMessage').textContent = "Saving...";
+      try{
+        const res = await fetch(API_BASE + "/terms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('termMessage').textContent = res.ok ? "Saved!" : "Failed!";
+        loadTerms();
+      }catch{ document.getElementById('termMessage').textContent = "Network error."; }
+    };
+
+    // Exams: fill dropdowns
+    fillDropdown("/terms", "examTermSelect");
+    fillDropdown("/classes", "examClassSelect");
+    fillDropdown("/classes", "cbtClassSelect");
+    fillDropdown("/classes", "resultsClassSelect");
+
+    // Exams Schedule Table
+    async function loadExamSchedules() {
+      const tbody = document.getElementById('examScheduleTableBody');
+      try {
+        const res = await fetch(API_BASE + "/exams/schedules", { headers: { Authorization: "Bearer " + token }});
+        const exams = await res.json();
+        if (!exams.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">No exams scheduled.</td></tr>'; return;}
+        tbody.innerHTML = exams.map(ex =>
+          `<tr>
+            <td class="py-2 px-3">${ex.title}</td>
+            <td class="py-2 px-3">${ex.term?.name || '-'}</td>
+            <td class="py-2 px-3">${ex.class?.name || '-'}</td>
+            <td class="py-2 px-3">${ex.date ? ex.date.slice(0,10) : ''}</td>
+            <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editExamSchedule('${ex._id}')"><i class="fa fa-edit"></i></button></td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading schedules.</td></tr>'; }
+    }
+    loadExamSchedules();
+
+    // Save Exam Schedule
+    document.getElementById('examScheduleForm').onsubmit = async function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('examScheduleMessage').textContent = "Saving...";
+      try{
+        const res = await fetch(API_BASE + "/exams/schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('examScheduleMessage').textContent = res.ok ? "Saved!" : "Failed!";
+        loadExamSchedules();
+      }catch{ document.getElementById('examScheduleMessage').textContent = "Network error."; }
+    };
+
+    // Mode: fill exams dropdown
+    async function fillExamDropdown() {
+      try {
+        const res = await fetch(API_BASE + "/exams/schedules", { headers: { Authorization: "Bearer " + token }});
+        const exams = await res.json();
+        document.getElementById('modeExamSelect').innerHTML = exams.map(ex => `<option value="${ex._id}">${ex.title}</option>`).join('');
+      } catch {}
+    }
+    fillExamDropdown();
+
+    // Exam Mode Table
+    async function loadExamModes() {
+      const tbody = document.getElementById('examModeTableBody');
+      try {
+        const res = await fetch(API_BASE + "/exams/modes", { headers: { Authorization: "Bearer " + token }});
+        const modes = await res.json();
+        if (!modes.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">No exam modes set.</td></tr>'; return;}
+        tbody.innerHTML = modes.map(m =>
+          `<tr>
+            <td class="py-2 px-3">${m.exam?.title || '-'}</td>
+            <td class="py-2 px-3">${m.mode}</td>
+            <td class="py-2 px-3">${m.duration || '-'}</td>
+            <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editExamMode('${m._id}')"><i class="fa fa-edit"></i></button></td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">Error loading modes.</td></tr>'; }
+    }
+    loadExamModes();
+
+    // Save Exam Mode
+    document.getElementById('examModeForm').onsubmit = async function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('examModeMessage').textContent = "Saving...";
+      try{
+        const res = await fetch(API_BASE + "/exams/modes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('examModeMessage').textContent = res.ok ? "Saved!" : "Failed!";
+        loadExamModes();
+      }catch{ document.getElementById('examModeMessage').textContent = "Network error."; }
+    };
+
+    // CBT Table
+    async function loadCBTs() {
+      const tbody = document.getElementById('cbtTableBody');
+      try {
+        const res = await fetch(API_BASE + "/cbt/mocks", { headers: { Authorization: "Bearer " + token }});
+        const cbts = await res.json();
+        if (!cbts.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">No CBT/mocks found.</td></tr>'; return;}
+        tbody.innerHTML = cbts.map(c =>
+          `<tr>
+            <td class="py-2 px-3">${c.title}</td>
+            <td class="py-2 px-3">${c.class?.name || '-'}</td>
+            <td class="py-2 px-3">${c.mode}</td>
+            <td class="py-2 px-3">${c.date ? c.date.slice(0,10) : ''}</td>
+            <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editCBT('${c._id}')"><i class="fa fa-edit"></i></button></td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading CBT/mocks.</td></tr>'; }
+    }
+    loadCBTs();
+
+    // Save CBT/Mock
+    document.getElementById('cbtForm').onsubmit = async function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('cbtMessage').textContent = "Saving...";
+      try{
+        const res = await fetch(API_BASE + "/cbt/mocks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('cbtMessage').textContent = res.ok ? "Saved!" : "Failed!";
+        loadCBTs();
+      }catch{ document.getElementById('cbtMessage').textContent = "Network error."; }
+    };
+
+    // Results Table
+    async function loadResults(filter={}) {
+      const tbody = document.getElementById('resultsTableBody');
+      tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>';
+      try {
+        let url = API_BASE + "/results/cbt-mocks";
+        if (filter.sessionId || filter.classId || filter.type) {
+          url += '?' + new URLSearchParams(filter).toString();
+        }
+        const res = await fetch(url, { headers: { Authorization: "Bearer " + token }});
+        const results = await res.json();
+        if (!results.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No results found.</td></tr>'; return;}
+        tbody.innerHTML = results.map(r =>
+          `<tr>
+            <td class="py-2 px-3">${r.student?.name || '-'}</td>
+            <td class="py-2 px-3">${r.class?.name || '-'}</td>
+            <td class="py-2 px-3">${r.type || '-'}</td>
+            <td class="py-2 px-3">${r.exam?.title || r.mock?.title || '-'}</td>
+            <td class="py-2 px-3">${r.score}</td>
+            <td class="py-2 px-3">${r.date ? r.date.slice(0,10) : ''}</td>
+          </tr>`).join('');
+      } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Error loading results.</td></tr>'; }
+    }
+    document.getElementById('resultsFilterForm').ons
     </script>
 </body>
 </html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Fees | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + Flowbite + Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #22305a;
+      min-height: 100vh;
+    }
+    .fees-bg {
+      background: linear-gradient(180deg, #ddeaff 0%, #f6f8fa 100%);
+    }
+    .avatar {
+      border: 2px solid #2647a6;
+      background: #ddeaff;
+    }
+  </style>
+</head>
+<body class="fees-bg">
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-[#2647a6]">Fees Portal</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-[#2647a6] text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='student-dashboard.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Dashboard
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='profile.html'">
+        <img id="profileAvatar" class="rounded-full h-8 w-8 avatar" src="https://ui-avatars.com/api/?name=Student&background=2647a6&color=fff" alt="Student">
+        <div class="text-sm font-bold text-[#2647a6]" id="profileName">Student Name</div>
+      </div>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <main class="max-w-3xl mx-auto mt-6 px-2">
+    <!-- Fee Summary Card -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <h1 class="text-xl font-bold text-[#2647a6] mb-2 flex items-center gap-2"><i class="fa fa-wallet"></i> My Fees Status</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4 text-center">
+        <div class="flex flex-col items-center">
+          <span class="text-3xl font-bold text-[#18ba89]" id="feesPaid">₦0</span>
+          <span class="text-[#22305a] font-medium mt-1">Paid</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-3xl font-bold text-[#e74c3c]" id="feesDue">₦0</span>
+          <span class="text-[#22305a] font-medium mt-1">Outstanding</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-3xl font-bold text-[#2647a6]" id="feesTotal">₦0</span>
+          <span class="text-[#22305a] font-medium mt-1">Total Fees</span>
+        </div>
+      </div>
+      <div class="mt-6 flex flex-col md:flex-row gap-3">
+        <button class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition" id="payNowBtn">
+          <i class="fa fa-credit-card mr-1"></i> Pay Now
+        </button>
+        <button class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#ddeaff] text-[#2647a6] font-bold hover:bg-[#e9f0fe] transition" onclick="window.location.href='fees-history.html'">
+          <i class="fa fa-history mr-1"></i> Payment History
+        </button>
+      </div>
+    </div>
+    <!-- Fee Breakdown Table -->
+    <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-list"></i> Fee Breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-[#e9f0fe]">
+            <tr>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Fee Type</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Amount</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Status</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Term</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Session</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Due Date</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Method</th>
+            </tr>
+          </thead>
+          <tbody id="feeTableBody" class="bg-white divide-y divide-[#e9f0fe]">
+            <tr><td class="py-2 px-4" colspan="7">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Fee By Class Table -->
+    <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-users"></i> Class Fees</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-[#e9f0fe]">
+            <tr>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Class</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Term</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Session</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Fee Type</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Amount</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Status</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Due Date</th>
+            </tr>
+          </thead>
+          <tbody id="classFeeTableBody" class="bg-white divide-y divide-[#e9f0fe]">
+            <tr><td class="py-2 px-4" colspan="7">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- FAQ Section -->
+    <div class="bg-white rounded-xl shadow-md p-5 mb-6">
+      <h3 class="text-lg font-bold text-[#2647a6] mb-3 flex items-center gap-2"><i class="fa fa-question-circle"></i> Fees FAQ</h3>
+      <div id="accordion-flush" data-accordion="collapse" data-active-classes="bg-[#e9f0fe] text-[#2647a6]" data-inactive-classes="text-[#22305a]">
+        <h2 id="faq-1">
+          <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-1" aria-expanded="false" aria-controls="faq-body-1">
+            How do I pay my fees online?
+            <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+        </h2>
+        <div id="faq-body-1" class="hidden" aria-labelledby="faq-1">
+          <div class="py-4 text-gray-700">Click the "Pay Now" button and follow instructions to complete your payment securely online.</div>
+        </div>
+        <h2 id="faq-2">
+          <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-2" aria-expanded="false" aria-controls="faq-body-2">
+            What if I miss a payment?
+            <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+        </h2>
+        <div id="faq-body-2" class="hidden" aria-labelledby="faq-2">
+          <div class="py-4 text-gray-700">Contact the school finance office for guidance and to avoid penalties.</div>
+        </div>
+        <h2 id="faq-3">
+          <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-3" aria-expanded="false" aria-controls="faq-body-3">
+            Can I view my past payments?
+            <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+        </h2>
+        <div id="faq-body-3" class="hidden" aria-labelledby="faq-3">
+          <div class="py-4 text-gray-700">Yes, use the "Payment History" button to see all your previous transactions.</div>
+        </div>
+      </div>
+    </div>
+    <!-- Contact Card -->
+    <div class="bg-white rounded-xl shadow-md p-5 mb-8 text-center">
+      <span class="text-[#2647a6] font-bold"><i class="fa fa-envelope"></i> Need Help?</span>
+      <div class="mt-2 text-gray-700">Email <a href="mailto:fees@goldlincschools.com" class="text-[#18ba89] font-bold">fees@goldlincschools.com</a> or call <a href="tel:+2348000000000" class="text-[#18ba89] font-bold">+234 800 000 0000</a></div>
+    </div>
+  </main>
+  <script>
+    // Responsive profile fill (reuse logic)
+    function fillProfile(data) {
+      document.getElementById('profileName').textContent = data.name || 'Student Name';
+      document.getElementById('profileAvatar').src = data.photo_url
+        ? data.photo_url
+        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name || 'Student') + '&background=2647a6&color=fff';
+    }
+
+    // API base
+    const API_BASE = "/api";
+    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+
+    // Fetch fees for current student (from backend)
+    async function fetchStudentFees() {
+      try {
+        const res = await fetch(API_BASE + "/fees/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error("Failed to fetch.");
+        const data = await res.json();
+
+        fillProfile(data);
+
+        // Fill summary
+        document.getElementById('feesPaid').textContent = "₦" + (data.fees.paid || 0).toLocaleString();
+        document.getElementById('feesDue').textContent = "₦" + (data.fees.due || 0).toLocaleString();
+        document.getElementById('feesTotal').textContent = "₦" + (data.fees.total || 0).toLocaleString();
+
+        // Fill breakdown table
+        const tbody = document.getElementById('feeTableBody');
+        const breakdown = data.fees.breakdown || [];
+        if (breakdown.length === 0) {
+          tbody.innerHTML = `<tr><td class="py-2 px-4" colspan="7">No fee data found.</td></tr>`;
+        } else {
+          tbody.innerHTML = breakdown.map(fee => `
+            <tr>
+              <td class="py-2 px-4 font-semibold">${fee.type}</td>
+              <td class="py-2 px-4">₦${(fee.amount || 0).toLocaleString()}</td>
+              <td class="py-2 px-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                  fee.status === 'Paid' ? 'bg-[#18ba89] text-white' :
+                  fee.status === 'Waived' ? 'bg-yellow-400 text-white' :
+                  'bg-[#e74c3c] text-white'
+                }">${fee.status}</span>
+              </td>
+              <td class="py-2 px-4">${fee.term || ''}</td>
+              <td class="py-2 px-4">${fee.session || ''}</td>
+              <td class="py-2 px-4">${fee.due ? fee.due : ''}</td>
+              <td class="py-2 px-4">${fee.method || ''}</td>
+            </tr>
+          `).join('');
+        }
+      } catch {
+        document.getElementById('feeTableBody').innerHTML = `<tr><td class="py-2 px-4" colspan="7">Unable to load fee data.</td></tr>`;
+      }
+    }
+
+    // Fetch class fees for student's class
+    async function fetchClassFees() {
+      try {
+        // Get student profile to find class id
+        const resProfile = await fetch(API_BASE + "/students/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resProfile.ok) throw new Error("Failed to fetch profile.");
+        const student = await resProfile.json();
+        const classId = student.class?._id;
+
+        if (!classId) {
+          document.getElementById('classFeeTableBody').innerHTML = `<tr><td class="py-2 px-4" colspan="7">Class info not found.</td></tr>`;
+          return;
+        }
+
+        // Fetch all class fees assigned to student's class (with student)
+        const resFees = await fetch(API_BASE + `/fees/class/${classId}/me`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resFees.ok) throw new Error("Failed to fetch class fees.");
+        const fees = await resFees.json();
+
+        const tbody = document.getElementById('classFeeTableBody');
+        if (fees.length === 0) {
+          tbody.innerHTML = `<tr><td class="py-2 px-4" colspan="7">No class fees found.</td></tr>`;
+        } else {
+          tbody.innerHTML = fees.map(fee => `
+            <tr>
+              <td class="py-2 px-4">${fee.class?.name || ''}</td>
+              <td class="py-2 px-4">${fee.term || ''}</td>
+              <td class="py-2 px-4">${fee.session || ''}</td>
+              <td class="py-2 px-4 font-semibold">${fee.type}</td>
+              <td class="py-2 px-4">₦${(fee.amount || 0).toLocaleString()}</td>
+              <td class="py-2 px-4">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                  fee.status === 'Paid' ? 'bg-[#18ba89] text-white' :
+                  fee.status === 'Waived' ? 'bg-yellow-400 text-white' :
+                  'bg-[#e74c3c] text-white'
+                }">${fee.status}</span>
+              </td>
+              <td class="py-2 px-4">${fee.dueDate ? fee.dueDate.slice(0,10) : ''}</td>
+            </tr>
+          `).join('');
+        }
+      } catch {
+        document.getElementById('classFeeTableBody').innerHTML = `<tr><td class="py-2 px-4" colspan="7">Unable to load class fee data.</td></tr>`;
+      }
+    }
+
+    // Pay Now logic (demo)
+    document.getElementById('payNowBtn').onclick = function() {
+      alert("Redirecting to payment portal...");
+      window.location.href = "https://paystack.com/pay/goldlinc";
+    };
+
+    // Initial load
+    fetchStudentFees();
+    fetchClassFees();
+  </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Fees Management | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + Flowbite + Tailwind + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f6f8fa; color: #22305a; min-height: 100vh; }
+    .fees-bg { background: linear-gradient(180deg, #ddeaff 0%, #f6f8fa 100%); }
+    .modal-overlay { background: rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body class="fees-bg">
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-[#2647a6]">Admin Fees Panel</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-[#2647a6] text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='student-dashboard.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Dashboard
+      </button>
+    </div>
+  </nav>
+  <main class="max-w-6xl mx-auto mt-6 px-2">
+    <!-- Fee Setup for Class/Term/Session -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-cogs"></i> Set Up Class/Term Fees</h2>
+      <form id="setupClassFeeForm" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+        <div>
+          <label class="block text-sm font-bold mb-1">Class</label>
+          <select name="classId" id="classId" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Term</label>
+          <select name="term" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option>First Term</option>
+            <option>Second Term</option>
+            <option>Third Term</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Session</label>
+          <input type="text" name="session" placeholder="2025/2026" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Fee Type</label>
+          <select name="type" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+            <option value="">Select</option>
+            <option>Tuition</option>
+            <option>Hostel</option>
+            <option>Transport</option>
+            <option>Library</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Amount (₦)</label>
+          <input type="number" name="amount" min="0" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1">Due Date</label>
+          <input type="date" name="dueDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+        </div>
+        <div class="md:col-span-6">
+          <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+            <i class="fa fa-cogs mr-1"></i> Set Up Fee
+          </button>
+        </div>
+      </form>
+      <div id="setupFeeMessage" class="mt-3 text-sm"></div>
+    </div>
+    <!-- Student Search and Details -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-search"></i> Search Student</h2>
+      <input type="text" id="studentSearchInput" placeholder="Type student name or email..." class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6] mb-2">
+      <ul id="studentSearchResults" class="mb-2"></ul>
+      <div id="studentFeeDetails"></div>
+    </div>
+    <!-- Fees Table (All Fees) -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
+      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-list"></i> All Fees</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm" id="feesTable">
+          <thead class="bg-[#e9f0fe]">
+            <tr>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Student</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Class</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Term</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Session</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Fee Type</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Amount</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Status</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Due Date</th>
+              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="feesTableBody" class="bg-white divide-y divide-[#e9f0fe]">
+            <tr><td colspan="9" class="py-2 px-4">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Fee Status Modal -->
+    <div id="feeStatusModal" tabindex="-1" class="hidden modal-overlay fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full">
+      <div class="bg-white rounded-xl shadow-md p-6 w-full max-w-lg">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-[#2647a6] flex items-center gap-2"><i class="fa fa-check-circle"></i> Update Fee Status</h3>
+          <button type="button" class="text-gray-400 hover:text-gray-900" onclick="closeModal('feeStatusModal')">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <form id="feeStatusForm" class="space-y-4">
+          <input type="hidden" id="feeStatusFeeId">
+          <div>
+            <label class="block text-sm font-bold mb-1">Payment Method</label>
+            <select id="feeStatusMethod" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+              <option>Cash</option>
+              <option>Transfer</option>
+              <option>Scholarship</option>
+              <option>Waived</option>
+            </select>
+          </div>
+          <div id="waiveNoteDiv" class="hidden">
+            <label class="block text-sm font-bold mb-1">Waive Note</label>
+            <input type="text" id="feeStatusWaiveNote" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]">
+          </div>
+          <div>
+            <button type="submit" class="w-full px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+              <i class="fa fa-save mr-1"></i> Update Status
+            </button>
+          </div>
+        </form>
+        <div id="feeStatusMessage" class="mt-3 text-sm"></div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    // Show/hide waive note
+    document.getElementById('feeStatusMethod').addEventListener('change', function() {
+      document.getElementById('waiveNoteDiv').classList.toggle('hidden', this.value !== 'Waived');
+    });
+
+    const API_BASE = "/api"; // change for deployment
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
+    // ========== Load Classes ==========
+    async function loadClasses() {
+      const res = await fetch(API_BASE + "/classes", { headers: { Authorization: "Bearer " + token } });
+      const data = await res.json();
+      const select = document.getElementById('classId');
+      select.innerHTML = data.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+    }
+    loadClasses();
+
+    // ========== Class Fee Setup ==========
+    document.getElementById('setupClassFeeForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      document.getElementById('setupFeeMessage').textContent = "Setting up...";
+      try {
+        const res = await fetch(API_BASE + "/fees/class-setup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          document.getElementById('setupFeeMessage').textContent = "Fee set for class successfully!";
+          this.reset();
+          loadFees();
+        } else {
+          const err = await res.json();
+          document.getElementById('setupFeeMessage').textContent = err.error || "Error setting fee.";
+        }
+      } catch {
+        document.getElementById('setupFeeMessage').textContent = "Network error.";
+      }
+    };
+
+    // ========== Student Search ==========
+    document.getElementById('studentSearchInput').oninput = async function(e) {
+      const q = e.target.value.trim();
+      const ul = document.getElementById('studentSearchResults');
+      ul.innerHTML = '';
+      if (q.length < 2) return;
+      const res = await fetch(API_BASE + "/students?search=" + encodeURIComponent(q), { headers: { Authorization: "Bearer " + token } });
+      const data = await res.json();
+      ul.innerHTML = data.slice(0,10).map(s => `<li class="p-2 border-b hover:bg-[#ddeaff] cursor-pointer" onclick="showStudentFees('${s._id}', '${s.name}', '${s.class?.name || ""}')">${s.name} <span class="text-xs text-gray-500">${s.email}</span></li>`).join('');
+    };
+
+    window.showStudentFees = async function(studentId, name, className) {
+      const res = await fetch(API_BASE + `/fees/student/${studentId}`, { headers: { Authorization: "Bearer " + token } });
+      const data = await res.json();
+      let html = `<h3 class="text-lg font-bold text-[#2647a6] mb-2">${name} (${className})</h3>`;
+      if (!data.length) html += "<div>No fees found.</div>";
+      else {
+        html += `<table class="min-w-full text-sm mb-4">
+          <thead><tr>
+            <th class="py-2 px-3">Type</th>
+            <th class="py-2 px-3">Amount</th>
+            <th class="py-2 px-3">Status</th>
+            <th class="py-2 px-3">Due</th>
+            <th class="py-2 px-3">Method</th>
+            <th class="py-2 px-3">Transaction</th>
+            <th class="py-2 px-3">Actions</th>
+          </tr></thead>
+          <tbody>` +
+          data.map(fee => `<tr>
+            <td class="py-2 px-3">${fee.type}</td>
+            <td class="py-2 px-3">₦${fee.amount.toLocaleString()}</td>
+            <td class="py-2 px-3">${fee.status}</td>
+            <td class="py-2 px-3">${fee.dueDate ? fee.dueDate.slice(0,10) : ""}</td>
+            <td class="py-2 px-3">${fee.method || ""}</td>
+            <td class="py-2 px-3">${fee.paymentRef || ""}${fee.waiveNote ? `<br><span class="text-xs text-red-600">Waived: ${fee.waiveNote}</span>` : ""}</td>
+            <td class="py-2 px-3">
+              <button class="px-2 py-1 rounded bg-[#18ba89] text-white text-xs font-bold hover:bg-[#13a87a]" onclick="openFeeStatusModal('${fee._id}')">Update</button>
+            </td>
+          </tr>`).join('') +
+          `</tbody></table>`;
+      }
+      document.getElementById('studentFeeDetails').innerHTML = html;
+    };
+
+    // ========== Fees Table ==========
+    async function loadFees() {
+      const tbody = document.getElementById('feesTableBody');
+      tbody.innerHTML = '<tr><td colspan="9" class="py-2 px-4">Loading...</td></tr>';
+      try {
+        const res = await fetch(API_BASE + "/fees", { headers: { Authorization: "Bearer " + token } });
+        if (res.ok) {
+          const fees = await res.json();
+          if (!fees.length) { tbody.innerHTML = '<tr><td colspan="9" class="py-2 px-4">No fees found.</td></tr>'; return;}
+          tbody.innerHTML = '';
+          fees.forEach(fee => {
+            tbody.innerHTML += `
+              <tr>
+                <td class="py-2 px-4">${fee.student?.name || 'N/A'}<br><span class="text-xs text-gray-500">${fee.student?.email || ''}</span></td>
+                <td class="py-2 px-4">${fee.class?.name || ''}</td>
+                <td class="py-2 px-4">${fee.term || ''}</td>
+                <td class="py-2 px-4">${fee.session || ''}</td>
+                <td class="py-2 px-4 font-semibold">${fee.type}</td>
+                <td class="py-2 px-4">₦${(fee.amount || 0).toLocaleString()}</td>
+                <td class="py-2 px-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold ${fee.status === 'Paid' ? 'bg-[#18ba89] text-white' : fee.status === 'Waived' ? 'bg-yellow-400 text-white' : 'bg-[#e74c3c] text-white'}">
+                    ${fee.status}
+                  </span>
+                </td>
+                <td class="py-2 px-4">${fee.dueDate ? fee.dueDate.slice(0,10) : ''}</td>
+                <td class="py-2 px-4 flex gap-2">
+                  <button class="px-2 py-1 rounded-lg bg-[#18ba89] text-white text-xs font-bold hover:bg-[#13a87a]" onclick="openFeeStatusModal('${fee._id}')">
+                    <i class="fa fa-check-circle"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="9" class="py-2 px-4">Error loading fees.</td></tr>';
+        }
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="9" class="py-2 px-4">Network error.</td></tr>';
+      }
+    }
+    loadFees();
+
+    // Fee Status Modal
+    window.openFeeStatusModal = function(feeId) {
+      document.getElementById('feeStatusFeeId').value = feeId;
+      document.getElementById('feeStatusMethod').value = 'Cash';
+      document.getElementById('feeStatusWaiveNote').value = '';
+      document.getElementById('feeStatusMessage').textContent = '';
+      closeModal('feeStatusModal'); // Ensure closed first
+      openModal('feeStatusModal');
+    };
+
+    document.getElementById('feeStatusForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const feeId = document.getElementById('feeStatusFeeId').value;
+      const method = document.getElementById('feeStatusMethod').value;
+      const waiveNote = document.getElementById('feeStatusWaiveNote').value;
+      document.getElementById('feeStatusMessage').textContent = "Updating...";
+      try {
+        const res = await fetch(API_BASE + `/fees/admin-status/${feeId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ method, waiveNote })
+        });
+        if (res.ok) {
+          document.getElementById('feeStatusMessage').textContent = "Fee status updated!";
+          closeModal('feeStatusModal');
+          loadFees();
+        } else {
+          const err = await res.json();
+          document.getElementById('feeStatusMessage').textContent = err.error || "Error updating fee.";
+        }
+      } catch {
+        document.getElementById('feeStatusMessage').textContent = "Network error.";
+      }
+    };
+
+    // Responsive: close modal on outside click (mobile)
+    window.onclick = function(event) {
+      const modal = document.getElementById('feeStatusModal');
+      if (modal && !modal.classList.contains('hidden') && event.target === modal) closeModal('feeStatusModal');
+    };
+  </script>
+</body>
+</html>

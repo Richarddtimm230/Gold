@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alumni Students | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #007bff;
+      --sidebar-bg: #fff;
+      --sidebar-width: 260px;
+      --sidebar-width-mobile: 90vw;
+      --border-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --neutral: #f6f8fa;
+      --card-bg: #fff;
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --font-main: 'Inter', Arial, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--neutral);
+      color: #222;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      min-width: 180px;
+      max-width: 320px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: var(--shadow);
+      z-index: 1050;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .sidebar nav {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.85em 1.3em;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: background 0.16s, border-color 0.16s;
+      font-size: 1.05em;
+    }
+    .sidebar a.active, .sidebar a:hover {
+      background: #f1f6fd;
+      border-left: 4px solid var(--primary);
+      color: var(--primary);
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      background: #fff;
+      margin: 0;
+    }
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 1.8em;
+      padding-top: 1.5vw;
+      padding-bottom: 1.5vw;
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.03em;
+    }
+    .header-actions .icon {
+      font-size: 1.43em;
+      cursor: pointer;
+      opacity: 0.88;
+      transition: opacity 0.2s;
+    }
+    .header-actions .icon:hover {
+      opacity: 1;
+    }
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-right: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+    }
+    .sidebar-overlay {
+      display: none;
+    }
+    .sidebar-overlay.active {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1040;
+    }
+    @media (max-width: 900px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+      .main-content { margin-left: 0; padding: 0 3vw; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 13px; }
+      .sidebar { width: 97vw; }
+    }
+    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+    .alumni-title {
+      margin: 1.5em 0 0.7em 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .alumni-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 2em;
+      margin-top: 2em;
+      margin-bottom: 3em;
+    }
+    .alumni-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.3em 1.1em 1.1em 1.1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: box-shadow 0.17s, transform 0.17s;
+      border: 2px solid #e9f0fe;
+      position: relative;
+      min-height: 240px;
+    }
+    .alumni-card:hover, .alumni-card:focus-visible {
+      box-shadow: 0 8px 32px #ddeaff55;
+      border-color: var(--primary);
+      transform: translateY(-2px) scale(1.025);
+    }
+    .alumni-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      margin-bottom: 0.7em;
+    }
+    .alumni-name {
+      font-weight: 700;
+      font-size: 1.14em;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 0.17em;
+    }
+    .alumni-class, .alumni-year {
+      font-size: 0.98em;
+      color: #666;
+      margin-bottom: 0.1em;
+      text-align: center;
+    }
+    .alumni-achievement {
+      font-size: 0.97em;
+      color: #18ba89;
+      font-weight: 600;
+      margin-bottom: 0.5em;
+      text-align: center;
+    }
+    .alumni-remark {
+      font-size: 0.97em;
+      color: #555;
+      margin-top: 0.3em;
+      text-align: center;
+      min-height: 32px;
+    }
+    /* Modal */
+    .alumni-modal-bg {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.30);
+      z-index: 1200;
+      align-items: center;
+      justify-content: center;
+    }
+    .alumni-modal-bg.active { display: flex; }
+    .alumni-modal {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 16px 75px #007bff40;
+      max-width: 430px;
+      width: 96vw;
+      padding: 2.2em 2em 1.5em 2em;
+      position: relative;
+      animation: modalPop 0.17s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @keyframes modalPop { 0%{ transform: scale(0.93); opacity:0; } 100%{ transform: scale(1); opacity:1; } }
+    .alumni-modal-close {
+      position: absolute;
+      top: 1.1em; right: 1.2em;
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      color: #888;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .alumni-modal-avatar {
+      width: 82px; height: 82px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 0.75em;
+    }
+    .alumni-modal-name {
+      font-weight: 700;
+      font-size: 1.22em;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 0.18em;
+    }
+    .alumni-modal-field {
+      font-size: 1em;
+      color: #222;
+      margin-bottom: 0.3em;
+      text-align: center;
+    }
+    .alumni-modal-label {
+      color: #666;
+      font-size: 0.99em;
+      margin-right: 0.4em;
+      font-weight: 500;
+    }
+    .alumni-modal-achievement {
+      color: #18ba89; font-weight: 600; margin-top: 0.6em; margin-bottom: 0.3em;
+    }
+    .alumni-modal-remark {
+      margin-top: 1em;
+      color: #444;
+      font-size: 1em;
+      text-align: center;
+    }
+    .alumni-modal-report {
+      margin: 0.6em 0;
+      color: #22305a;
+      background: #f9f9ff;
+      border-radius: 8px;
+      padding: 1em 1.2em;
+      font-size: 0.99em;
+      box-shadow: 0 2px 12px #ddeaff15;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar for desktop, overlays for mobile -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+      <div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
+      </div>
+    </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
+    <nav>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Mobile navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
+    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
+    <div class="font-bold text-primary text-lg flex items-center gap-2">
+      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
+      <span>Gold & Linc Schools</span>
+    </div>
+    <div></div>
+  </nav>
+  <!-- Main Content -->
+  <main class="main-content" style="margin-top:70px;">
+    <header>
+      <div class="school-title">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <span>GOLD AND LINC SCHOOLS</span>
+      </div>
+      <div class="header-actions">
+        <span class="icon" title="Notifications">🔔</span>
+        <span class="icon" title="Help">❓</span>
+        <span class="icon" title="Settings">⚙️</span>
+      </div>
+    </header>
+    <h2 class="alumni-title"><span>🎓</span> Alumni Students</h2>
+    <section>
+      <div class="flex flex-wrap gap-3 mb-4 items-center">
+        <input id="searchName" type="text" placeholder="Search by name or reg no." class="px-3 py-2 rounded-lg border border-[#ddeaff] text-base" style="min-width:210px;">
+        <select id="filterYear" class="px-3 py-2 rounded-lg border border-[#ddeaff] text-base">
+          <option value="">All Years</option>
+        </select>
+        <button class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#005ecb] transition" onclick="fetchAlumni()"><i class="fa fa-search"></i> Search</button>
+      </div>
+      <div class="alumni-grid" id="alumniGrid">
+        <!-- Cards go here -->
+        <div style="grid-column:1/-1;text-align:center;color:#888;">Loading...</div>
+      </div>
+    </section>
+  </main>
+  <!-- Alumni Modal -->
+  <div class="alumni-modal-bg" id="alumniModal">
+    <div class="alumni-modal" id="alumniModalContent">
+      <button class="alumni-modal-close" onclick="closeAlumniModal()" aria-label="Close Modal"><i class="fa fa-times"></i></button>
+      <img id="modalAvatar" class="alumni-modal-avatar" src="" alt="Alumni Avatar">
+      <div class="alumni-modal-name" id="modalName"></div>
+      <div class="alumni-modal-field"><span class="alumni-modal-label">Reg. No:</span><span id="modalRegNo"></span></div>
+      <div class="alumni-modal-field"><span class="alumni-modal-label">Graduation Year:</span><span id="modalYear"></span></div>
+      <div class="alumni-modal-field"><span class="alumni-modal-label">Class:</span><span id="modalClass"></span></div>
+      <div class="alumni-modal-field alumni-modal-achievement"><i class="fa fa-trophy"></i> <span id="modalAchievement"></span></div>
+      <div class="alumni-modal-report" id="modalReport"></div>
+      <div class="alumni-modal-remark" id="modalRemark"></div>
+    </div>
+  </div>
+  <script>
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAlumniModal(); });
+
+    // Modal logic
+    function openAlumniModal(alumni) {
+      document.getElementById('modalAvatar').src = alumni.photo_url || "https://ui-avatars.com/api/?name=" + encodeURIComponent(alumni.name) + "&background=007bff&color=fff";
+      document.getElementById('modalName').textContent = alumni.name;
+      document.getElementById('modalRegNo').textContent = alumni.regNo || "N/A";
+      document.getElementById('modalYear').textContent = alumni.year || "N/A";
+      document.getElementById('modalClass').textContent = alumni.class || "N/A";
+      document.getElementById('modalAchievement').textContent = alumni.achievement || "None";
+      document.getElementById('modalReport').textContent = alumni.report || "No report available.";
+      document.getElementById('modalRemark').textContent = alumni.remark || "";
+      document.getElementById('alumniModal').classList.add('active');
+    }
+    function closeAlumniModal() {
+      document.getElementById('alumniModal').classList.remove('active');
+    }
+    document.getElementById('alumniModal').addEventListener('click', function(e){
+      if (e.target === this) closeAlumniModal();
+    });
+
+    // Fetch alumni from backend
+    async function fetchAlumni() {
+      const token = localStorage.getItem('token');
+      const search = document.getElementById('searchName').value.trim();
+      const year = document.getElementById('filterYear').value;
+
+      let url = '/api/alumni';
+      let params = [];
+      if (search) params.push('search=' + encodeURIComponent(search));
+      if (year) params.push('year=' + encodeURIComponent(year));
+      if (params.length) url += '?' + params.join('&');
+
+      const grid = document.getElementById('alumniGrid');
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#888;">Loading...</div>`;
+      try {
+        const res = await fetch(url, {headers: { 'Authorization': 'Bearer ' + token }});
+        if (!res.ok) throw new Error('Unable to fetch alumni');
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ccc;">No alumni found.</div>`;
+          return;
+        }
+        // Fill available years
+        fillYears(data);
+
+        grid.innerHTML = data.map(alumni => `
+          <div class="alumni-card" tabindex="0" onclick="openAlumniModal(${encodeURIComponent(JSON.stringify(alumni))})" onkeydown="if(event.key==='Enter'||event.key===' '){openAlumniModal(${encodeURIComponent(JSON.stringify(alumni))})}">
+            <img class="alumni-avatar" src="${alumni.photo_url || 'https://ui-avatars.com/api/?name='+encodeURIComponent(alumni.name)+'&background=007bff&color=fff'}" alt="${alumni.name}">
+            <div class="alumni-name">${alumni.name}</div>
+            <div class="alumni-class">${alumni.class || ''}</div>
+            <div class="alumni-year"><i class="fa fa-calendar"></i> ${alumni.year || ''}</div>
+            <div class="alumni-achievement"><i class="fa fa-trophy"></i> ${alumni.achievement || ''}</div>
+            <div class="alumni-remark">${alumni.remark || ''}</div>
+          </div>
+        `).join('');
+        // Fix card click for modal (pass object, not string)
+        Array.from(document.querySelectorAll('.alumni-card')).forEach((card, idx) => {
+          card.onclick = () => openAlumniModal(data[idx]);
+          card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openAlumniModal(data[idx]); };
+        });
+      } catch (e) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load alumni.</div>`;
+      }
+    }
+    // Fill graduation years for filter
+    function fillYears(alumniList) {
+      const yearSel = document.getElementById('filterYear');
+      const years = Array.from(new Set(alumniList.map(a => a.year).filter(Boolean))).sort((a,b)=>b-a);
+      yearSel.innerHTML = `<option value="">All Years</option>` + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    }
+    // Initial load
+    fetchAlumni();
+  </script>
+</body>
+</html>

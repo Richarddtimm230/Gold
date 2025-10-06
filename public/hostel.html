@@ -198,7 +198,7 @@
         fillProfile(student);
 
         // HOSTEL ALLOCATION
-        const resHostel = await fetch(API_BASE + "/hostel/me", {
+        const resHostel = await fetch(API_BASE + "/students/me/hostel", {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         let hostel;

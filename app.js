@@ -36,6 +36,8 @@ const transportRoute = require('./routes/transport');
 const subjectsRoute = require('./routes/subjects');
 // And in app.js
 const hostelRoute = require('./routes/hostel');
+const assignmentsRoute = require('./routes/assignments');
+app.use('/api/assignments', assignmentsRoute);
 app.use('/api/hostel', hostelRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/transport', transportRoute);

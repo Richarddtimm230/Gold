@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-
-// Mongoose model
 const Staff = require('../models/Staff');
 
 const storage = multer.memoryStorage();
@@ -16,7 +14,6 @@ router.get('/', async (req, res) => {
   try {
     const staffList = await Staff.find({}, 'first_name last_name designation department photo').lean();
 
-    // Format response
     const formattedStaff = staffList.map(s => ({
       id: s._id,
       first_name: s.first_name,
@@ -26,7 +23,6 @@ router.get('/', async (req, res) => {
       photo_url: s.photo || null
     }));
 
-    // Sort by last_name, then first_name
     formattedStaff.sort((a, b) => {
       if (a.last_name === b.last_name) {
         return a.first_name.localeCompare(b.first_name);
@@ -38,6 +34,69 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+/**
+ * FILTERED ENDPOINTS for each special staff section
+ * You can add more below as needed!
+ */
+const departments = [
+  { route: 'bursary', dep: 'Bursary' },
+  { route: 'registrar', dep: 'Registrar' },
+  { route: 'general', dep: 'General' },
+  { route: 'librarian', dep: 'Library' },
+  { route: 'hostel', dep: 'Hostel' },
+  { route: 'transport', dep: 'Transport' }
+];
+
+// GET /api/staff/bursary etc.
+departments.forEach(({route, dep}) => {
+  // GET
+  router.get(`/${route}`, async (req, res) => {
+    try {
+      const staffList = await Staff.find({
+        department: new RegExp('^' + dep + '$', 'i')
+      }, 'first_name last_name designation department photo').lean();
+
+      const formattedStaff = staffList.map(s => ({
+        id: s._id,
+        first_name: s.first_name,
+        last_name: s.last_name,
+        designation: s.designation,
+        department: s.department,
+        photo_url: s.photo || null
+      }));
+
+      formattedStaff.sort((a, b) => {
+        if (a.last_name === b.last_name) {
+          return a.first_name.localeCompare(b.first_name);
+        }
+        return a.last_name.localeCompare(b.last_name);
+      });
+
+      res.json(formattedStaff);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // PATCH
+  router.patch(
+    `/${route}/:id`,
+    upload.fields([
+      { name: 'photo', maxCount: 1 },
+      { name: 'id_upload', maxCount: 1 }
+    ]),
+    async (req, res) => {
+      req.body.department = dep; // enforce correct department
+      return updateStaffById(req, res);
+    }
+  );
+
+  // DELETE
+  router.delete(`/${route}/:id`, async (req, res) => {
+    return deleteStaffById(req, res);
+  });
 });
 
 /**
@@ -132,5 +191,101 @@ router.post(
     }
   }
 );
+
+/**
+ * PATCH /api/staff/:id - Update staff member
+ */
+router.patch(
+  '/:id',
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'id_upload', maxCount: 1 }
+  ]),
+  updateStaffById
+);
+
+/**
+ * DELETE /api/staff/:id - Delete staff member
+ */
+router.delete('/:id', deleteStaffById);
+
+// --- Helper functions for PATCH/DELETE ---
+async function updateStaffById(req, res) {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+
+    const data = req.body;
+
+    // If updating password, hash it
+    if (data.login_password) {
+      staff.login_password = await bcrypt.hash(data.login_password, 10);
+    }
+
+    // Handle photo
+    if (req.files && req.files['photo'] && req.files['photo'][0]) {
+      const file = req.files['photo'][0];
+      staff.photo = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    }
+    // Handle ID upload
+    if (req.files && req.files['id_upload'] && req.files['id_upload'][0]) {
+      const file = req.files['id_upload'][0];
+      staff.id_upload = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    }
+
+    // Convert fields
+    if (data.date_joined) staff.date_joined = new Date(data.date_joined);
+    if (data.dob) staff.dob = new Date(data.dob);
+    if (data.experience) staff.experience = Number(data.experience);
+
+    // Update all other fields except protected ones
+    const protectedFields = ['_id', 'id', 'login_password', 'photo', 'id_upload', 'createdAt', 'updatedAt'];
+    for (const key in data) {
+      if (protectedFields.includes(key)) continue;
+      staff[key] = data[key];
+    }
+
+    // Check for duplicate email/account_number if changed
+    if (data.email && data.email !== staff.email) {
+      if (await Staff.findOne({ email: data.email, _id: { $ne: staff._id } })) {
+        return res.status(400).json({ error: 'Duplicate email.' });
+      }
+    }
+    if (data.account_number && data.account_number !== staff.account_number) {
+      if (await Staff.findOne({ account_number: data.account_number, _id: { $ne: staff._id } })) {
+        return res.status(400).json({ error: 'Duplicate account number.' });
+      }
+    }
+
+    await staff.save();
+    res.json({ message: 'Staff updated successfully!' });
+  } catch (error) {
+    console.error('[STAFF UPDATE ERROR]', error);
+    if (error.name === 'ValidationError') {
+      let msg = error.message;
+      if (error.errors) {
+        msg = Object.values(error.errors).map(e => e.message).join('; ');
+      }
+      return res.status(400).json({ error: msg });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'Duplicate email or account number.' });
+    }
+    res.status(500).json({ error: error.message || 'Unknown server error.' });
+  }
+}
+
+async function deleteStaffById(req, res) {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+
+    await Staff.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Staff deleted successfully!' });
+  } catch (error) {
+    console.error('[STAFF DELETE ERROR]', error);
+    res.status(500).json({ error: error.message || 'Unknown server error.' });
+  }
+}
 
 module.exports = router;

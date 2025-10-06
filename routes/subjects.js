@@ -1,8 +1,18 @@
-// Converted to Mongoose-based subject API
 const express = require('express');
 const router = express.Router();
+const Subject = require('../models/Subject'); // adjust as needed
 
-const Subject = require('../models/Subject');
+// Get subjects by class name
+router.get('/class/:className', async (req, res) => {
+  const { className } = req.params;
+  try {
+    const subjects = await Subject.find({ class: className }); // adjust query for your schema
+    res.json(subjects);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
+
 
 // GET /api/subjects - Get all subjects
 router.get('/', async (req, res) => {

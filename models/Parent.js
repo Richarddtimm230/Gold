@@ -6,4 +6,4 @@ const ParentSchema = new mongoose.Schema({
   families: [{ type: String }], // Names or Family IDs (for now, names)
 }, { timestamps: true });
 
-module.exports = mongoose.model('Parent', ParentSchema);
+module.exports = mongoose.models.Parent || mongoose.model('Parent', ParentSchema);

@@ -33,6 +33,8 @@ const feesRoute = require('./routes/fees');
 const schoolAdminRoute = require('./routes/schoolAdmin');
 const schoolAdminsRoute = require('./routes/schoolAdmins');
 const transportRoute = require('./routes/transport');
+const subjectsRoute = require('./routes/subjects');
+app.use('/api/subjects', subjectsRoute);
 app.use('/api/transport', transportRoute);
 app.use('/api', schoolAdminRoute);
 app.use('/api', schoolAdminsRoute);

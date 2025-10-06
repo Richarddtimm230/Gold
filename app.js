@@ -34,6 +34,9 @@ const schoolAdminRoute = require('./routes/schoolAdmin');
 const schoolAdminsRoute = require('./routes/schoolAdmins');
 const transportRoute = require('./routes/transport');
 const subjectsRoute = require('./routes/subjects');
+// And in app.js
+const hostelRoute = require('./routes/hostel');
+app.use('/api/hostel', hostelRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/transport', transportRoute);
 app.use('/api', schoolAdminRoute);

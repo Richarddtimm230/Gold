@@ -452,7 +452,7 @@
         return;
       }
       try {
-        const res = await fetch(`/api/classes/${classId}/students`, {headers: {'Authorization': 'Bearer ' + token }});
+        const res = await fetch(`https://goldlincschools.onrender.com/api/classes/${classId}/students`, {headers: {'Authorization': 'Bearer ' + token }});
         const data = await res.json();
         studentsByClass[classId] = data;
         renderStudentSelect(selId, data);
@@ -473,7 +473,7 @@
       const token = localStorage.getItem('token');
       const classId = document.getElementById('filterClass').value;
       const search = document.getElementById('searchStudent').value.trim();
-      let url = '/api/commbook/messages?';
+      let url = 'https://goldlincschools.onrender.com/api/commbook/messages?';
       if (classId) url += `class=${encodeURIComponent(classId)}&`;
       if (search) url += `search=${encodeURIComponent(search)}&`;
       url = url.replace(/[&?]$/, '');
@@ -509,7 +509,7 @@
       const content = document.getElementById('messageContent').value.trim();
       if (!classId || !studentId || !content) return;
       try {
-        const res = await fetch('/api/commbook/messages', {
+        const res = await fetch('https://goldlincschools.onrender.com/api/commbook/messages', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ class: classId, student: studentId, content })

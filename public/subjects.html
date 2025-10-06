@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Subjects | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind + Flowbite -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #22305a;
+      min-height: 100vh;
+    }
+    .avatar {
+      border: 2px solid #2647a6;
+      background: #ddeaff;
+    }
+    .bg-primary { background: #2647a6; }
+    .text-primary { color: #2647a6; }
+    .hover-link:hover { color: #18308b; text-decoration: underline; }
+    .subject-card {
+      transition: box-shadow 0.14s, transform 0.14s;
+      cursor: pointer;
+      outline: none;
+    }
+    .subject-card:hover, .subject-card:focus-visible {
+      box-shadow: 0 6px 18px #ddeaff88;
+      transform: translateY(-2px) scale(1.025);
+      border-color: #2647a6;
+      background: #e9f0fe;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-primary">Subjects</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='student-dashboard.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Dashboard
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='profile.html'">
+        <img id="profileAvatar" class="rounded-full h-8 w-8 avatar" src="https://ui-avatars.com/api/?name=Student&background=2647a6&color=fff" alt="Student">
+        <div class="text-sm font-bold text-primary" id="profileName">Student Name</div>
+      </div>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto mt-10 px-2">
+    <div class="bg-white rounded-xl shadow-md p-7 mb-8">
+      <h1 class="text-xl font-bold text-primary mb-2 flex items-center gap-2"><i class="fa fa-users"></i> My Subjects</h1>
+      <div id="subjectsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-7 mt-7">
+        <!-- Subject cards go here -->
+        <div class="col-span-full text-center text-gray-500" id="subjectsLoading">Loading subjects...</div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Backend API
+    const API_BASE = "/api";
+    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+
+    // Profile fill
+    function fillProfile(data) {
+      document.getElementById('profileName').textContent = data.name || 'Student Name';
+      document.getElementById('profileAvatar').src = data.photo_url
+        ? data.photo_url
+        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name || 'Student') + '&background=2647a6&color=fff';
+    }
+
+    // Fetch and fill subjects
+    async function fetchSubjects() {
+      try {
+        // Profile first, for nav fill and class
+        const resProfile = await fetch(API_BASE + "/students/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resProfile.ok) throw new Error("Unable to fetch student profile");
+        const student = await resProfile.json();
+        fillProfile(student);
+
+        const classId = student.class?._id || student.class || student.classId;
+        if (!classId) {
+          document.getElementById('subjectsContainer').innerHTML =
+            `<div class="col-span-full text-center text-red-500">Class information not found for your account.</div>`;
+          return;
+        }
+
+        // Fetch subjects for this class
+        const resSubjects = await fetch(`${API_BASE}/subjects/class/${classId}`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resSubjects.ok) throw new Error("Unable to fetch subjects");
+        const subjects = await resSubjects.json();
+
+        const container = document.getElementById('subjectsContainer');
+        if (!subjects.length) {
+          container.innerHTML = `<div class="col-span-full text-center text-gray-400">No subjects assigned to your class.</div>`;
+          return;
+        }
+        container.innerHTML = subjects.map(s => `
+          <div tabindex="0" class="subject-card bg-[#f6f8fa] border-2 border-[#ddeaff] rounded-xl p-5 flex flex-col items-start gap-2 shadow hover:shadow-lg transition"
+               onclick="goToSubject('${s._id || s.id || ''}')"
+               onkeydown="if(event.key==='Enter'||event.key===' '){goToSubject('${s._id || s.id || ''}')}"
+               title="Go to subject E-Class">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="inline-flex items-center justify-center rounded-full bg-[#ddeaff] text-primary font-bold text-lg w-11 h-11 shadow"><i class="fa fa-book"></i></span>
+              <span class="font-bold text-lg text-primary">${s.name || 'Subject'}</span>
+            </div>
+            <div class="ml-0.5 text-gray-600 text-sm">${s.teacher?.name ? `<i class="fa fa-chalkboard-teacher mr-1"></i> ${s.teacher.name}` : ''}</div>
+            <div class="ml-0.5 text-xs text-gray-400">${s.code ? `Code: ${s.code}` : ''}</div>
+            <div class="mt-2 text-primary text-xs font-bold">${s.status === 'active' ? 'Ongoing' : 'Not Active'}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById('subjectsContainer').innerHTML =
+          `<div class="col-span-full text-center text-red-500">Unable to load subjects.</div>`;
+      }
+    }
+
+    // Redirect to E-Class for subject
+    function goToSubject(subjectId) {
+      // You can modify target url as needed for your E-Class subject route
+      window.location.href = `e-class.html?subject=${encodeURIComponent(subjectId)}`;
+    }
+
+    // Initial load
+    fetchSubjects();
+  </script>
+</body>
+</html>

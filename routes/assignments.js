@@ -1,16 +1,164 @@
 const express = require('express');
 const router = express.Router();
-const { getFirestore } = require('firebase-admin/firestore');
-const db = getFirestore();
+const multer = require('multer');
+const Assignment = require('../models/Assignment');
+const AssignmentSubmission = require('../models/AssignmentSubmission');
+const Student = require('../models/Student');
+const studentAuth = require('../middleware/studentAuth');
+const adminAuth = require('../middleware/adminAuth'); // if you have
 
-// Assignments by Class
-router.get('/:classId', async (req, res) => {
-  const snap = await db.collection('assignments').doc(req.params.classId).collection('list').get();
-  res.json(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+const upload = multer({ storage: multer.memoryStorage() });
+
+// --- Get assignments for logged-in student ---
+router.get('/me', studentAuth, async (req, res) => {
+  try {
+    const studentId = req.student._id;
+    // Find assignments for this student or their class
+    const student = await Student.findById(studentId);
+    const assignments = await Assignment.find({
+      $or: [
+        { assignedTo: studentId },
+        { class: student.class }
+      ]
+    }).populate('subject');
+    // Also get submission info for each assignment
+    const submissions = await AssignmentSubmission.find({ student: studentId });
+    const assignmentData = assignments.map(ass => {
+      const submission = submissions.find(sub => sub.assignment.toString() === ass._id.toString());
+      let status = "Pending", score, feedback, submissionFile, submitted = false, totalScore;
+      if (submission) {
+        status = submission.status || (submission.score !== undefined ? "Reviewed" : "Submitted");
+        score = submission.score;
+        totalScore = submission.totalScore;
+        feedback = submission.feedback;
+        submissionFile = submission.submissionFile?.url;
+        submitted = true;
+      }
+      // Check overdue
+      if (!submitted && new Date(ass.dueDate) < new Date()) status = "Overdue";
+      return {
+        _id: ass._id,
+        title: ass.title,
+        description: ass.description,
+        subject: ass.subject,
+        dueDate: ass.dueDate,
+        status,
+        score,
+        totalScore,
+        feedback,
+        submissionFile,
+        submitted
+      };
+    });
+    res.json(assignmentData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
-router.post('/:classId', async (req, res) => {
-  const ref = await db.collection('assignments').doc(req.params.classId).collection('list').add(req.body);
-  res.status(201).json({ id: ref.id, ...req.body });
+
+// --- Submit assignment (upload) ---
+router.post('/:assignmentId/submit', studentAuth, upload.single('file'), async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const studentId = req.student._id;
+    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+
+    // For demo, just save buffer as base64. In production, upload to cloud storage and save URL.
+    const fileUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const fileMeta = { url: fileUrl, name: req.file.originalname };
+
+    // Upsert submission
+    let submission = await AssignmentSubmission.findOne({ assignment: assignmentId, student: studentId });
+    if (submission) {
+      submission.submissionFile = fileMeta;
+      submission.status = 'Submitted';
+      submission.submittedAt = new Date();
+      await submission.save();
+    } else {
+      submission = await AssignmentSubmission.create({
+        assignment: assignmentId,
+        student: studentId,
+        submissionFile: fileMeta,
+        status: 'Submitted'
+      });
+    }
+
+    res.json({ message: 'Submission successful!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- CRUD for assignments (admin/staff only) ---
+// Create assignment
+router.post('/', adminAuth, async (req, res) => {
+  try {
+    const data = req.body;
+    const assignment = await Assignment.create(data);
+    res.status(201).json(assignment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Read all assignments
+router.get('/', adminAuth, async (req, res) => {
+  try {
+    const assignments = await Assignment.find().populate('subject');
+    res.json(assignments);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Read one assignment
+router.get('/:id', adminAuth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id).populate('subject');
+    if (!assignment) return res.status(404).json({ error: 'Assignment not found' });
+    res.json(assignment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update assignment
+router.put('/:id', adminAuth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!assignment) return res.status(404).json({ error: 'Assignment not found' });
+    res.json(assignment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete assignment
+router.delete('/:id', adminAuth, async (req, res) => {
+  try {
+    await Assignment.findByIdAndDelete(req.params.id);
+    res.json({ message: "Assignment deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- Teacher/admin review student submission ---
+router.post('/:assignmentId/review/:studentId', adminAuth, async (req, res) => {
+  try {
+    const { assignmentId, studentId } = req.params;
+    const { score, feedback, totalScore } = req.body;
+    const submission = await AssignmentSubmission.findOne({ assignment: assignmentId, student: studentId });
+    if (!submission) return res.status(404).json({ error: "Submission not found" });
+    submission.score = score;
+    submission.feedback = feedback;
+    submission.status = "Reviewed";
+    if (totalScore) submission.totalScore = totalScore;
+    await submission.save();
+    res.json({ message: "Review saved" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

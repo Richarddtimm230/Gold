@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Promotion & Graduation | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind + Flowbite -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #007bff;
+      --sidebar-bg: #fff;
+      --sidebar-width: 260px;
+      --sidebar-width-mobile: 90vw;
+      --border-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --neutral: #f8f9fa;
+      --card-bg: #fff;
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --font-main: 'Inter', Arial, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--neutral);
+      color: #222;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      min-width: 180px;
+      max-width: 320px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: var(--shadow);
+      z-index: 1050;
+      padding: 0 0 2rem 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .sidebar nav {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.85em 1.3em;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: background 0.16s, border-color 0.16s;
+      font-size: 1.05em;
+    }
+    .sidebar a.active, .sidebar a:hover {
+      background: #f1f6fd;
+      border-left: 4px solid var(--primary);
+      color: var(--primary);
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      background: #fff;
+      margin: 0;
+    }
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 1.8em;
+      padding-top: 1.5vw;
+      padding-bottom: 1.5vw;
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.03em;
+    }
+    .header-actions .icon {
+      font-size: 1.43em;
+      cursor: pointer;
+      opacity: 0.88;
+      transition: opacity 0.2s;
+    }
+    .header-actions .icon:hover {
+      opacity: 1;
+    }
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-right: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+    }
+    .sidebar-overlay {
+      display: none;
+    }
+    .sidebar-overlay.active {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1040;
+    }
+    @media (max-width: 900px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+      .main-content { margin-left: 0; padding: 0 3vw; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 13px; }
+      .sidebar { width: 97vw; }
+    }
+    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+    .promotion-title {
+      margin: 1.5em 0 0.7em 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .promotion-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      margin-top: 2em;
+      padding: 2.2em 1.7em 2em 1.7em;
+      max-width: 1100px;
+      width: 100%;
+    }
+    .promotion-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.3em;
+      margin-bottom: 1.1em;
+      align-items: center;
+    }
+    .promotion-filters select, .promotion-filters input {
+      padding: 0.6em 0.9em;
+      border-radius: 7px;
+      border: 1px solid #ddeaff;
+      font-size: 1em;
+      min-width: 180px;
+      background: #fff;
+    }
+    .promotion-filters button {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.6em 1.2em;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .promotion-filters button:hover { background: #005ecb; }
+    .promotion-table-wrap {
+      overflow-x: auto;
+      margin-top: 1.5em;
+    }
+    .promotion-table {
+      min-width: 820px;
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .promotion-table th, .promotion-table td {
+      padding: 0.95em 1.1em;
+      border-bottom: 1px solid #e5e8ef;
+      text-align: left;
+      font-size: 1em;
+    }
+    .promotion-table th {
+      background: #e9f0fe;
+      color: var(--primary);
+      font-weight: 700;
+      border-top: 0;
+    }
+    .promotion-table td {
+      background: #fff;
+    }
+    .promotion-table tr:last-child td {
+      border-bottom: none;
+    }
+    .action-btn {
+      padding: 0.35em 0.95em;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      margin-right: 0.5em;
+      cursor: pointer;
+      font-size: 0.97em;
+      background: #e9f0fe;
+      color: var(--primary);
+      transition: background 0.18s, color 0.18s;
+    }
+    .action-btn.promote { background: #18ba89; color: #fff; }
+    .action-btn.graduate { background: #835bd1; color: #fff; }
+    .action-btn.demote { background: #e74c3c; color: #fff; }
+    .action-btn.disabled, .action-btn[disabled] { opacity: 0.62; pointer-events: none; }
+    .bulk-actions-bar {
+      background: #f5fbff;
+      border-radius: 8px;
+      padding: 0.6em 1.1em;
+      margin: 1.15em 0 1em 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      align-items: center;
+      font-size: 1em;
+      box-shadow: 0 1px 7px rgba(0,0,0,0.04);
+    }
+    .bulk-actions-bar button {
+      padding: 0.45em 1.1em;
+      border-radius: 7px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.18s;
+    }
+    .bulk-actions-bar button:hover { background: #005ecb; }
+    .badge {
+      display: inline-block;
+      border-radius: 9999px;
+      padding: 0.18em 0.8em;
+      font-size: 0.91em;
+      font-weight: 700;
+      margin-right: 0.2em;
+    }
+    .badge-promoted { background: #18ba89; color: #fff; }
+    .badge-graduated { background: #835bd1; color: #fff; }
+    .badge-pending { background: #ffd600; color: #22305a; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar for desktop, overlays for mobile -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+      <div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
+      </div>
+    </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
+    <nav>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Mobile navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
+    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
+    <div class="font-bold text-primary text-lg flex items-center gap-2">
+      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
+      <span>Gold & Linc Schools</span>
+    </div>
+    <div></div>
+  </nav>
+  <!-- Main Content -->
+  <main class="main-content" style="margin-top:70px;">
+    <header>
+      <div class="school-title">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <span>GOLD AND LINC SCHOOLS</span>
+      </div>
+      <div class="header-actions">
+        <span class="icon" title="Notifications">🔔</span>
+        <span class="icon" title="Help">❓</span>
+        <span class="icon" title="Settings">⚙️</span>
+      </div>
+    </header>
+    <h2 class="promotion-title"><span>🎯</span> Student Promotion, Transfer & Graduation</h2>
+    <!-- Promotion/Graduation Filters -->
+    <section class="promotion-section">
+      <form class="promotion-filters" onsubmit="event.preventDefault(); fetchStudents();">
+        <select id="filterSession">
+          <option value="">Select Session</option>
+          <option value="2024-2025">2024-2025</option>
+          <option value="2023-2024">2023-2024</option>
+        </select>
+        <select id="filterTerm">
+          <option value="">All Terms</option>
+          <option>FIRST TERM</option>
+          <option>SECOND TERM</option>
+          <option>THIRD TERM</option>
+        </select>
+        <select id="filterClass">
+          <option value="">All Classes</option>
+          <!-- JS fill -->
+        </select>
+        <input type="text" id="searchName" placeholder="Name or Reg No.">
+        <button type="submit"><i class="fa fa-search mr-1"></i> Search</button>
+      </form>
+      <!-- Bulk actions bar -->
+      <div class="bulk-actions-bar" id="bulkActionsBar" style="display:none;">
+        <span id="selectedCount">0 selected</span>
+        <button type="button" onclick="bulkPromote()" class="bg-[#18ba89] hover:bg-[#11a57c]">Promote</button>
+        <button type="button" onclick="bulkGraduate()" class="bg-[#835bd1] hover:bg-[#6d49b3]">Graduate</button>
+        <button type="button" onclick="bulkDemote()" class="bg-[#e74c3c] hover:bg-[#c32218]">Demote</button>
+      </div>
+      <!-- Table -->
+      <div class="promotion-table-wrap">
+        <table class="promotion-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" onchange="toggleAllStudents(this)"></th>
+              <th>Name</th>
+              <th>Reg No.</th>
+              <th>Current Class</th>
+              <th>Session</th>
+              <th>Term</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody">
+            <tr><td colspan="8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Sidebar mobile toggle logic (consistent with people.html)
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // Demo data (to be replaced by API)
+    let students = [];
+    let selectedStudents = new Set();
+
+    function fillClasses() {
+      // Ideally, fetch from backend
+      const classes = [
+        {id: "js1", name: "JSS 1"}, {id: "js2", name: "JSS 2"}, {id: "js3", name: "JSS 3"},
+        {id: "ss1", name: "SSS 1"}, {id: "ss2", name: "SSS 2"}, {id: "ss3", name: "SSS 3"}
+      ];
+      const sel = document.getElementById('filterClass');
+      sel.innerHTML = '<option value="">All Classes</option>' +
+        classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+
+    function fetchStudents() {
+      // Simulate API call with filters
+      const filterClass = document.getElementById('filterClass').value;
+      const filterSession = document.getElementById('filterSession').value;
+      const filterTerm = document.getElementById('filterTerm').value;
+      const search = document.getElementById('searchName').value.trim().toLowerCase();
+      // Replace with real API call using above filters
+      students = [
+        {id:"1", name:"Janet Okafor", regNo:"STU1001", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Promoted"},
+        {id:"2", name:"Ali Musa", regNo:"STU1002", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Pending"},
+        {id:"3", name:"Blessing Uzo", regNo:"STU1003", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Graduated"},
+        {id:"4", name:"Chuka Eze", regNo:"STU1004", class:"JSS 2", session:"2024-2025", term:"FIRST TERM", status:"Pending"},
+        {id:"5", name:"Ngozi Ibe", regNo:"STU1005", class:"SSS 2", session:"2024-2025", term:"SECOND TERM", status:"Pending"},
+      ].filter(s =>
+        (!filterClass || s.class.toLowerCase().replace(/\s/g,'') === filterClass) &&
+        (!filterSession || s.session === filterSession) &&
+        (!filterTerm || s.term === filterTerm) &&
+        (!search || s.name.toLowerCase().includes(search) || s.regNo.toLowerCase().includes(search))
+      );
+      renderStudentsTable();
+    }
+
+    function renderStudentsTable() {
+      const tbody = document.getElementById('studentsTableBody');
+      if (!students.length) {
+        tbody.innerHTML = `<tr><td colspan="8">No students found for selected criteria.</td></tr>`;
+        document.getElementById('bulkActionsBar').style.display = "none";
+        return;
+      }
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td><input type="checkbox" value="${s.id}" ${selectedStudents.has(s.id) ? "checked" : ""} onchange="toggleStudent('${s.id}')"></td>
+          <td>${s.name}</td>
+          <td>${s.regNo}</td>
+          <td>${s.class}</td>
+          <td>${s.session}</td>
+          <td>${s.term}</td>
+          <td>
+            <span class="badge ${
+              s.status === "Promoted" ? "badge-promoted" :
+              s.status === "Graduated" ? "badge-graduated" :
+              "badge-pending"
+            }">${s.status}</span>
+          </td>
+          <td>
+            <button class="action-btn promote" onclick="promoteStudent('${s.id}')" ${s.status==="Promoted"||s.status==="Graduated"?"disabled":""}>Promote</button>
+            <button class="action-btn graduate" onclick="graduateStudent('${s.id}')" ${s.status==="Graduated"?"disabled":""}>Graduate</button>
+            <button class="action-btn demote" onclick="demoteStudent('${s.id}')">Demote</button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('bulkActionsBar').style.display = selectedStudents.size ? "flex" : "none";
+      document.getElementById('selectedCount').textContent = selectedStudents.size + " selected";
+    }
+
+    function toggleStudent(id) {
+      if (selectedStudents.has(id)) selectedStudents.delete(id); else selectedStudents.add(id);
+      renderStudentsTable();
+    }
+
+    function toggleAllStudents(box) {
+      if (box.checked) {
+        students.forEach(s => selectedStudents.add(s.id));
+      } else {
+        students.forEach(s => selectedStudents.delete(s.id));
+      }
+      renderStudentsTable();
+    }
+
+    function promoteStudent(id) {
+      // Replace with API call
+      const s = students.find(x => x.id === id);
+      if (s && s.status !== "Promoted" && s.status !== "Graduated") {
+        s.status = "Promoted";
+        renderStudentsTable();
+        alert(`Student ${s.name} promoted to next class!`);
+      }
+    }
+    function graduateStudent(id) {
+      // Replace with API call
+      const s = students.find(x => x.id === id);
+      if (s && s.status !== "Graduated") {
+        s.status = "Graduated";
+        renderStudentsTable();
+        alert(`Student ${s.name} graduated!`);
+      }
+    }
+    function demoteStudent(id) {
+      // Replace with API call
+      const s = students.find(x => x.id === id);
+      if (s) {
+        s.status = "Pending";
+        renderStudentsTable();
+        alert(`Student ${s.name} set to pending/demoted.`);
+      }
+    }
+    function bulkPromote() {
+      students.forEach(s => { if (selectedStudents.has(s.id) && s.status !== "Promoted" && s.status !== "Graduated") s.status = "Promoted"; });
+      renderStudentsTable();
+      alert("Selected students promoted.");
+    }
+    function bulkGraduate() {
+      students.forEach(s => { if (selectedStudents.has(s.id) && s.status !== "Graduated") s.status = "Graduated"; });
+      renderStudentsTable();
+      alert("Selected students graduated.");
+    }
+    function bulkDemote() {
+      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Pending"; });
+      renderStudentsTable();
+      alert("Selected students set to pending/demoted.");
+    }
+
+    // Initial fill
+    fillClasses();
+    fetchStudents();
+  </script>
+</body>
+</html>

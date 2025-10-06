@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gold and Linc Schools - Bursary Staff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+  <style>
+    :root {
+      --primary: #007bff;
+      --sidebar-bg: #fff;
+      --sidebar-width: 260px;
+      --sidebar-width-mobile: 90vw;
+      --header-height: 64px;
+      --border-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --neutral: #f8f9fa;
+      --card-bg: #fff;
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --font-main: 'Inter', Arial, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--neutral);
+      color: #222;
+      height: 100%;
+      min-height: 100%;
+      box-sizing: border-box;
+    }
+    #pageSpinnerOverlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.96);
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      transition: opacity 0.4s;
+    }
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border: 5px solid #e3e6ea;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      min-width: 180px;
+      max-width: 320px;
+      height: 100vh;
+      max-height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: var(--shadow);
+      z-index: 1050;
+      padding: 0 0 2rem 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      display: block;
+      background: #fff;
+    }
+    .sidebar nav {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.85em 1.3em;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: background 0.16s, border-color 0.16s;
+      font-size: 1.05em;
+    }
+    .sidebar a.active, .sidebar a:hover {
+      background: #f1f6fd;
+      border-left: 4px solid var(--primary);
+      color: var(--primary);
+    }
+    @media (max-width: 750px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        box-shadow: 2px 0 18px rgba(0,0,0,0.13);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+    }
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-right: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      height: var(--header-height);
+    }
+    .sidebar-overlay {
+      display: none;
+    }
+    .sidebar-overlay.active {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1040;
+    }
+
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      gap: 1.8em;
+      padding-top: 1.5vw;
+      padding-bottom: 1.5vw;
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.03em;
+    }
+    .header-actions .icon {
+      font-size: 1.43em;
+      cursor: pointer;
+      opacity: 0.88;
+      transition: opacity 0.2s;
+    }
+    .header-actions .icon:hover {
+      opacity: 1;
+    }
+
+    .bursary-title {
+      margin: 1.5em 0 0.7em 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      color: #333;
+    }
+    .bursary-actions {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-bottom: 1.25em;
+    }
+    .bursary-actions .add-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.62em 1.2em;
+      border-radius: 7px;
+      font-size: 1.03em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+      transition: background 0.18s;
+    }
+    .bursary-actions .add-btn:hover {
+      background: #005ecb;
+    }
+    .bursary-actions .search-bar {
+      flex: 1;
+      max-width: 330px;
+    }
+    .bursary-actions .search-bar input {
+      width: 100%;
+      padding: 0.62em 1em;
+      border-radius: 6px;
+      border: 1px solid #e0e6eb;
+      font-size: 1em;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .bursary-list {
+      width: 100%;
+      border-radius: var(--border-radius);
+      background: var(--card-bg);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      margin-bottom: 2em;
+    }
+    .bursary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .bursary-table th, .bursary-table td {
+      text-align: left;
+      padding: 1rem 0.8rem;
+      border-bottom: 1px solid #f0f3f7;
+    }
+    .bursary-table th {
+      background: #f5f8fd;
+      font-weight: 600;
+      color: #1a3157;
+      font-size: 1.04em;
+    }
+    .bursary-table td {
+      font-size: 1.02em;
+      color: #373737;
+      background: #fff;
+      vertical-align: top;
+    }
+    .bursary-table tr:last-child td {
+      border-bottom: none;
+    }
+    .duty-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+    }
+    .duty-badge {
+      background: #f9ecd7;
+      color: #a77b06;
+      border-radius: 5px;
+      padding: 0.18em 0.7em;
+      font-size: 0.97em;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    .bursary-table .actions {
+      display: flex;
+      gap: 0.5em;
+    }
+    .bursary-table .action-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.07em;
+      padding: 0.35em 0.5em;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .bursary-table .action-btn.view { color: var(--primary); }
+    .bursary-table .action-btn.edit { color: #a77b06; }
+    .bursary-table .action-btn.delete { color: #c82333; }
+    .bursary-table .action-btn:hover { background: #f1f6fd; }
+    .empty-state {
+      text-align: center;
+      color: #9fa7b8;
+      padding: 2.5em 0;
+      font-size: 1.08em;
+    }
+    .loading-state {
+      text-align: center;
+      color: #888;
+      padding: 2.5em 0;
+      font-size: 1.13em;
+    }
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(40,40,60,0.35);
+      z-index: 1200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      padding: 2.2em 2.1em 1.5em 2.1em;
+      max-width: 410px;
+      width: 95vw;
+      position: relative;
+      animation: modalPop 0.18s;
+    }
+    @keyframes modalPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-close-btn {
+      position: absolute;
+      top: 0.7em; right: 1em;
+      background: transparent;
+      border: none;
+      font-size: 1.7em;
+      color: #bbb;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .modal-title {
+      font-weight: 700;
+      font-size: 1.19em;
+      margin-bottom: 1em;
+      color: var(--primary);
+    }
+    .modal-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25em;
+      margin-top: 0.9em;
+      color: #333;
+    }
+    .modal-form input, .modal-form textarea {
+      width: 100%;
+      padding: 0.62em 1em;
+      border-radius: 6px;
+      border: 1px solid #e0e6eb;
+      font-size: 1em;
+      margin-bottom: 0.7em;
+      box-sizing: border-box;
+      background: #f9fafd;
+    }
+    .modal-form .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.7em;
+      margin-top: 1.3em;
+    }
+    .modal-form .submit-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.6em 1.4em;
+      border-radius: 7px;
+      font-size: 1.08em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.17s;
+    }
+    .modal-form .submit-btn:hover {
+      background: #005ecb;
+    }
+    .modal-form .add-duty-btn {
+      background: #f9ecd7;
+      color: #a77b06;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.98em;
+      cursor: pointer;
+      padding: 0.37em 1em;
+      margin-top: 0.3em;
+      margin-bottom: 0.7em;
+      transition: background 0.13s;
+    }
+    .modal-form .add-duty-btn:hover {
+      background: #ffe7b3;
+    }
+    .modal-form .duty-input-row {
+      display: flex;
+      gap: 0.5em;
+      margin-bottom: 0.5em;
+    }
+    .modal-form .duty-input-row input {
+      flex: 1;
+    }
+    .modal-form .remove-duty-btn {
+      background: #ffeded;
+      color: #d20a0a;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.09em;
+      cursor: pointer;
+      padding: 0 0.6em;
+      margin-left: 5px;
+      transition: background 0.13s;
+    }
+    .modal-form .remove-duty-btn:hover {
+      background: #ffe0e0;
+    }
+    @media (max-width: 1100px) {
+      .main-content { margin-left: 0; padding: 0 3vw; }
+    }
+    @media (max-width: 750px) {
+      .main-content { margin-left: 0; padding: 0 3vw; }
+      .sidebar { width: var(--sidebar-width-mobile); min-width: 0; max-width: 95vw; }
+      .sidebar.active { transform: translateX(0); }
+      .sidebar-toggle { display: inline-flex; }
+      .sidebar-overlay.active { display: block; }
+      body.sidebar-open { overflow: hidden; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+      .modal-box { padding: 1.1em 0.6em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 13px; }
+      .sidebar { width: 97vw; }
+    }
+    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="pageSpinnerOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+      <div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
+      </div>
+    </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
+    <nav>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content main-content-bursary">
+    <header>
+      <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
+      <div class="school-title">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <span>GOLD AND LINC SCHOOLS</span>
+      </div>
+      <div class="header-actions">
+        <span class="icon" title="Notifications">🔔</span>
+        <span class="icon" title="Help">❓</span>
+        <span class="icon" title="Settings">⚙️</span>
+      </div>
+    </header>
+    <h2 class="bursary-title"><span>💼</span> Bursary Staff Management</h2>
+    <div class="bursary-actions">
+      <button class="add-btn" id="addBursaryBtn"><span>➕</span> Add Bursary Staff</button>
+      <div class="search-bar">
+        <input type="text" id="bursarySearchInput" placeholder="Search bursary staff..." aria-label="Search bursary staff">
+      </div>
+    </div>
+
+    <div class="bursary-list" id="bursaryListSection">
+      <div class="loading-state" id="bursaryLoading">Loading bursary staff...</div>
+      <div class="empty-state" id="bursaryEmpty" style="display:none;">No bursary staff found.</div>
+      <table class="bursary-table" id="bursaryTable" style="display:none;">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Position</th>
+          <th>Contact</th>
+          <th>Duties</th>
+          <th style="min-width: 115px;">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="bursaryTableBody">
+        <!-- Bursary staff rows will be loaded here -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal for Add/Edit Bursary Staff -->
+  <div class="modal-backdrop" id="bursaryModalBackdrop">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="bursaryModalTitle">
+      <button class="modal-close-btn" id="closeBursaryModal" aria-label="Close">&times;</button>
+      <div class="modal-title" id="bursaryModalTitle">Add Bursary Staff</div>
+      <form id="bursaryForm" class="modal-form" autocomplete="off">
+        <input type="hidden" id="bursaryIdInput">
+        <label for="bursaryNameInput">Name</label>
+        <input type="text" id="bursaryNameInput" required maxlength="40" placeholder="e.g. Jane Doe">
+        <label for="bursaryPositionInput">Position/Role</label>
+        <input type="text" id="bursaryPositionInput" required maxlength="36" placeholder="e.g. Bursar, Accountant">
+        <label for="bursaryContactInput">Contact</label>
+        <input type="text" id="bursaryContactInput" maxlength="60" placeholder="e.g. 0803... or email">
+        <label>Duties</label>
+        <div id="dutyInputs"></div>
+        <button type="button" class="add-duty-btn" id="addDutyBtn">+ Add Duty</button>
+        <div class="form-actions">
+          <button type="submit" class="submit-btn" id="bursaryFormSubmitBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <button class="support-tab" aria-label="Open Support">Support</button>
+  <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
+
+  <script>
+    // Spinner overlay logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const spinner = document.getElementById('pageSpinnerOverlay');
+      if (spinner) spinner.style.display = 'flex';
+      setTimeout(() => {
+        if (spinner) {
+          spinner.style.opacity = '0';
+          setTimeout(() => { spinner.style.display = 'none'; }, 400);
+        }
+      }, 1200);
+    });
+
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // Modal logic for Add/Edit Bursary Staff
+    const bursaryModalBackdrop = document.getElementById('bursaryModalBackdrop');
+    const addBursaryBtn = document.getElementById('addBursaryBtn');
+    const closeBursaryModal = document.getElementById('closeBursaryModal');
+    const bursaryForm = document.getElementById('bursaryForm');
+    const bursaryModalTitle = document.getElementById('bursaryModalTitle');
+    const bursaryIdInput = document.getElementById('bursaryIdInput');
+    const bursaryNameInput = document.getElementById('bursaryNameInput');
+    const bursaryContactInput = document.getElementById('bursaryContactInput');
+    const bursaryPositionInput = document.getElementById('bursaryPositionInput');
+    const dutyInputs = document.getElementById('dutyInputs');
+    const addDutyBtn = document.getElementById('addDutyBtn');
+
+    function resetBursaryForm() {
+      bursaryForm.reset();
+      bursaryIdInput.value = '';
+      dutyInputs.innerHTML = '';
+      addDutyInput('');
+    }
+    addBursaryBtn.addEventListener('click', () => {
+      resetBursaryForm();
+      bursaryModalTitle.textContent = 'Add Bursary Staff';
+      bursaryModalBackdrop.classList.add('active');
+    });
+    closeBursaryModal.addEventListener('click', () => {
+      bursaryModalBackdrop.classList.remove('active');
+    });
+    bursaryModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === bursaryModalBackdrop) bursaryModalBackdrop.classList.remove('active');
+    });
+    function addDutyInput(value) {
+      const row = document.createElement('div');
+      row.className = 'duty-input-row';
+      const input = document.createElement('input');
+      input.type = 'text'; input.placeholder = 'Duty description'; input.value = value || ''; input.required = true; input.maxLength = 36;
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'remove-duty-btn';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.title = "Remove";
+      removeBtn.addEventListener('click', () => row.remove());
+      row.appendChild(input);
+      row.appendChild(removeBtn);
+      dutyInputs.appendChild(row);
+    }
+    addDutyBtn.addEventListener('click', () => addDutyInput(''));
+
+    // Table logic
+    const bursaryLoading = document.getElementById('bursaryLoading');
+    const bursaryEmpty = document.getElementById('bursaryEmpty');
+    const bursaryTable = document.getElementById('bursaryTable');
+    const bursaryTableBody = document.getElementById('bursaryTableBody');
+    const bursarySearchInput = document.getElementById('bursarySearchInput');
+    let allBursaryStaff = [];
+
+    async function fetchBursaryStaff() {
+      bursaryLoading.style.display = '';
+      bursaryEmpty.style.display = 'none';
+      bursaryTable.style.display = 'none';
+      bursaryTableBody.innerHTML = '';
+      try {
+        const res = await fetch('/api/staff/bursary');
+        if (!res.ok) throw new Error('Failed to fetch bursary staff');
+        allBursaryStaff = await res.json();
+        renderBursaryStaff(allBursaryStaff);
+      } catch (e) {
+        bursaryLoading.textContent = 'Error loading bursary staff.';
+        allBursaryStaff = [];
+        bursaryTableBody.innerHTML = '';
+        bursaryTable.style.display = 'none';
+        bursaryEmpty.style.display = '';
+      }
+    }
+    function renderBursaryStaff(list) {
+      bursaryLoading.style.display = 'none';
+      bursaryTableBody.innerHTML = '';
+      if (!list.length) {
+        bursaryTable.style.display = 'none';
+        bursaryEmpty.style.display = '';
+        return;
+      }
+      bursaryEmpty.style.display = 'none';
+      bursaryTable.style.display = '';
+      list.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHTML(b.name)}</td>
+          <td>${escapeHTML(b.position)}</td>
+          <td>${escapeHTML(b.contact||'')}</td>
+          <td>
+            <div class="duty-badges">${
+              (b.duties||[]).map(d => `<span class="duty-badge">${escapeHTML(d)}</span>`).join('')
+            }</div>
+          </td>
+          <td class="actions">
+            <button class="action-btn view" title="View" onclick="viewBursary('${b._id}')">👁️</button>
+            <button class="action-btn edit" title="Edit" onclick="editBursary('${b._id}')">✏️</button>
+            <button class="action-btn delete" title="Delete" onclick="deleteBursary('${b._id}')">🗑️</button>
+          </td>
+        `;
+        bursaryTableBody.appendChild(tr);
+      });
+    }
+    function escapeHTML(str) {
+      return String(str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    bursarySearchInput.addEventListener('input', () => {
+      const q = bursarySearchInput.value.trim().toLowerCase();
+      const filtered = allBursaryStaff.filter(b =>
+        (b.name||'').toLowerCase().includes(q)
+        || (b.position||'').toLowerCase().includes(q)
+        || (b.contact||'').toLowerCase().includes(q)
+        || (b.duties||[]).join(' ').toLowerCase().includes(q)
+      );
+      renderBursaryStaff(filtered);
+    });
+
+    // Add/Edit functions
+    window.editBursary = function(id) {
+      const b = allBursaryStaff.find(bb => bb._id === id);
+      if (!b) return;
+      bursaryModalTitle.textContent = 'Edit Bursary Staff';
+      bursaryIdInput.value = b._id;
+      bursaryNameInput.value = b.name || '';
+      bursaryPositionInput.value = b.position || '';
+      bursaryContactInput.value = b.contact || '';
+      dutyInputs.innerHTML = '';
+      (b.duties || ['']).forEach(addDutyInput);
+      bursaryModalBackdrop.classList.add('active');
+    };
+    window.viewBursary = function(id) {
+      window.editBursary(id);
+      bursaryModalTitle.textContent = 'View Bursary Staff';
+      bursaryForm.querySelectorAll('input,textarea,button.submit-btn').forEach(el => el.disabled = true);
+      closeBursaryModal.disabled = false;
+    };
+    bursaryModalBackdrop.addEventListener('transitionend', () => {
+      if (!bursaryModalBackdrop.classList.contains('active')) {
+        bursaryForm.querySelectorAll('input,textarea,button').forEach(el => el.disabled = false);
+      }
+    });
+    window.deleteBursary = async function(id) {
+      if (!confirm('Are you sure you want to delete this bursary staff?')) return;
+      try {
+        const res = await fetch(`/api/staff/bursary/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        await fetchBursaryStaff();
+      } catch (e) {
+        alert('Error deleting bursary staff.');
+      }
+    };
+
+    bursaryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = bursaryIdInput.value;
+      const name = bursaryNameInput.value.trim();
+      const position = bursaryPositionInput.value.trim();
+      const contact = bursaryContactInput.value.trim();
+      const duties = Array.from(dutyInputs.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+      if (!name || !position || !duties.length) {
+        alert('Please fill all required fields.');
+        return;
+      }
+      try {
+        const payload = { name, position, contact, duties };
+        let res;
+        if (id) {
+          res = await fetch(`/api/staff/bursary/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch('/api/staff/bursary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        if (!res.ok) throw new Error('Save failed');
+        bursaryModalBackdrop.classList.remove('active');
+        await fetchBursaryStaff();
+      } catch (err) {
+        alert('Error saving bursary staff.');
+      }
+    });
+
+    // Initial load
+    fetchBursaryStaff();
+  </script>
+</body>
+</html>

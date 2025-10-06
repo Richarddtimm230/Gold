@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Birthdays | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #007bff;
+      --sidebar-bg: #fff;
+      --sidebar-width: 260px;
+      --sidebar-width-mobile: 90vw;
+      --neutral: #f6f8fa;
+      --border-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --font-main: 'Inter', Arial, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--neutral);
+      color: #222;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      min-width: 180px;
+      max-width: 320px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: var(--shadow);
+      z-index: 1050;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .sidebar nav {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.85em 1.3em;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: background 0.16s, border-color 0.16s;
+      font-size: 1.05em;
+    }
+    .sidebar a.active, .sidebar a:hover {
+      background: #f1f6fd;
+      border-left: 4px solid var(--primary);
+      color: var(--primary);
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      background: #fff;
+      margin: 0;
+    }
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 1.8em;
+      padding-top: 1.5vw;
+      padding-bottom: 1.5vw;
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.03em;
+    }
+    .header-actions .icon {
+      font-size: 1.43em;
+      cursor: pointer;
+      opacity: 0.88;
+      transition: opacity 0.2s;
+    }
+    .header-actions .icon:hover {
+      opacity: 1;
+    }
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-right: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+    }
+    .sidebar-overlay {
+      display: none;
+    }
+    .sidebar-overlay.active {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1040;
+    }
+    @media (max-width: 900px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+      .main-content { margin-left: 0; padding: 0 3vw; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 13px; }
+      .sidebar { width: 97vw; }
+    }
+    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+    .birthdays-title {
+      margin: 1.5em 0 0.7em 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .birthdays-section {
+      background: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      margin-top: 2em;
+      padding: 2.2em 1.7em 2em 1.7em;
+      max-width: 1100px;
+      width: 100%;
+    }
+    .birthday-list-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.1em;
+      margin-top: 1.2em;
+      margin-bottom: 0.3em;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .birthday-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.2em;
+      margin-bottom: 1em;
+    }
+    .birthday-card {
+      background: #f6faff;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px #ddeaff17;
+      padding: 1.2em 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 160px;
+      transition: box-shadow 0.13s, transform 0.13s;
+      position: relative;
+      border: 2px solid #e9f0fe;
+      cursor: pointer;
+    }
+    .birthday-card.today {
+      border: 2px solid #18ba89;
+      background: #eafff3;
+    }
+    .birthday-card.past {
+      opacity: 0.7;
+    }
+    .birthday-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #007bff;
+      margin-bottom: 0.6em;
+    }
+    .birthday-name {
+      font-weight: 700;
+      font-size: 1.13em;
+      color: var(--primary);
+      text-align: center;
+    }
+    .birthday-date {
+      font-size: 0.97em;
+      color: #444;
+      margin-bottom: 0.2em;
+      text-align: center;
+    }
+    .birthday-class {
+      font-size: 0.97em;
+      color: #555;
+      text-align: center;
+    }
+    .birthday-age {
+      font-size: 0.95em;
+      color: #18ba89;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 0.15em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar for desktop, overlays for mobile -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+      <div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
+      </div>
+    </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
+    <nav>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Mobile navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
+    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
+    <div class="font-bold text-primary text-lg flex items-center gap-2">
+      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
+      <span>Gold & Linc Schools</span>
+    </div>
+    <div></div>
+  </nav>
+  <!-- Main Content -->
+  <main class="main-content" style="margin-top:70px;">
+    <header>
+      <div class="school-title">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <span>GOLD AND LINC SCHOOLS</span>
+      </div>
+      <div class="header-actions">
+        <span class="icon" title="Notifications">🔔</span>
+        <span class="icon" title="Help">❓</span>
+        <span class="icon" title="Settings">⚙️</span>
+      </div>
+    </header>
+    <h2 class="birthdays-title"><span>🎂</span> Student Birthdays (This Month)</h2>
+    <section class="birthdays-section">
+      <div class="birthday-list-title"><i class="fa fa-history"></i> Previous Birthdays</div>
+      <div class="birthday-grid" id="pastBirthdays">
+        <div style="grid-column:1/-1;text-align:center;color:#bbb;">Loading...</div>
+      </div>
+      <div class="birthday-list-title"><i class="fa fa-birthday-cake"></i> Today's Birthdays</div>
+      <div class="birthday-grid" id="todayBirthdays">
+        <div style="grid-column:1/-1;text-align:center;color:#bbb;">Loading...</div>
+      </div>
+      <div class="birthday-list-title"><i class="fa fa-hourglass-start"></i> Upcoming Birthdays</div>
+      <div class="birthday-grid" id="upcomingBirthdays">
+        <div style="grid-column:1/-1;text-align:center;color:#bbb;">Loading...</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // Fetch birthdays for current month
+    async function fetchBirthdays() {
+      const token = localStorage.getItem('token');
+      const now = new Date();
+      const month = now.getMonth() + 1; // 1-based
+      const day = now.getDate();
+      try {
+        const res = await fetch(`/api/students/birthdays?month=${month}`, {headers: {'Authorization': 'Bearer ' + token}});
+        const data = await res.json();
+        // sort into past, today, upcoming
+        let past = [], today = [], upcoming = [];
+        data.forEach(student => {
+          if (!student.dob) return;
+          const dob = new Date(student.dob);
+          if (dob.getMonth() + 1 !== month) return;
+          const bday = dob.getDate();
+          if (bday < day) past.push(student);
+          else if (bday === day) today.push(student);
+          else upcoming.push(student);
+        });
+        // sort each group by date
+        past.sort((a,b)=>new Date(a.dob).getDate()-new Date(b.dob).getDate());
+        today.sort((a,b)=>a.name.localeCompare(b.name));
+        upcoming.sort((a,b)=>new Date(a.dob).getDate()-new Date(b.dob).getDate());
+        renderBirthdayGroup('pastBirthdays', past, 'past');
+        renderBirthdayGroup('todayBirthdays', today, 'today');
+        renderBirthdayGroup('upcomingBirthdays', upcoming, 'upcoming');
+      } catch {
+        document.getElementById('pastBirthdays').innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load birthdays.</div>`;
+        document.getElementById('todayBirthdays').innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load birthdays.</div>`;
+        document.getElementById('upcomingBirthdays').innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load birthdays.</div>`;
+      }
+    }
+    function renderBirthdayGroup(id, students, type) {
+      const grid = document.getElementById(id);
+      if (!students.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#bbb;">No birthdays.</div>`;
+        return;
+      }
+      const today = new Date();
+      const cards = students.map(s => {
+        const dob = new Date(s.dob);
+        const age = today.getFullYear() - dob.getFullYear();
+        return `
+          <div class="birthday-card ${type}" tabindex="0">
+            <img class="birthday-avatar" src="${s.photo_url || 'https://ui-avatars.com/api/?name='+encodeURIComponent(s.name)+'&background=007bff&color=fff'}" alt="${s.name}">
+            <div class="birthday-name">${s.name}</div>
+            <div class="birthday-class">${s.class || ''}</div>
+            <div class="birthday-date"><i class="fa fa-calendar"></i> ${dob.getDate().toString().padStart(2,'0')}/${(dob.getMonth()+1).toString().padStart(2,'0')}</div>
+            <div class="birthday-age"><i class="fa fa-user"></i> ${age} years</div>
+          </div>
+        `;
+      }).join('');
+      grid.innerHTML = cards;
+    }
+    fetchBirthdays();
+  </script>
+</body>
+</html>

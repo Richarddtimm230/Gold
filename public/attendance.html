@@ -190,7 +190,7 @@
       try {
         const token = localStorage.getItem('token');
         // Optionally fetch admin profile
-        const adminRes = await fetch('/api/admin/me', {headers: {'Authorization': 'Bearer ' + token}});
+        const adminRes = await fetch('https://goldlincschools.onrender.com/api/admin/me', {headers: {'Authorization': 'Bearer ' + token}});
         if (adminRes.ok) {
           const admin = await adminRes.json();
           fillProfile(admin);
@@ -267,7 +267,7 @@
         const role = document.getElementById('filterRole').value;
         const status = document.getElementById('filterStatus').value;
         const search = document.getElementById('searchName').value;
-        let url = `/api/attendance/records?`;
+        let url = `https://goldlincschools.onrender.com/api/attendance/records?`;
         if (date) url += `date=${encodeURIComponent(date)}&`;
         if (role) url += `role=${encodeURIComponent(role)}&`;
         if (status) url += `status=${encodeURIComponent(status)}&`;

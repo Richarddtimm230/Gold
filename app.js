@@ -27,7 +27,10 @@ const adminRoute = require('./routes/admin');
 const staffRoute = require('./routes/staff');
 
 const subjectsRoute = require('./routes/subjects');
-
+const familiesRoute = require('./routes/families');
+const parentsRoute = require('./routes/parents');
+app.use('/api/families', familiesRoute);
+app.use('/api/parents', parentsRoute);
 // Route mounting
 app.use('/api/auth', authRoute);
 app.use('/api/staff', staffRoute);

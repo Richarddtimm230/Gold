@@ -179,7 +179,15 @@ router.post('/', upload.single('photo'), async (req, res) => {
     res.status(500).json({ error: error.message || 'Unknown server error.' });
   }
 });
-
+// --- Get logged-in student's hostel info ---
+router.get('/me/hostel', studentAuthMiddleware, async (req, res) => {
+  try {
+    const student = req.student;
+    res.json(student.hostel || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error.' });
+  }
+});
 // --- Get students (with filtering, pagination) ---
 router.get('/', async (req, res) => {
   try {

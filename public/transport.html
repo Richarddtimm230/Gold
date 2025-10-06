@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Transport | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind + Flowbite -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #22305a;
+      min-height: 100vh;
+    }
+    .avatar {
+      border: 2px solid #2647a6;
+      background: #ddeaff;
+    }
+    .bg-primary { background: #2647a6; }
+    .text-primary { color: #2647a6; }
+    .hover-link:hover { color: #18308b; text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      border-radius: 9999px;
+      padding: 0.18em 0.8em;
+      font-size: 0.91em;
+      font-weight: 700;
+      margin-right: 0.2em;
+    }
+    .badge-active { background: #18ba89; color: #fff; }
+    .badge-inactive { background: #e74c3c; color: #fff; }
+    .badge-pending { background: #ffd600; color: #22305a; }
+    .badge-suspended { background: #a6b1d0; color: #fff; }
+    .transport-card {
+      transition: box-shadow 0.14s, transform 0.14s;
+      cursor: pointer;
+      outline: none;
+    }
+    .transport-card:hover, .transport-card:focus-visible {
+      box-shadow: 0 6px 18px #ddeaff88;
+      transform: translateY(-2px) scale(1.025);
+      border-color: #2647a6;
+      background: #e9f0fe;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-primary">Transport</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='student-dashboard.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Dashboard
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='profile.html'">
+        <img id="profileAvatar" class="rounded-full h-8 w-8 avatar" src="https://ui-avatars.com/api/?name=Student&background=2647a6&color=fff" alt="Student">
+        <div class="text-sm font-bold text-primary" id="profileName">Student Name</div>
+      </div>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto mt-8 px-2">
+    <div class="bg-white rounded-xl shadow-md p-7 mb-8">
+      <h1 class="text-xl font-bold text-primary mb-2 flex items-center gap-2"><i class="fa fa-bus"></i> My Transport Details</h1>
+      <div id="transportCard" class="transport-card bg-[#f6f8fa] border-2 border-[#ddeaff] rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center gap-6 shadow hover:shadow-lg transition mb-7">
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center justify-center rounded-full bg-[#ddeaff] text-primary font-bold text-2xl w-16 h-16 shadow"><i class="fa fa-bus"></i></span>
+        </div>
+        <div class="flex-1 min-w-0 mt-2 md:mt-0">
+          <div class="mb-1 text-base text-gray-700" id="transportRoute"></div>
+          <div class="mb-1 text-sm text-gray-500" id="transportPickup"></div>
+          <div class="mb-1 text-sm text-gray-500" id="transportDrop"></div>
+          <div class="mb-1 text-sm text-gray-500" id="transportBus"></div>
+          <div class="mb-1 text-sm text-gray-500" id="transportDriver"></div>
+          <div class="mb-1 text-sm text-gray-500" id="transportContact"></div>
+          <div class="mt-2" id="transportStatus"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-7">
+        <!-- Bus Tracking (if any) -->
+        <div class="bg-[#f6f8fa] rounded-xl p-5 shadow">
+          <h2 class="font-bold text-primary text-lg mb-3 flex items-center gap-2"><i class="fa fa-map-marker-alt"></i> Bus Tracking</h2>
+          <div id="busTracking">
+            <div class="text-sm text-gray-500 mb-2">Live bus tracking is coming soon.</div>
+            <img src="https://img.icons8.com/color/96/000000/bus--v2.png" alt="Bus" class="mx-auto my-3" style="max-width:70px;">
+          </div>
+        </div>
+        <!-- Payment/Status Table -->
+        <div class="bg-[#f6f8fa] rounded-xl p-5 shadow">
+          <h2 class="font-bold text-primary text-lg mb-3 flex items-center gap-2"><i class="fa fa-wallet"></i> Transport Payment Status</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-[#e9f0fe]">
+                <tr>
+                  <th class="py-3 px-4 text-left font-bold text-primary">Term</th>
+                  <th class="py-3 px-4 text-left font-bold text-primary">Session</th>
+                  <th class="py-3 px-4 text-left font-bold text-primary">Amount</th>
+                  <th class="py-3 px-4 text-left font-bold text-primary">Status</th>
+                  <th class="py-3 px-4 text-left font-bold text-primary">Due Date</th>
+                </tr>
+              </thead>
+              <tbody id="transportPaymentTable" class="bg-white divide-y divide-[#e9f0fe]">
+                <tr><td class="py-2 px-4" colspan="5">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="bg-[#f6f8fa] rounded-xl shadow p-5 mt-8">
+        <h3 class="text-lg font-bold text-primary mb-3 flex items-center gap-2"><i class="fa fa-question-circle"></i> Transport FAQ</h3>
+        <div id="accordion-flush" data-accordion="collapse" data-active-classes="bg-[#e9f0fe] text-primary" data-inactive-classes="text-[#22305a]">
+          <h2 id="faq-1">
+            <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-1" aria-expanded="false" aria-controls="faq-body-1">
+              How do I change my assigned bus or stop?
+              <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+          </h2>
+          <div id="faq-body-1" class="hidden" aria-labelledby="faq-1">
+            <div class="py-4 text-gray-700">Contact the transport office to request changes to your assigned route, bus, or pickup/drop-off point.</div>
+          </div>
+          <h2 id="faq-2">
+            <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-2" aria-expanded="false" aria-controls="faq-body-2">
+              What if I miss my bus?
+              <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+          </h2>
+          <div id="faq-body-2" class="hidden" aria-labelledby="faq-2">
+            <div class="py-4 text-gray-700">Call your bus driver's contact number or the transport office for immediate assistance.</div>
+          </div>
+          <h2 id="faq-3">
+            <button type="button" class="flex items-center justify-between w-full py-3 font-medium text-left border-b border-[#ddeaff] focus:outline-none" data-accordion-target="#faq-body-3" aria-expanded="false" aria-controls="faq-body-3">
+              Can I view my past transport payments?
+              <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="#2647a6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+          </h2>
+          <div id="faq-body-3" class="hidden" aria-labelledby="faq-3">
+            <div class="py-4 text-gray-700">Yes, payment history is shown in the table above. For detailed receipts, contact the transport department.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Card -->
+      <div class="bg-[#f6f8fa] rounded-xl shadow p-5 mt-8 text-center">
+        <span class="text-primary font-bold"><i class="fa fa-envelope"></i> Need Help?</span>
+        <div class="mt-2 text-gray-700">Email <a href="mailto:transport@goldlincschools.com" class="text-[#18ba89] font-bold">transport@goldlincschools.com</a> or call <a href="tel:+2348000000000" class="text-[#18ba89] font-bold">+234-800-000-0000</a></div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Backend API
+    const API_BASE = "/api";
+    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+
+    // Fill profile (avatar, name)
+    function fillProfile(data) {
+      document.getElementById('profileName').textContent = data.name || 'Student Name';
+      document.getElementById('profileAvatar').src = data.photo_url
+        ? data.photo_url
+        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name || 'Student') + '&background=2647a6&color=fff';
+    }
+
+    // Fill transport card and payment status
+    async function fetchTransportDetails() {
+      try {
+        // PROFILE
+        const resProfile = await fetch(API_BASE + "/students/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resProfile.ok) throw new Error("Unable to fetch profile");
+        const student = await resProfile.json();
+        fillProfile(student);
+
+        // TRANSPORT ALLOCATION (assigned to student)
+        const resTransport = await fetch(API_BASE + "/transport/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resTransport.ok) throw new Error("Unable to fetch transport allocation");
+        const transport = await resTransport.json();
+
+        // Fill transport card
+        document.getElementById('transportRoute').innerHTML = `<strong>Route:</strong> ${transport.route?.name || transport.route || 'N/A'}`;
+        document.getElementById('transportPickup').innerHTML = `<strong>Pickup:</strong> ${transport.pickup_point || 'N/A'}`;
+        document.getElementById('transportDrop').innerHTML = `<strong>Drop-off:</strong> ${transport.dropoff_point || 'N/A'}`;
+        document.getElementById('transportBus').innerHTML = `<strong>Bus:</strong> ${transport.bus?.name || transport.bus?.number || transport.bus || 'N/A'}`;
+        document.getElementById('transportDriver').innerHTML = `<strong>Driver:</strong> ${transport.driver?.name || transport.driver || 'N/A'}`;
+        document.getElementById('transportContact').innerHTML = `<strong>Driver Contact:</strong> <a href="tel:${transport.driver?.phone || ''}" class="hover-link">${transport.driver?.phone || 'N/A'}</a>`;
+        let status = transport.status || 'Active';
+        let badgeClass = 'badge-active';
+        if (status.toLowerCase() === 'inactive') badgeClass = 'badge-inactive';
+        if (status.toLowerCase() === 'pending') badgeClass = 'badge-pending';
+        if (status.toLowerCase() === 'suspended') badgeClass = 'badge-suspended';
+        document.getElementById('transportStatus').innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
+
+      } catch (err) {
+        document.getElementById('transportCard').innerHTML =
+          `<div class="text-center text-red-500 w-full">Unable to load your transport details.</div>`;
+      }
+    }
+
+    // Fetch student's transport payment records
+    async function fetchTransportPayments() {
+      try {
+        const res = await fetch(API_BASE + "/transport/payments/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error("Unable to fetch transport payments");
+        const payments = await res.json();
+        const tbody = document.getElementById('transportPaymentTable');
+        if (!payments.length) {
+          tbody.innerHTML = `<tr><td class="py-2 px-4" colspan="5">No transport payments found.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = payments.map(pay => `
+          <tr>
+            <td class="py-2 px-4">${pay.term || ''}</td>
+            <td class="py-2 px-4">${pay.session || ''}</td>
+            <td class="py-2 px-4">₦${(pay.amount || 0).toLocaleString()}</td>
+            <td class="py-2 px-4">
+              <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                pay.status === 'Paid' ? 'bg-[#18ba89] text-white' :
+                pay.status === 'Pending' ? 'bg-yellow-400 text-white' :
+                'bg-[#e74c3c] text-white'
+              }">${pay.status}</span>
+            </td>
+            <td class="py-2 px-4">${pay.dueDate ? pay.dueDate.slice(0,10) : ''}</td>
+          </tr>
+        `).join('');
+      } catch {
+        document.getElementById('transportPaymentTable').innerHTML =
+          `<tr><td class="py-2 px-4" colspan="5">Unable to load transport payment data.</td></tr>`;
+      }
+    }
+
+    // Initial load
+    fetchTransportDetails();
+    fetchTransportPayments();
+  </script>
+</body>
+</html>

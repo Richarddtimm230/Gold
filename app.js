@@ -33,8 +33,7 @@ const feesRoute = require('./routes/fees');
 const schoolAdminRoute = require('./routes/schoolAdmin');
 const schoolAdminsRoute = require('./routes/schoolAdmins');
 const transportRoute = require('./routes/transport');
-const subjectsRoute = require('./routes/subjects');
-// And in app.js
+
 const hostelRoute = require('./routes/hostel');
 const assignmentsRoute = require('./routes/assignments');
 app.use('/api/assignments', assignmentsRoute);
@@ -55,7 +54,6 @@ app.use('/api', dashboardRoute);
 
 app.use('/api/results', resultsRoute);
 app.use('/api/classes', classesRoute);
-app.use('/api/subjects', subjectsRoute);
 app.use('/api/students', studentsRoute);
 
 

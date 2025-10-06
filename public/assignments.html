@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Assignments | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonts + Icons + Tailwind/Flowbite -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #22305a;
+      min-height: 100vh;
+    }
+    .avatar {
+      border: 2px solid #2647a6;
+      background: #ddeaff;
+    }
+    .bg-primary { background: #2647a6; }
+    .text-primary { color: #2647a6; }
+    .rounded-xl { border-radius: 1rem; }
+    .badge {
+      display: inline-block;
+      border-radius: 9999px;
+      padding: 0.2em 0.8em;
+      font-size: 0.91em;
+      font-weight: 700;
+      margin-right: 0.2em;
+    }
+    .badge-pending { background: #e9f0fe; color: #2647a6; }
+    .badge-completed { background: #18ba89; color: #fff; }
+    .badge-overdue { background: #e74c3c; color: #fff; }
+    .badge-reviewed { background: #ffd600; color: #22305a; }
+    .hover-link:hover { text-decoration: underline; color: #18308b; }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
+      <span class="text-xl font-bold text-primary">Assignments</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='student-dashboard.html'">
+        <i class="fa fa-arrow-left mr-1"></i> Dashboard
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='profile.html'">
+        <img id="profileAvatar" class="rounded-full h-8 w-8 avatar" src="https://ui-avatars.com/api/?name=Student&background=2647a6&color=fff" alt="Student">
+        <div class="text-sm font-bold text-primary" id="profileName">Student Name</div>
+      </div>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto mt-8 px-2">
+    <!-- Assignments Table -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+      <h1 class="text-xl font-bold text-primary mb-2 flex items-center gap-2"><i class="fa fa-file-alt"></i> My Assignments</h1>
+      <div class="overflow-x-auto mt-5">
+        <table class="min-w-full text-sm">
+          <thead class="bg-[#e9f0fe]">
+            <tr>
+              <th class="py-3 px-4 text-left font-bold text-primary">Title</th>
+              <th class="py-3 px-4 text-left font-bold text-primary">Subject</th>
+              <th class="py-3 px-4 text-left font-bold text-primary">Due Date</th>
+              <th class="py-3 px-4 text-left font-bold text-primary">Status</th>
+              <th class="py-3 px-4 text-left font-bold text-primary">Score</th>
+              <th class="py-3 px-4 text-left font-bold text-primary">Action</th>
+            </tr>
+          </thead>
+          <tbody id="assignmentsTableBody" class="bg-white divide-y divide-[#e9f0fe]">
+            <tr><td class="py-2 px-4" colspan="6">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Assignment Details Modal -->
+    <div id="assignmentModal" tabindex="-1" class="hidden fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[100vh] max-h-full bg-black bg-opacity-40">
+      <div class="relative w-full max-w-lg max-h-full mx-auto mt-20">
+        <div class="relative bg-white rounded-lg shadow p-6">
+          <button type="button" class="absolute top-2 right-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-2 ml-auto inline-flex items-center" onclick="closeAssignmentModal()">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
+          <h3 class="text-xl font-bold mb-2 text-primary" id="modalTitle">Assignment Details</h3>
+          <div class="mb-2 text-gray-700" id="modalSubject"></div>
+          <div class="mb-2 text-sm text-gray-500" id="modalDue"></div>
+          <div class="mb-2" id="modalDescription"></div>
+          <div class="mb-3" id="modalUploadSection"></div>
+          <div id="modalSubmissionStatus" class="mb-2"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Backend API
+    const API_BASE = "/api";
+    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+
+    // Profile filling
+    function fillProfile(data) {
+      document.getElementById('profileName').textContent = data.name || 'Student Name';
+      document.getElementById('profileAvatar').src = data.photo_url
+        ? data.photo_url
+        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name || 'Student') + '&background=2647a6&color=fff';
+    }
+
+    // Fetch and fill assignments
+    async function fetchAssignments() {
+      try {
+        // Student profile for name/avatar (for nav)
+        const resProfile = await fetch(API_BASE + "/students/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const student = await resProfile.json();
+        fillProfile(student);
+
+        // Main assignments
+        const res = await fetch(API_BASE + "/assignments/me", {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error("Failed to fetch assignments");
+        const assignments = await res.json();
+
+        const tbody = document.getElementById('assignmentsTableBody');
+        if (!assignments.length) {
+          tbody.innerHTML = `<tr><td class="py-2 px-4" colspan="6">No assignments found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = assignments.map((a, i) => {
+          // Status badge
+          let statusClass = "badge-pending", statusLabel = "Pending";
+          if (a.status === "Completed" || a.status === "Submitted") { statusClass = "badge-completed"; statusLabel = "Submitted"; }
+          if (a.status === "Reviewed") { statusClass = "badge-reviewed"; statusLabel = "Reviewed"; }
+          if (a.status === "Overdue" || (a.dueDate && new Date(a.dueDate) < new Date() && !a.submitted)) { statusClass = "badge-overdue"; statusLabel = "Overdue"; }
+          // Score
+          let score = a.score !== undefined && a.score !== null ? `${a.score}/${a.totalScore || 100}` : "-";
+          return `
+            <tr>
+              <td class="py-2 px-4 font-semibold">${a.title}</td>
+              <td class="py-2 px-4">${a.subject?.name || a.subject || ''}</td>
+              <td class="py-2 px-4">${a.dueDate ? a.dueDate.slice(0,10) : ''}</td>
+              <td class="py-2 px-4"><span class="badge ${statusClass}">${statusLabel}</span></td>
+              <td class="py-2 px-4">${score}</td>
+              <td class="py-2 px-4">
+                <button class="text-primary hover-link font-bold" onclick="openAssignmentModal(${i})"><i class="fa fa-eye"></i> View</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Store assignments globally for modal use
+        window._assignments = assignments;
+      } catch (err) {
+        document.getElementById('assignmentsTableBody').innerHTML = `<tr><td class="py-2 px-4" colspan="6">Unable to load assignments.</td></tr>`;
+      }
+    }
+
+    // Modal logic
+    function openAssignmentModal(idx) {
+      const a = window._assignments[idx];
+      document.getElementById('modalTitle').textContent = a.title;
+      document.getElementById('modalSubject').innerHTML = `<strong>Subject:</strong> ${a.subject?.name || a.subject || ''}`;
+      document.getElementById('modalDue').innerHTML = `<strong>Due:</strong> ${a.dueDate ? a.dueDate.slice(0,16).replace('T',' ') : 'N/A'}`;
+      document.getElementById('modalDescription').innerHTML = `<strong>Description:</strong><br>${(a.description || '').replace(/\n/g,'<br>')}`;
+      // Submission
+      let uploadSection = '';
+      if (a.status === "Reviewed") {
+        uploadSection += `<div class="my-2"><strong>Feedback:</strong><br>${a.feedback || 'No feedback.'}</div>`;
+      }
+      if (!a.submitted && (!a.status || a.status === "Pending" || a.status === "Overdue")) {
+        uploadSection += `
+          <form id="uploadForm" class="mt-2" enctype="multipart/form-data">
+            <label class="block mb-2 font-bold text-primary" for="submissionFile">Upload your work:</label>
+            <input type="file" name="file" id="submissionFile" required class="mb-2 block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#e9f0fe] file:text-primary hover:file:bg-[#ddeaff]"/>
+            <button type="submit" class="bg-primary text-white px-5 py-2 rounded-lg font-bold hover:bg-[#18308b] transition"><i class="fa fa-upload mr-1"></i>Submit</button>
+          </form>
+        `;
+      } else if (a.submitted) {
+        uploadSection += `<div class="mb-2"><span class="badge badge-completed">Submitted</span></div>`;
+        if (a.submissionFile) {
+          uploadSection += `<div><a class="text-primary hover-link" href="${a.submissionFile}" target="_blank"><i class="fa fa-download"></i> View Submission</a></div>`;
+        }
+      }
+      document.getElementById('modalUploadSection').innerHTML = uploadSection;
+
+      // Submission status
+      let statusMsg = '';
+      if (a.status === "Reviewed" && a.score !== undefined && a.score !== null) {
+        statusMsg = `<div class="font-bold text-green-600">Score: ${a.score}/${a.totalScore || 100}</div>`;
+      } else if (a.status === "Overdue" || (!a.submitted && a.dueDate && new Date(a.dueDate) < new Date())) {
+        statusMsg = `<div class="font-bold text-red-600">This assignment is overdue!</div>`;
+      }
+      document.getElementById('modalSubmissionStatus').innerHTML = statusMsg;
+
+      // Add upload event if form present
+      if (document.getElementById('uploadForm')) {
+        document.getElementById('uploadForm').onsubmit = function(ev) {
+          ev.preventDefault();
+          submitAssignment(a._id || a.id);
+        }
+      }
+      document.getElementById('assignmentModal').classList.remove('hidden');
+    }
+    function closeAssignmentModal() {
+      document.getElementById('assignmentModal').classList.add('hidden');
+    }
+    window.onclick = function(e) {
+      const modal = document.getElementById('assignmentModal');
+      if (!modal.classList.contains('hidden') && e.target === modal) closeAssignmentModal();
+    }
+
+    // Submission logic
+    async function submitAssignment(assignmentId) {
+      const fileInput = document.getElementById('submissionFile');
+      if (!fileInput.files.length) return alert('Please select a file.');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      try {
+        const res = await fetch(`${API_BASE}/assignments/${assignmentId}/submit`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        if (!res.ok) throw new Error("Failed to submit assignment.");
+        alert("Submission successful!");
+        closeAssignmentModal();
+        fetchAssignments();
+      } catch {
+        alert("Failed to submit assignment. Please try again.");
+      }
+    }
+
+    // Initial load
+    fetchAssignments();
+  </script>
+</body>
+</html>

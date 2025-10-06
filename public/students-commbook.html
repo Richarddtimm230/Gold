@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Communication Book | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome + Tailwind + Flowbite -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #007bff;
+      --sidebar-bg: #fff;
+      --sidebar-width: 260px;
+      --sidebar-width-mobile: 90vw;
+      --neutral: #f6f8fa;
+      --border-radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      --font-main: 'Inter', Arial, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--neutral);
+      color: #222;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      min-width: 180px;
+      max-width: 320px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: var(--shadow);
+      z-index: 1050;
+      padding: 0 0 2rem 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+    .sidebar nav {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      margin-top: 1.5em;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      padding: 0.85em 1.3em;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: background 0.16s, border-color 0.16s;
+      font-size: 1.05em;
+    }
+    .sidebar a.active, .sidebar a:hover {
+      background: #f1f6fd;
+      border-left: 4px solid var(--primary);
+      color: var(--primary);
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 1.2rem 1rem 1.2rem;
+      border-bottom: 1px solid #ececec;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid #e3e6ea;
+    }
+    .name { font-weight: 700; font-size: 1.13em; }
+    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      background: #fff;
+      margin: 0;
+    }
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 1.8em;
+      padding-top: 1.5vw;
+      padding-bottom: 1.5vw;
+    }
+    .school-title {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.03em;
+    }
+    .header-actions .icon {
+      font-size: 1.43em;
+      cursor: pointer;
+      opacity: 0.88;
+      transition: opacity 0.2s;
+    }
+    .header-actions .icon:hover {
+      opacity: 1;
+    }
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-right: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+    }
+    .sidebar-overlay {
+      display: none;
+    }
+    .sidebar-overlay.active {
+      display: block;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1040;
+    }
+    @media (max-width: 900px) {
+      .sidebar {
+        width: var(--sidebar-width-mobile);
+        min-width: 0;
+        max-width: 95vw;
+        height: 100vh;
+        max-height: 100vh;
+        transform: translateX(-105%);
+        position: fixed;
+        z-index: 1050;
+        overflow: hidden;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
+      .main-content { margin-left: 0; padding: 0 3vw; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 13px; }
+      .sidebar { width: 97vw; }
+    }
+    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
+    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+    .commbook-title {
+      margin: 1.5em 0 0.7em 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .commbook-section {
+      background: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      margin-top: 2em;
+      padding: 2.2em 1.7em 2em 1.7em;
+      max-width: 1100px;
+      width: 100%;
+    }
+    .commbook-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.3em;
+      margin-bottom: 1.1em;
+      align-items: center;
+    }
+    .commbook-filters select, .commbook-filters input {
+      padding: 0.6em 0.9em;
+      border-radius: 7px;
+      border: 1px solid #ddeaff;
+      font-size: 1em;
+      min-width: 170px;
+      background: #fff;
+    }
+    .commbook-filters button {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.6em 1.2em;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .commbook-filters button:hover { background: #005ecb; }
+    .commbook-msglist {
+      max-height: 56vh; min-height: 330px;
+      overflow-y: auto;
+      background: #f8fbff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px #ddeaff15;
+      margin-top: 1.2em;
+      padding: 1.3em 1.2em;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2em;
+    }
+    .comm-msg {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 9px #ddeaff13;
+      padding: 1em 1.15em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3em;
+      border-left: 5px solid #007bff;
+      position: relative;
+    }
+    .comm-msg.teacher { border-left: 5px solid #18ba89; }
+    .comm-msg.student { border-left: 5px solid #007bff; }
+    .comm-msg .comm-meta {
+      font-size: 0.92em;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 1em;
+    }
+    .comm-msg .comm-author {
+      font-weight: 700;
+      color: #22305a;
+    }
+    .comm-msg .comm-content {
+      font-size: 1em;
+      color: #22305a;
+      margin-bottom: 0.2em;
+      margin-top: 0.2em;
+    }
+    .commbook-sendform {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8em;
+      margin-top: 1.7em;
+      align-items: center;
+    }
+    .commbook-sendform textarea {
+      flex: 1 1 220px;
+      min-height: 55px;
+      border-radius: 7px;
+      border: 1px solid #ddeaff;
+      padding: 0.7em 1.05em;
+      font-size: 1em;
+      margin-right: 0.7em;
+    }
+    .commbook-sendform select {
+      padding: 0.6em 0.9em;
+      border-radius: 7px;
+      border: 1px solid #ddeaff;
+      font-size: 1em;
+      min-width: 120px;
+      background: #fff;
+    }
+    .commbook-sendform button {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.6em 1.3em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .commbook-sendform button:hover { background: #005ecb; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar for desktop, overlays for mobile -->
+  <aside class="sidebar" id="sidebar">
+    <div class="profile">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
+      <div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
+      </div>
+    </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
+    <nav>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Mobile navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
+    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
+    <div class="font-bold text-primary text-lg flex items-center gap-2">
+      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
+      <span>Gold & Linc Schools</span>
+    </div>
+    <div></div>
+  </nav>
+  <!-- Main Content -->
+  <main class="main-content" style="margin-top:70px;">
+    <header>
+      <div class="school-title">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
+        <span>GOLD AND LINC SCHOOLS</span>
+      </div>
+      <div class="header-actions">
+        <span class="icon" title="Notifications">🔔</span>
+        <span class="icon" title="Help">❓</span>
+        <span class="icon" title="Settings">⚙️</span>
+      </div>
+    </header>
+    <h2 class="commbook-title"><span>💬</span> Student Communication Book</h2>
+    <!-- Communication Filters -->
+    <section class="commbook-section">
+      <form class="commbook-filters" onsubmit="event.preventDefault(); fetchMessages();">
+        <select id="filterClass">
+          <option value="">All Classes</option>
+        </select>
+        <input type="text" id="searchStudent" placeholder="Search student name/reg no.">
+        <button type="submit"><i class="fa fa-search mr-1"></i> Filter</button>
+      </form>
+      <!-- Messages List -->
+      <div class="commbook-msglist" id="commbookMsgList">
+        <div style="text-align:center;color:#888;">Loading messages...</div>
+      </div>
+      <!-- Send Message -->
+      <form class="commbook-sendform" onsubmit="event.preventDefault(); sendMessage();">
+        <select id="messageClass" required>
+          <option value="">Select Class</option>
+        </select>
+        <select id="messageStudent" required>
+          <option value="">Select Student</option>
+        </select>
+        <textarea id="messageContent" placeholder="Type a message..." required maxlength="500"></textarea>
+        <button type="submit"><i class="fa fa-paper-plane"></i> Send</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // Fetch classes from backend
+    let classList = [], studentsByClass = {};
+    async function fetchClasses() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('/api/classes', {headers: {'Authorization': 'Bearer ' + token }});
+        const data = await res.json();
+        classList = data;
+        const sel1 = document.getElementById('filterClass');
+        const sel2 = document.getElementById('messageClass');
+        sel1.innerHTML = '<option value="">All Classes</option>' + classList.map(c=>`<option value="${c._id}">${c.name}</option>`).join('');
+        sel2.innerHTML = '<option value="">Select Class</option>' + classList.map(c=>`<option value="${c._id}">${c.name}</option>`).join('');
+      } catch { }
+    }
+
+    // Fetch students by class when changed
+    async function fetchStudentsForClass(classId, selId) {
+      const token = localStorage.getItem('token');
+      if (!classId) {
+        document.getElementById(selId).innerHTML = '<option value="">Select Student</option>';
+        return;
+      }
+      if (studentsByClass[classId]) {
+        renderStudentSelect(selId, studentsByClass[classId]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/classes/${classId}/students`, {headers: {'Authorization': 'Bearer ' + token }});
+        const data = await res.json();
+        studentsByClass[classId] = data;
+        renderStudentSelect(selId, data);
+      } catch {
+        document.getElementById(selId).innerHTML = '<option value="">Select Student</option>';
+      }
+    }
+    function renderStudentSelect(selId, students) {
+      document.getElementById(selId).innerHTML =
+        '<option value="">Select Student</option>' + students.map(s=>`<option value="${s._id}">${s.name} (${s.regNo})</option>`).join('');
+    }
+    document.getElementById('messageClass').addEventListener('change', function(){
+      fetchStudentsForClass(this.value, 'messageStudent');
+    });
+
+    // Fetch messages
+    async function fetchMessages() {
+      const token = localStorage.getItem('token');
+      const classId = document.getElementById('filterClass').value;
+      const search = document.getElementById('searchStudent').value.trim();
+      let url = '/api/commbook/messages?';
+      if (classId) url += `class=${encodeURIComponent(classId)}&`;
+      if (search) url += `search=${encodeURIComponent(search)}&`;
+      url = url.replace(/[&?]$/, '');
+      const list = document.getElementById('commbookMsgList');
+      list.innerHTML = `<div style="text-align:center;color:#888;">Loading messages...</div>`;
+      try {
+        const res = await fetch(url, {headers: { 'Authorization': 'Bearer ' + token }});
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) {
+          list.innerHTML = `<div style="text-align:center;color:#ccc;">No messages found.</div>`;
+          return;
+        }
+        list.innerHTML = data.map(msg => `
+          <div class="comm-msg ${msg.senderRole === 'teacher' ? 'teacher' : 'student'}">
+            <div class="comm-meta">
+              <span class="comm-author">${msg.senderName || 'Unknown'}${msg.senderRole==='teacher'?' (Teacher)':''}</span>
+              <span>${msg.className || ''}</span>
+              <span>${msg.date ? new Date(msg.date).toLocaleString() : ''}</span>
+            </div>
+            <div class="comm-content">${msg.content}</div>
+          </div>
+        `).join('');
+      } catch {
+        list.innerHTML = `<div style="text-align:center;color:#e74c3c;">Failed to load messages.</div>`;
+      }
+    }
+
+    // Send message
+    async function sendMessage() {
+      const token = localStorage.getItem('token');
+      const classId = document.getElementById('messageClass').value;
+      const studentId = document.getElementById('messageStudent').value;
+      const content = document.getElementById('messageContent').value.trim();
+      if (!classId || !studentId || !content) return;
+      try {
+        const res = await fetch('/api/commbook/messages', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ class: classId, student: studentId, content })
+        });
+        if (!res.ok) throw new Error('Failed to send message');
+        document.getElementById('messageContent').value = '';
+        fetchMessages();
+        alert("Message sent!");
+      } catch {
+        alert("Failed to send message.");
+      }
+    }
+
+    // Initial load
+    fetchClasses();
+    fetchMessages();
+  </script>
+</body>
+</html>

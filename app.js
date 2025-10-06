@@ -30,6 +30,8 @@ const subjectsRoute = require('./routes/subjects');
 const familiesRoute = require('./routes/families');
 const parentsRoute = require('./routes/parents');
 const feesRoute = require('./routes/fees');
+const schoolAdminRoute = require('./routes/schoolAdmin');
+app.use('/api', schoolAdminRoute);
 app.use('/api/fees', feesRoute);
 app.use('/api/families', familiesRoute);
 app.use('/api/parents', parentsRoute);

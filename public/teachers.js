@@ -252,7 +252,7 @@ document.getElementById('attendance-form').onsubmit = async function (e) {
   });
   alert('Attendance saved!');
   // Optionally: POST attendance to backend here, e.g.:
-  /*
+  
   try {
     const res = await fetch(`${API_BASE_URL}/api/attendance`, {
       method: "POST",
@@ -264,7 +264,6 @@ document.getElementById('attendance-form').onsubmit = async function (e) {
   } catch {
     alert('Failed to save attendance to server.');
   }
-  */
 };
 
 // --- Gradebook ---
@@ -300,7 +299,6 @@ function renderGradebookTable() {
   html += `</tbody></table>`;
   document.getElementById('gradebook-table').innerHTML = html;
 }
-
 // --- Assignments ---
 function renderAssignments() {
   const assignmentClassSel = document.getElementById('assignment-class');
@@ -314,6 +312,26 @@ function renderAssignments() {
   });
   renderAssignmentList();
 }
+
+function populateAssignmentSubjects() {
+  const classId = document.getElementById('assignment-class').value;
+  const subjectSelect = document.getElementById('assignment-subject');
+  subjectSelect.innerHTML = '';
+  const subjects = subjectsByClass[classId] || [];
+  subjects.forEach(subj => {
+    let opt = document.createElement('option');
+    opt.value = subj.id;
+    opt.innerText = subj.name;
+    subjectSelect.appendChild(opt);
+  });
+}
+
+function openAssignmentModal() {
+  document.getElementById('assignmentModalBg').style.display = 'flex';
+  populateAssignmentSubjects();
+  document.getElementById('assignment-class').onchange = populateAssignmentSubjects;
+}
+
 function renderAssignmentList() {
   const div = document.getElementById('assignment-list');
   if (!assignments.length) {
@@ -333,9 +351,7 @@ function renderAssignmentList() {
   html += '</tbody></table>';
   div.innerHTML = html;
 }
-function openAssignmentModal() {
-  document.getElementById('assignmentModalBg').style.display = 'flex';
-}
+
 function closeAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'none';
 }

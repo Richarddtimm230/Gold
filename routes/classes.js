@@ -5,9 +5,8 @@ const router = express.Router();
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
-const staffAuth = require('../middleware/staffAuth');
+// NOTE: No authentication middleware here, so all authenticated users can access
 router.get('/', async (req, res) => {
-
   try {
     const teacherId = req.query.teacher_id;
     let query = {};
@@ -27,6 +26,8 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 // POST /api/classes/:id/teachers
 router.post('/:id/teachers', async (req, res) => {
   try {

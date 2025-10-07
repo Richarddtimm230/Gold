@@ -5,8 +5,9 @@ const router = express.Router();
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
-// GET /api/classes - Get all classes with arms, subjects, teachers
-router.get('/', async (req, res) => {
+const staffAuth = require('../middleware/staffAuth');
+router.get('/', staffAuth, async (req, res) => {
+
   try {
     const teacherId = req.query.teacher_id;
     let query = {};

@@ -1,4 +1,3 @@
-
 const API_BASE_URL = "https://goldlincschools.onrender.com";
 const token = localStorage.getItem('teacherToken') || localStorage.getItem('token') || "";
 // --- DATA HOLDERS ---
@@ -38,6 +37,8 @@ async function fetchAndSetup() {
 
   renderClassesList();
   renderStudentsBlock();
+  renderSubjectsBlock();
+  showAddSubjectBlock();
 }
 
 // --- BACKEND API CALLS ---
@@ -135,6 +136,12 @@ sidebarBtns.forEach(btn => {
     if (sec === 'attendance') renderAttendance();
     if (sec === 'gradebook') renderGradebook();
     if (sec === 'assignments') renderAssignments();
+    if (sec === 'dashboard' || sec === 'classes') {
+      renderClassesList();
+      renderStudentsBlock();
+      renderSubjectsBlock();
+      showAddSubjectBlock();
+    }
   }
 });
 
@@ -160,7 +167,13 @@ let selectedClassId = null;
 function renderClassesList() {
   const classList = document.getElementById('class-list');
   classList.innerHTML = '';
-  if (!teacher.classes) return;
+  if (!teacher.classes || teacher.classes.length === 0) return;
+
+  // Auto-select first class if none is selected
+  if (!selectedClassId) {
+    selectedClassId = teacher.classes[0].id;
+  }
+
   teacher.classes.forEach(cls => {
     const li = document.createElement('li');
     const btn = document.createElement('button');
@@ -171,11 +184,18 @@ function renderClassesList() {
       selectedClassId = cls.id;
       renderClassesList();
       renderStudentsBlock();
+      renderSubjectsBlock();
+      showAddSubjectBlock();
     };
     li.appendChild(btn);
     classList.appendChild(li);
   });
+
+  renderStudentsBlock();
+  renderSubjectsBlock();
+  showAddSubjectBlock();
 }
+
 function renderStudentsBlock() {
   const block = document.getElementById('students-block');
   block.innerHTML = '';
@@ -204,6 +224,61 @@ function renderStudentsBlock() {
   });
   html += `</tbody></table></div>`;
   block.innerHTML = html;
+}
+
+function renderSubjectsBlock() {
+  const block = document.getElementById('subjects-block');
+  block.innerHTML = '';
+  if (!selectedClassId) return;
+  const subjects = subjectsByClass[selectedClassId] || [];
+  if (subjects.length === 0) {
+    block.innerHTML = '<div class="card"><em>No subjects found for this class.</em></div>';
+    return;
+  }
+  let html = `<div class="card"><h2>Subjects for ${teacher.classes.find(c => c.id === selectedClassId).name}</h2><ul>`;
+  subjects.forEach(subj => {
+    html += `<li>${subj.name}</li>`;
+  });
+  html += '</ul></div>';
+  block.innerHTML = html;
+}
+
+// --- Add Subject to Class ---
+function showAddSubjectBlock() {
+  const block = document.getElementById('add-subject-block');
+  if (!block) return;
+  if (selectedClassId) {
+    block.style.display = '';
+  } else {
+    block.style.display = 'none';
+  }
+}
+
+// Attach event listener for adding a subject
+const addSubjectForm = document.getElementById('add-subject-form');
+if (addSubjectForm) {
+  addSubjectForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const subjectInput = document.getElementById('subject-name-input');
+    const subjectName = subjectInput.value.trim();
+    if (!subjectName || !selectedClassId) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes/${selectedClassId}/subjects`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ subjects: [subjectName] })
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      subjectsByClass[selectedClassId] = data.subjects;
+      subjectInput.value = '';
+      renderSubjectsBlock();
+      alert('Subject added!');
+    } catch {
+      alert('Failed to add subject.');
+    }
+  };
 }
 
 // --- Attendance ---
@@ -360,12 +435,12 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
   const assignment = {
-  class: classId,
-  subject: document.getElementById('assignment-subject').value, // <-- NEW
-  title: fd.get('title'),
-  description: fd.get('desc'),
-  dueDate: fd.get('due')
-};
+    class: classId,
+    subject: document.getElementById('assignment-subject').value,
+    title: fd.get('title'),
+    description: fd.get('desc'),
+    dueDate: fd.get('due')
+  };
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
       method: "POST",
@@ -559,6 +634,7 @@ document.getElementById('profile-form').onsubmit = async function (e) {
 // --- Initial Render (called after data is fetched) ---
 window.renderClassesList = renderClassesList;
 window.renderStudentsBlock = renderStudentsBlock;
+window.renderSubjectsBlock = renderSubjectsBlock;
 window.openAssignmentModal = openAssignmentModal;
 window.closeAssignmentModal = closeAssignmentModal;
 window.openResultModal = openResultModal;

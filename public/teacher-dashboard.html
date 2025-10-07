@@ -1,165 +1,541 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Teacher Dashboard - Gold and Linc Schools</title>
-  <meta name="viewport" content="width=device-width,initial-scale=0.90">
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
-  <!-- Link to external CSS -->
-  <link rel="stylesheet" href="teachers.css">
+  <title>Teacher Dashboard | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind & Flowbite -->
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@2.2.1/dist/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.2.1/dist/flowbite.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <style>
+    .card-bg {
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg,rgba(38,71,166,0.53) 0%,rgba(0,0,0,0.09) 100%);
+      z-index: 1;
+    }
+    .card-content {
+      position: relative;
+      z-index: 2;
+    }
+    .spinner {
+      border: 4px solid #e9f0fe;
+      border-top: 4px solid #2647a6;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .navbar-blur {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 2px 9px rgba(38,71,166,0.14);
+    }
+  </style>
 </head>
-<body>
-<div class="dashboard-container">
-  <aside class="sidebar">
-    <div class="school-logo">GLS</div>
-    <button class="hamburger" aria-label="Open navigation" onclick="toggleSidebarMenu()" style="display:none;">&#9776;</button>
-    <nav>
-      <button class="active" data-section="dashboard">Dashboard</button>
-      <button data-section="classes">My Classes</button>
-      <button data-section="attendance">Attendance</button>
-      <button data-section="gradebook">Gradebook</button>
-      <button data-section="assignments">Assignments</button>
-      <button data-section="draftResults">Draft Results</button>
-      <button data-section="notifications">Notifications</button>
-      <button data-section="profile">Profile/Settings</button>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Sidebar (desktop) -->
+  <aside class="hidden lg:flex w-24 bg-blue-900 text-white flex-col items-center py-6 fixed h-screen z-30">
+    <div class="mb-10">
+      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="w-12 h-12 rounded shadow-lg">
+    </div>
+    <nav class="flex flex-col gap-8 flex-1 items-center">
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="dashboard" title="Dashboard"><i class="fa fa-home fa-xl"></i></button>
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="assignments" title="Assignments"><i class="fa fa-tasks fa-xl"></i></button>
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="classes" title="Classes"><i class="fa fa-chalkboard-teacher fa-xl"></i></button>
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="results" title="Results"><i class="fa fa-chart-bar fa-xl"></i></button>
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="notifications" title="Notifications"><i class="fa fa-bell fa-xl"></i></button>
+      <button class="hover:bg-blue-700 rounded-full p-4 sidebar-btn" data-section="profile" title="Profile"><i class="fa fa-user fa-xl"></i></button>
     </nav>
-    <div class="profile-section">
-      <div style="font-size:1.1em;"><strong>Mr. John Doe</strong></div>
-      <small>Mathematics Teacher</small>
+    <div class="mt-6">
+      <button class="hover:bg-blue-700 rounded-full p-4" title="Logout"><i class="fa fa-sign-out-alt fa-xl"></i></button>
     </div>
   </aside>
-  <main class="main-content">
-    <header>
-      <h1>Welcome, Mr. John Doe</h1>
-      <div class="avatar">JD</div>
+  <!-- Navbar (mobile) -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 navbar-blur flex justify-around py-2 border-t border-blue-100">
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1 active" data-section="dashboard">
+      <i class="fa fa-home fa-lg"></i>
+      <span class="text-xs">Home</span>
+    </button>
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1" data-section="assignments">
+      <i class="fa fa-tasks fa-lg"></i>
+      <span class="text-xs">Tasks</span>
+    </button>
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1" data-section="classes">
+      <i class="fa fa-chalkboard-teacher fa-lg"></i>
+      <span class="text-xs">Classes</span>
+    </button>
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1" data-section="results">
+      <i class="fa fa-chart-bar fa-lg"></i>
+      <span class="text-xs">Results</span>
+    </button>
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1" data-section="notifications">
+      <i class="fa fa-bell fa-lg"></i>
+      <span class="text-xs">Alerts</span>
+    </button>
+    <button class="focus:outline-none navbar-btn text-blue-900 flex flex-col items-center gap-1" data-section="profile">
+      <i class="fa fa-user fa-lg"></i>
+      <span class="text-xs">Me</span>
+    </button>
+  </nav>
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col lg:ml-24 pt-1 pb-16 lg:pb-3">
+    <!-- Top Bar -->
+    <header class="bg-white shadow flex items-center justify-between px-6 py-4 sticky top-0 z-20">
+      <div class="flex items-center gap-5">
+        <h1 class="text-2xl font-bold text-blue-900">Teacher Dashboard</h1>
+        <span class="text-gray-500 hidden md:inline" id="teacherRole"></span>
+        <span class="text-gray-400" id="profileName"></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="notifButton" class="relative text-blue-900">
+          <i class="fa fa-bell fa-lg"></i>
+          <span id="notifDot" class="absolute top-0 right-0 bg-red-500 rounded-full w-3 h-3 border border-white hidden"></span>
+        </button>
+        <img id="profileAvatar" class="w-10 h-10 rounded-full border-2 border-blue-900 shadow" src="https://ui-avatars.com/api/?name=Teacher&background=2647a6&color=fff" alt="Teacher">
+      </div>
     </header>
-
-    <!-- Dashboard Section -->
-    <section id="section-dashboard">
-      <div class="card classes-list">
-        <h2>My Classes</h2>
-        <ul id="class-list"></ul>
+    <!-- Section Content -->
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full" id="dashboardSection">
+      <!-- Quick Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('assignments')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-tasks fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">Assignments</span>
+            <span class="text-blue-100 text-xs mt-1">Create & Manage</span>
+          </div>
+        </div>
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('classes')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-chalkboard-teacher fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">My Classes</span>
+            <span class="text-blue-100 text-xs mt-1">View & Interact</span>
+          </div>
+        </div>
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('results')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-chart-bar fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">Results</span>
+            <span class="text-blue-100 text-xs mt-1">Draft & Publish</span>
+          </div>
+        </div>
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('notifications')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-bell fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">Notifications</span>
+            <span class="text-blue-100 text-xs mt-1">School Alerts</span>
+          </div>
+        </div>
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('profile')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-user fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">Profile</span>
+            <span class="text-blue-100 text-xs mt-1">View & Edit</span>
+          </div>
+        </div>
+        <div class="card-bg rounded-xl shadow-lg min-h-[160px] flex items-end transition hover:scale-105 cursor-pointer"
+          style="background-image:url('https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?auto=format,fit=crop&w=400&q=80');"
+          onclick="showSection('dashboard')">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col items-start">
+            <span class="bg-blue-900 text-white rounded-full p-2 mb-2"><i class="fa fa-home fa-lg"></i></span>
+            <span class="font-bold text-white text-lg">Dashboard</span>
+            <span class="text-blue-100 text-xs mt-1">Summary</span>
+          </div>
+        </div>
       </div>
-      <div id="students-block"></div>
-    </section>
-
-    <!-- Attendance Section -->
-    <section id="section-attendance" style="display:none;">
-      <div class="card students-table">
-        <h2>Attendance</h2>
-        <form id="attendance-form">
-          <label>Select Class:</label>
-          <select id="attendance-class"></select>
-          <div id="attendance-students"></div>
-          <button type="submit" class="btn" style="margin-top:12px;">Save Attendance</button>
-        </form>
+      <!-- News & Announcements -->
+      <div class="mb-8">
+        <div class="bg-yellow-100 p-4 rounded shadow">
+          <h2 class="font-bold text-yellow-900 mb-2">School Announcements</h2>
+          <div id="newsContent"><div class="spinner"></div></div>
+        </div>
       </div>
     </section>
-
-    <!-- Gradebook Section -->
-    <section id="section-gradebook" style="display:none;">
-      <div class="card students-table">
-        <h2>Gradebook</h2>
-        <label>Select Class:</label>
-        <select id="gradebook-class"></select>
-        <div id="gradebook-table"></div>
-      </div>
-    </section>
-
     <!-- Assignments Section -->
-    <section id="section-assignments" style="display:none;">
-      <div class="card students-table">
-        <h2 style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Assignments</span>
-          <button class="btn" onclick="openAssignmentModal()">+ Create Assignment</button>
-        </h2>
-        <div id="assignment-list"></div>
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full hidden" id="assignmentsSection">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-blue-900">Assignments</h2>
+        <button class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="showAssignmentModal()">Create Assignment</button>
       </div>
+      <div id="assignmentsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+      <div id="assignmentsLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
     </section>
-
-    <!-- Draft Results Section -->
-    <section id="section-draftResults" style="display:none;">
-      <div class="card draft-results-table">
-        <h2>Draft Results</h2>
-        <table id="draft-results-table">
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Class</th>
-              <th>Term</th>
-              <th>Status</th>
-              <th>Last Updated</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Draft results will be loaded here -->
-          </tbody>
-        </table>
-      </div>
+    <!-- Classes Section -->
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full hidden" id="classesSection">
+      <h2 class="text-xl font-bold text-blue-900 mb-4">My Classes</h2>
+      <div id="classesList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+      <div id="classesLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
     </section>
-
+    <!-- Results Section -->
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full hidden" id="resultsSection">
+      <h2 class="text-xl font-bold text-blue-900 mb-4">Draft Results</h2>
+      <div id="resultsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+      <div id="resultsLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
+    </section>
     <!-- Notifications Section -->
-    <section id="section-notifications" style="display:none;">
-      <div class="card notification-list" id="notification-list">
-        <h2>Notifications</h2>
-      </div>
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full hidden" id="notificationsSection">
+      <h2 class="text-xl font-bold text-blue-900 mb-4">Notifications</h2>
+      <div id="notificationsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+      <div id="notificationsLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
     </section>
-
-    <!-- Profile/Settings Section -->
-    <section id="section-profile" style="display:none;">
-      <div class="card profile-settings">
-        <h2>Profile / Settings</h2>
-        <form id="profile-form">
-          <label>Name</label>
-          <input type="text" id="profile-name" value="Mr. John Doe">
-          <label>Email</label>
-          <input type="email" id="profile-email" value="john.doe@goldlincschools.com">
-          <label>Password</label>
-          <input type="password" id="profile-password" placeholder="Change password">
-          <button type="submit">Update Profile</button>
-        </form>
-      </div>
+    <!-- Profile Section -->
+    <section class="p-2 md:p-6 max-w-7xl mx-auto w-full hidden" id="profileSection">
+      <h2 class="text-xl font-bold text-blue-900 mb-4">My Profile</h2>
+      <form id="profileForm" class="space-y-4 max-w-xl">
+        <!-- Fields auto-filled by JS -->
+      </form>
+      <button type="submit" form="profileForm" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Update Profile</button>
+      <div id="profileLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
     </section>
-
-    <!-- Assignment Modal -->
-    <div id="assignmentModalBg" class="form-modal-bg" style="display:none;">
-      <div class="form-modal">
-        <button class="close-btn" onclick="closeAssignmentModal()">&times;</button>
-        <h3>Create Assignment</h3>
-        <form id="assignmentForm">
-          <label>Class</label>
-          <select id="assignment-class"></select>
-          <label>Title</label>
-          <input type="text" name="title" required>
-          <label>Description</label>
-          <input type="text" name="desc" required>
-          <label>Due Date</label>
-          <input type="date" name="due" required>
-          <div class="modal-actions">
-            <button type="submit" class="btn">Save Assignment</button>
+    <!-- Assignment Modal (Flowbite) -->
+    <div id="assignmentModal" tabindex="-1" class="fixed top-0 left-0 z-50 hidden w-full h-full bg-black bg-opacity-60 flex items-center justify-center">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg relative">
+        <button onclick="hideAssignmentModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700"><i class="fa fa-times"></i></button>
+        <h3 class="text-lg font-bold mb-4">Create Assignment</h3>
+        <form id="createAssignmentForm" class="space-y-4">
+          <div>
+            <label class="block font-medium text-gray-700">Title</label>
+            <input type="text" name="title" class="w-full border rounded px-3 py-2" required>
           </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal for Result Entry -->
-    <div id="resultModalBg" class="form-modal-bg" style="display:none;">
-      <div class="form-modal">
-        <button class="close-btn" onclick="closeResultModal()">&times;</button>
-        <h3>Enter/Update Result</h3>
-        <form id="resultForm">
-          <div id="resultFormFields"></div>
-          <div class="modal-actions">
-            <button type="submit" class="btn">Save Draft</button>
+          <div>
+            <label class="block font-medium text-gray-700">Description</label>
+            <textarea name="description" class="w-full border rounded px-3 py-2" required></textarea>
           </div>
+          <div>
+            <label class="block font-medium text-gray-700">Due Date</label>
+            <input type="date" name="dueDate" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block font-medium text-gray-700">Class</label>
+            <select name="classId" id="assignmentClassSelect" class="w-full border rounded px-3 py-2" required>
+              <!-- JS fills classes -->
+            </select>
+          </div>
+          <button type="submit" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Create</button>
         </form>
+        <div id="assignmentModalLoader" class="flex justify-center mt-4 hidden"><div class="spinner"></div></div>
       </div>
     </div>
   </main>
-</div>
-<script src="teachers.js">
+  <script>
+    // Config
+    const API_BASE_URL = "https://goldlincschools.onrender.com";
+    let teacherData = {};
+    let teacherId = "";
+    let assignedClasses = [];
 
-</script>
+    // SECTION HANDLING
+    function showSection(section) {
+      const sections = ["dashboardSection","assignmentsSection","classesSection","resultsSection","notificationsSection","profileSection"];
+      sections.forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById(section+"Section").classList.remove("hidden");
+
+      // Highlight active nav/side button
+      document.querySelectorAll('.navbar-btn, .sidebar-btn').forEach(btn => {
+        btn.classList.remove('active','bg-blue-900','text-white');
+        if(btn.dataset.section === section) btn.classList.add('active','bg-blue-900','text-white');
+      });
+    }
+
+    document.querySelectorAll('.navbar-btn, .sidebar-btn').forEach(btn => {
+      btn.onclick = () => showSection(btn.dataset.section);
+    });
+
+    // MODAL HANDLING
+    function showAssignmentModal() {
+      document.getElementById('assignmentModal').classList.remove('hidden');
+      fillAssignmentClassSelect();
+    }
+    function hideAssignmentModal() {
+      document.getElementById('assignmentModal').classList.add('hidden');
+      document.getElementById('createAssignmentForm').reset();
+      document.getElementById('assignmentModalLoader').classList.add('hidden');
+    }
+
+    // Loader helpers
+    function showLoader(loaderId){ document.getElementById(loaderId).classList.remove('hidden'); }
+    function hideLoader(loaderId){ document.getElementById(loaderId).classList.add('hidden'); }
+
+    // API: Get Teacher Profile
+    async function getTeacherProfile(showLoaderFlag = true) {
+      if(showLoaderFlag) showLoader('profileLoader');
+      const token = localStorage.getItem('teacherToken');
+      if (!token) return hideLoader('profileLoader');
+      const res = await fetch(API_BASE_URL + '/api/teachers/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        teacherData = await res.json();
+        teacherId = teacherData.id;
+        document.getElementById('profileName').textContent = teacherData.name;
+        document.getElementById('teacherRole').textContent = teacherData.designation + " - " + teacherData.department;
+        document.getElementById('profileAvatar').src = teacherData.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacherData.name)}&background=2647a6&color=fff`;
+        fillProfileForm();
+      }
+      hideLoader('profileLoader');
+    }
+
+    // Fill Profile Form
+    function fillProfileForm() {
+      const form = document.getElementById('profileForm');
+      form.innerHTML = '';
+      [
+        {label:'Name',name:'name', value:teacherData.name, disabled:true},
+        {label:'Email',name:'email', value:teacherData.email, disabled:true},
+        {label:'Phone',name:'phone', value:teacherData.phone},
+        {label:'Designation',name:'designation', value:teacherData.designation, disabled:true},
+        {label:'Department',name:'department', value:teacherData.department, disabled:true}
+      ].forEach(f => {
+        form.innerHTML += `<div>
+          <label class="block font-medium text-gray-700">${f.label}</label>
+          <input type="text" name="${f.name}" value="${f.value||''}" ${f.disabled?'disabled':''} class="w-full border rounded px-3 py-2">
+        </div>`;
+      });
+      form.onsubmit = async function(e){
+        e.preventDefault();
+        showLoader('profileLoader');
+        // PATCH
+        const payload = {
+          phone: form.phone.value
+        };
+        const token = localStorage.getItem('teacherToken');
+        const res = await fetch(API_BASE_URL + "/api/teachers/me", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify(payload)
+        });
+        hideLoader('profileLoader');
+        if(res.ok){ alert("Profile updated!"); getTeacherProfile(false); }
+        else{ alert("Update failed."); }
+      };
+    }
+
+    // API: Get Assignments
+    async function getAssignments() {
+      showLoader('assignmentsLoader');
+      if(!teacherId) return hideLoader('assignmentsLoader');
+      const res = await fetch(`${API_BASE_URL}/api/teachers/${teacherId}/assignments`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('teacherToken') }
+      });
+      const data = res.ok ? await res.json() : { assignments: [] };
+      const list = document.getElementById('assignmentsList');
+      list.innerHTML = '';
+      if(data.assignments.length === 0){
+        list.innerHTML = `<div class="col-span-3 text-center text-gray-400 py-10">No assignments found.</div>`;
+      }
+      data.assignments.forEach(a => {
+        list.innerHTML += `
+        <div class="card-bg rounded-xl shadow-lg min-h-[170px] relative flex" style="background-image:url('https://images.unsplash.com/photo-1471506480208-91b3a4cc8a47?auto=format,fit=crop&w=400&q=80');">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col justify-between">
+            <div>
+              <div class="font-bold text-white text-lg">${a.title}</div>
+              <div class="text-blue-100 mb-2">${a.description}</div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="bg-white bg-opacity-70 text-blue-900 px-3 py-1 rounded text-xs">Due: ${new Date(a.dueDate).toLocaleDateString()}</span>
+              <button class="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 ml-2" onclick="viewAssignment('${a._id}')">View</button>
+            </div>
+          </div>
+        </div>`;
+      });
+      hideLoader('assignmentsLoader');
+    }
+
+    // Assignment Modal Select
+    async function fillAssignmentClassSelect() {
+      const res = await fetch(`${API_BASE_URL}/api/staffs/${teacherId}`);
+      if(res.ok){
+        const data = await res.json();
+        assignedClasses = data.classes || [];
+        const select = document.getElementById('assignmentClassSelect');
+        select.innerHTML = '';
+        assignedClasses.forEach(cls => {
+          select.innerHTML += `<option value="${cls._id}">${cls.name}</option>`;
+        });
+      }
+    }
+
+    // Assignment Create
+    document.getElementById('createAssignmentForm').onsubmit = async function(e){
+      e.preventDefault();
+      showLoader('assignmentModalLoader');
+      const form = e.target;
+      const payload = {
+        classId: form.classId.value,
+        title: form.title.value,
+        description: form.description.value,
+        dueDate: form.dueDate.value
+      };
+      const res = await fetch(`${API_BASE_URL}/api/teachers/${teacherId}/assignments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem('teacherToken')
+        },
+        body: JSON.stringify(payload)
+      });
+      hideLoader('assignmentModalLoader');
+      if(res.ok){
+        hideAssignmentModal();
+        getAssignments();
+      }else{
+        alert("Failed to create assignment.");
+      }
+    };
+
+    // API: Get Classes
+    async function getClasses() {
+      showLoader('classesLoader');
+      const res = await fetch(`${API_BASE_URL}/api/staffs/${teacherId}`);
+      const data = res.ok ? await res.json() : { classes: [] };
+      const list = document.getElementById('classesList');
+      list.innerHTML = '';
+      if((data.classes||[]).length === 0){
+        list.innerHTML = `<div class="col-span-3 text-center text-gray-400 py-10">No classes assigned.</div>`;
+      }
+      (data.classes||[]).forEach(cls => {
+        list.innerHTML += `<div class="card-bg rounded-xl shadow-lg min-h-[170px] relative flex" style="background-image:url('https://images.unsplash.com/photo-1465101162946-4377e57745c3?auto=format,fit=crop&w=400&q=80');">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col justify-between">
+            <div>
+              <div class="font-bold text-white text-lg">${cls.name}</div>
+              <div class="text-blue-100 mb-1">Arms: ${(cls.arms||[]).join(', ')}</div>
+              <div class="text-blue-100 mb-2">Subjects: ${(cls.subjects||[]).map(s=>s.name).join(', ')}</div>
+            </div>
+            <button class="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 self-end" onclick="viewClass('${cls._id}')">View Students</button>
+          </div>
+        </div>`;
+      });
+      hideLoader('classesLoader');
+    }
+
+    // API: Get Results
+    async function getResults() {
+      showLoader('resultsLoader');
+      const res = await fetch(`${API_BASE_URL}/api/teachers/${teacherId}/draft-results`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('teacherToken') }
+      });
+      const data = res.ok ? await res.json() : { draftResults: [] };
+      const list = document.getElementById('resultsList');
+      list.innerHTML = '';
+      if(data.draftResults.length === 0){
+        list.innerHTML = `<div class="col-span-3 text-center text-gray-400 py-10">No draft results found.</div>`;
+      }
+      data.draftResults.forEach(r => {
+        list.innerHTML += `<div class="card-bg rounded-xl shadow-lg min-h-[170px] relative flex" style="background-image:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format,fit=crop&w=400&q=80');">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col justify-between">
+            <div>
+              <div class="font-bold text-white text-lg">Student: ${r.student}</div>
+              <div class="text-blue-100 mb-1">Class: ${r.class}</div>
+              <div class="text-blue-100 mb-1">Term: ${r.term}</div>
+              <div class="text-blue-200 mb-2">Score: ${r.score}</div>
+              <div class="text-blue-200 text-xs">Last Updated: ${new Date(r.updated).toLocaleString()}</div>
+            </div>
+            <button class="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 self-end" onclick="editResult('${r._id}')">Edit</button>
+          </div>
+        </div>`;
+      });
+      hideLoader('resultsLoader');
+    }
+
+    // API: Get Notifications
+    async function getNotifications() {
+      showLoader('notificationsLoader');
+      const res = await fetch(`${API_BASE_URL}/api/teachers/${teacherId}/notifications`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('teacherToken') }
+      });
+      const data = res.ok ? await res.json() : { notifications: [] };
+      const list = document.getElementById('notificationsList');
+      list.innerHTML = '';
+      if(data.notifications.length === 0){
+        list.innerHTML = `<div class="col-span-3 text-center text-gray-400 py-10">No notifications found.</div>`;
+      }
+      data.notifications.forEach(n => {
+        list.innerHTML += `<div class="card-bg rounded-xl shadow-lg min-h-[120px] relative flex" style="background-image:url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format,fit=crop&w=400&q=80');">
+          <div class="card-overlay"></div>
+          <div class="card-content p-4 w-full flex flex-col justify-between">
+            <div>
+              <div class="font-bold text-white text-lg">${n.title || "Notification"}</div>
+              <div class="text-blue-100 mb-2">${n.message}</div>
+              <div class="text-blue-200 text-xs">${new Date(n.date).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>`;
+      });
+      document.getElementById('notifDot').style.display = data.notifications.length > 0 ? 'block' : 'none';
+      hideLoader('notificationsLoader');
+    }
+
+    // API: News/Announcements (prototype, can connect to actual endpoint)
+    function getNews() {
+      setTimeout(()=>{
+        document.getElementById('newsContent').innerHTML = `
+          <ul class="list-disc ml-6 text-blue-900">
+            <li>Midterm Exams: Start next week. Prepare!</li>
+            <li>New library books available. Check out the new science fiction collection.</li>
+          </ul>
+        `;
+      }, 900); // Simulate loading
+    }
+
+    // INIT DASHBOARD
+    async function initDashboard() {
+      await getTeacherProfile();
+      getAssignments();
+      getClasses();
+      getResults();
+      getNotifications();
+      getNews();
+      showSection('dashboard');
+    }
+
+    window.onload = initDashboard;
+    // On section click, fetch relevant data
+    window.showSection = async function(section){
+      showSection(section);
+      if(section==="assignments") getAssignments();
+      if(section==="classes") getClasses();
+      if(section==="results") getResults();
+      if(section==="notifications") getNotifications();
+      if(section==="profile") getTeacherProfile();
+      if(section==="dashboard") getNews();
+    };
+  </script>
 </body>
 </html>

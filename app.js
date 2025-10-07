@@ -18,7 +18,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const studentsRoute = require('./routes/students');
-const { router: authRoute, authMiddleware } = require('./routes/auth');
+const { authMiddleware } = require('./routes/auth');
+const adminAuth = require('./middleware/adminAuth'); // or your path
 
 
 const dashboardRoute = require('./routes/dashboard');
@@ -57,7 +58,9 @@ app.use('/api', dashboardRoute);
 
 
 app.use('/api/results', resultsRoute);
-app.use('/api/classes', classesRoute);
+
+app.use('/api/classes', authMiddleware, adminAuth, classesRoute);
+
 app.use('/api/students', studentsRoute);
 
 

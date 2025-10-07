@@ -336,11 +336,7 @@
             <input type="text" name="experience" required>
           </div>
         </div>
-        <label>Assigned Classes:</label>
-<select id="assignClassesSelect" multiple>
-  <!-- options filled dynamically with class names -->
-</select>
-<button onclick="saveAssignedClasses(staffId)">Assign Classes</button>
+        
         <div class="form-row">
           <div class="form-group">
             <label>Previous Employer/School</label>
@@ -687,6 +683,11 @@
             <div class="modal-details">
               <label>Email:</label><span>${s.login_email||'-'}</span>
               <label>Access Level:</label><span>${s.access_level||'-'}</span>
+              <label>Assigned Classes:</label>
+<select id="assignClassesSelect" multiple>
+  <!-- options filled dynamically with class names -->
+</select>
+<button onclick="saveAssignedClasses(staffId)">Assign Classes</button>
             </div>
           </div>
         `;

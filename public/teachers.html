@@ -336,6 +336,11 @@
             <input type="text" name="experience" required>
           </div>
         </div>
+        <label>Assigned Classes:</label>
+<select id="assignClassesSelect" multiple>
+  <!-- options filled dynamically with class names -->
+</select>
+<button onclick="saveAssignedClasses(staffId)">Assign Classes</button>
         <div class="form-row">
           <div class="form-group">
             <label>Previous Employer/School</label>
@@ -549,6 +554,17 @@
       } catch (err) {
         staffListDiv.innerHTML = '<div class="empty-staff-list">Could not load staff. Please try again.</div>';
       }
+    }
+    async function saveAssignedClasses(staffId) {
+  const select = document.getElementById('assignClassesSelect');
+  const classIds = Array.from(select.selectedOptions).map(opt => opt.value);
+  const res = await fetch(API_BASE_URL + `/api/staffs/${staffId}/classes`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ classIds })
+  });
+  const data = await res.json();
+  if (res.ok) alert("Classes assigned!"); else alert(data.error);
     }
     function renderStaffList(staff) {
       const staffListDiv = document.getElementById('staffList');

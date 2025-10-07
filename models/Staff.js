@@ -32,9 +32,9 @@ const StaffSchema = new mongoose.Schema({
   account_number: { type: String, required: true, unique: true },
   pension: String,
   tax_id: String,
-  emergency_name: { type: String, required: false },
-  emergency_phone: { type: String, required: false },
-  emergency_relationship: { type: String, required: false },
+  emergency_name: { type: String }, // not required
+  emergency_phone: { type: String }, // not required
+  emergency_relationship: { type: String }, // not required
   login_email: { type: String, required: true, unique: true },
   login_password: { type: String, required: true }, // hashed
   access_level: { type: String, required: true, enum: [

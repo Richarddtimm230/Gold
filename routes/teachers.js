@@ -122,17 +122,21 @@ router.get('/subjects', teacherAuth, async (req, res) => {
   res.json(subjects);
 });
 
-// --- TEACHER STUDENTS (per class) ---
-// GET /api/teachers/students?classId=...
 router.get('/students', teacherAuth, async (req, res) => {
   const { classId } = req.query;
   if (!classId) return res.status(400).json({ error: "classId is required" });
-  const students = await Student.find({ class: classId });
+
+  // Find the class by ObjectId
+  const cls = await Class.findById(classId);
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+
+  // Find students by class name (string)
+  const students = await Student.find({ class: cls.name });
   res.json(students.map(stu => ({
     id: stu._id,
-    name: stu.name,
+    name: `${stu.firstname} ${stu.surname}`,
     regNo: stu.regNo,
-    email: stu.email
+    email: stu.studentEmail
   })));
 });
 

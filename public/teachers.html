@@ -508,7 +508,7 @@
       submitBtn.textContent = 'Submitting...';
       submitBtn.disabled = true;
       try {
-        const response = await fetch(API_BASE_URL + '/api/staff', {
+        const response = await fetch(API_BASE_URL + '/api/staffs', {
           method: 'POST',
           body: formData
         });
@@ -541,7 +541,7 @@
       const staffListDiv = document.getElementById('staffList');
       staffListDiv.innerHTML = '<div class="empty-staff-list">Loading staff...</div>';
       try {
-        const resp = await fetch(API_BASE_URL + '/api/staff');
+        const resp = await fetch(API_BASE_URL + '/api/staffs');
         if (!resp.ok) throw new Error('Failed to fetch staff list');
         const staff = await resp.json();
         staffDataCache = staff;
@@ -593,7 +593,7 @@
       staffModal.classList.add('active');
       try {
         // Fetch staff details
-        const resp = await fetch(API_BASE_URL + `/api/staff/${id}`);
+        const resp = await fetch(API_BASE_URL + `/api/staffs/${id}`);
         if (!resp.ok) throw new Error('Failed to fetch staff details');
         const s = await resp.json();
         // Compose modal content

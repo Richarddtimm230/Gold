@@ -98,7 +98,29 @@ departments.forEach(({route, dep}) => {
     return deleteStaffById(req, res);
   });
 });
+// PATCH /api/staffs/:id/classes
+router.patch('/:id/classes', async (req, res) => {
+  const staffId = req.params.id;
+  const { classIds } = req.body; // classIds is array of class ObjectIds
+  if (!Array.isArray(classIds)) return res.status(400).json({ error: "classIds must be an array" });
 
+  try {
+    // Update teacher's assigned classes
+    const staff = await Staff.findByIdAndUpdate(
+      staffId,
+      { classes: classIds },
+      { new: true }
+    );
+    // Optionally, update Class model to link to teacher as well
+    await Class.updateMany(
+      { _id: { $in: classIds } },
+      { $addToSet: { teachers: staffId } }
+    );
+    res.json({ message: "Classes assigned to teacher!", staff });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 /**
  * GET /api/staff/:id - Return full details for a staff member
  */

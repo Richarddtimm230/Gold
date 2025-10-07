@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../firestore'); // Firestore instance
+const Staff = require('../models/Staff'); // Use your Mongoose model
 
 async function teacherAuthMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -9,13 +9,12 @@ async function teacherAuthMiddleware(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Fetch teacher user from Firestore by ID
-    const teacherDoc = await db.collection('teachers').doc(decoded.id).get();
-    if (!teacherDoc.exists) {
-      return res.status(401).json({ error: 'Teacher not found.' });
+    // Find teacher in MongoDB by ID and check access_level
+    const teacher = await Staff.findById(decoded.id);
+    if (!teacher || teacher.access_level !== 'Teacher') {
+      return res.status(401).json({ error: 'Teacher not found or not authorized.' });
     }
-    const teacher = teacherDoc.data();
-    req.user = { id: teacherDoc.id, ...teacher }; // Attach user info and role
+    req.staff = teacher; // Attach teacher info to request
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid or expired token.' });

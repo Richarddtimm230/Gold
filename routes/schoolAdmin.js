@@ -123,7 +123,7 @@ router.patch('/alumni/:regNo', adminAuth, async (req, res) => {
 
 // --- Birthdays ---
 // Make birthdays route accessible to all authenticated users
-router.get('/students/birthdays', studentAuthMiddleware, async (req, res) => {
+router.get('/students/birthdays', async (req, res) => {
   const { month } = req.query;
   const monthNum = parseInt(month, 10);
   if (!monthNum || monthNum < 1 || monthNum > 12) return res.status(400).json({ error: 'Invalid month' });

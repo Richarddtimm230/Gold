@@ -1,5 +1,6 @@
 const API_BASE_URL = "https://goldlincschools.onrender.com";
 const token = localStorage.getItem('teacherToken') || localStorage.getItem('token') || "";
+
 // --- DATA HOLDERS ---
 let teacher = null;
 let studentsByClass = {};
@@ -17,23 +18,22 @@ async function fetchAndSetup() {
   teacher = await fetchTeacherProfile();
   if (!teacher) return alert("Failed to load teacher profile.");
   document.querySelector('.profile-section strong').textContent = teacher.name;
-  document.querySelector('.profile-section small').textContent = teacher.role || '';
+  document.querySelector('.profile-section small').textContent = teacher.designation || '';
   document.querySelector('header h1').textContent = `Welcome, ${teacher.name}`;
   document.querySelector('.avatar').textContent = (teacher.name || '').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
 
-  teacher.classes = await fetchTeacherClasses(teacher.id);
-
-  notifications = await fetchTeacherNotifications(teacher.id);
+  teacher.classes = await fetchTeacherClasses();
+  notifications = await fetchTeacherNotifications();
 
   studentsByClass = {};
   subjectsByClass = {};
   for (const cls of teacher.classes) {
-    studentsByClass[cls.id] = await fetchStudentsByClass(cls.name);
-    subjectsByClass[cls.id] = await fetchSubjectsByClass(cls.name);
+    studentsByClass[cls.id] = await fetchStudentsByClass(cls.id);
+    subjectsByClass[cls.id] = await fetchSubjectsByClass(cls.id);
   }
 
-  assignments = await fetchAssignments(teacher.id) || [];
-  draftResults = await fetchDraftResults(teacher.id) || [];
+  assignments = await fetchAssignments() || [];
+  draftResults = await fetchDraftResults() || [];
 
   renderClassesList();
   renderStudentsBlock();
@@ -54,58 +54,54 @@ async function fetchTeacherProfile() {
   } catch { return null; }
 }
 
-async function fetchTeacherClasses(teacherId) {
+async function fetchTeacherClasses() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/classes?teacher_id=${encodeURIComponent(teacherId)}`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/classes`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data.classes) ? data.classes : [];
+    return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
 
-async function fetchTeacherNotifications(teacherId) {
+async function fetchTeacherNotifications() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/notifications`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/notifications`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data.notifications) ? data.notifications : [];
   } catch { return []; }
 }
 
-async function fetchStudentsByClass(className) {
+async function fetchStudentsByClass(classId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(className)}`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/students?classId=${encodeURIComponent(classId)}`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data.students) ? data.students.map(stu => ({
-      ...stu,
-      id: stu.student_id || stu.regNo,
-      name: stu.name || `${stu.firstname} ${stu.surname}`,
-    })) : [];
+    return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
 
-async function fetchSubjectsByClass(className) {
+async function fetchSubjectsByClass(classId) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/subjects?class=${encodeURIComponent(className)}`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/subjects?classId=${encodeURIComponent(classId)}`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data.subjects) ? data.subjects : [];
+    return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
 
-async function fetchAssignments(teacherId) {
+async function fetchAssignments() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/assignments`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data.assignments) ? data.assignments : [];
   } catch { return []; }
 }
 
-async function fetchDraftResults(teacherId) {
+async function fetchDraftResults() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacherId)}/draft-results`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/draft-results`, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data.draftResults) ? data.draftResults : [];
@@ -327,7 +323,6 @@ document.getElementById('attendance-form').onsubmit = async function (e) {
   });
   alert('Attendance saved!');
   // Optionally: POST attendance to backend here, e.g.:
-  
   try {
     const res = await fetch(`${API_BASE_URL}/api/attendance`, {
       method: "POST",

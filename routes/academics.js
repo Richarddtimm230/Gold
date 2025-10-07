@@ -34,17 +34,21 @@ router.post('/sessions', adminAuth, async (req, res) => {
   }
   res.json(session);
 });
-
 router.get('/terms', adminAuth, async (req, res) => {
-  const terms = await Term.find().populate('session').sort('-createdAt');
-  res.json(terms.map(t => ({
-    _id: t._id,
-    name: t.name,
-    session: t.session ? { _id: t.session._id, name: t.session.name } : undefined,
-    startDate: t.startDate,
-    endDate: t.endDate
-  })));
+  try {
+    const terms = await Term.find().populate('session').sort('-createdAt');
+    res.json(terms.map(t => ({
+      _id: t._id,
+      name: t.name,
+      session: t.session ? { _id: t.session._id, name: t.session.name } : null,
+      startDate: t.startDate,
+      endDate: t.endDate
+    })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
+
 router.post('/terms', adminAuth, async (req, res) => {
   const { name, sessionId, startDate, endDate } = req.body;
   if (!name || !sessionId) return res.status(400).json({ error: "Term name and session required" });

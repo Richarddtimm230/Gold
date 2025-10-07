@@ -69,13 +69,15 @@
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div class="tablist" id="academicsTabs">
-      <button class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</button>
-      <button data-tab="terms"><i class="fa fa-clock"></i> Terms</button>
-      <button data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</button>
-      <button data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</button>
-      <button data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</button>
-      <button data-tab="classes"><i class="fa fa-graduation-cap"></i> Classes</button>
-    </div>
+  <button class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</button>
+  <button data-tab="terms"><i class="fa fa-clock"></i> Terms</button>
+  <button data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</button>
+  <button data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</button>
+  <button data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</button>
+  <button data-tab="classes"><i class="fa fa-graduation-cap"></i> Classes</button>
+  <!-- Add this line below for Subjects -->
+  <button data-tab="subjects"><i class="fa fa-book"></i> Subjects</button>
+</div>
     <div class="tab-content" id="academicsTabContent">
       <!-- Sessions Section -->
       <div class="section-card" data-section="sessions">
@@ -116,6 +118,30 @@
           </table>
         </div>
       </div>
+      <!-- Add Subject to Class -->
+<div class="section-card hidden" data-section="subjects">
+  <div class="section-title"><i class="fa fa-book"></i> Assign Subject to Class & Teacher</div>
+  <form id="assignSubjectForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+    <div>
+      <label class="block text-sm font-bold mb-1">Class</label>
+      <select name="classId" id="assignClassSelect" required></select>
+    </div>
+    <div>
+      <label class="block text-sm font-bold mb-1">Subject Name</label>
+      <input type="text" name="subjectName" placeholder="Mathematics" required>
+    </div>
+    <div>
+      <label class="block text-sm font-bold mb-1">Assign Teacher</label>
+      <select name="teacherId" id="assignSubjectTeacherSelect" required></select>
+    </div>
+    <div class="md:col-span-4">
+      <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+        <i class="fa fa-save mr-1"></i> Assign Subject
+      </button>
+    </div>
+  </form>
+  <div id="assignSubjectMessage" class="text-sm mb-4"></div>
+    </div>
       <!-- Classes Section -->
       <div class="section-card hidden" data-section="classes">
         <div class="section-title"><i class="fa fa-graduation-cap"></i> Class Management</div>
@@ -491,6 +517,42 @@
         loadClasses();
       }catch{ document.getElementById('classMessage').textContent = "Network error."; }
     };
+
+    async function fillClassDropdown() {
+  const res = await fetch(API_BASE + "/classes", { headers: { Authorization: "Bearer " + token }});
+  const data = await res.json();
+  document.getElementById('assignClassSelect').innerHTML = data.map(c =>
+    `<option value="${c._id}">${c.name}</option>`
+  ).join('');
+}
+async function fillTeacherDropdown2() {
+  const res = await fetch(API_BASE.replace('/academics','') + "/teachers", { headers: { Authorization: "Bearer " + token }});
+  const data = await res.json();
+  document.getElementById('assignSubjectTeacherSelect').innerHTML = data.map(t =>
+    `<option value="${t.id}">${t.name} (${t.email})</option>`
+  ).join('');
+}
+fillClassDropdown();
+fillTeacherDropdown2();
+
+document.getElementById('assignSubjectForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form));
+  document.getElementById('assignSubjectMessage').textContent = "Saving...";
+  try {
+    const res = await fetch(API_BASE + `/classes/${data.classId}/subjects`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ subjectName: data.subjectName, teacherId: data.teacherId })
+    });
+    const resp = await res.json();
+    document.getElementById('assignSubjectMessage').textContent = res.ok ? "Assigned!" : ("Error: " + (resp.error || "Unknown"));
+    if (res.ok) form.reset();
+  } catch (err) {
+    document.getElementById('assignSubjectMessage').textContent = "Network error.";
+  }
+};
     // Sessions Table
     async function loadSessions() {
       await fillDropdown("/sessions", "termSessionSelect");

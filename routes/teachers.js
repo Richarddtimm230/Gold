@@ -5,12 +5,44 @@ const Staff = require('../models/Staff');
 const Assignment = require('../models/Assignment');
 const Notification = require('../models/Notification');
 const DraftResult = require('../models/DraftResult');
+const Class = require('../models/Class');
+const Subject = require('../models/Subject');
+const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
 
-// GET /api/teachers/me - Get own teacher profile
+// GET /api/teachers/me - Get own teacher profile + classes + subjects
 router.get('/me', teacherAuth, async (req, res) => {
   const teacher = req.staff;
   if (!teacher || teacher.access_level !== 'Teacher') return res.status(404).json({ error: "Teacher not found" });
+
+  // Get classes assigned to this teacher (ObjectId match)
+  const classes = await Class.find({ teachers: teacher._id })
+    .populate({
+      path: 'subjects.subject',
+      model: 'Subject'
+    })
+    .populate({
+      path: 'subjects.teacher',
+      model: 'Staff',
+      select: 'first_name last_name email'
+    });
+
+  // Structure classes and subjects in academic format
+  const classData = classes.map(cls => ({
+    id: cls._id,
+    name: cls.name,
+    arms: cls.arms,
+    subjects: (cls.subjects || []).map(s => ({
+      id: s.subject && s.subject._id,
+      name: s.subject && s.subject.name,
+      teacher: s.teacher ? {
+        id: s.teacher._id,
+        name: `${s.teacher.first_name} ${s.teacher.last_name}`,
+        email: s.teacher.email
+      } : null
+    }))
+  }));
+
   res.json({
     id: teacher._id,
     name: `${teacher.first_name} ${teacher.last_name}`,
@@ -19,6 +51,7 @@ router.get('/me', teacherAuth, async (req, res) => {
     designation: teacher.designation,
     department: teacher.department,
     photo_url: teacher.photo || null,
+    classes: classData
   });
 });
 
@@ -39,17 +72,67 @@ router.patch('/me', teacherAuth, async (req, res) => {
   });
 });
 
-// GET /api/teachers - List all teachers
+// GET /api/teachers - List all teachers (for assignments or admin)
 router.get('/', async (req, res) => {
   const teachers = await Staff.find({ access_level: 'Teacher' });
   res.json(teachers.map(t => ({
     id: t._id,
+    first_name: t.first_name,
+    last_name: t.last_name,
     name: `${t.first_name} ${t.last_name}`,
     email: t.email,
     phone: t.phone,
     designation: t.designation,
     department: t.department,
     photo_url: t.photo || null,
+  })));
+});
+
+// --- TEACHER CLASSES ---
+// GET /api/teachers/classes - Classes assigned to logged-in teacher
+router.get('/classes', teacherAuth, async (req, res) => {
+  const classes = await Class.find({ teachers: req.staff._id });
+  res.json(classes.map(cls => ({
+    id: cls._id,
+    name: cls.name,
+    arms: cls.arms
+  })));
+});
+
+// --- TEACHER SUBJECTS (per class) ---
+// GET /api/teachers/subjects?classId=...
+router.get('/subjects', teacherAuth, async (req, res) => {
+  const { classId } = req.query;
+  if (!classId) return res.status(400).json({ error: "classId is required" });
+  const cls = await Class.findById(classId)
+    .populate('subjects.subject')
+    .populate({
+      path: 'subjects.teacher',
+      model: 'Staff',
+      select: 'first_name last_name email'
+    });
+  if (!cls) return res.json([]);
+  // Only return subjects assigned to this teacher (or all if teacher is assigned to class)
+  const subjects = (cls.subjects || []).filter(
+    s => s.teacher && String(s.teacher._id) === String(req.staff._id)
+  ).map(s => ({
+    id: s.subject ? s.subject._id : undefined,
+    name: s.subject ? s.subject.name : undefined
+  }));
+  res.json(subjects);
+});
+
+// --- TEACHER STUDENTS (per class) ---
+// GET /api/teachers/students?classId=...
+router.get('/students', teacherAuth, async (req, res) => {
+  const { classId } = req.query;
+  if (!classId) return res.status(400).json({ error: "classId is required" });
+  const students = await Student.find({ class: classId });
+  res.json(students.map(stu => ({
+    id: stu._id,
+    name: stu.name,
+    regNo: stu.regNo,
+    email: stu.email
   })));
 });
 
@@ -67,10 +150,11 @@ router.get('/:id/assignments', teacherAuth, async (req, res) => {
 // POST /api/teachers/:id/assignments
 router.post('/:id/assignments', teacherAuth, async (req, res) => {
   try {
-    const { classId, title, description, dueDate } = req.body;
+    const { classId, subject, title, description, dueDate } = req.body;
     const assignment = new Assignment({
       teacher: req.params.id,
       class: classId,
+      subject,
       title,
       description,
       dueDate

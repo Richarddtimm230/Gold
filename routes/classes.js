@@ -6,7 +6,7 @@ const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
 const staffAuth = require('../middleware/staffAuth');
-router.get('/', staffAuth, async (req, res) => {
+router.get('/', async (req, res) => {
 
   try {
     const teacherId = req.query.teacher_id;

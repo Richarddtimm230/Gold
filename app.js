@@ -25,7 +25,8 @@ const dashboardRoute = require('./routes/dashboard');
 
 const adminRoute = require('./routes/admin');
 const staffRoute = require('./routes/staff');
-
+const staffsRoute = require('./routes/staffs');
+                                 
 const subjectsRoute = require('./routes/subjects');
 const familiesRoute = require('./routes/families');
 const parentsRoute = require('./routes/parents');
@@ -48,6 +49,7 @@ app.use('/api/parents', parentsRoute);
 // Route mounting
 app.use('/api/auth', authRoute);
 app.use('/api/staff', staffRoute);
+app.use('/api/staffs', staffsRoute);
 app.use('/api', dashboardRoute);
 
 

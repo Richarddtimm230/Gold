@@ -37,6 +37,8 @@ const transportRoute = require('./routes/transport');
 
 const hostelRoute = require('./routes/hostel');
 const assignmentsRoute = require('./routes/assignments');
+const teachersRoute = require('./routes/teachers');
+app.use('/api/teachers', teachersRoute);
 app.use('/api/assignments', assignmentsRoute);
 app.use('/api/hostel', hostelRoute);
 app.use('/api/subjects', subjectsRoute);

@@ -1,7 +1,6 @@
 
 const API_BASE_URL = "https://goldlincschools.onrender.com";
 const token = localStorage.getItem('teacherToken') || localStorage.getItem('token') || "";
-
 // --- DATA HOLDERS ---
 let teacher = null;
 let studentsByClass = {};
@@ -345,11 +344,12 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
   const assignment = {
-    class: classId, // match backend model
-    title: fd.get('title'),
-    description: fd.get('desc'),
-    dueDate: fd.get('due')
-  };
+  class: classId,
+  subject: document.getElementById('assignment-subject').value, // <-- NEW
+  title: fd.get('title'),
+  description: fd.get('desc'),
+  dueDate: fd.get('due')
+};
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
       method: "POST",

@@ -448,7 +448,7 @@
         const res = await fetch("https://goldlincschools.onrender.com/api/teachers", { headers: { Authorization: "Bearer " + token }});
         const data = await res.json();
         document.getElementById('classTeacherSelect').innerHTML = data.map(t =>
-          `<option value="${t._id}">${t.first_name} ${t.last_name} (${t.email})</option>`
+          `<option value="${t.id}">${t.name} (${t.email})</option>`
         ).join('');
       } catch{}
     }

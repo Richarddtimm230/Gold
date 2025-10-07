@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -41,6 +41,14 @@
         <ul id="class-list"></ul>
       </div>
       <div id="students-block"></div>
+      <div id="subjects-block"></div>
+      <!-- Add Subject to Class -->
+      <div id="add-subject-block" style="display:none;">
+        <form id="add-subject-form" style="margin-top:10px;display:flex;gap:6px;align-items:center;">
+          <input type="text" id="subject-name-input" placeholder="New Subject Name" required />
+          <button type="submit" class="btn">+ Add Subject</button>
+        </form>
+      </div>
     </section>
 
     <!-- Attendance Section -->
@@ -132,8 +140,8 @@
           <select id="assignment-class"></select>
           <label>Title</label>
           <input type="text" name="title" required>
-         <label>Subject</label>
-<select name="subject" id="assignment-subject"></select>
+          <label>Subject</label>
+          <select name="subject" id="assignment-subject"></select>
           <label>Description</label>
           <input type="text" name="desc" required>
           <label>Due Date</label>
@@ -160,8 +168,6 @@
     </div>
   </main>
 </div>
-<script src="teachers.js">
-
-</script>
+<script src="teachers.js"></script>
 </body>
 </html>

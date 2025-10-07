@@ -8,7 +8,10 @@ const Subject = require('../models/Subject');
 // GET /api/classes - Get all classes with arms, subjects, teachers
 router.get('/', async (req, res) => {
   try {
-    const classes = await Class.find().populate('subjects');
+    const teacherId = req.query.teacher_id;
+    let query = {};
+    if (teacherId) query.teachers = teacherId; // teachers should be array of ObjectId
+    const classes = await Class.find(query).populate('subjects');
     const output = classes.map(cls => {
       return {
         id: cls._id,
@@ -18,12 +21,28 @@ router.get('/', async (req, res) => {
         subjects: cls.subjects.map(sub => ({ id: sub._id, name: sub.name }))
       };
     });
-    res.json(output);
+    res.json({ classes: output });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+// POST /api/classes/:id/teachers
+router.post('/:id/teachers', async (req, res) => {
+  try {
+    const { teacherId } = req.body;
+    if (!teacherId) return res.status(400).json({ error: 'Teacher ID required' });
 
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ error: 'Class not found' });
+
+    cls.teachers.push(teacherId);
+    await cls.save();
+
+    res.json({ id: cls._id, ...cls.toObject() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // POST /api/classes - Create a new class
 router.post('/', async (req, res) => {
   try {
@@ -94,22 +113,6 @@ router.post('/:id/subjects', async (req, res) => {
   }
 });
 
-// POST /api/classes/:id/teachers - Add teacher to class (optional arm)
-router.post('/:id/teachers', async (req, res) => {
-  try {
-    const { teacher } = req.body;
-    if (!teacher || !teacher.name) return res.status(400).json({ error: 'Teacher object with name required' });
 
-    const cls = await Class.findById(req.params.id);
-    if (!cls) return res.status(404).json({ error: 'Class not found' });
-
-    cls.teachers.push(teacher);
-    await cls.save();
-
-    res.json({ id: cls._id, ...cls.toObject() });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 module.exports = router;

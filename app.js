@@ -45,7 +45,7 @@ app.use('/api/hostel', hostelRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/transport', transportRoute);
 app.use('/api', schoolAdminRoute);
-app.use('/api', schoolAdminsRoute);
+app.use('/api/academics', schoolAdminsRoute);
 app.use('/api/fees', feesRoute);
 app.use('/api/families', familiesRoute);
 app.use('/api/parents', parentsRoute);

@@ -32,6 +32,7 @@ const subjectsRoute = require('./routes/subjects');
 const familiesRoute = require('./routes/families');
 const parentsRoute = require('./routes/parents');
 const feesRoute = require('./routes/fees');
+const academicsRoute = require('./routes/academics');
 const schoolAdminRoute = require('./routes/schoolAdmin');
 const schoolAdminsRoute = require('./routes/schoolAdmins');
 const transportRoute = require('./routes/transport');
@@ -45,8 +46,9 @@ app.use('/api/hostel', hostelRoute);
 app.use('/api/subjects', subjectsRoute);
 app.use('/api/transport', transportRoute);
 app.use('/api', schoolAdminRoute);
-app.use('/api/academics', schoolAdminsRoute);
+app.use('/api', schoolAdminsRoute);
 app.use('/api/fees', feesRoute);
+app.use('/api/academics', academicsRoute);
 app.use('/api/families', familiesRoute);
 app.use('/api/parents', parentsRoute);
 // Route mounting

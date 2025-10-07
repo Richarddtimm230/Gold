@@ -144,7 +144,7 @@ router.delete('/:id', adminAuth, async (req, res) => {
 });
 
 // --- Teacher/admin review student submission ---
-router.post('/:assignmentId/review/:studentId', adminAuth, async (req, res) => {
+router.post('/:assignmentId/review/:studentId', async (req, res) => {
   try {
     const { assignmentId, studentId } = req.params;
     const { score, feedback, totalScore } = req.body;

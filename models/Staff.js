@@ -32,6 +32,7 @@ const StaffSchema = new mongoose.Schema({
   account_number: { type: String, required: true, unique: true },
   pension: String,
   tax_id: String,
+  classes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }], // add this line
   emergency_name: { type: String }, // not required
   emergency_phone: { type: String }, // not required
   emergency_relationship: { type: String }, // not required

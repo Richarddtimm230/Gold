@@ -100,19 +100,13 @@ router.get('/classes', teacherAuth, async (req, res) => {
 });
 
 // --- TEACHER SUBJECTS (per class) ---
-// GET /api/teachers/subjects?classId=...
 router.get('/subjects', teacherAuth, async (req, res) => {
   const { classId } = req.query;
   if (!classId) return res.status(400).json({ error: "classId is required" });
   const cls = await Class.findById(classId)
     .populate('subjects.subject')
-    .populate({
-      path: 'subjects.teacher',
-      model: 'Staff',
-      select: 'first_name last_name email'
-    });
+    .populate('subjects.teacher');
   if (!cls) return res.json([]);
-  // Only return subjects assigned to this teacher (or all if teacher is assigned to class)
   const subjects = (cls.subjects || []).filter(
     s => s.teacher && String(s.teacher._id) === String(req.staff._id)
   ).map(s => ({
@@ -214,5 +208,21 @@ router.post('/:id/draft-results', teacherAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+router.post('/classes/:classId/subjects', teacherAuth, async (req, res) => {
+  const { classId } = req.params;
+  const { subjectName } = req.body;
+  // Find or create subject
+  let subject = await Subject.findOne({ name: subjectName });
+  if (!subject) {
+    subject = new Subject({ name: subjectName });
+    await subject.save();
+  }
+  const cls = await Class.findById(classId);
+  // Prevent duplicate subject assignment
+  if (!cls.subjects.some(s => String(s.subject) === String(subject._id) && String(s.teacher) === String(req.staff._id))) {
+    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
+    await cls.save();
+  }
+  res.json({ success: true });
+});
 module.exports = router;

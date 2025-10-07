@@ -10,6 +10,39 @@ const CBTMock = require('../models/CBTMock');
 const CBTMockResult = require('../models/CBTMockResult');
 
 const Staff = require('../models/Staff');
+const Subject = require('../models/Subject');
+
+// Add a new subject to a class and assign to a teacher
+router.post('/classes/:classId/subjects', adminAuth, async (req, res) => {
+  const { classId } = req.params;
+  const { subjectName, teacherId } = req.body;
+  if (!subjectName || !teacherId) return res.status(400).json({ error: "Subject name and teacher required" });
+
+  // Find or create subject
+  let subject = await Subject.findOne({ name: subjectName });
+  if (!subject) {
+    subject = new Subject({ name: subjectName });
+    await subject.save();
+  }
+  // Add to class if not already assigned
+  let cls = await Class.findById(classId);
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+
+  // Check if this subject is already assigned in this class
+  if (cls.subjects.some(s => String(s.subject) === String(subject._id))) {
+    return res.status(409).json({ error: "Subject already assigned to class" });
+  }
+
+  cls.subjects.push({ subject: subject._id, teacher: teacherId });
+  await cls.save();
+
+  res.json({
+    success: true,
+    classId,
+    subject: { id: subject._id, name: subject.name },
+    teacherId
+  });
+});
 
 router.post('/classes', adminAuth, async (req, res) => {
   const { name, arms, teacherId } = req.body;

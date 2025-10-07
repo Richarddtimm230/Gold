@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const studentsRoute = require('./routes/students');
-const { authMiddleware } = require('./routes/auth');
+const { router: authRoute, authMiddleware } = require('./routes/auth');
 const adminAuth = require('./middleware/adminAuth'); // or your path
 
 

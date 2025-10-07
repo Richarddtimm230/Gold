@@ -9,6 +9,54 @@ const ExamMode = require('../models/ExamMode');
 const CBTMock = require('../models/CBTMock');
 const CBTMockResult = require('../models/CBTMockResult');
 
+const Staff = require('../models/Staff');
+
+router.post('/classes', adminAuth, async (req, res) => {
+  const { name, arms, teacherId } = req.body;
+  if (!name) return res.status(400).json({ error: "Class name required" });
+
+  let existing = await Class.findOne({ name });
+  if (existing) return res.status(409).json({ error: "Class already exists" });
+
+  const newClass = new Class({
+    name,
+    arms: Array.isArray(arms) ? arms : [],
+    teachers: teacherId ? [teacherId] : [],
+    subjects: []
+  });
+  await newClass.save();
+
+  // Assign this class to the teacher's Staff document if teacherId provided
+  if (teacherId) {
+    await Staff.findByIdAndUpdate(
+      teacherId,
+      { $addToSet: { classes: newClass._id } }
+    );
+  }
+
+  res.status(201).json({
+    _id: newClass._id,
+    name: newClass.name,
+    arms: newClass.arms,
+    teachers: newClass.teachers,
+    subjects: newClass.subjects
+  });
+});
+router.get('/classes', adminAuth, async (req, res) => {
+  const classes = await Class.find().populate('teachers');
+  res.json(classes.map(c => ({
+    _id: c._id,
+    name: c.name,
+    arms: c.arms,
+    teachers: c.teachers.map(t => ({
+      _id: t._id,
+      first_name: t.first_name,
+      last_name: t.last_name,
+      email: t.email
+    })),
+    subjects: c.subjects
+  })));
+});
 router.get('/sessions', adminAuth, async (req, res) => {
   const sessions = await Session.find().sort('-createdAt');
   res.json(sessions.map(s => ({

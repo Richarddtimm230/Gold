@@ -233,7 +233,8 @@ function renderSubjectsBlock() {
   }
   let html = `<div class="card"><h2>Subjects for ${teacher.classes.find(c => c.id === selectedClassId).name}</h2><ul>`;
   subjects.forEach(subj => {
-    html += `<li>${subj.name}</li>`;
+    // Handles both object and string
+    html += `<li>${subj.name || subj}</li>`;
   });
   html += '</ul></div>';
   block.innerHTML = html;
@@ -260,23 +261,21 @@ if (addSubjectForm) {
     if (!subjectName || !selectedClassId) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/teachers/classes/${selectedClassId}/subjects`, {
+      const res = await fetch(`${API_BASE_URL}/api/classes/${selectedClassId}/subjects`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({ subjects: [subjectName] })
       });
       if (!res.ok) throw new Error();
-      const data = await res.json();
+      // Always refetch to update UI with latest format
       subjectsByClass[selectedClassId] = await fetchSubjectsByClass(selectedClassId);
-renderSubjectsBlock();
-
+      renderSubjectsBlock();
       alert('Subject added!');
     } catch {
       alert('Failed to add subject.');
     }
   };
 }
-
 // --- Attendance ---
 function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');

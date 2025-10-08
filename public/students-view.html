@@ -288,18 +288,26 @@
 
         try {
             const res = await fetch(url);
-            if(res.ok) {
-                const data = await res.json();
-                let studentsList = Array.isArray(data.students) ? data.students : [];
-                studentsData = studentsList;
-                filteredData = studentsData;
-                currentPage = 1;
-                renderStudentsTable();
-            } else {
-                studentsData = [];
-                filteredData = [];
-                renderStudentsTable();
-            }
+            if (res.ok) {
+    const data = await res.json();
+    // Handle both { students: [...] } and raw array response
+    let studentsList;
+    if (Array.isArray(data)) {
+        studentsList = data;
+    } else if (Array.isArray(data.students)) {
+        studentsList = data.students;
+    } else {
+        studentsList = [];
+    }
+    studentsData = studentsList;
+    filteredData = studentsData;
+    currentPage = 1;
+    renderStudentsTable();
+} else {
+    studentsData = [];
+    filteredData = [];
+    renderStudentsTable();
+}
         } catch (err) {
             studentsData = [];
             filteredData = [];

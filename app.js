@@ -41,7 +41,16 @@ const hostelRoute = require('./routes/hostel');
 const assignmentsRoute = require('./routes/assignments');
 const teachersRoute = require('./routes/teachers');
 const teacherResultsRoute = require('./routes/teacherResults');
+//...
+const examRoute = require('./routes/exam');
+const activityRoute = require('./routes/activities');
+const uploadRoute = require('./routes/upload');
 
+//...
+app.use('/api/exam', examRoute);
+app.use('/api/activity', activityRoute);
+app.use('/api/upload', uploadRoute);
+//...
 // 2. Mount it with a path
 app.use('/api/teachers', teacherResultsRoute);
 app.use('/api/teachers', teachersRoute);

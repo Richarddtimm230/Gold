@@ -475,7 +475,7 @@
     const filterTerm = document.getElementById('filterTerm').value;
     const search = document.getElementById('searchName').value.trim();
 
-    let url = `${API_BASE_URL}/api/students?`;
+    let url = `${API_BASE_URL}/api/student?`;
     if (filterClass) url += `class=${encodeURIComponent(filterClass)}&`;
     if (filterSession) url += `academicSession=${encodeURIComponent(filterSession)}&`;
     if (filterTerm) url += `term=${encodeURIComponent(filterTerm)}&`;
@@ -545,7 +545,7 @@
   }
 
   function promoteStudent(id) {
-    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "promote" })
@@ -561,7 +561,7 @@
   }
 
   function graduateStudent(id) {
-    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "graduate" })
@@ -577,7 +577,7 @@
   }
 
   function demoteStudent(id) {
-    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "demote" })
@@ -593,7 +593,7 @@
   }
 
   function bulkPromote() {
-    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "promote" })
@@ -607,7 +607,7 @@
     });
   }
   function bulkGraduate() {
-    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "graduate" })
@@ -621,7 +621,7 @@
     });
   }
   function bulkDemote() {
-    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "demote" })

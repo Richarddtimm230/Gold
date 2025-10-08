@@ -138,8 +138,12 @@ router.get('/students', teacherAuth, async (req, res) => {
 // GET /api/teachers/:id/assignments
 router.get('/:id/assignments', teacherAuth, async (req, res) => {
   try {
-    const assignments = await Assignment.find({ teacher: req.params.id }).sort({ dueDate: 1 });
-    res.json({ assignments });
+    // In assignments fetch endpoint
+const assignments = await Assignment.find({ teacher: req.params.id })
+  .populate({ path: 'class', select: 'name' }) // this will attach class.name to each assignment
+  .sort({ dueDate: 1 });
+res.json({ assignments });
+    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -276,7 +276,7 @@ document.getElementById("resultForm").addEventListener("submit", function (e) {
   }
 
   // Call backend API
-  fetch(`/api/results/check?regNo=${encodeURIComponent(regNumber)}&scratchCard=${encodeURIComponent(scratchCard)}&class=${encodeURIComponent(className)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`)
+  fetch(`https://goldlincschools.onrender.com/api/results/check?regNo=${encodeURIComponent(regNumber)}&scratchCard=${encodeURIComponent(scratchCard)}&class=${encodeURIComponent(className)}&session=${encodeURIComponent(session)}&term=${encodeURIComponent(term)}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {

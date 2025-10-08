@@ -134,16 +134,13 @@ router.get('/students', teacherAuth, async (req, res) => {
   })));
 });
 
-// --- ASSIGNMENTS ---
 // GET /api/teachers/:id/assignments
 router.get('/:id/assignments', teacherAuth, async (req, res) => {
   try {
-    // In assignments fetch endpoint
-const assignments = await Assignment.find({ teacher: req.params.id })
-  .populate({ path: 'class', select: 'name' }) // this will attach class.name to each assignment
-  .sort({ dueDate: 1 });
-res.json({ assignments });
-    
+    const assignments = await Assignment.find({ teacher: req.params.id })
+      .populate({ path: 'class', select: 'name' }) // ensures .class.name is available
+      .sort({ dueDate: 1 });
+    res.json({ assignments });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -152,22 +149,23 @@ res.json({ assignments });
 // POST /api/teachers/:id/assignments
 router.post('/:id/assignments', teacherAuth, async (req, res) => {
   try {
-    const { classId, subject, title, description, dueDate } = req.body;
+    const { class: classId, subject, title, description, dueDate } = req.body;
     const assignment = new Assignment({
       teacher: req.params.id,
-      class: classId,
+      class: classId, // expects 'class' in body
       subject,
       title,
       description,
       dueDate
     });
     await assignment.save();
+    // Optionally, populate class before returning
+    await assignment.populate({ path: 'class', select: 'name' });
     res.status(201).json({ assignment });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 // --- NOTIFICATIONS ---
 // GET /api/teachers/:id/notifications
 router.get('/:id/notifications', teacherAuth, async (req, res) => {

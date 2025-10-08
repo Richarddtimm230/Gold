@@ -369,12 +369,6 @@ function renderGradebookTable() {
   document.getElementById('gradebook-table').innerHTML = html;
 }
 
-// ...previous code...
-
-// --- Assignments ---
-
-// Defensive rendering for class name
-
 
 
 function renderAssignments() {
@@ -409,7 +403,6 @@ function openAssignmentModal() {
   document.getElementById('assignment-class').onchange = populateAssignmentSubjects;
 }
 
-function renderAssignmentList() {
 function renderAssignmentList() {
   const div = document.getElementById('assignment-list');
   if (!assignments.length) {

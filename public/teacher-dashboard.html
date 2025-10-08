@@ -134,18 +134,18 @@
     <div id="assignmentModalBg" class="form-modal-bg" style="display:none;">
       <div class="form-modal">
         <button class="close-btn" onclick="closeAssignmentModal()">&times;</button>
-        <h3>Create Assignment</h3>
+        <h3>Create/Update Assignment</h3>
         <form id="assignmentForm">
           <label>Class</label>
           <select id="assignment-class"></select>
           <label>Title</label>
-          <input type="text" name="title" required>
+          <input type="text" id="assignment-title" name="title" required>
           <label>Subject</label>
           <select name="subject" id="assignment-subject"></select>
           <label>Description</label>
-          <input type="text" name="desc" required>
+          <input type="text" id="assignment-desc" name="desc" required>
           <label>Due Date</label>
-          <input type="date" name="due" required>
+          <input type="date" id="assignment-due" name="due" required>
           <div class="modal-actions">
             <button type="submit" class="btn">Save Assignment</button>
           </div>
@@ -165,6 +165,20 @@
           </div>
         </form>
       </div>
+    </div>
+
+    <!-- Student Edit Modal (for update action in student section) -->
+    <div id="editStudentModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;background:rgba(32,40,71,0.23);align-items:center;justify-content:center;">
+      <form id="editStudentForm" style="background:#fff;padding:30px;border-radius:10px;max-width:320px;margin:auto;">
+        <h3>Edit Student</h3>
+        <label>Name</label><input type="text" id="editStudentName"><br>
+        <label>Reg. No.</label><input type="text" id="editStudentRegNo"><br>
+        <label>Email</label><input type="email" id="editStudentEmail"><br>
+        <div style="margin-top:12px;">
+          <button type="submit" class="btn warning">Update</button>
+          <button type="button" class="btn" onclick="closeEditStudentModal()">Cancel</button>
+        </div>
+      </form>
     </div>
   </main>
 </div>

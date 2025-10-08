@@ -8,7 +8,9 @@ const Term = require('../models/Term');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 
-// UTILITY: Assign grade/remark based on total score
+/**
+ * UTILITY: Assign grade/remark based on total score
+ */
 function getGradeAndRemark(totalScore) {
   if (totalScore >= 70) return { grade: 'A', remark: 'Excellent' };
   if (totalScore >= 60) return { grade: 'B', remark: 'Very Good' };
@@ -28,7 +30,9 @@ function ordinalSuffix(pos) {
   }
 }
 
-// Calculate and persist subject positions for a class/session/term/subject
+/**
+ * Calculate and persist subject positions for a class/session/term/subject
+ */
 async function computeAndPersistSubjectPositions({ classId, sessionId, termId, subjectId }) {
   const filter = {
     class: classId,
@@ -219,6 +223,9 @@ router.get('/check', async (req, res) => {
   }
 });
 
+/**
+ * BULK UPLOAD
+ */
 router.post('/upload', async (req, res) => {
   try {
     const { session, term, class: className, subject, resultType, results } = req.body;
@@ -257,10 +264,12 @@ router.post('/upload', async (req, res) => {
   }
 });
 
+/**
+ * GET: Filter results. Accepts session, term, student_id, class, subject
+ */
 router.get('/', async (req, res) => {
   try {
     const query = {};
-    // Strict session and term filtering: both must be found, else return unavailable
     if (req.query.session) {
       const sess = await Session.findOne({ name: req.query.session });
       if (!sess) {
@@ -306,6 +315,9 @@ router.get('/', async (req, res) => {
   }
 });
 
+/**
+ * GET: Single result
+ */
 router.get('/:id', async (req, res) => {
   try {
     const result = await Result.findById(req.params.id)
@@ -320,6 +332,10 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * UPDATE: Full update
+ */
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true })
@@ -334,6 +350,10 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * UPDATE: Partial update
+ */
 router.patch('/:id', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -343,6 +363,10 @@ router.patch('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * PUBLISH a result
+ */
 router.post('/:id/publish', async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, { status: 'Published' }, { new: true });
@@ -352,6 +376,10 @@ router.post('/:id/publish', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * DELETE: Remove a result
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Result.findByIdAndDelete(req.params.id);

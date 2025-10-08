@@ -133,14 +133,14 @@
         }
         try {
             // Try student_id first (no orderBy)
-            let url = `${API_BASE_URL}/api/students?student_id=${encodeURIComponent(studentIdParam)}`;
+            let url = `${API_BASE_URL}/api/student?student_id=${encodeURIComponent(studentIdParam)}`;
             let res = await fetch(url);
             let data = await res.json();
             let stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
 
             // If not found, try as regNo
             if (!stu) {
-                url = `${API_BASE_URL}/api/students?regNo=${encodeURIComponent(studentIdParam)}`;
+                url = `${API_BASE_URL}/api/student?regNo=${encodeURIComponent(studentIdParam)}`;
                 res = await fetch(url);
                 data = await res.json();
                 stu = (Array.isArray(data.students) && data.students.length > 0) ? data.students[0] : null;
@@ -229,8 +229,8 @@ document.getElementById('skillsForm').onsubmit = async function(e){
 
     // Hardcode session and term or get from context as needed
     // Example: Adjust as needed or fetch from your UI/app context
-    const session = "2024-2025"; // <-- Change this as appropriate or get from context
-    const term = "Third Term";   // <-- Change this as appropriate or get from context
+    const session = "2024–2025"; // <-- Change this as appropriate or get from context
+    const term = "THIRD TERM";   // <-- Change this as appropriate or get from context
 
     const payload = {
         session,
@@ -252,7 +252,7 @@ document.getElementById('skillsForm').onsubmit = async function(e){
     try {
        const studentIdentifier = encodeURIComponent(loadedStudent.regNo);
 
-const res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(loadedStudent.regNo)}/skills-report`, {
+const res = await fetch(`${API_BASE_URL}/api/student/${encodeURIComponent(loadedStudent.regNo)}/skills-report`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(payload)

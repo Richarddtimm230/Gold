@@ -267,9 +267,9 @@ if (addSubjectForm) {
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      subjectsByClass[selectedClassId] = data.subjects;
-      subjectInput.value = '';
-      renderSubjectsBlock();
+      subjectsByClass[selectedClassId] = await fetchSubjectsByClass(selectedClassId);
+renderSubjectsBlock();
+
       alert('Subject added!');
     } catch {
       alert('Failed to add subject.');

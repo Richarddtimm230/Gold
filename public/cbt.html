@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gold and Linc Schools | Central Computer Based Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Flowbite + TailwindCSS + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f7fafd;
+      color: #1a2b4b;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .cbt-option {
+      cursor: pointer;
+      transition: box-shadow 0.18s, background 0.18s;
+      background: #ffffff;
+      border: 2px solid #ddeaff;
+    }
+    .cbt-option.selected {
+      background: #2647a6;
+      color: #fff;
+      border-color: #2647a6;
+      box-shadow: 0 4px 18px #ddeaff99;
+    }
+    .cbt-option:hover {
+      background: #e9f0fe;
+      border-color: #2647a6;
+    }
+    .cbt-btn {
+      padding: 0.9em 2em;
+      border-radius: 0.6em;
+      background: #2647a6;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      transition: background 0.18s;
+      margin: 0 0.5em;
+      box-shadow: 0 2px 12px #ddeaff99;
+    }
+    .cbt-btn:disabled {
+      background: #bfcde7;
+      color: #888;
+    }
+    .cbt-btn:hover:not(:disabled) {
+      background: #18308b;
+    }
+    .cbt-timer {
+      font-weight: bold;
+      font-size: 1.08em;
+      background: #e9f0fe;
+      color: #2647a6;
+      padding: 0.6em 1.2em;
+      border-radius: 0.5em;
+      margin-bottom: 1em;
+      display: inline-block;
+      box-shadow: 0 1px 7px #ddeaff88;
+    }
+    .cbt-summary {
+      background: #fff;
+      border-radius: 1em;
+      box-shadow: 0 2px 14px #ddeaff77;
+      padding: 1.7em 1.5em;
+      margin-bottom: 1.2em;
+      min-width: 250px;
+      font-size: 1em;
+    }
+    .cbt-question-nav button {
+      width: 32px; height: 32px;
+      margin: 0.2em;
+      border-radius: 0.4em;
+      border: 1.5px solid #ddeaff;
+      background: #f6f8fa;
+      font-weight: 700;
+      color: #2647a6;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .cbt-question-nav button.answered {
+      background: #2647a6;
+      color: #fff;
+      border-color: #2647a6;
+    }
+    .cbt-question-nav button.current {
+      background: #ffd600;
+      border-color: #ffd600;
+      color: #22305a;
+    }
+    .cbt-question-nav button:hover {
+      background: #e9f0fe;
+    }
+
+    @media (max-width: 950px) {
+      .cbt-main { flex-direction: column; }
+      .cbt-sidebar { width: 100%; margin-bottom: 1.5em; }
+      .cbt-content { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="flex flex-col items-center w-full min-h-screen py-6 bg-[#f7fafd]">
+    <div class="w-full max-w-6xl flex cbt-main gap-8 px-3 py-2">
+      <!-- Sidebar: Student Details & Navigation -->
+      <aside class="cbt-sidebar bg-white rounded-2xl shadow-lg p-7 flex flex-col items-center gap-5 min-w-[280px] max-w-sm">
+        <div class="text-2xl font-bold text-primary mb-2 text-center">GOLD AND LINC SCHOOLS</div>
+        <div class="text-lg font-semibold mb-2 text-center">CENTRAL COMPUTER BASED TEST</div>
+        <div class="cbt-summary w-full">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="rounded-full bg-[#ddeaff] text-[#2647a6] font-bold text-xl flex items-center justify-center w-14 h-14 shadow avatar">
+              <i class="fa fa-desktop"></i>
+            </div>
+            <div>
+              <div class="font-bold text-lg" id="studentName">Student Name</div>
+              <div class="text-sm text-gray-600" id="studentClass">Class: JSS1</div>
+            </div>
+          </div>
+          <div class="text-sm mb-1" id="cbtSubject">Subject: Mathematics</div>
+          <div class="text-sm mb-1">Questions: <span id="cbtTotalQuestions">10</span></div>
+          <div class="text-sm mb-1">Answered: <span id="cbtTotalAnswered">0</span></div>
+          <div class="text-sm mb-1">Left: <span id="cbtTotalLeft">10</span></div>
+        </div>
+        <div class="cbt-question-nav flex flex-wrap justify-center w-full mb-3" id="cbtQuestionNav">
+          <!-- Question nav buttons dynamically generated -->
+        </div>
+        <div class="cbt-timer text-center" id="cbtTimer"></div>
+      </aside>
+      <!-- Main CBT Content -->
+      <main class="cbt-content flex-1 bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-7">
+        <div>
+          <div class="text-lg font-bold text-primary mb-3" id="cbtTestTitle">MATHEMATICS — JSS1</div>
+          <div class="text-base font-semibold mb-2" id="cbtQuestionText"></div>
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mt-4" id="cbtOptions">
+            <!-- Options go here -->
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-6">
+          <button class="cbt-btn" id="cbtPrevBtn"><i class="fa fa-arrow-left mr-1"></i> Previous</button>
+          <button class="cbt-btn" id="cbtNextBtn">Next <i class="fa fa-arrow-right ml-1"></i></button>
+          <button class="cbt-btn" id="cbtSubmitBtn"><i class="fa fa-paper-plane mr-1"></i> Submit</button>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script>
+    // ---- MOCK DATA ----
+    const student = {
+      name: "Janet Okafor",
+      class: "JSS1",
+      subject: "Mathematics",
+      avatar: "",
+    };
+    const questions = [
+      { text: "1. What is 2 + 2?", options: [{ key: "A", value: "3" }, { key: "B", value: "4" }, { key: "C", value: "6" }, { key: "D", value: "5" }], answer: "B" },
+      { text: "2. Which is a prime number?", options: [{ key: "A", value: "4" }, { key: "B", value: "6" }, { key: "C", value: "5" }, { key: "D", value: "8" }], answer: "C" },
+      { text: "3. What is 10 ÷ 2?", options: [{ key: "A", value: "4" }, { key: "B", value: "5" }, { key: "C", value: "6" }, { key: "D", value: "8" }], answer: "B" },
+      { text: "4. The value of π (pi) is closest to?", options: [{ key: "A", value: "2.14" }, { key: "B", value: "3.14" }, { key: "C", value: "4.14" }, { key: "D", value: "5.14" }], answer: "B" },
+      { text: "5. What is the square root of 25?", options: [{ key: "A", value: "6" }, { key: "B", value: "7" }, { key: "C", value: "5" }, { key: "D", value: "4" }], answer: "C" },
+      { text: "6. What is 12 - 7?", options: [{ key: "A", value: "5" }, { key: "B", value: "4" }, { key: "C", value: "6" }, { key: "D", value: "7" }], answer: "A" },
+      { text: "7. What is 3 x 3?", options: [{ key: "A", value: "6" }, { key: "B", value: "9" }, { key: "C", value: "8" }, { key: "D", value: "7" }], answer: "B" },
+      { text: "8. What is 15 ÷ 3?", options: [{ key: "A", value: "5" }, { key: "B", value: "6" }, { key: "C", value: "4" }, { key: "D", value: "3" }], answer: "A" },
+      { text: "9. Which is an even number?", options: [{ key: "A", value: "7" }, { key: "B", value: "5" }, { key: "C", value: "8" }, { key: "D", value: "3" }], answer: "C" },
+      { text: "10. What is 100 ÷ 10?", options: [{ key: "A", value: "11" }, { key: "B", value: "12" }, { key: "C", value: "10" }, { key: "D", value: "9" }], answer: "C" }
+    ];
+    // ---- CBT LOGIC ----
+    let currentQ = 0;
+    let answers = Array(questions.length).fill(null);
+    let timerSeconds = 15 * 60; // 15 minutes
+    let timerInterval = null;
+
+    function fillStudentSidebar() {
+      document.getElementById('studentName').textContent = student.name;
+      document.getElementById('studentClass').textContent = "Class: " + student.class;
+      document.getElementById('cbtSubject').textContent = "Subject: " + student.subject;
+      document.getElementById('cbtTotalQuestions').textContent = questions.length;
+      document.getElementById('cbtTotalAnswered').textContent = answers.filter(a => a !== null).length;
+      document.getElementById('cbtTotalLeft').textContent = answers.filter(a => a === null).length;
+
+      // Question navigation
+      let navHtml = "";
+      for (let i = 0; i < questions.length; i++) {
+        let btnClass = "";
+        if (i === currentQ) btnClass = "current";
+        else if (answers[i] !== null) btnClass = "answered";
+        navHtml += `<button type="button" class="${btnClass}" onclick="gotoQuestion(${i})">${i + 1}</button>`;
+      }
+      document.getElementById('cbtQuestionNav').innerHTML = navHtml;
+    }
+
+    function renderQuestion() {
+      document.getElementById('cbtTestTitle').textContent = student.subject + " — " + student.class;
+      document.getElementById('cbtQuestionText').textContent = questions[currentQ].text;
+      let optsHtml = "";
+      questions[currentQ].options.forEach((opt, idx) => {
+        let selected = answers[currentQ] === opt.key ? "selected" : "";
+        optsHtml += `
+          <div class="cbt-option flex flex-col items-center justify-center gap-2 p-6 rounded-xl text-lg font-bold ${selected}"
+            onclick="selectAnswer('${opt.key}')">
+            <span class="text-base font-bold mb-2">(${opt.key})</span>
+            <span>${opt.value}</span>
+          </div>
+        `;
+      });
+      document.getElementById('cbtOptions').innerHTML = optsHtml;
+
+      document.getElementById('cbtPrevBtn').disabled = currentQ === 0;
+      document.getElementById('cbtNextBtn').disabled = currentQ === questions.length - 1;
+      document.getElementById('cbtSubmitBtn').disabled = answers.filter(a => a !== null).length !== questions.length;
+
+      fillStudentSidebar();
+    }
+
+    window.gotoQuestion = function (qIdx) {
+      currentQ = qIdx;
+      renderQuestion();
+    }
+
+    window.selectAnswer = function (key) {
+      answers[currentQ] = key;
+      renderQuestion();
+    }
+
+    document.getElementById('cbtPrevBtn').onclick = function () {
+      if (currentQ > 0) {
+        currentQ--;
+        renderQuestion();
+      }
+    };
+    document.getElementById('cbtNextBtn').onclick = function () {
+      if (currentQ < questions.length - 1) {
+        currentQ++;
+        renderQuestion();
+      }
+    };
+    document.getElementById('cbtSubmitBtn').onclick = function () {
+      if (confirm("Are you sure you want to submit?")) {
+        clearInterval(timerInterval);
+        showResults();
+      }
+    };
+
+    // ---- Timer Logic ----
+    function formatTimer(s) {
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+    function startTimer() {
+      document.getElementById('cbtTimer').textContent = "Time Left: " + formatTimer(timerSeconds);
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        document.getElementById('cbtTimer').textContent = "Time Left: " + formatTimer(timerSeconds);
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          alert("Time is up! Submitting your test.");
+          showResults();
+        }
+      }, 1000);
+    }
+
+    // ---- Result Display ----
+    function showResults() {
+      let correct = 0;
+      let resultHtml = "<h2 class='text-xl font-bold mb-2 text-primary'>Test Submitted</h2>";
+      resultHtml += "<div class='mb-3'>Thank you, <b>" + student.name + "</b>!<br>Here are your results:</div><ul class='mb-3'>";
+      questions.forEach((q, i) => {
+        let isCorrect = answers[i] === q.answer;
+        if (isCorrect) correct++;
+        resultHtml += `<li class="mb-1 text-base">${q.text}<br>
+          <b>Your Ans:</b> ${answers[i] || '<span class="text-red-600">No Answer</span>'} |
+          <b>Correct:</b> ${q.answer} 
+          ${isCorrect ? "<span class='text-green-600 ml-2'>✔️</span>" : "<span class='text-red-600 ml-2'>❌</span>"}
+        </li>`;
+      });
+      resultHtml += "</ul>";
+      resultHtml += `<div class="font-bold text-lg text-primary">Score: ${correct} / ${questions.length}</div>`;
+      document.querySelector('.cbt-content').innerHTML = `<div class="py-8">${resultHtml}</div>`;
+      document.getElementById('cbtTimer').textContent = '';
+      document.getElementById('cbtQuestionNav').innerHTML = '';
+    }
+
+    // ---- Init ----
+    renderQuestion();
+    startTimer();
+  </script>
+</body>
+</html>

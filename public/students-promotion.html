@@ -454,136 +454,190 @@
     sidebarOverlay.addEventListener('click', closeSidebar);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-    // Demo data (to be replaced by API)
-    let students = [];
-    let selectedStudents = new Set();
+  const API_BASE_URL = "https://goldlincschools.onrender.com";
+  let students = [];
+  let selectedStudents = new Set();
 
-    function fillClasses() {
-      // Ideally, fetch from backend
-      const classes = [
-        {id: "js1", name: "JSS 1"}, {id: "js2", name: "JSS 2"}, {id: "js3", name: "JSS 3"},
-        {id: "ss1", name: "SSS 1"}, {id: "ss2", name: "SSS 2"}, {id: "ss3", name: "SSS 3"}
-      ];
-      const sel = document.getElementById('filterClass');
-      sel.innerHTML = '<option value="">All Classes</option>' +
-        classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    }
+  function fillClasses() {
+    fetch(API_BASE_URL + "/api/classes")
+      .then(res => res.json())
+      .then(data => {
+        const sel = document.getElementById('filterClass');
+        sel.innerHTML = '<option value="">All Classes</option>' +
+          (data.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      });
+  }
 
-    function fetchStudents() {
-      // Simulate API call with filters
-      const filterClass = document.getElementById('filterClass').value;
-      const filterSession = document.getElementById('filterSession').value;
-      const filterTerm = document.getElementById('filterTerm').value;
-      const search = document.getElementById('searchName').value.trim().toLowerCase();
-      // Replace with real API call using above filters
-      students = [
-        {id:"1", name:"Janet Okafor", regNo:"STU1001", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Promoted"},
-        {id:"2", name:"Ali Musa", regNo:"STU1002", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Pending"},
-        {id:"3", name:"Blessing Uzo", regNo:"STU1003", class:"JSS 1", session:"2024-2025", term:"FIRST TERM", status:"Graduated"},
-        {id:"4", name:"Chuka Eze", regNo:"STU1004", class:"JSS 2", session:"2024-2025", term:"FIRST TERM", status:"Pending"},
-        {id:"5", name:"Ngozi Ibe", regNo:"STU1005", class:"SSS 2", session:"2024-2025", term:"SECOND TERM", status:"Pending"},
-      ].filter(s =>
-        (!filterClass || s.class.toLowerCase().replace(/\s/g,'') === filterClass) &&
-        (!filterSession || s.session === filterSession) &&
-        (!filterTerm || s.term === filterTerm) &&
-        (!search || s.name.toLowerCase().includes(search) || s.regNo.toLowerCase().includes(search))
-      );
-      renderStudentsTable();
-    }
+  function fetchStudents() {
+    // Build backend query
+    const filterClass = document.getElementById('filterClass').value;
+    const filterSession = document.getElementById('filterSession').value;
+    const filterTerm = document.getElementById('filterTerm').value;
+    const search = document.getElementById('searchName').value.trim();
 
-    function renderStudentsTable() {
-      const tbody = document.getElementById('studentsTableBody');
-      if (!students.length) {
-        tbody.innerHTML = `<tr><td colspan="8">No students found for selected criteria.</td></tr>`;
-        document.getElementById('bulkActionsBar').style.display = "none";
-        return;
-      }
-      tbody.innerHTML = students.map(s => `
-        <tr>
-          <td><input type="checkbox" value="${s.id}" ${selectedStudents.has(s.id) ? "checked" : ""} onchange="toggleStudent('${s.id}')"></td>
-          <td>${s.name}</td>
-          <td>${s.regNo}</td>
-          <td>${s.class}</td>
-          <td>${s.session}</td>
-          <td>${s.term}</td>
-          <td>
-            <span class="badge ${
-              s.status === "Promoted" ? "badge-promoted" :
-              s.status === "Graduated" ? "badge-graduated" :
-              "badge-pending"
-            }">${s.status}</span>
-          </td>
-          <td>
-            <button class="action-btn promote" onclick="promoteStudent('${s.id}')" ${s.status==="Promoted"||s.status==="Graduated"?"disabled":""}>Promote</button>
-            <button class="action-btn graduate" onclick="graduateStudent('${s.id}')" ${s.status==="Graduated"?"disabled":""}>Graduate</button>
-            <button class="action-btn demote" onclick="demoteStudent('${s.id}')">Demote</button>
-          </td>
-        </tr>
-      `).join('');
-      document.getElementById('bulkActionsBar').style.display = selectedStudents.size ? "flex" : "none";
-      document.getElementById('selectedCount').textContent = selectedStudents.size + " selected";
-    }
+    let url = `${API_BASE_URL}/api/students?`;
+    if (filterClass) url += `class=${encodeURIComponent(filterClass)}&`;
+    if (filterSession) url += `academicSession=${encodeURIComponent(filterSession)}&`;
+    if (filterTerm) url += `term=${encodeURIComponent(filterTerm)}&`;
+    if (search) url += `search=${encodeURIComponent(search)}&`; // You may need to handle search in backend
 
-    function toggleStudent(id) {
-      if (selectedStudents.has(id)) selectedStudents.delete(id); else selectedStudents.add(id);
-      renderStudentsTable();
-    }
-
-    function toggleAllStudents(box) {
-      if (box.checked) {
-        students.forEach(s => selectedStudents.add(s.id));
-      } else {
-        students.forEach(s => selectedStudents.delete(s.id));
-      }
-      renderStudentsTable();
-    }
-
-    function promoteStudent(id) {
-      // Replace with API call
-      const s = students.find(x => x.id === id);
-      if (s && s.status !== "Promoted" && s.status !== "Graduated") {
-        s.status = "Promoted";
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        students = (data.students || []).map(s => ({
+          id: s.student_id || s.regNo,
+          name: `${s.firstname} ${s.surname}`,
+          regNo: s.regNo,
+          class: s.class,
+          session: s.academicSession,
+          term: s.term || '', // Add term if available
+          status: s.status || "Pending"
+        }));
         renderStudentsTable();
-        alert(`Student ${s.name} promoted to next class!`);
-      }
+      });
+  }
+
+  function renderStudentsTable() {
+    const tbody = document.getElementById('studentsTableBody');
+    if (!students.length) {
+      tbody.innerHTML = `<tr><td colspan="8">No students found for selected criteria.</td></tr>`;
+      document.getElementById('bulkActionsBar').style.display = "none";
+      return;
     }
-    function graduateStudent(id) {
-      // Replace with API call
+    tbody.innerHTML = students.map(s => `
+      <tr>
+        <td><input type="checkbox" value="${s.id}" ${selectedStudents.has(s.id) ? "checked" : ""} onchange="toggleStudent('${s.id}')"></td>
+        <td>${s.name}</td>
+        <td>${s.regNo}</td>
+        <td>${s.class}</td>
+        <td>${s.session}</td>
+        <td>${s.term}</td>
+        <td>
+          <span class="badge ${
+            s.status === "Promoted" ? "badge-promoted" :
+            s.status === "Graduated" ? "badge-graduated" :
+            "badge-pending"
+          }">${s.status}</span>
+        </td>
+        <td>
+          <button class="action-btn promote" onclick="promoteStudent('${s.id}')" ${s.status==="Promoted"||s.status==="Graduated"?"disabled":""}>Promote</button>
+          <button class="action-btn graduate" onclick="graduateStudent('${s.id}')" ${s.status==="Graduated"?"disabled":""}>Graduate</button>
+          <button class="action-btn demote" onclick="demoteStudent('${s.id}')">Demote</button>
+        </td>
+      </tr>
+    `).join('');
+    document.getElementById('bulkActionsBar').style.display = selectedStudents.size ? "flex" : "none";
+    document.getElementById('selectedCount').textContent = selectedStudents.size + " selected";
+  }
+
+  function toggleStudent(id) {
+    if (selectedStudents.has(id)) selectedStudents.delete(id); else selectedStudents.add(id);
+    renderStudentsTable();
+  }
+
+  function toggleAllStudents(box) {
+    if (box.checked) {
+      students.forEach(s => selectedStudents.add(s.id));
+    } else {
+      students.forEach(s => selectedStudents.delete(s.id));
+    }
+    renderStudentsTable();
+  }
+
+  function promoteStudent(id) {
+    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "promote" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
       const s = students.find(x => x.id === id);
-      if (s && s.status !== "Graduated") {
-        s.status = "Graduated";
-        renderStudentsTable();
-        alert(`Student ${s.name} graduated!`);
-      }
-    }
-    function demoteStudent(id) {
-      // Replace with API call
+      if (s) s.status = "Promoted";
+      renderStudentsTable();
+      alert(resp.message || `Student promoted!`);
+    });
+  }
+
+  function graduateStudent(id) {
+    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "graduate" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
       const s = students.find(x => x.id === id);
-      if (s) {
-        s.status = "Pending";
-        renderStudentsTable();
-        alert(`Student ${s.name} set to pending/demoted.`);
-      }
-    }
-    function bulkPromote() {
-      students.forEach(s => { if (selectedStudents.has(s.id) && s.status !== "Promoted" && s.status !== "Graduated") s.status = "Promoted"; });
+      if (s) s.status = "Graduated";
       renderStudentsTable();
-      alert("Selected students promoted.");
-    }
-    function bulkGraduate() {
-      students.forEach(s => { if (selectedStudents.has(s.id) && s.status !== "Graduated") s.status = "Graduated"; });
+      alert(resp.message || `Student graduated!`);
+    });
+  }
+
+  function demoteStudent(id) {
+    fetch(`${API_BASE_URL}/api/students/${id}/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "demote" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
+      const s = students.find(x => x.id === id);
+      if (s) s.status = "Pending";
       renderStudentsTable();
-      alert("Selected students graduated.");
-    }
-    function bulkDemote() {
+      alert(resp.message || `Student demoted!`);
+    });
+  }
+
+  function bulkPromote() {
+    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "promote" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
+      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Promoted"; });
+      renderStudentsTable();
+      alert(resp.message || "Selected students promoted.");
+    });
+  }
+  function bulkGraduate() {
+    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "graduate" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
+      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Graduated"; });
+      renderStudentsTable();
+      alert(resp.message || "Selected students graduated.");
+    });
+  }
+  function bulkDemote() {
+    fetch(`${API_BASE_URL}/api/students/bulk/promote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "demote" })
+    })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return alert(resp.error);
       students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Pending"; });
       renderStudentsTable();
-      alert("Selected students set to pending/demoted.");
-    }
+      alert(resp.message || "Selected students demoted.");
+    });
+  }
 
-    // Initial fill
-    fillClasses();
-    fetchStudents();
-  </script>
+  // Initial fill
+  fillClasses();
+  fetchStudents();
+</script>    
 </body>
 </html>

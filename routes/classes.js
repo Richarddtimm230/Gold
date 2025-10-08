@@ -4,7 +4,63 @@ const router = express.Router();
 
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
+// ... other code above
 
+// Only keep THIS endpoint for adding subjects to a class as a teacher
+const teacherAuth = require('../middleware/teacherAuth'); // Add this at top if not present
+
+router.post('/:classId/subjects', teacherAuth, async (req, res) => {
+  const { classId } = req.params;
+  const { subjectName } = req.body;
+
+  // Defensive: subjectName required
+  if (!subjectName || !subjectName.trim()) {
+    return res.status(400).json({ error: "Subject name required" });
+  }
+
+  // Find or create subject
+  let subject = await Subject.findOne({ name: subjectName.trim() });
+  if (!subject) {
+    subject = new Subject({ name: subjectName.trim() });
+    await subject.save();
+  }
+  const cls = await Class.findById(classId);
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+
+  // Prevent duplicate subject assignment
+  let justAdded = null;
+  if (!cls.subjects.some(s => String(s.subject) === String(subject._id) && String(s.teacher) === String(req.staff._id))) {
+    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
+    await cls.save();
+    justAdded = { subject: subject._id, teacher: req.staff._id };
+  }
+  // Populate the subject for the response
+  await cls.populate([
+    { path: 'subjects.subject', model: 'Subject' },
+    { path: 'subjects.teacher', model: 'Staff', select: 'first_name last_name email' }
+  ]);
+  // Find the just-added subject-teacher pair
+  const added = cls.subjects.find(s =>
+    String(s.subject._id) === String(subject._id) &&
+    String(s.teacher._id) === String(req.staff._id)
+  );
+  res.json({
+    success: true,
+    subject: added
+      ? {
+          id: added.subject._id,
+          name: added.subject.name,
+          teacher: added.teacher
+            ? {
+                id: added.teacher._id,
+                name: `${added.teacher.first_name} ${added.teacher.last_name}`,
+                email: added.teacher.email
+              }
+            : null
+        }
+      : null
+  });
+});
 // NOTE: No authentication middleware here, so all authenticated users can access
 router.get('/', async (req, res) => {
   try {
@@ -115,49 +171,6 @@ router.post('/non/:id/subjects', async (req, res) => {
   }
 });
 
-router.post('/:classId/subjects', async (req, res) => {
-  const { classId } = req.params;
-  const { subjectName } = req.body;
-  // Find or create subject
-  let subject = await Subject.findOne({ name: subjectName });
-  if (!subject) {
-    subject = new Subject({ name: subjectName });
-    await subject.save();
-  }
-  const cls = await Class.findById(classId);
-  // Prevent duplicate subject assignment
-  let justAdded = null;
-  if (!cls.subjects.some(s => String(s.subject) === String(subject._id) && String(s.teacher) === String(req.staff._id))) {
-    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
-    await cls.save();
-    justAdded = { subject: subject._id, teacher: req.staff._id };
-  }
-  // Populate the subject for the response
-  await cls.populate([
-    { path: 'subjects.subject', model: 'Subject' },
-    { path: 'subjects.teacher', model: 'Staff', select: 'first_name last_name email' }
-  ]);
-  // Find the just-added subject-teacher pair
-  const added = cls.subjects.find(s =>
-    String(s.subject._id) === String(subject._id) &&
-    String(s.teacher._id) === String(req.staff._id)
-  );
-  res.json({
-    success: true,
-    subject: added
-      ? {
-          id: added.subject._id,
-          name: added.subject.name,
-          teacher: added.teacher
-            ? {
-                id: added.teacher._id,
-                name: `${added.teacher.first_name} ${added.teacher.last_name}`,
-                email: added.teacher.email
-              }
-            : null
-        }
-      : null
-  });
-});
+
 
 module.exports = router;

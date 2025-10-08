@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
     subjectName: ex.subject?.name,
     scheduledFor: ex.scheduledFor,
     duration: ex.duration,
-    status: ex.status
+    status: ex.status,
+    questions: ex.questions // <-- ADD THIS LINE!
   })));
 });
 

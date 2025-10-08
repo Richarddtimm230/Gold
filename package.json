@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "School Results Management API",
   "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
-  },
+"scripts": {
+  "start": "node app.js",
+  "dev": "nodemon app.js",
+  "migrate-subjects": "node migrate_subjects_classes.js"
+},
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

@@ -223,7 +223,7 @@ student.class =
 student.avatar = studentJson.photo_url || '';
       student._id = studentJson._id;
 let scheduledRes = await fetch(
-  API_BASE_URL + '/api/exam?status=Scheduled,Started&scheduledFor=student',
+  API_BASE_URL + '/api/exam/student?status=Scheduled,Started&scheduledFor=student',
   { headers: token ? { 'Authorization': 'Bearer ' + token } : {} }
 );
       let scheduled = [];

@@ -110,4 +110,33 @@ router.get('/:id/class-results', teacherAuth, async (req, res) => {
   }
 });
 
+/* --- MISSING ENDPOINTS FOR DASHBOARD --- */
+
+// PATCH /api/teachers/:id/results/:resultId - Update a result (partial update)
+router.patch('/:id/results/:resultId', teacherAuth, async (req, res) => {
+  try {
+    const { id, resultId } = req.params;
+    // Only allow update if teacher owns the result
+    const result = await Result.findOne({ _id: resultId, createdBy: id });
+    if (!result) return res.status(404).json({ error: "Result not found or not owned by teacher." });
+    Object.assign(result, req.body);
+    await result.save();
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/teachers/:id/results/:resultId - Delete a result
+router.delete('/:id/results/:resultId', teacherAuth, async (req, res) => {
+  try {
+    const { id, resultId } = req.params;
+    const result = await Result.findOneAndDelete({ _id: resultId, createdBy: id });
+    if (!result) return res.status(404).json({ error: "Result not found or not owned by teacher." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

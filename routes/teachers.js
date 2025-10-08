@@ -254,4 +254,44 @@ router.post('/classes/:classId/subjects', teacherAuth, async (req, res) => {
       : null
   });
 });
+
+// PATCH /api/teachers/:id/assignments/:assignmentId - Update assignment
+router.patch('/:id/assignments/:assignmentId', teacherAuth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findOneAndUpdate(
+      { _id: req.params.assignmentId, teacher: req.params.id },
+      req.body,
+      { new: true }
+    );
+    if (!assignment) return res.status(404).json({ error: "Assignment not found or not owned by teacher." });
+    res.json({ success: true, assignment });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/teachers/:id/assignments/:assignmentId - Delete assignment
+router.delete('/:id/assignments/:assignmentId', teacherAuth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findOneAndDelete({ _id: req.params.assignmentId, teacher: req.params.id });
+    if (!assignment) return res.status(404).json({ error: "Assignment not found or not owned by teacher." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/teachers/:id/notifications/:notificationId - Delete notification
+router.delete('/:id/notifications/:notificationId', teacherAuth, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({ _id: req.params.notificationId, teacher: req.params.id });
+    if (!notification) return res.status(404).json({ error: "Notification not found or not owned by teacher." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* Note: For student update/delete, those should be in the students.js route file. */
+
 module.exports = router;

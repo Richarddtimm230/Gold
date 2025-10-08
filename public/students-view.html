@@ -279,7 +279,7 @@
     // Fetch students from backend
     async function fetchStudents(filters = {}) {
         showTableSpinner(true);
-        let url = API_BASE_URL + '/api/students';
+        let url = API_BASE_URL + '/api/student';
         const params = Object.keys(filters)
             .filter(key => filters[key])
             .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`)
@@ -451,7 +451,7 @@ window.deleteStudent = async function(studentId) {
     if (!confirm('Are you sure you want to delete this student?')) return;
     showTableSpinner(true);
     try {
-        let res = await fetch(`${API_BASE_URL}/api/students/${studentId}`, {
+        let res = await fetch(`${API_BASE_URL}/api/student/${studentId}`, {
             method: "DELETE"
             // No headers for authentication
         });
@@ -533,7 +533,7 @@ function openEditModal(stu) {
         for (const [k,v] of formData.entries()) editData[k]=v;
         try {
             const studentId = stu.student_id || stu._id || stu.regNo;
-            let res = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(studentId)}`, {
+            let res = await fetch(`${API_BASE_URL}/api/student/${encodeURIComponent(studentId)}`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,12 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const Subject = require('../models/Subject'); // adjust as needed
+const mongoose = require('mongoose');
+const Subject = require('../models/Subject');
+const Class = require('../models/Class'); // Assuming you have a Class model
 
-// Get subjects by class name
-router.get('/class/:className', async (req, res) => {
-  const { className } = req.params;
+// Helper to check for ObjectId
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+// Get subjects by class id or name
+router.get('/class/:classParam', async (req, res) => {
+  const { classParam } = req.params;
+  let classValue = classParam;
   try {
-    const subjects = await Subject.find({ class: className }); // adjust query for your schema
+    // If not valid ObjectId, treat as name
+    if (!isValidObjectId(classParam)) {
+      const classDoc = await Class.findOne({ name: classParam });
+      if (!classDoc) return res.status(404).json({ error: 'Class not found' });
+      classValue = classDoc._id;
+    }
+    // Now find subjects for the class ObjectId
+    const subjects = await Subject.find({ class: classValue });
     res.json(subjects);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Server error.' });

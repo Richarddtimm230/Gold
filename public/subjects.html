@@ -67,8 +67,10 @@
   <script>
     // Backend API
     const API_BASE = "https://goldlincschools.onrender.com/api";
-    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
-
+    const token =
+  localStorage.getItem('student_token') ||
+  localStorage.getItem('studentToken') ||
+  localStorage.getItem('token');
     // Profile fill
     function fillProfile(data) {
       document.getElementById('profileName').textContent = data.name || 'Student Name';

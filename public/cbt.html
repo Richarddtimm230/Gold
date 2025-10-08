@@ -364,9 +364,10 @@ student.avatar = studentJson.photo_url || '';
       document.getElementById('cbtResultArea').innerHTML = '<div class="text-center text-lg text-primary py-14">Submitting your answers...</div>';
 
       const payload = {
-        exam: exam._id,
-        answers
-      };
+  exam: exam._id,
+  answers,
+  student: student._id // Set this value
+};
       let result = null;
       try {
         const res = await fetch(API_BASE_URL + '/api/result', {

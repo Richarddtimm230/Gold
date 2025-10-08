@@ -68,6 +68,7 @@ app.use('/api/results', resultsRoute);
 app.use('/api/classes', authMiddleware, adminAuth, classesRoute);
 
 app.use('/api/student', studentsRoute);
+app.use('/api/students', studentsRoute);
 
 
 

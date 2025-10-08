@@ -21,7 +21,31 @@ router.get('/', async (req, res) => {
     questions: ex.questions // <-- ADD THIS LINE!
   })));
 });
-
+// GET /api/exams - List all exams (with status filter)
+router.get('/student', async (req, res) => {
+  // Allow status filtering via query param (e.g. ?status=Scheduled,Started)
+  let statusFilter = req.query.status;
+  let query = {};
+  if (statusFilter) {
+    // Accept comma-separated or single value
+    let statusArray = statusFilter.split(',').map(s => s.trim());
+    query.status = { $in: statusArray };
+  }
+  const exams = await Exam.find(query)
+    .populate('class', 'name')
+    .populate('subject', 'name')
+    .sort({ createdAt: -1 });
+  res.json(exams.map(ex => ({
+    _id: ex._id,
+    title: ex.title,
+    className: ex.class?.name,
+    subjectName: ex.subject?.name,
+    scheduledFor: ex.scheduledFor,
+    duration: ex.duration,
+    status: ex.status,
+    questions: ex.questions
+  })));
+});
 // GET /api/exams/:id - Get single exam
 router.get('/:id', async (req, res) => {
   const ex = await Exam.findById(req.params.id)

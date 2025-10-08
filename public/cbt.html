@@ -200,7 +200,32 @@
     let currentQ = 0;
     let timerSeconds = 0;
     let timerInterval = null;
+// Helper to send student activity
+async function logStudentActivity(action, extra = {}) {
+  // Prepare payload
+  const payload = {
+    student: student._id,         // Student's MongoDB ID
+    exam: exam._id,               // Exam's MongoDB ID
+    action: action,               // e.g., 'started', 'answered', 'navigated', 'submitted'
+    timestamp: new Date().toISOString()
+                        // Additional info (questionIndex, answer, etc)
+  };
 
+  try {
+    await fetch(API_BASE_URL + '/api/activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+      },
+      body: JSON.stringify(payload)
+    });
+    // Optionally, handle/log success or failure
+  } catch (e) {
+    // Optionally, log errors for debug
+    // console.error('Activity log failed', e);
+  }
+}
     // --- Fetch student info and scheduled exam ---
     async function fetchStudentAndExam() {
       // 1. Fetch student info
@@ -247,6 +272,8 @@ let scheduledRes = await fetch(
       fillStudentSidebar();
       renderQuestion();
       startTimer();
+      // After exam and student objects are set and exam is about to begin
+logStudentActivity('started');
     }
 
     function showNoExam() {
@@ -308,14 +335,16 @@ let scheduledRes = await fetch(
     }
 
     window.gotoQuestion = function (qIdx) {
-      currentQ = qIdx;
-      renderQuestion();
-    }
+  currentQ = qIdx;
+  renderQuestion();
+  logStudentActivity('navigated', { questionIndex: qIdx });
+}
 
     window.selectAnswer = function (idx) {
-      answers[currentQ] = idx;
-      renderQuestion();
-    }
+  answers[currentQ] = idx;
+  renderQuestion();
+  logStudentActivity('answered', { questionIndex: currentQ, answer: idx });
+}
 
     document.getElementById('cbtPrevBtn').onclick = function () {
       if (currentQ > 0) {
@@ -384,6 +413,8 @@ let scheduledRes = await fetch(
           result = await res.json();
         }
       } catch {}
+      logStudentActivity('submitted', { answers });
+  
       showResults(result);
     }
 

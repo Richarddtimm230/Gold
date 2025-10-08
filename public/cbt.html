@@ -369,7 +369,7 @@ student.avatar = studentJson.photo_url || '';
       };
       let result = null;
       try {
-        const res = await fetch(API_BASE_URL + '/api/resultscbt', {
+        const res = await fetch(API_BASE_URL + '/api/result', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

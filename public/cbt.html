@@ -220,6 +220,7 @@ student.class =
     (typeof studentJson.class === 'string' ? studentJson.class : '-');
 
 student.avatar = studentJson.photo_url || '';
+      student._id = studentJson._id;
 
       // 2. Fetch scheduled CBT exam(s) for student
       // Option: by class or personalized

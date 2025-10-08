@@ -402,11 +402,11 @@
 
       // Observe for new editors and patch image upload
       const observer = new MutationObserver(() => { patchAllQuills(); });
-      
-observer.observe(document.body, { childList: true, subtree: true });
+      observer.observe(document.body, { childList: true, subtree: true });
 
-// Initial render
-renderQuestions();
+      // Initial render
+      renderQuestions();
+
 
 // Form submit handler (attach every time the form is (re)rendered!)
 function attachUploadFormHandler() {
@@ -473,8 +473,6 @@ function attachUploadFormHandler() {
     }
   };
 }
-
-// Call this immediately after rendering the upload form
 attachUploadFormHandler();
 
 // If you re-render the form (for example, after adding/removing questions), call attachUploadFormHandler() again.

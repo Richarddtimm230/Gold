@@ -402,67 +402,82 @@
 
       // Observe for new editors and patch image upload
       const observer = new MutationObserver(() => { patchAllQuills(); });
-      observer.observe(document.body, { childList: true, subtree: true });
+      
+observer.observe(document.body, { childList: true, subtree: true });
 
-      // Initial render
-      renderQuestions();
+// Initial render
+renderQuestions();
 
-      // Form submit handler
-      document.getElementById('uploadExamForm').onsubmit = async function(e) {
-        e.preventDefault();
-        // Validate
-        const fd = new FormData(this);
-        const title = fd.get('title');
-        const classId = fd.get('class');
-        const subjectId = fd.get('subject');
-        const duration = Number(fd.get('duration'));
-        if (!title || !classId || !subjectId || !duration) {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">All exam fields are required.</div>`; return;
-        }
-        // Validate questions
-        if (!questions.length) {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Add at least one question.</div>`; return;
-        }
-        for (let [i,q] of questions.entries()) {
-          if (!q.text || !(q.options && q.options.length >= 2)) {
-            document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} must have text and at least 2 options.</div>`; return;
-          }
-          for (let [j,o] of (q.options||[]).entries()) {
-            if (!o.value) {
-              document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} Option ${String.fromCharCode(65+j)} cannot be empty.</div>`; return;
-            }
-          }
-          if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-            document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i+1}.</div>`; return;
-          }
-        }
-        // Prepare payload
-        const payload = {
-          title,
-          class: classId,
-          subject: subjectId,
-          duration,
-          questions: questions.map(q => ({
-            text: q.text,
-            options: q.options.map(o => o.value),
-            answer: q.answer,
-            score: q.score || 1
-          }))
-        };
-        // POST /api/exams
-        const res = await fetch('https://goldlincschools.onrender.com/api/exam', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        }).then(r => r.json());
-        if (res.error) {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">${res.error}</div>`;
-        } else {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-green-600">Exam uploaded successfully.</div>`;
-          setTimeout(showExams, 1200);
+// Form submit handler (attach every time the form is (re)rendered!)
+function attachUploadFormHandler() {
+  const uploadForm = document.getElementById('uploadExamForm');
+  if (!uploadForm) return;
+  uploadForm.onsubmit = async function(e) {
+    e.preventDefault();
+
+    // Validate
+    const fd = new FormData(this);
+    const title = fd.get('title');
+    const classId = fd.get('class');
+    const subjectId = fd.get('subject');
+    const duration = Number(fd.get('duration'));
+    if (!title || !classId || !subjectId || !duration) {
+      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">All exam fields are required.</div>`; return;
+    }
+    // Validate questions
+    if (!questions.length) {
+      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Add at least one question.</div>`; return;
+    }
+    for (let [i,q] of questions.entries()) {
+      if (!q.text || !(q.options && q.options.length >= 2)) {
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} must have text and at least 2 options.</div>`; return;
+      }
+      for (let [j,o] of (q.options||[]).entries()) {
+        if (!o.value) {
+          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} Option ${String.fromCharCode(65+j)} cannot be empty.</div>`; return;
         }
       }
+      if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i+1}.</div>`; return;
+      }
     }
+    // Prepare payload
+    const payload = {
+      title,
+      class: classId,
+      subject: subjectId,
+      duration,
+      questions: questions.map(q => ({
+        text: q.text,
+        options: q.options.map(o => o.value),
+        answer: q.answer,
+        score: q.score || 1
+      }))
+    };
+    // POST /api/exam
+    try {
+      const res = await fetch('https://goldlincschools.onrender.com/api/exam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.error) {
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">${data.error}</div>`;
+      } else {
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-green-600">Exam uploaded successfully.</div>`;
+        setTimeout(showExams, 1200);
+      }
+    } catch (err) {
+      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Network or server error.</div>`;
+    }
+  };
+}
+
+// Call this immediately after rendering the upload form
+attachUploadFormHandler();
+
+// If you re-render the form (for example, after adding/removing questions), call attachUploadFormHandler() again.
 
     // 3. Schedule Exam
     async function showScheduleExam() {

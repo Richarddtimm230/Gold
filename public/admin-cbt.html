@@ -175,7 +175,7 @@
     }
     async function loadExamsTable() {
       // Assumed GET /api/exams
-      const exams = await fetch('/api/exams').then(r => r.json()).catch(() => []);
+      const exams = await fetch('https://goldlincschools.onrender.com/api/exam').then(r => r.json()).catch(() => []);
       const table = document.getElementById('examsTable');
       if (!Array.isArray(exams) || exams.length === 0) {
         table.innerHTML = `<div class="text-center text-gray-500 mt-12">No exams found.</div>`; return;
@@ -216,7 +216,7 @@
     // 2. Upload Exam (NEW, with Quill)
     async function showUploadExam() {
       // Fetch class/subject lists
-      const classes = await fetch('/api/classes').then(r => r.json()).then(r => r.classes || []).catch(() => []);
+      const classes = await fetch('https://goldlincschools.onrender.com/api/classes').then(r => r.json()).then(r => r.classes || []).catch(() => []);
       const subjects = await fetch('/api/subjects').then(r => r.json()).catch(() => []);
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Upload New Exam</h2>
@@ -378,7 +378,7 @@
           const formData = new FormData();
           formData.append('image', file);
           // POST to backend image upload endpoint (should upload to Cloudinary and return image URL)
-          const res = await fetch('/api/upload/image', { method: 'POST', body: formData });
+          const res = await fetch('https://goldlincschools.onrender.com/api/upload/image', { method: 'POST', body: formData });
           const data = await res.json();
           if(data.url){
             const range = quill.getSelection();
@@ -450,7 +450,7 @@
           }))
         };
         // POST /api/exams
-        const res = await fetch('/api/exams', {
+        const res = await fetch('https://goldlincschools.onrender.com/api/exam', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -466,7 +466,7 @@
 
     // 3. Schedule Exam
     async function showScheduleExam() {
-      const exams = await fetch('/api/exams').then(r => r.json()).catch(() => []);
+      const exams = await fetch('https://goldlincschools.onrender.com/api/exam').then(r => r.json()).catch(() => []);
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Schedule Exam</h2>
         <form id="scheduleExamForm" class="space-y-4 max-w-xl">
@@ -490,7 +490,7 @@
         const fd = new FormData(this);
         const data = { scheduledFor: fd.get('scheduledFor') };
         // PATCH /api/exams/:id/schedule
-        const res = await fetch(`/api/exams/${fd.get('examId')}/schedule`, {
+        const res = await fetch(`https://goldlincschools.onrender.com/api/exam/${fd.get('examId')}/schedule`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -593,7 +593,7 @@
     // --- ACTIONS ---
     window.viewExam = async function(id) {
       // GET /api/exams/:id
-      const ex = await fetch(`/api/exams/${id}`).then(r=>r.json());
+      const ex = await fetch(`https://goldlincschools.onrender.com/api/exam/${id}`).then(r=>r.json());
       if(ex.error){alert(ex.error); return;}
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Exam Detail</h2>
@@ -620,7 +620,7 @@
     }
     window.editExam = async function(id) {
       // GET /api/exams/:id
-      const ex = await fetch(`/api/exams/${id}`).then(r=>r.json());
+      const ex = await fetch(`https://goldlincschools.onrender.com/api/exam/${id}`).then(r=>r.json());
       if(ex.error){alert(ex.error); return;}
       // For brevity, only allow editing questions array as in upload
       // You may want to refactor for production to prefill the upload form with editing mode
@@ -630,18 +630,18 @@
     window.deleteExam = async function(id) {
       if (!confirm('Delete this exam?')) return;
       // DELETE /api/exams/:id
-      const res = await fetch(`/api/exams/${id}`,{method:'DELETE'}).then(r=>r.json());
+      const res = await fetch(`https://goldlincschools.onrender.com/api/exam/${id}`,{method:'DELETE'}).then(r=>r.json());
       if(res.error){alert(res.error);} else {showExams();}
     }
     window.stopExam = async function(id) {
       if (!confirm('Stop this exam for all students?')) return;
       // POST /api/exams/:id/stop
-      await fetch(`/api/exams/${id}/stop`,{method:'POST'});
+      await fetch(`https://goldlincschools.onrender.com/api/exam/${id}/stop`,{method:'POST'});
       showExams();
     }
     window.viewResult = async function(id) {
       // GET /api/results/:id
-      const r = await fetch(`/api/results/${id}`).then(r=>r.json());
+      const r = await fetch(`https://goldlincschools.onrender.com/api/resultscbt/${id}`).then(r=>r.json());
       if(r.error){alert(r.error); return;}
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Result Detail</h2>
@@ -658,7 +658,7 @@
     }
     window.viewActivity = async function(id) {
       // GET /api/activity/:id
-      const a = await fetch(`/api/activity/${id}`).then(r=>r.json());
+      const a = await fetch(`https://goldlincschools.onrender.com/api/activity/${id}`).then(r=>r.json());
       if(a.error){alert(a.error); return;}
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Student Activity Detail</h2>
@@ -676,7 +676,7 @@
     // 6. Logout
     function logout() {
       // POST /api/logout
-      fetch('/api/logout',{method:'POST'}).finally(()=>location.href='/login');
+      fetch('https://goldlincschools.onrender.com/api/logout',{method:'POST'}).finally(()=>location.href='/login.html');
     }
 
     // --- INITIALIZE DEFAULT PAGE ---

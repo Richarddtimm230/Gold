@@ -78,7 +78,7 @@ router.post('/:id/arms', async (req, res) => {
 });
 
 // POST /api/classes/:id/subjects - Add/replace subjects
-router.post('/:id/subjects', async (req, res) => {
+router.post('/non/:id/subjects', async (req, res) => {
   try {
     const { subjects } = req.body;
     if (!Array.isArray(subjects)) return res.status(400).json({ error: 'Subjects array required' });
@@ -115,7 +115,7 @@ router.post('/:id/subjects', async (req, res) => {
   }
 });
 
-router.post('/:classId/subjects', teacherAuth, async (req, res) => {
+router.post('/:classId/subjects', async (req, res) => {
   const { classId } = req.params;
   const { subjectName } = req.body;
   // Find or create subject

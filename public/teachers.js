@@ -264,7 +264,7 @@ if (addSubjectForm) {
       const res = await fetch(`${API_BASE_URL}/api/classes/${selectedClassId}/subjects`, {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ subjects: [subjectName] })
+        body: JSON.stringify({ subjectName })
       });
       if (!res.ok) throw new Error();
       // Always refetch to update UI with latest format

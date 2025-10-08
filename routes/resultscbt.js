@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Result = require('../models/ResultCBT');
-const Exam = require('../models/Exam');
+const Exam = require('../models/CBTExam');
 const Student = require('../models/Student');
 
 // GET /api/results - List all results

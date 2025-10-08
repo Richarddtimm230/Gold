@@ -24,7 +24,33 @@ router.get('/', async (req, res) => {
     finishedAt: r.finishedAt
   })));
 });
+// POST /api/result - Save a new CBT result
+router.post('/', async (req, res) => {
+  try {
+    const { exam, answers, score, startedAt, finishedAt } = req.body;
+    // You'll need to get the student ID from auth/session if required
+    const studentId = req.user ? req.user._id : req.body.student; // Adjust as needed
 
+    if (!exam || !answers || !studentId) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    // Calculate score, total, etc. here if you want, or trust frontend
+    const result = new Result({
+      student: studentId,
+      exam,
+      answers,
+      score,
+      startedAt,
+      finishedAt
+    });
+
+    await result.save();
+    res.status(201).json({ success: true, resultId: result._id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // GET /api/results/:id - Get single result
 router.get('/:id', async (req, res) => {
   const r = await Result.findById(req.params.id)

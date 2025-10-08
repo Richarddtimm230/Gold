@@ -9,19 +9,29 @@ const adminAuth = require('../middleware/adminAuth'); // if you have
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const mongoose = require('mongoose');
+const Class = require('../models/Class'); // Assuming you have Class model
+
 // --- Get assignments for logged-in student ---
 router.get('/me', studentAuth, async (req, res) => {
   try {
     const studentId = req.student._id;
-    // Find assignments for this student or their class
     const student = await Student.findById(studentId);
+
+    let classValue = student.class;
+    // If not ObjectId, treat as name
+    if (!mongoose.Types.ObjectId.isValid(student.class)) {
+      const classDoc = await Class.findOne({ name: student.class });
+      if (!classDoc) return res.status(404).json({ error: 'Class not found for assignments' });
+      classValue = classDoc._id;
+    }
+
     const assignments = await Assignment.find({
       $or: [
         { assignedTo: studentId },
-        { class: student.class }
+        { class: classValue }
       ]
     }).populate('subject');
-    // Also get submission info for each assignment
     const submissions = await AssignmentSubmission.find({ student: studentId });
     const assignmentData = assignments.map(ass => {
       const submission = submissions.find(sub => sub.assignment.toString() === ass._id.toString());

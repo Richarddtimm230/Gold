@@ -159,8 +159,8 @@ router.post('/:id/assignments', teacherAuth, async (req, res) => {
       dueDate
     });
     await assignment.save();
-    // Optionally, populate class before returning
-    await assignment.populate({ path: 'class', select: 'name' });
+// When creating/fetching assignments
+await assignment.populate({ path: 'class', select: 'name' });
     res.status(201).json({ assignment });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -274,6 +274,10 @@
       padding: 38px 34px 22px 34px;
       min-width: 349px;
       max-width: 98vw;
+        height: 90vh;
+        overflow-y: auto;
+        top: 5px;
+        bottom: 5px;
       box-sizing: border-box;
       box-shadow: 0 2px 32px rgba(0,0,0,0.12);
       position: relative;

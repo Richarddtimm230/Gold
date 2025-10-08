@@ -492,7 +492,7 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/api/students?class=${encodeURIComponent(className)}`);
                 const data = await res.json();
-                const students = data.students || [];
+const students = Array.isArray(data) ? data : (data.students || []);
                 if (!Array.isArray(students) || students.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No students found for this class.</td></tr>';
                     return;

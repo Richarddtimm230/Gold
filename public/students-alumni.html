@@ -469,50 +469,58 @@
       if (e.target === this) closeAlumniModal();
     });
 
-    // Fetch alumni from backend
-    async function fetchAlumni() {
-      const token = localStorage.getItem('token');
-      const search = document.getElementById('searchName').value.trim();
-      const year = document.getElementById('filterYear').value;
+// Fetch only graduated students (alumni) from backend
+async function fetchAlumni() {
+  const token = localStorage.getItem('token');
+  const search = document.getElementById('searchName').value.trim();
+  const year = document.getElementById('filterYear').value;
 
-      let url = 'https://goldlincschools.onrender.com/api/alumni';
-      let params = [];
-      if (search) params.push('search=' + encodeURIComponent(search));
-      if (year) params.push('year=' + encodeURIComponent(year));
-      if (params.length) url += '?' + params.join('&');
+  let url = 'https://goldlincschools.onrender.com/api/students/alumni';
+  let params = [];
+  if (search) params.push('search=' + encodeURIComponent(search));
+  if (year) params.push('graduationYear=' + encodeURIComponent(year));
+  if (params.length) url += '?' + params.join('&');
 
-      const grid = document.getElementById('alumniGrid');
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#888;">Loading...</div>`;
-      try {
-        const res = await fetch(url, {headers: { 'Authorization': 'Bearer ' + token }});
-        if (!res.ok) throw new Error('Unable to fetch alumni');
-        const data = await res.json();
-        if (!Array.isArray(data) || !data.length) {
-          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ccc;">No alumni found.</div>`;
-          return;
-        }
-        // Fill available years
-        fillYears(data);
-
-        grid.innerHTML = data.map(alumni => `
-          <div class="alumni-card" tabindex="0" onclick="openAlumniModal(${encodeURIComponent(JSON.stringify(alumni))})" onkeydown="if(event.key==='Enter'||event.key===' '){openAlumniModal(${encodeURIComponent(JSON.stringify(alumni))})}">
-            <img class="alumni-avatar" src="${alumni.photo_url || 'https://ui-avatars.com/api/?name='+encodeURIComponent(alumni.name)+'&background=007bff&color=fff'}" alt="${alumni.name}">
-            <div class="alumni-name">${alumni.name}</div>
-            <div class="alumni-class">${alumni.class || ''}</div>
-            <div class="alumni-year"><i class="fa fa-calendar"></i> ${alumni.year || ''}</div>
-            <div class="alumni-achievement"><i class="fa fa-trophy"></i> ${alumni.achievement || ''}</div>
-            <div class="alumni-remark">${alumni.remark || ''}</div>
-          </div>
-        `).join('');
-        // Fix card click for modal (pass object, not string)
-        Array.from(document.querySelectorAll('.alumni-card')).forEach((card, idx) => {
-          card.onclick = () => openAlumniModal(data[idx]);
-          card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openAlumniModal(data[idx]); };
-        });
-      } catch (e) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load alumni.</div>`;
-      }
+  const grid = document.getElementById('alumniGrid');
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#888;">Loading...</div>`;
+  try {
+    const res = await fetch(url, {headers: { 'Authorization': 'Bearer ' + token }});
+    if (!res.ok) throw new Error('Unable to fetch alumni');
+    const data = await res.json();
+    const alumniList = Array.isArray(data.students) ? data.students : [];
+    if (!alumniList.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ccc;">No alumni found.</div>`;
+      return;
     }
+    fillYears(alumniList);
+
+    grid.innerHTML = alumniList.map(alumni => `
+      <div class="alumni-card" tabindex="0">
+        <img class="alumni-avatar" src="${alumni.photoBase64 || alumni.photo_url || 'https://ui-avatars.com/api/?name='+encodeURIComponent(alumni.firstname + ' ' + alumni.surname)+'&background=007bff&color=fff'}" alt="${alumni.firstname} ${alumni.surname}">
+        <div class="alumni-name">${alumni.firstname} ${alumni.surname}</div>
+        <div class="alumni-class">${alumni.class || ''}</div>
+        <div class="alumni-year"><i class="fa fa-calendar"></i> ${alumni.graduationYear || alumni.academicSession || ''}</div>
+        <div class="alumni-achievement"><i class="fa fa-trophy"></i> ${alumni.achievement || ''}</div>
+        <div class="alumni-remark">${alumni.remark || ''}</div>
+      </div>
+    `).join('');
+    Array.from(document.querySelectorAll('.alumni-card')).forEach((card, idx) => {
+      card.onclick = () => openAlumniModal({
+        name: alumniList[idx].firstname + ' ' + alumniList[idx].surname,
+        regNo: alumniList[idx].regNo,
+        year: alumniList[idx].graduationYear || alumniList[idx].academicSession || "",
+        class: alumniList[idx].class,
+        achievement: alumniList[idx].achievement,
+        report: alumniList[idx].report,
+        remark: alumniList[idx].remark,
+        photo_url: alumniList[idx].photoBase64 || alumniList[idx].photo_url
+      });
+      card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') card.onclick(); };
+    });
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#e74c3c;">Failed to load alumni.</div>`;
+  }
+}
     // Fill graduation years for filter
     function fillYears(alumniList) {
       const yearSel = document.getElementById('filterYear');

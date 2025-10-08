@@ -4,17 +4,10 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 
-// Configure Cloudinary using environment variables (API key, secret, cloud name)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// No need to call cloudinary.config() if CLOUDINARY_URL is set
 
-// Set up multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// POST /api/upload/image
 router.post('/image', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file' });

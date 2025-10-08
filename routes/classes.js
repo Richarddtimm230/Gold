@@ -26,14 +26,17 @@ router.post('/:classId/subjects', teacherAuth, async (req, res) => {
   }
   const cls = await Class.findById(classId);
   if (!cls) return res.status(404).json({ error: "Class not found" });
+let justAdded = null;
+if (!cls.subjects.some(s => 
+  s.subject && 
+  String(s.subject._id) === String(subject._id) &&
+  String(s.teacher) === String(req.staff._id)
+)) {
+  cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
+  await cls.save();
+  justAdded = { subject: subject._id, teacher: req.staff._id };
+}
 
-  // Prevent duplicate subject assignment
-  let justAdded = null;
-  if (!cls.subjects.some(s => String(s.subject) === String(subject._id) && String(s.teacher) === String(req.staff._id))) {
-    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
-    await cls.save();
-    justAdded = { subject: subject._id, teacher: req.staff._id };
-  }
   // Populate the subject for the response
   await cls.populate([
     { path: 'subjects.subject', model: 'Subject' },
@@ -41,9 +44,10 @@ router.post('/:classId/subjects', teacherAuth, async (req, res) => {
   ]);
   // Find the just-added subject-teacher pair
   const added = cls.subjects.find(s =>
-    String(s.subject._id) === String(subject._id) &&
-    String(s.teacher._id) === String(req.staff._id)
-  );
+  s.subject && 
+  String(s.subject._id) === String(subject._id) &&
+  String(s.teacher._id) === String(req.staff._id)
+);
   res.json({
     success: true,
     subject: added

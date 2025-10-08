@@ -188,6 +188,108 @@ router.get('/me/hostel', studentAuthMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message || 'Server error.' });
   }
 });
+
+// PATCH /api/students/:studentId/promote
+router.patch('/:studentId/promote', async (req, res) => {
+  try {
+    const { action } = req.body; // 'promote', 'demote', 'graduate'
+    const studentId = req.params.studentId;
+    let student = await Student.findOne({ student_id: studentId }) || await Student.findOne({ regNo: studentId });
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
+    // Classes order - update this list as per your school's structure
+    const classesOrder = ["Creche", "Nursery 1", "Nursery 2", "Nursery 3", "Primary 1", "Primary 2","Primary 3", "Primary 4", "Primary 5", "JSS1", "JSS2", "JSS3", "SSS1", "SSS2", "SSS3"];
+    let newStatus;
+
+    if (action === 'promote') {
+      // Find current class index
+      let idx = classesOrder.indexOf(student.class);
+      if (idx >= 0 && idx < classesOrder.length - 1) {
+        student.class = classesOrder[idx + 1]; // Move to next class
+        newStatus = 'Promoted';
+      } else if (idx === classesOrder.length - 1) {
+        // Last class, promote means graduate
+        newStatus = 'Graduated';
+      } else {
+        return res.status(400).json({ error: 'Cannot promote: class not recognized.' });
+      }
+    } else if (action === 'demote') {
+      let idx = classesOrder.indexOf(student.class);
+      if (idx > 0) {
+        student.class = classesOrder[idx - 1]; // Move to previous class
+        newStatus = 'Pending';
+      } else if (idx === 0) {
+        // Already at lowest, can't demote further
+        newStatus = 'Pending';
+      } else {
+        return res.status(400).json({ error: 'Cannot demote: class not recognized.' });
+      }
+    } else if (action === 'graduate') {
+      newStatus = 'Graduated';
+      // Optionally set class to null or a graduated value
+      student.class = "Graduated";
+    } else {
+      return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    student.status = newStatus;
+    await student.save();
+    res.json({ message: `Student ${action}d successfully!`, status: newStatus, class: student.class });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Optionally for bulk actions
+router.patch('/bulk/promote', async (req, res) => {
+  try {
+    const { studentIds, action } = req.body; // array of ids, action
+    if (!Array.isArray(studentIds) || !action) return res.status(400).json({ error: 'studentIds and action required' });
+
+    // Classes order - update this list as per your school's structure
+    const classesOrder = ["JSS 1", "JSS 2", "JSS 3", "SSS 1", "SSS 2", "SSS 3"];
+    let newStatus;
+
+    let bulkUpdates = [];
+    for (const studentId of studentIds) {
+      let student = await Student.findOne({ student_id: studentId }) || await Student.findOne({ regNo: studentId });
+      if (!student) continue;
+      if (action === 'promote') {
+        let idx = classesOrder.indexOf(student.class);
+        if (idx >= 0 && idx < classesOrder.length - 1) {
+          student.class = classesOrder[idx + 1];
+          newStatus = 'Promoted';
+        } else if (idx === classesOrder.length - 1) {
+          newStatus = 'Graduated';
+        } else {
+          continue;
+        }
+      } else if (action === 'demote') {
+        let idx = classesOrder.indexOf(student.class);
+        if (idx > 0) {
+          student.class = classesOrder[idx - 1];
+          newStatus = 'Pending';
+        } else if (idx === 0) {
+          newStatus = 'Pending';
+        } else {
+          continue;
+        }
+      } else if (action === 'graduate') {
+        newStatus = 'Graduated';
+        student.class = "Graduated";
+      } else {
+        continue;
+      }
+      student.status = newStatus;
+      await student.save();
+      bulkUpdates.push(student.student_id);
+    }
+
+    res.json({ message: `Bulk ${action} completed!`, updatedCount: bulkUpdates.length, updated: bulkUpdates });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // --- Get students (with filtering, pagination) ---
 router.get('/', async (req, res) => {
   try {

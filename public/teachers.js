@@ -542,7 +542,7 @@ document.getElementById('resultForm').onsubmit = async function (e) {
   let attendancePercent = Number(fd.get('attendance_percent'));
 
   // --- Term/session values: get from your UI (dropdown/select), or hardcode for now
-  const term = "First Term"; // Or get from a select/dropdown
+  const term = "FIRST TERM"; // Or get from a select/dropdown
   const session = "2024–2025"; // Or get from a select/dropdown
 
   // --- Compose payload for backend ---

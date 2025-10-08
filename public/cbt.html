@@ -222,12 +222,10 @@ student.class =
 
 student.avatar = studentJson.photo_url || '';
       student._id = studentJson._id;
-
-      // 2. Fetch scheduled CBT exam(s) for student
-      // Option: by class or personalized
-      let scheduledRes = await fetch(API_BASE_URL + '/api/exam?scheduledFor=student', {
-        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-      });
+let scheduledRes = await fetch(
+  API_BASE_URL + '/api/exam?status=Scheduled,Started&scheduledFor=student',
+  { headers: token ? { 'Authorization': 'Bearer ' + token } : {} }
+);
       let scheduled = [];
       if (scheduledRes.ok) {
         scheduled = await scheduledRes.json();

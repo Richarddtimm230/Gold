@@ -99,15 +99,16 @@ async function fetchAssignments() {
   } catch { return []; }
 }
 
-async function fetchDraftResults() {
+async function fetchTeacherResults(status = "") {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/draft-results`, { headers: authHeaders() });
+    let url = `${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results`;
+    if (status) url += `?status=${encodeURIComponent(status)}`;
+    const res = await fetch(url, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data.draftResults) ? data.draftResults : [];
+    return Array.isArray(data.results) ? data.results : [];
   } catch { return []; }
 }
-
 // --- UI LOGIC ---
 const sidebarBtns = document.querySelectorAll('.sidebar nav button');
 const sections = {
@@ -514,86 +515,113 @@ document.getElementById('resultForm').onsubmit = async function (e) {
   e.preventDefault();
   const fd = new FormData(e.target);
   const subjects = subjectsByClass[currentResultClassId] || [];
-  let resultData = {};
+  // --- Build subjects array for backend ---
+  let subjectsPayload = [];
   subjects.forEach(subj => {
-    resultData[subj.id] = {
+    subjectsPayload.push({
+      subject: subj.id,
       ca: Number(fd.get(`ca_${subj.id}`)),
       mid: Number(fd.get(`mid_${subj.id}`)),
       exam: Number(fd.get(`exam_${subj.id}`)),
       comment: fd.get(`comment_${subj.id}`) || ''
-    };
+    });
   });
+
+  // --- Skills ---
   let affectiveRatings = {};
   ['Punctuality', 'Attentiveness', 'Neatness', 'Honesty', 'Politeness', 'Perseverance', 'Relationship with Others', 'Organization Ability']
     .forEach(skill => affectiveRatings[skill] = Number(fd.get(`affective_${skill.toLowerCase().replace(/ /g, '_')}`)));
   let psychomotorRatings = {};
   ['Hand Writing', 'Drawing and Painting', 'Speech / Verbal Fluency', 'Quantitative Reasoning', 'Processing Speed', 'Retentiveness', 'Visual Memory', 'Public Speaking', 'Sports and Games']
     .forEach(skill => psychomotorRatings[skill] = Number(fd.get(`psychomotor_${skill.toLowerCase().replace(/ |\//g, '_')}`)));
+
+  // --- Attendance ---
   let attendanceTotal = Number(fd.get('attendance_total'));
   let attendancePresent = Number(fd.get('attendance_present'));
   let attendanceAbsent = Number(fd.get('attendance_absent'));
   let attendancePercent = Number(fd.get('attendance_percent'));
-  let draft = draftResults.find(r => r.studentId === currentResultStudentId && r.classId === currentResultClassId);
-  if (!draft) {
-    draft = {
-      studentId: currentResultStudentId,
-      classId: currentResultClassId,
-      term: 'First Term',
-      status: 'Draft',
-      updated: (new Date()).toISOString().slice(0, 16).replace('T', ' '),
-      data: {}
-    };
-    draftResults.push(draft);
-  }
-  draft.data = resultData;
-  draft.affectiveRatings = affectiveRatings;
-  draft.psychomotorRatings = psychomotorRatings;
-  draft.attendanceTotal = attendanceTotal;
-  draft.attendancePresent = attendancePresent;
-  draft.attendanceAbsent = attendanceAbsent;
-  draft.attendancePercent = attendancePercent;
-  draft.updated = (new Date()).toISOString().slice(0, 16).replace('T', ' ');
 
-  // POST to backend
+  // --- Term/session values: get from your UI (dropdown/select), or hardcode for now
+  const term = "First Term"; // Or get from a select/dropdown
+  const session = "2024–2025"; // Or get from a select/dropdown
+
+  // --- Compose payload for backend ---
+  const payload = {
+    student: currentResultStudentId,
+    class: currentResultClassId,
+    term,
+    session,
+    subjects: subjectsPayload,
+    affectiveRatings,
+    psychomotorRatings,
+    attendanceTotal,
+    attendancePresent,
+    attendanceAbsent,
+    attendancePercent,
+    status: "Draft" // Or "Published"
+  };
+
+  // --- POST to new backend endpoint ---
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/draft-results`, {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify(draft)
+      body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error();
-    alert('Draft result saved!');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to save results");
+    alert('Results saved!');
     closeResultModal();
-    renderDraftResults();
-  } catch {
-    alert('Failed to save draft result.');
+    teacherResults = await fetchTeacherAllResults();
+    renderTeacherResults(); // You may want to fetch published results instead!
+  } catch (err) {
+    alert('Failed to save results: ' + err.message);
   }
 };
-window.openResultModal = openResultModal;
-window.closeResultModal = closeResultModal;
-
-// --- Draft Results ---
-function renderDraftResults() {
+async function fetchTeacherAllResults() {
+  try {
+    // Fetch drafts and published in parallel
+    const [draftRes, publishedRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Draft`, { headers: authHeaders() }),
+      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Published`, { headers: authHeaders() })
+    ]);
+    let draftResults = [];
+    let publishedResults = [];
+    if (draftRes.ok) {
+      const drData = await draftRes.json();
+      draftResults = Array.isArray(drData.results) ? drData.results : [];
+    }
+    if (publishedRes.ok) {
+      const prData = await publishedRes.json();
+      publishedResults = Array.isArray(prData.results) ? prData.results : [];
+    }
+    // Combine both arrays (optionally sort by updatedAt descending)
+    return [...draftResults, ...publishedResults].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  } catch {
+    return [];
+  }
+}
+function renderTeacherResults() {
   const tbody = document.querySelector('#draft-results-table tbody');
   tbody.innerHTML = '';
-  draftResults.forEach(dr => {
-    const stu = Object.values(studentsByClass).flat().find(s => s.id === dr.studentId) || {};
-    const cls = teacher.classes.find(c => c.id === dr.classId) || {};
+  teacherResults.forEach(dr => {
+    const stu = dr.student || {};
+    const cls = dr.class || {};
+    let statusColor = dr.status === "Published" ? "var(--accent)" : "var(--warning)";
     let tr = document.createElement('tr');
-    tr.innerHTML = `<td data-label="Student">${stu.name || '[Unknown]'}</td>
-      <td data-label="Class">${cls.name || dr.classId}</td>
-      <td data-label="Term">${dr.term}</td>
-      <td data-label="Status">${dr.status}</td>
-      <td data-label="Last Updated">${dr.updated}</td>
+    tr.innerHTML = `<td data-label="Student">${stu.name || stu.firstname || '[Unknown]'}</td>
+      <td data-label="Class">${cls.name || '[Unknown]'}</td>
+      <td data-label="Term">${dr.term || ''}</td>
+      <td data-label="Status" style="color:${statusColor};font-weight:bold">${dr.status || ''}</td>
+      <td data-label="Last Updated">${dr.updatedAt ? new Date(dr.updatedAt).toLocaleString() : ''}</td>
       <td data-label="Actions">
-        <button class="btn" onclick="openResultModal('${dr.studentId}','${dr.classId}')">Edit</button>
+        <button class="btn" onclick="openResultModal('${stu._id}','${cls._id}')">Edit</button>
         <button class="btn danger" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
-}
-
+            }
 // --- Notifications ---
 function renderNotifications() {
   const list = document.getElementById('notification-list');

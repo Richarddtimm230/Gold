@@ -37,5 +37,27 @@ router.get('/:id', async (req, res) => {
     activityLog: a.activityLog
   });
 });
+// POST /api/activity - Log a new student activity
+router.post('/', async (req, res) => {
+  try {
+    const { student, exam, action, timestamp, ...rest } = req.body;
+    if (!student || !exam || !action) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
 
+    // Create a new activity document. You can customize fields as your model allows.
+    const activity = new Activity({
+      student,
+      exam,
+      action,
+      timestamp: timestamp ? new Date(timestamp) : new Date(),
+      ...rest
+    });
+
+    await activity.save();
+    res.status(201).json({ success: true, activityId: activity._id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;

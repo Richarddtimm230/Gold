@@ -19,7 +19,7 @@ const resultSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
   session: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', required: true },
   term: { type: mongoose.Schema.Types.ObjectId, ref: 'Term', required: true },
-  class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true },
+  class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class'},
   subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
   ca1_score: { type: Number, default: 0 },
   ca2_score: { type: Number, default: 0 },

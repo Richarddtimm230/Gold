@@ -367,7 +367,43 @@ router.get('/me', studentAuthMiddleware, async (req, res) => {
     photo_url: student.photoBase64 || ''
   });
 });
+// GET /api/alumni - Get only graduated students
+router.get('/alumni', async (req, res) => {
+  try {
+    const { search, graduationYear } = req.query;
+    let query = { status: "Graduated" };
+    if (search) {
+      query.$or = [
+        { surname: { $regex: search, $options: "i" } },
+        { firstname: { $regex: search, $options: "i" } },
+        { regNo: { $regex: search, $options: "i" } }
+      ];
+    }
+    if (graduationYear) query.academicSession = graduationYear;
 
+    const students = await Student.find(query).sort({ academicSession: -1, surname: 1 });
+    res.json({
+      students: students.map(d => ({
+        student_id: d.student_id,
+        regNo: d.regNo,
+        surname: d.surname,
+        firstname: d.firstname,
+        othernames: d.othernames || '',
+        class: d.class,
+        academicSession: d.academicSession,
+        graduationYear: d.academicSession,
+        achievement: d.achievement || '',
+        remark: d.remark || '',
+        report: d.report || '',
+        photoBase64: d.photoBase64 || '',
+        photo_url: d.photoBase64 || '',
+        status: d.status
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // --- Get a student profile by regNo (admin only) ---
 router.get('/:regNo', adminAuth, async (req, res) => {
   try {

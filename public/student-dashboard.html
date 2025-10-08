@@ -719,8 +719,10 @@
 
   // Fill dashboard from API as before
   async function fetchStudentDashboard() {
-    const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
-    // DEMO fallback data:
+    const token =
+  localStorage.getItem('student_token') ||
+  localStorage.getItem('studentToken') ||
+  localStorage.getItem('token');
     const defaultData = {
       name: "Janet Okafor",
       photo_url: "",

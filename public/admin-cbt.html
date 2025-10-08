@@ -451,11 +451,12 @@ function attachUploadFormHandler() {
       subject: subjectId,
       duration,
       questions: questions.map(q => ({
-        text: q.text,
-        options: q.options.map(o => o.value),
-        answer: q.answer,
-        score: q.score || 1
-      }))
+  text: q.text,
+  options: q.options, // send array of objects, not just strings!
+  answer: q.answer,
+  score: q.score || 1
+}))
+    
     };
     // POST /api/exam
     try {

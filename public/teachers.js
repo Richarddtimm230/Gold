@@ -368,7 +368,15 @@ function renderGradebookTable() {
   html += `</tbody></table>`;
   document.getElementById('gradebook-table').innerHTML = html;
 }
+
+// ...previous code...
+
 // --- Assignments ---
+
+// Defensive rendering for class name
+
+
+
 function renderAssignments() {
   const assignmentClassSel = document.getElementById('assignment-class');
   assignmentClassSel.innerHTML = '';
@@ -402,6 +410,7 @@ function openAssignmentModal() {
 }
 
 function renderAssignmentList() {
+function renderAssignmentList() {
   const div = document.getElementById('assignment-list');
   if (!assignments.length) {
     div.innerHTML = '<em>No assignments yet.</em>';
@@ -409,6 +418,7 @@ function renderAssignmentList() {
   }
   let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
+    // Defensive: handle both ObjectId and populated object
     const classId = a.class && a.class._id ? a.class._id : a.class;
     const cls = teacher.classes.find(c => c.id == classId);
     html += `<tr>
@@ -425,12 +435,13 @@ function renderAssignmentList() {
 function closeAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'none';
 }
+// Submission handler for creating assignments
 document.getElementById('assignmentForm').onsubmit = async function (e) {
   e.preventDefault();
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
   const assignment = {
-    class: classId,
+    class: classId, // <--- use 'class', not 'classId'
     subject: document.getElementById('assignment-subject').value,
     title: fd.get('title'),
     description: fd.get('desc'),
@@ -443,12 +454,11 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
       body: JSON.stringify(assignment)
     });
     if (!res.ok) throw new Error();
-    const { assignment: created } = await res.json();
-    assignments.push(created);
+    // Instead of pushing returned assignment, always refetch
+    assignments = await fetchAssignments();
     alert('Assignment created!');
     closeAssignmentModal();
-    await fetchAssignments(); // re-fetch from backend, so you get populated .class
-renderAssignmentList();
+    renderAssignmentList();
   } catch {
     alert('Failed to create assignment.');
   }

@@ -409,10 +409,11 @@ function renderAssignmentList() {
   }
   let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
-    const cls = teacher.classes.find(c => c.id === a.class) || {};
+    const classId = a.class && a.class._id ? a.class._id : a.class;
+    const cls = teacher.classes.find(c => c.id == classId);
     html += `<tr>
       <td data-label="Title">${a.title}</td>
-      <td data-label="Class">${cls.name || a.class}</td>
+      <td data-label="Class">${(a.class && a.class.name) || (cls && cls.name) || classId || 'Unknown'}</td>
       <td data-label="Due">${a.dueDate ? a.dueDate.slice(0,10) : (a.due || '')}</td>
       <td data-label="Description">${a.description || a.desc}</td>
     </tr>`;
@@ -446,7 +447,8 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
     assignments.push(created);
     alert('Assignment created!');
     closeAssignmentModal();
-    renderAssignmentList();
+    await fetchAssignments(); // re-fetch from backend, so you get populated .class
+renderAssignmentList();
   } catch {
     alert('Failed to create assignment.');
   }

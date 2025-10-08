@@ -367,7 +367,9 @@ student.avatar = studentJson.photo_url || '';
       const payload = {
   exam: exam._id,
   answers,
-  student: student._id // Set this value
+  student: student._id,
+  startedAt: startedAt,   // you need to record when the test starts!
+  finishedAt: new Date().toISOString()
 };
       let result = null;
       try {

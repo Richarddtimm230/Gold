@@ -13,29 +13,33 @@ router.post('/:classId/subjects', teacherAuth, async (req, res) => {
   const { classId } = req.params;
   const { subjectName } = req.body;
 
-  // Defensive: subjectName required
   if (!subjectName || !subjectName.trim()) {
     return res.status(400).json({ error: "Subject name required" });
   }
 
-  // Find or create subject
+  // Find or create subject, and ensure its class field is set
   let subject = await Subject.findOne({ name: subjectName.trim() });
   if (!subject) {
-    subject = new Subject({ name: subjectName.trim() });
+    subject = new Subject({ name: subjectName.trim(), class: classId });
+    await subject.save();
+  } else if (!subject.class || String(subject.class) !== String(classId)) {
+    subject.class = classId;
     await subject.save();
   }
+
   const cls = await Class.findById(classId);
   if (!cls) return res.status(404).json({ error: "Class not found" });
-let justAdded = null;
-if (!cls.subjects.some(s => 
-  s.subject && 
-  String(s.subject._id) === String(subject._id) &&
-  String(s.teacher) === String(req.staff._id)
-)) {
-  cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
-  await cls.save();
-  justAdded = { subject: subject._id, teacher: req.staff._id };
-}
+
+  let justAdded = null;
+  if (!cls.subjects.some(s =>
+    s.subject &&
+    String(s.subject._id) === String(subject._id) &&
+    String(s.teacher) === String(req.staff._id)
+  )) {
+    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
+    await cls.save();
+    justAdded = { subject: subject._id, teacher: req.staff._id };
+  }
 
   // Populate the subject for the response
   await cls.populate([
@@ -44,24 +48,24 @@ if (!cls.subjects.some(s =>
   ]);
   // Find the just-added subject-teacher pair
   const added = cls.subjects.find(s =>
-  s.subject && 
-  String(s.subject._id) === String(subject._id) &&
-  String(s.teacher._id) === String(req.staff._id)
-);
+    s.subject &&
+    String(s.subject._id) === String(subject._id) &&
+    String(s.teacher._id) === String(req.staff._id)
+  );
   res.json({
     success: true,
     subject: added
       ? {
-          id: added.subject._id,
-          name: added.subject.name,
-          teacher: added.teacher
-            ? {
-                id: added.teacher._id,
-                name: `${added.teacher.first_name} ${added.teacher.last_name}`,
-                email: added.teacher.email
-              }
-            : null
-        }
+        id: added.subject._id,
+        name: added.subject.name,
+        teacher: added.teacher
+          ? {
+            id: added.teacher._id,
+            name: `${added.teacher.first_name} ${added.teacher.last_name}`,
+            email: added.teacher.email
+          }
+          : null
+      }
       : null
   });
 });

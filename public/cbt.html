@@ -210,7 +210,16 @@
         document.getElementById('cbtExamLoader').textContent = 'Failed to load student data. Please login again.';
         return;
       }
-      student = await studentRes.json();
+      const studentJson = await studentRes.json();
+student.name = studentJson.name || 
+    ((studentJson.firstname && studentJson.surname) ? studentJson.firstname + " " + studentJson.surname : "Student Name");
+
+// If studentJson.class is an object, try to use .name, else use as string, else fallback to '-'
+student.class = 
+    (typeof studentJson.class === 'object' && studentJson.class && studentJson.class.name) ? studentJson.class.name :
+    (typeof studentJson.class === 'string' ? studentJson.class : '-');
+
+student.avatar = studentJson.photo_url || '';
 
       // 2. Fetch scheduled CBT exam(s) for student
       // Option: by class or personalized

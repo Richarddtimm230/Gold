@@ -11,30 +11,43 @@ const teacherAuth = require('../middleware/teacherAuth'); // sets req.staff
 router.post('/:id/results', teacherAuth, async (req, res) => {
   try {
     const teacherId = req.params.id;
-    const { student, class: classId, term, session, subjects, affectiveRatings, psychomotorRatings, attendanceTotal, attendancePresent, attendanceAbsent, attendancePercent, status } = req.body;
+    let { student, class: classId, term, session, subjects, affectiveRatings, psychomotorRatings, attendanceTotal, attendancePresent, attendanceAbsent, attendancePercent, status } = req.body;
 
-    // subjects: array of { subject, ca, mid, exam, comment }
-    if (!Array.isArray(subjects) || !student || !classId)
-      return res.status(400).json({ error: "Missing required fields." });
+    // --- RESOLVE session and term names to ObjectIds ---
+    const Session = require('../models/Session');
+    const Term = require('../models/Term');
 
+    // findOrCreateByName utility (copy from admin logic)
+    async function findOrCreateByName(Model, name) {
+      if (!name) return null;
+      let doc = await Model.findOne({ name });
+      if (doc) return doc;
+      doc = new Model({ name });
+      await doc.save();
+      return doc;
+    }
+
+    const sessionObj = await findOrCreateByName(Session, session);
+    const termObj = await findOrCreateByName(Term, term);
+
+    if (!sessionObj || !termObj) return res.status(400).json({ error: "Invalid session or term." });
+
+    // --- Save results ---
     const savedResults = [];
-
     for (const subjScore of subjects) {
       const { subject, ca, mid, exam, comment } = subjScore;
-
-      // Compose result document
       const resultDoc = new Result({
         student,
         class: classId,
-        term,
-        session,
+        session: sessionObj._id,  // <-- use ObjectId
+        term: termObj._id,        // <-- use ObjectId
         subject,
-        ca1_score: ca, // or ca1_score/midterm_score/exam_score as per your schema
+        ca1_score: ca,
         midterm_score: mid,
         exam_score: exam,
         remarks: comment,
-        affectiveRatings, // Save as object
-        psychomotorRatings, // Save as object
+        affectiveRatings,
+        psychomotorRatings,
         attendance: {
           total: attendanceTotal,
           present: attendancePresent,
@@ -44,11 +57,9 @@ router.post('/:id/results', teacherAuth, async (req, res) => {
         createdBy: teacherId,
         status: status || 'Draft'
       });
-
       await resultDoc.save();
       savedResults.push(resultDoc);
     }
-
     res.json({ success: true, inserted: savedResults.length, results: savedResults });
   } catch (err) {
     res.status(500).json({ error: err.message });

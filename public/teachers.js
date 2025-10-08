@@ -260,7 +260,7 @@ if (addSubjectForm) {
     if (!subjectName || !selectedClassId) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/classes/${selectedClassId}/subjects`, {
+      const res = await fetch(`${API_BASE_URL}/api/teachers/classes/${selectedClassId}/subjects`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({ subjects: [subjectName] })
@@ -324,7 +324,7 @@ document.getElementById('attendance-form').onsubmit = async function (e) {
   alert('Attendance saved!');
   // Optionally: POST attendance to backend here, e.g.:
   try {
-    const res = await fetch(`${API_BASE_URL}/api/attendance`, {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/attendance`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ classId, attendance: attendanceRecords.filter(a => a.classId === classId) })

@@ -194,6 +194,7 @@
     const token = localStorage.getItem('student_token') || localStorage.getItem('studentToken') || localStorage.getItem('token');
     let student = { name: '', class: '', subject: '', avatar: '' };
     let exam = null;
+    let startedAt = new Date().toISOString();
     let questions = [];
     let answers = [];
     let currentQ = 0;

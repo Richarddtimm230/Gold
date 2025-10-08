@@ -216,7 +216,7 @@
     // 2. Upload Exam (NEW, with Quill)
     async function showUploadExam() {
       // Fetch class/subject lists
-      const classes = await fetch('https://goldlincschools.onrender.com/api/classes').then(r => r.json()).then(r => r.classes || []).catch(() => []);
+      const classes = await fetch('https://goldlincschools.onrender.com/api/classes').then(r => r.json()).catch(() => []);
       const subjects = await fetch('https://goldlincschools.onrender.com/api/subjects').then(r => r.json()).catch(() => []);
       document.getElementById('contentArea').innerHTML = `
         <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Upload New Exam</h2>
@@ -229,7 +229,7 @@
             <label>Class <span class="text-red-500">*</span></label>
             <select name="class" required class="block w-full rounded border px-3 py-2 mt-1">
               <option value="">Select Class</option>
-              ${classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+              ${classes.map(c => `<option value="${c._id}">${c.name}</option>`).join('')}
             </select>
           </div>
           <div>

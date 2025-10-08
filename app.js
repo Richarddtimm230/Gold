@@ -45,9 +45,11 @@ const teacherResultsRoute = require('./routes/teacherResults');
 const examRoute = require('./routes/exam');
 const activityRoute = require('./routes/activities');
 const uploadRoute = require('./routes/upload');
+const resultscbtRoute = require('./routes/resultscbt');
 
 //...
 app.use('/api/exam', examRoute);
+app.use('/api/result', resultscbtRoute);
 app.use('/api/activity', activityRoute);
 app.use('/api/upload', uploadRoute);
 //...

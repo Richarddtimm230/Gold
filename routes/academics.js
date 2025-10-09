@@ -171,7 +171,36 @@ router.post('/terms', adminAuth, async (req, res) => {
   }
   res.json(term);
 });
-
+router.delete('/classes/:id', adminAuth, async (req, res) => {
+  const cls = await Class.findByIdAndDelete(req.params.id);
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+  res.json({ success: true });
+});
+router.delete('/exams/schedules/:id', adminAuth, async (req, res) => {
+  const exam = await ExamSchedule.findByIdAndDelete(req.params.id);
+  if (!exam) return res.status(404).json({ error: "Exam schedule not found" });
+  res.json({ success: true });
+});
+router.delete('/cbt/mocks/:id', adminAuth, async (req, res) => {
+  const cbt = await CBTMock.findByIdAndDelete(req.params.id);
+  if (!cbt) return res.status(404).json({ error: "CBT/mock not found" });
+  res.json({ success: true });
+});
+router.delete('/results/cbt-mocks/:id', adminAuth, async (req, res) => {
+  const result = await CBTMockResult.findByIdAndDelete(req.params.id);
+  if (!result) return res.status(404).json({ error: "Result not found" });
+  res.json({ success: true });
+});
+router.delete('/sessions/:id', adminAuth, async (req, res) => {
+  const session = await Session.findByIdAndDelete(req.params.id);
+  if (!session) return res.status(404).json({ error: "Session not found" });
+  res.json({ success: true });
+});
+router.delete('/terms/:id', adminAuth, async (req, res) => {
+  const term = await Term.findByIdAndDelete(req.params.id);
+  if (!term) return res.status(404).json({ error: "Term not found" });
+  res.json({ success: true });
+});
 router.get('/classes', adminAuth, async (req, res) => {
   const classes = await Class.find().sort('name');
   res.json(classes.map(c => ({ _id: c._id, name: c.name })));

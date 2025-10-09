@@ -504,6 +504,57 @@ document.getElementById('resultsFilterForm').onsubmit = function (e) {
   const data = Object.fromEntries(new FormData(this));
   loadResults(data);
 };
+
+const pushCBTResultsBtn = document.getElementById('pushCBTResultsBtn');
+const pushCBTModal = document.getElementById('pushCBTModal');
+const pushCBTModalForm = document.getElementById('pushCBTModalForm');
+const pushCBTResultsMessage = document.getElementById('pushCBTResultsMessage');
+const pushCBTModalFeedback = document.getElementById('pushCBTModalFeedback');
+const cancelPushCBTModal = document.getElementById('cancelPushCBTModal');
+
+// Open modal on button click
+pushCBTResultsBtn.onclick = () => {
+  pushCBTModal.classList.remove('hidden');
+  pushCBTModalFeedback.textContent = "";
+};
+
+// Close modal on cancel
+cancelPushCBTModal.onclick = () => {
+  pushCBTModal.classList.add('hidden');
+  pushCBTModalFeedback.textContent = "";
+};
+
+// Handle modal submit
+pushCBTModalForm.onsubmit = async function(e) {
+  e.preventDefault();
+  const formData = new FormData(pushCBTModalForm);
+  const scoreField = formData.get('scoreField');
+  pushCBTModalFeedback.textContent = "Pushing CBT results...";
+  try {
+    const res = await fetch("https://goldlincschools.onrender.com/api/results/push-cbt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem('adminToken') || localStorage.getItem('token'))
+      },
+      body: JSON.stringify({ scoreField })
+    });
+    const data = await res.json();
+    if (data.success) {
+      pushCBTModalFeedback.textContent = `Done! Inserted: ${data.inserted}, Skipped: ${data.skipped}`;
+      pushCBTResultsMessage.textContent = `Last push: Inserted ${data.inserted}, Skipped ${data.skipped}`;
+    } else {
+      pushCBTModalFeedback.textContent = "Error: " + (data.error || "Unknown error");
+    }
+  } catch (err) {
+    pushCBTModalFeedback.textContent = "Network error";
+  } finally {
+    // Optionally close the modal after a few seconds
+    setTimeout(() => {
+      pushCBTModal.classList.add('hidden');
+    }, 2000);
+  }
+};  
 window.editSession = editSession;
 window.editTerm = editTerm;
 window.editExamSchedule = editExamSchedule;

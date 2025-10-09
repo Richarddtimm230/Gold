@@ -288,11 +288,12 @@
       });
     }
 
-    // Add question
-    document.getElementById('addQuestionBtn').onclick = function() {
-      window.questions.push({ text: '', options: [], answer: 0, score: 1 });
-      renderQuestions();
-    };
+    document.addEventListener('click', function(e) {
+  if (e.target && e.target.id === 'addQuestionBtn') {
+    window.questions.push({ text: '', options: [], answer: 0, score: 1 });
+    renderQuestions();
+  }
+});
 
     // Initial render
     renderQuestions();

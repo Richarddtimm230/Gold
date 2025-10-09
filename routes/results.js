@@ -390,4 +390,66 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.post('/push-cbt', async (req, res) => {
+  try {
+    // Validate input
+    const allowedFields = ['ca1_score', 'ca2_score', 'midterm_score', 'exam_score'];
+    const { scoreField } = req.body;
+    if (!allowedFields.includes(scoreField)) {
+      return res.status(400).json({ error: 'Invalid score field selected.' });
+    }
+
+    const ResultCBT = require('../models/ResultCBT');
+    const CBTExam = require('../models/CBTExam');
+    const Result = require('../models/Result');
+    const Student = require('../models/Student');
+
+    // Fetch all CBT results
+    const cbtResults = await ResultCBT.find().populate('student exam');
+    let inserted = 0, skipped = 0, errors = [];
+
+    for (const r of cbtResults) {
+      // Gather required info
+      const exam = r.exam;
+      const student = r.student;
+      if (!exam || !student) { skipped++; continue; }
+
+      // Optional: Check for duplicate universal result for same student/exam/subject/class/session/term
+      const dup = await Result.findOne({
+        student: student._id,
+        class: exam.class,
+        subject: exam.subject,
+        session: exam.session,
+        term: exam.term
+      });
+      if (dup) { skipped++; continue; }
+
+      // Prepare new universal result
+      let resultData = {
+        student: student._id,
+        class: exam.class || undefined,
+        subject: exam.subject || undefined,
+        session: exam.session || undefined,
+        term: exam.term || undefined,
+        status: "Draft",
+        remarks: "Imported from CBT",
+        [scoreField]: r.score // set only the chosen field
+        // other fields will be default/empty as per schema
+      };
+
+      // Save
+      try {
+        const newResult = new Result(resultData);
+        await newResult.save();
+        inserted++;
+      } catch (err) {
+        errors.push({ student: student._id, exam: exam._id, error: err.message });
+      }
+    }
+
+    res.json({ success: true, inserted, skipped, errors });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 module.exports = router;

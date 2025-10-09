@@ -355,7 +355,41 @@ router.put('/exams/modes/:id', adminAuth, async (req, res) => {
   if (!examMode) return res.status(404).json({ error: "Exam mode not found" });
   res.json(examMode);
 });
-
+// Update a class by ID
+router.put('/classes/:id', adminAuth, async (req, res) => {
+  const { name, arms, teacherId } = req.body;
+  const update = {
+    name,
+    arms: Array.isArray(arms) ? arms : [],
+  };
+  if (teacherId) {
+    update.teachers = [teacherId];
+  }
+  const cls = await Class.findByIdAndUpdate(
+    req.params.id,
+    update,
+    { new: true }
+  );
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+  res.json(cls);
+});
+// Get individual class by ID
+router.get('/classes/:id', adminAuth, async (req, res) => {
+  const cls = await Class.findById(req.params.id).populate('teachers');
+  if (!cls) return res.status(404).json({ error: "Class not found" });
+  res.json({
+    _id: cls._id,
+    name: cls.name,
+    arms: cls.arms,
+    teachers: cls.teachers.map(t => ({
+      _id: t._id,
+      first_name: t.first_name,
+      last_name: t.last_name,
+      email: t.email
+    })),
+    subjects: cls.subjects
+  });
+});
 // Update a CBT/mock by ID
 router.put('/cbt/mocks/:id', adminAuth, async (req, res) => {
   const { title, classId, mode, date } = req.body;

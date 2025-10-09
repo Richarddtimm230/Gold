@@ -9,6 +9,8 @@ const AssignmentSchema = new mongoose.Schema({
   teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', required: true }, // <--- ADD THIS LINE
   files: [{ url: String, name: String }],
   dueDate: { type: Date, required: true },
+
+cbt: { type: mongoose.Schema.Types.ObjectId, ref: 'CBT', required: false },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

@@ -83,12 +83,12 @@
       box-shadow: 0 2px 7px #eee;
       background: #fafafa;
       justify-content: center;
-      
       display: block;
     }
     .student-info-table td {
       vertical-align: middle;
     }
+    .hidden { display: none !important; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -143,11 +143,11 @@
         </tr>
         <tr>
           <td><strong>Class:</strong> <span id="stuClass"></span></td>
-          <td><strong>Grade Point Average:</strong> <span id="stuGPA"></span></td>
+          <td id="gpaCell"><strong>Grade Point Average:</strong> <span id="stuGPA"></span></td>
         </tr>
         <tr>
           <td><strong>Email:</strong> <span id="stuEmail"></span></td>
-          <td><strong>Result Summary:</strong> <span id="resultSummary"></span></td>
+          <td id="summaryCell"><strong>Result Summary:</strong> <span id="resultSummary"></span></td>
         </tr>
       </table>
     </section>
@@ -161,9 +161,9 @@
             <th>Examination</th>
             <th>Total Score</th>
             <th>Score Grade</th>
-            <th>Subject Position</th>
-            <th>Grade Points</th>
-            <th>Class Teacher's Comment</th>
+            <th class="subject-pos-col">Subject Position</th>
+            <th class="grade-points-col">Grade Points</th>
+            <th class="teacher-remark-col">Class Teacher's Comment</th>
           </tr>
         </thead>
         <tbody>
@@ -247,6 +247,12 @@
     </div>
   </div>
 <script>
+  let reportPreferences = {};
+  // Fetch preferences before rendering report
+  fetch('https://goldlincschools.onrender.com/api/report/preferences', { credentials: 'include' })
+    .then(r => r.json())
+    .then(p => { reportPreferences = p; fillReport(); });
+
   function getFormattedPrintDate() {
     const now = new Date();
     const dd = now.getDate().toString().padStart(2,'0');
@@ -349,7 +355,6 @@
       document.getElementById("stuAge").innerText = ageVal ? ageVal : "";
       document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || data.student.parentEmail || "";
       document.getElementById("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
-      // Student photo
       if (data.student.photoBase64) {
         studentPhoto = data.student.photoBase64;
       }
@@ -389,13 +394,11 @@
         } else if (res.subject_name) {
           subjectName = res.subject_name;
         }
-
         const ca1 = parseFloat(res.ca1_score || 0);
         const ca2 = parseFloat(res.ca2_score || 0);
         const mid = parseFloat(res.midterm_score || 0);
         const exam = parseFloat(res.exam_score || 0);
         const total = ca1 + ca2 + mid + exam;
-        // Grade Points: if grade is "F" or total < 40, point = 0
         let gradePoint = 0;
         if (res.grade && res.grade.toUpperCase() === "F") {
           gradePoint = 0;
@@ -412,7 +415,6 @@
         totalGradePoints += gradePoint;
         subjectCount++;
 
-        // Class teacher's comment: based on grade/total
         let teacherComment = "";
         const remark = getGradeRemark(total);
         if (remark === "Excellent") teacherComment = "Excellent performance!";
@@ -421,10 +423,8 @@
         else if (remark === "Pass") teacherComment = "Passed. Needs improvement.";
         else if (remark === "Poor") teacherComment = "Poor. More effort needed.";
         else if (remark === "Fail") teacherComment = "Failed. Must work much harder!";
-        // Prefer user-defined class teacher's comment if present
         if (res.teacher_comment) teacherComment = res.teacher_comment;
 
-        // Use subject_position for "Subject Position" column
         return `
           <tr>
             <td>${subjectName}</td>
@@ -433,9 +433,9 @@
             <td>${exam}</td>
             <td>${res.total !== undefined ? res.total : total}</td>
             <td>${res.grade || ""}</td>
-            <td>${res.subject_position || ""}</td>
-            <td>${gradePoint}</td>
-            <td>${teacherComment}</td>
+            <td class="subject-pos-col">${res.subject_position || ""}</td>
+            <td class="grade-points-col">${gradePoint}</td>
+            <td class="teacher-remark-col">${teacherComment}</td>
           </tr>
         `;
       }).join('');
@@ -445,7 +445,6 @@
     const avgScore = subjectCount > 0 ? (totalScore / subjectCount) : 0;
     const gpa = subjectCount > 0 ? (totalGradePoints / subjectCount) : 0;
 
-    // Auto-grade based on average score
     let perfGrade = "";
     if (avgScore >= 70) perfGrade = "A (Excellent)";
     else if (avgScore >= 60) perfGrade = "B (Very Good)";
@@ -454,7 +453,6 @@
     else if (avgScore >= 40) perfGrade = "E (Poor)";
     else perfGrade = "F (Fail)";
 
-    // Auto-remark based on GPA
     let gpaRemark = "";
     if (gpa >= 4.5) gpaRemark = "Excellent";
     else if (gpa >= 3.5) gpaRemark = "Very Good";
@@ -469,6 +467,44 @@
     document.getElementById("perfGrade").innerText = perfGrade;
     document.getElementById("resultSummary").innerText = gpaRemark;
 
+    // Show/hide report sections according to preferences
+    // Columns in results table
+    if (reportPreferences && reportPreferences.showTeacherRemark === false) {
+      document.querySelectorAll('.teacher-remark-col').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#resultsTable th.teacher-remark-col').forEach(el => el.classList.add('hidden'));
+    }
+    if (reportPreferences && reportPreferences.showSubjectPosition === false) {
+      document.querySelectorAll('.subject-pos-col').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#resultsTable th.subject-pos-col').forEach(el => el.classList.add('hidden'));
+    }
+    if (reportPreferences && reportPreferences.showGradePoints === false) {
+      document.querySelectorAll('.grade-points-col').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#resultsTable th.grade-points-col').forEach(el => el.classList.add('hidden'));
+    }
+    // GPA Row
+    if (reportPreferences && reportPreferences.showGPA === false) {
+      document.getElementById("gpaCell").classList.add("hidden");
+    }
+    // Result summary row
+    if (reportPreferences && reportPreferences.showResultSummary === false) {
+      document.getElementById("summaryCell").classList.add("hidden");
+    }
+    // Skills tables
+    if (reportPreferences && reportPreferences.showAffectiveSkills === false) {
+      document.getElementById("affectiveSkillsTable").classList.add("hidden");
+    }
+    if (reportPreferences && reportPreferences.showPsychomotorSkills === false) {
+      document.getElementById("psychomotorSkillsTable").classList.add("hidden");
+    }
+    // Attendance table
+    if (reportPreferences && reportPreferences.showAttendance === false) {
+      document.getElementById("attendanceTable").classList.add("hidden");
+    }
+    // Principal's comment section
+    if (reportPreferences && reportPreferences.showPrincipalComment === false) {
+      document.querySelector(".comments-section").classList.add("hidden");
+    }
+
     // Fill skills tables if available
     if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
       const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
@@ -481,16 +517,13 @@
     // Attendance table (show summary only, no duplication)
     if (data.attendance && Array.isArray(data.attendance)) {
       let presentDays = 0, absentDays = 0;
-      // Try to extract present/absent from labels or from keys
       data.attendance.forEach(a => {
         let labelLower = a.label ? a.label.toLowerCase() : "";
         if (labelLower.includes("present")) presentDays = Number(a.value) || presentDays;
         if (labelLower.includes("absent")) absentDays = Number(a.value) || absentDays;
-        // Prefer direct keys if available
         if (typeof a.present === "number") presentDays = a.present;
         if (typeof a.absent === "number") absentDays = a.absent;
       });
-      // If attendance array is a single object: {present, absent}
       if (data.attendance.length === 1 && typeof data.attendance[0] === "object") {
         const att = data.attendance[0];
         presentDays = att.present || presentDays;
@@ -510,8 +543,6 @@
 
     document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
-
-  window.addEventListener('DOMContentLoaded', fillReport);
 
   async function downloadPDF() {
     const reportDom = document.getElementById('reportCardDom');

@@ -444,17 +444,46 @@ document.getElementById('cbtForm').onsubmit = async function(e){
 };
 
 // Results Table
-async function loadResults(filter={}) {
+async function loadResults(filter = {}) {
   const tbody = document.getElementById('resultsTableBody');
   tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>';
   try {
+    let results = [];
+    // If "CBT" is selected, use the dedicated CBT results API
+    if (filter.type === "CBT") {
+      // You may want to construct query params for filtering if needed
+      let url = "https://goldlincschools.onrender.com/api/result";
+      // Optionally, add query parameters for filtering by class or student, e.g.:
+      // if (filter.classId) url += '?classId=' + encodeURIComponent(filter.classId);
+      const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+      results = await res.json();
+      if (!results.length) {
+        tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No CBT results found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = results.map(r =>
+        `<tr>
+          <td class="py-2 px-3">${r.studentName || '-'}</td>
+          <td class="py-2 px-3">${r.className || '-'}</td>
+          <td class="py-2 px-3">CBT</td>
+          <td class="py-2 px-3">${r.examTitle || '-'}</td>
+          <td class="py-2 px-3">${r.score}/${r.total}</td>
+          <td class="py-2 px-3">${r.finishedAt ? r.finishedAt.slice(0, 10) : ''}</td>
+        </tr>`
+      ).join('');
+      return;
+    }
+    // Otherwise, use default endpoint for mocks or other types
     let url = API_BASE + "/results/cbt-mocks";
     if (filter.sessionId || filter.classId || filter.type) {
       url += '?' + new URLSearchParams(filter).toString();
     }
-    const res = await fetch(url, { headers: { Authorization: "Bearer " + token }});
-    const results = await res.json();
-    if (!results.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No results found.</td></tr>'; return;}
+    const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+    results = await res.json();
+    if (!results.length) {
+      tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No results found.</td></tr>';
+      return;
+    }
     tbody.innerHTML = results.map(r =>
       `<tr>
         <td class="py-2 px-3">${r.student?.name || '-'}</td>
@@ -462,11 +491,15 @@ async function loadResults(filter={}) {
         <td class="py-2 px-3">${r.type || '-'}</td>
         <td class="py-2 px-3">${r.exam?.title || r.mock?.title || '-'}</td>
         <td class="py-2 px-3">${r.score}</td>
-        <td class="py-2 px-3">${r.date ? r.date.slice(0,10) : ''}</td>
-      </tr>`).join('');
-  } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Error loading results.</td></tr>'; }
+        <td class="py-2 px-3">${r.date ? r.date.slice(0, 10) : ''}</td>
+      </tr>`
+    ).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Error loading results.</td></tr>';
+  }
 }
-document.getElementById('resultsFilterForm').onsubmit = function(e) {
+
+document.getElementById('resultsFilterForm').onsubmit = function (e) {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(this));
   loadResults(data);

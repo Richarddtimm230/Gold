@@ -10,10 +10,19 @@ let draftResults = [];
 let attendanceRecords = [];
 let gradebookData = {};
 let assignments = [];
+let cbts = [];
 
 // --- INITIAL FETCH & SETUP ---
 window.addEventListener('DOMContentLoaded', fetchAndSetup);
-
+async function fetchTeacherCBTs() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, { headers: authHeaders() });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Defensive: data may be array or {cbts:[...]}
+    return Array.isArray(data) ? data : data.cbts || [];
+  } catch { return []; }
+}
 async function fetchAndSetup() {
   teacher = await fetchTeacherProfile();
   if (!teacher) return alert("Failed to load teacher profile.");

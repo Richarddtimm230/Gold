@@ -11,6 +11,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* --- (unchanged CSS) --- */
     :root {
       --primary: #007bff;
       --sidebar-bg: #fff;
@@ -32,326 +33,53 @@
       min-height: 100vh;
       box-sizing: border-box;
     }
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      width: var(--sidebar-width);
-      min-width: 180px;
-      max-width: 320px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      box-shadow: var(--shadow);
-      z-index: 1050;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s ease;
-      overflow: hidden;
-    }
-    .sidebar nav {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25em;
-      margin-top: 1.5em;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      padding: 0.85em 1.3em;
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      border-left: 4px solid transparent;
-      border-radius: 0 6px 6px 0;
-      transition: background 0.16s, border-color 0.16s;
-      font-size: 1.05em;
-    }
-    .sidebar a.active, .sidebar a:hover {
-      background: #f1f6fd;
-      border-left: 4px solid var(--primary);
-      color: var(--primary);
-    }
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem 1.2rem 1rem 1.2rem;
-      border-bottom: 1px solid #ececec;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: 2px solid #e3e6ea;
-    }
+    .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); min-width: 180px; max-width: 320px; height: 100vh; background: var(--sidebar-bg); box-shadow: var(--shadow); z-index: 1050; display: flex; flex-direction: column; transition: transform 0.25s ease; overflow: hidden; }
+    .sidebar nav { flex: 1 1 0%; display: flex; flex-direction: column; gap: 0.25em; margin-top: 1.5em; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+    .sidebar a { display: flex; align-items: center; gap: 0.7em; padding: 0.85em 1.3em; text-decoration: none; color: #333; font-weight: 500; border-left: 4px solid transparent; border-radius: 0 6px 6px 0; transition: background 0.16s, border-color 0.16s; font-size: 1.05em; }
+    .sidebar a.active, .sidebar a:hover { background: #f1f6fd; border-left: 4px solid var(--primary); color: var(--primary); }
+    .profile { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 1.2rem 1rem 1.2rem; border-bottom: 1px solid #ececec; flex-shrink: 0; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #e3e6ea; }
     .name { font-weight: 700; font-size: 1.13em; }
     .role { font-size: 0.98em; color: #888; margin-top: 2px; }
-    .search {
-      padding: 0.7em 1.2em;
-      flex-shrink: 0;
-      background: var(--sidebar-bg);
-    }
-    .search input {
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      padding: 0.6em 0.9em;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      font-size: 1em;
-      background: #fff;
-      margin: 0;
-    }
-    .main-content {
-      min-height: 100vh;
-      margin-left: var(--sidebar-width);
-      padding: 0 2.5vw 2vw 2.5vw;
-      transition: margin-left 0.25s;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      height: 64px;
-      gap: 1.8em;
-      padding-top: 1.5vw;
-      padding-bottom: 1.5vw;
-    }
-    .school-title {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--primary);
-      letter-spacing: 1px;
-    }
-    .logo {
-      width: 32px; height: 32px;
-      border-radius: 6px;
-    }
-    .header-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 1.03em;
-    }
-    .header-actions .icon {
-      font-size: 1.43em;
-      cursor: pointer;
-      opacity: 0.88;
-      transition: opacity 0.2s;
-    }
-    .header-actions .icon:hover {
-      opacity: 1;
-    }
-    .sidebar-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 2rem;
-      color: var(--primary);
-      margin-right: 1.2rem;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      height: 64px;
-    }
-    .sidebar-overlay {
-      display: none;
-    }
-    .sidebar-overlay.active {
-      display: block;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.25);
-      z-index: 1040;
-    }
-    @media (max-width: 900px) {
-      .sidebar {
-        width: var(--sidebar-width-mobile);
-        min-width: 0;
-        max-width: 95vw;
-        height: 100vh;
-        max-height: 100vh;
-        transform: translateX(-105%);
-        position: fixed;
-        z-index: 1050;
-        overflow: hidden;
-      }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-      .sidebar-toggle {
-        display: inline-flex;
-      }
-      .sidebar-overlay.active {
-        display: block;
-      }
-      body.sidebar-open {
-        overflow: hidden;
-      }
-      .main-content { margin-left: 0; padding: 0 3vw; }
-    }
-    @media (max-width: 600px) {
-      .main-content { padding: 0 2vw; }
-      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .avatar { width: 37px; height: 37px; }
-      .name, .role { font-size: 0.96rem; }
-      .school-title span { font-size: 1.04rem; }
-      header { gap: 0.9em; }
-    }
-    @media (max-width: 400px) {
-      html { font-size: 13px; }
-      .sidebar { width: 97vw; }
-    }
+    .search { padding: 0.7em 1.2em; flex-shrink: 0; background: var(--sidebar-bg); }
+    .search input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 0.6em 0.9em; border-radius: 6px; border: 1px solid #ddd; font-size: 1em; background: #fff; margin: 0; }
+    .main-content { min-height: 100vh; margin-left: var(--sidebar-width); padding: 0 2.5vw 2vw 2.5vw; transition: margin-left 0.25s; }
+    header { display: flex; align-items: center; height: 64px; gap: 1.8em; padding-top: 1.5vw; padding-bottom: 1.5vw; }
+    .school-title { display: flex; align-items: center; gap: 0.7em; font-size: 1.35rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+    .logo { width: 32px; height: 32px; border-radius: 6px; }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 1.03em; }
+    .header-actions .icon { font-size: 1.43em; cursor: pointer; opacity: 0.88; transition: opacity 0.2s; }
+    .header-actions .icon:hover { opacity: 1; }
+    .sidebar-toggle { display: none; background: none; border: none; font-size: 2rem; color: var(--primary); margin-right: 1.2rem; cursor: pointer; align-items: center; justify-content: center; height: 64px; }
+    .sidebar-overlay { display: none; }
+    .sidebar-overlay.active { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 1040; }
+    @media (max-width: 900px) { .sidebar { width: var(--sidebar-width-mobile); min-width: 0; max-width: 95vw; height: 100vh; max-height: 100vh; transform: translateX(-105%); position: fixed; z-index: 1050; overflow: hidden; } .sidebar.active { transform: translateX(0); } .sidebar-toggle { display: inline-flex; } .sidebar-overlay.active { display: block; } body.sidebar-open { overflow: hidden; } .main-content { margin-left: 0; padding: 0 3vw; } }
+    @media (max-width: 600px) { .main-content { padding: 0 2vw; } .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .avatar { width: 37px; height: 37px; } .name, .role { font-size: 0.96rem; } .school-title span { font-size: 1.04rem; } header { gap: 0.9em; } }
+    @media (max-width: 400px) { html { font-size: 13px; } .sidebar { width: 97vw; } }
     ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
     ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
-    .alumni-title {
-      margin: 1.5em 0 0.7em 0;
-      font-size: 1.4em;
-      font-weight: 700;
-      color: #222;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-    }
-    .alumni-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-      gap: 2em;
-      margin-top: 2em;
-      margin-bottom: 3em;
-    }
-    .alumni-card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      padding: 1.3em 1.1em 1.1em 1.1em;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-      transition: box-shadow 0.17s, transform 0.17s;
-      border: 2px solid #e9f0fe;
-      position: relative;
-      min-height: 240px;
-    }
-    .alumni-card:hover, .alumni-card:focus-visible {
-      box-shadow: 0 8px 32px #ddeaff55;
-      border-color: var(--primary);
-      transform: translateY(-2px) scale(1.025);
-    }
-    .alumni-avatar {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--primary);
-      margin-bottom: 0.7em;
-    }
-    .alumni-name {
-      font-weight: 700;
-      font-size: 1.14em;
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 0.17em;
-    }
-    .alumni-class, .alumni-year {
-      font-size: 0.98em;
-      color: #666;
-      margin-bottom: 0.1em;
-      text-align: center;
-    }
-    .alumni-achievement {
-      font-size: 0.97em;
-      color: #18ba89;
-      font-weight: 600;
-      margin-bottom: 0.5em;
-      text-align: center;
-    }
-    .alumni-remark {
-      font-size: 0.97em;
-      color: #555;
-      margin-top: 0.3em;
-      text-align: center;
-      min-height: 32px;
-    }
+    .alumni-title { margin: 1.5em 0 0.7em 0; font-size: 1.4em; font-weight: 700; color: #222; display: flex; align-items: center; gap: 0.5em; }
+    .alumni-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 2em; margin-top: 2em; margin-bottom: 3em; }
+    .alumni-card { background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--card-shadow); padding: 1.3em 1.1em 1.1em 1.1em; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: box-shadow 0.17s, transform 0.17s; border: 2px solid #e9f0fe; position: relative; min-height: 240px; }
+    .alumni-card:hover, .alumni-card:focus-visible { box-shadow: 0 8px 32px #ddeaff55; border-color: var(--primary); transform: translateY(-2px) scale(1.025); }
+    .alumni-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 0.7em; }
+    .alumni-name { font-weight: 700; font-size: 1.14em; color: var(--primary); text-align: center; margin-bottom: 0.17em; }
+    .alumni-class, .alumni-year { font-size: 0.98em; color: #666; margin-bottom: 0.1em; text-align: center; }
+    .alumni-achievement { font-size: 0.97em; color: #18ba89; font-weight: 600; margin-bottom: 0.5em; text-align: center; }
+    .alumni-remark { font-size: 0.97em; color: #555; margin-top: 0.3em; text-align: center; min-height: 32px; }
     /* Modal */
-    .alumni-modal-bg {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.30);
-      z-index: 1200;
-      align-items: center;
-      justify-content: center;
-    }
+    .alumni-modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.30); z-index: 1200; align-items: center; justify-content: center; }
     .alumni-modal-bg.active { display: flex; }
-    .alumni-modal {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 16px 75px #007bff40;
-      max-width: 430px;
-      width: 96vw;
-      padding: 2.2em 2em 1.5em 2em;
-      position: relative;
-      animation: modalPop 0.17s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    .alumni-modal { background: #fff; border-radius: 18px; box-shadow: 0 16px 75px #007bff40; max-width: 430px; width: 96vw; padding: 2.2em 2em 1.5em 2em; position: relative; animation: modalPop 0.17s; display: flex; flex-direction: column; align-items: center; }
     @keyframes modalPop { 0%{ transform: scale(0.93); opacity:0; } 100%{ transform: scale(1); opacity:1; } }
-    .alumni-modal-close {
-      position: absolute;
-      top: 1.1em; right: 1.2em;
-      background: none;
-      border: none;
-      font-size: 1.5em;
-      color: #888;
-      cursor: pointer;
-      z-index: 2;
-    }
-    .alumni-modal-avatar {
-      width: 82px; height: 82px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 0.75em;
-    }
-    .alumni-modal-name {
-      font-weight: 700;
-      font-size: 1.22em;
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 0.18em;
-    }
-    .alumni-modal-field {
-      font-size: 1em;
-      color: #222;
-      margin-bottom: 0.3em;
-      text-align: center;
-    }
-    .alumni-modal-label {
-      color: #666;
-      font-size: 0.99em;
-      margin-right: 0.4em;
-      font-weight: 500;
-    }
-    .alumni-modal-achievement {
-      color: #18ba89; font-weight: 600; margin-top: 0.6em; margin-bottom: 0.3em;
-    }
-    .alumni-modal-remark {
-      margin-top: 1em;
-      color: #444;
-      font-size: 1em;
-      text-align: center;
-    }
-    .alumni-modal-report {
-      margin: 0.6em 0;
-      color: #22305a;
-      background: #f9f9ff;
-      border-radius: 8px;
-      padding: 1em 1.2em;
-      font-size: 0.99em;
-      box-shadow: 0 2px 12px #ddeaff15;
-    }
+    .alumni-modal-close { position: absolute; top: 1.1em; right: 1.2em; background: none; border: none; font-size: 1.5em; color: #888; cursor: pointer; z-index: 2; }
+    .alumni-modal-avatar { width: 82px; height: 82px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 0.75em; }
+    .alumni-modal-name { font-weight: 700; font-size: 1.22em; color: var(--primary); text-align: center; margin-bottom: 0.18em; }
+    .alumni-modal-field { font-size: 1em; color: #222; margin-bottom: 0.3em; text-align: center; }
+    .alumni-modal-label { color: #666; font-size: 0.99em; margin-right: 0.4em; font-weight: 500; }
+    .alumni-modal-achievement { color: #18ba89; font-weight: 600; margin-top: 0.6em; margin-bottom: 0.3em; }
+    .alumni-modal-remark { margin-top: 1em; color: #444; font-size: 1em; text-align: center; }
+    .alumni-modal-report { margin: 0.6em 0; color: #22305a; background: #f9f9ff; border-radius: 8px; padding: 1em 1.2em; font-size: 0.99em; box-shadow: 0 2px 12px #ddeaff15; }
   </style>
 </head>
 <body>
@@ -475,12 +203,12 @@
       const search = document.getElementById('searchName').value.trim();
       const year = document.getElementById('filterYear').value;
 
-      // Use dedicated backend alumni endpoint, filters only graduates
-      let url = 'https://goldlincschools.onrender.com/api/student/alumni';
+      // Use dedicated backend alumni endpoint, or filter students by status=Graduated
+      let url = 'https://goldlincschools.onrender.com/api/students?status=Graduated';
       let params = [];
       if (search) params.push('search=' + encodeURIComponent(search));
-      if (year) params.push('graduationYear=' + encodeURIComponent(year));
-      if (params.length) url += '?' + params.join('&');
+      if (year) params.push('graduationYear=' + encodeURIComponent(year)); // backend should support this
+      if (params.length) url += '&' + params.join('&');
 
       const grid = document.getElementById('alumniGrid');
       grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#888;">Loading...</div>`;
@@ -506,6 +234,7 @@
             <div class="alumni-remark">${alumni.remark || ''}</div>
           </div>
         `).join('');
+        // Modal click logic for all alumni cards
         Array.from(document.querySelectorAll('.alumni-card')).forEach((card, idx) => {
           card.onclick = () => openAlumniModal({
             name: alumniList[idx].firstname + ' ' + alumniList[idx].surname,

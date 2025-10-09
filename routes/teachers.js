@@ -316,7 +316,11 @@ router.post('/:id/cbt', teacherAuth, async (req, res) => {
       questions
     });
     await cbt.save();
-    await cbt.populate('class', 'name').populate('subject', 'name');
+    // FIXED: populate both fields correctly
+    await cbt.populate([
+      { path: 'class', select: 'name' },
+      { path: 'subject', select: 'name' }
+    ]);
     res.status(201).json({ cbt });
   } catch (err) {
     res.status(500).json({ error: err.message });

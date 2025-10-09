@@ -407,7 +407,6 @@
       observer.observe(document.body, { childList: true, subtree: true });
 
       // Initial render
-      attachUploadFormHandler();
       renderQuestions();
 
 
@@ -415,7 +414,9 @@
 function attachUploadFormHandler() {
   const uploadForm = document.getElementById('uploadExamForm');
   if (!uploadForm) return;
-  uploadForm.onsubmit = async function(e) {
+  // Remove previous submit handlers
+  uploadForm.onsubmit = null;
+  uploadForm.addEventListener('submit', async function handler(e) {
     e.preventDefault();
 
     // Validate

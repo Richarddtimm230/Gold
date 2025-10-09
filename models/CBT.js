@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const CBTQuestionSchema = new mongoose.Schema({
   text: String,

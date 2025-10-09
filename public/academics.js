@@ -83,15 +83,19 @@ async function loadClasses() {
     const classes = await res.json();
     if (!classes.length) { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">No classes found.</td></tr>'; return;}
     tbody.innerHTML = classes.map(c =>
-      `<tr>
-        <td class="py-2 px-3">${c.name}</td>
-        <td class="py-2 px-3">${c.arms && c.arms.length ? c.arms.join(', ') : '-'}</td>
-        <td class="py-2 px-3">${
-          c.teachers && c.teachers.length ? c.teachers.map(t => `${t.first_name} ${t.last_name}`).join(', ') : '-'
-        }</td>
-        <td class="py-2 px-3"></td>
-      </tr>`
-    ).join('');
+  `<tr>
+    <td class="py-2 px-3">${c.name}</td>
+    <td class="py-2 px-3">${c.arms && c.arms.length ? c.arms.join(', ') : '-'}</td>
+    <td class="py-2 px-3">${
+      c.teachers && c.teachers.length ? c.teachers.map(t => `${t.first_name} ${t.last_name}`).join(', ') : '-'
+    }</td>
+    <td class="py-2 px-3">
+      <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editClass('${c._id}')">
+        <i class="fa fa-edit"></i>
+      </button>
+    </td>
+  </tr>`
+).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">Error loading classes.</td></tr>'; }
 }
 loadClasses();
@@ -99,20 +103,37 @@ loadClasses();
 // Add Class
 document.getElementById('classForm').onsubmit = async function(e){
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(this));
+  const form = this;
+  const data = Object.fromEntries(new FormData(form));
   data.arms = data.arms ? data.arms.split(',').map(a => a.trim()).filter(a => a) : [];
+  const editId = form.getAttribute('data-edit-id');
   document.getElementById('classMessage').textContent = "Saving...";
   try{
-    const res = await fetch(API_BASE + "/classes", {
-      method: "POST",
+    const method = editId ? "PUT" : "POST";
+    const url = API_BASE + "/classes" + (editId ? "/" + editId : "");
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify(data)
     });
     document.getElementById('classMessage').textContent = res.ok ? "Saved!" : "Failed!";
+    form.removeAttribute('data-edit-id');
+    form.reset();
     loadClasses();
   }catch{ document.getElementById('classMessage').textContent = "Network error."; }
 };
-
+function editClass(id) {
+  fetch(`${API_BASE}/classes/${id}`, { headers: { Authorization: "Bearer " + token }})
+    .then(res => res.json())
+    .then(cls => {
+      const form = document.getElementById('classForm');
+      form.name.value = cls.name || "";
+      form.arms.value = cls.arms && cls.arms.length ? cls.arms.join(', ') : "";
+      form.teacherId.value = cls.teachers && cls.teachers.length ? cls.teachers[0]._id : "";
+      form.setAttribute('data-edit-id', id);
+      document.getElementById('classMessage').textContent = "Editing class. Save to update.";
+    });
+}
 // Assign Subject to Class & Teacher
 document.getElementById('assignSubjectForm').onsubmit = async function(e) {
   e.preventDefault();
@@ -455,3 +476,4 @@ window.editTerm = editTerm;
 window.editExamSchedule = editExamSchedule;
 window.editExamMode = editExamMode;
 window.editCBT = editCBT;
+window.editClass = editClass;

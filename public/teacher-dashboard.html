@@ -22,6 +22,9 @@
       <button data-section="draftResults">Draft Results</button>
       <button data-section="notifications">Notifications</button>
       <button data-section="profile">Profile/Settings</button>
+      <!-- Add in the sidebar menu where other buttons are -->
+<button data-section="cbtQuestions">CBT Questions</button>
+      
     </nav>
     <div class="profile-section">
       <div style="font-size:1.1em;"><strong>Mr. John Doe</strong></div>
@@ -114,6 +117,27 @@
       </div>
     </section>
 
+<!-- Add this after other <section> blocks -->
+<section id="section-cbtQuestions" style="display:none;">
+  <div class="card">
+    <h2>CBT Questions Uploader</h2>
+    <form id="cbt-question-form">
+      <label>Class</label>
+      <select id="cbt-class-select" required></select>
+      <label>Subject</label>
+      <select id="cbt-subject-select" required></select>
+      <label>Title</label>
+      <input type="text" id="cbt-title" required>
+      <label>Duration (minutes)</label>
+      <input type="number" id="cbt-duration" min="1" required>
+      <label>Questions</label>
+      <div id="cbt-questions-list"></div>
+      <button type="button" class="btn" id="cbt-add-question-btn">+ Add Question</button>
+      <button type="submit" class="btn" style="margin-top:12px;">Upload CBT</button>
+    </form>
+    <div id="cbt-upload-msg" style="margin-top:10px;color:green;"></div>
+  </div>
+</section>
     <!-- Profile/Settings Section -->
     <section id="section-profile" style="display:none;">
       <div class="card profile-settings">
@@ -142,7 +166,13 @@
           <input type="text" id="assignment-title" name="title" required>
           <label>Subject</label>
           <select name="subject" id="assignment-subject"></select>
-          <label>Description</label>
+          <!-- Add this in the assignment modal form, after the "Due Date" input, for example -->
+<label>CBT (optional)</label>
+<select id="assignment-cbt">
+  <option value="">None (regular assignment)</option>
+  <!-- CBTs will be loaded here -->
+</select>
+          <label>Description/Instruction</label>
           <input type="text" id="assignment-desc" name="desc" required>
           <label>Due Date</label>
           <input type="date" id="assignment-due" name="due" required>

@@ -284,17 +284,17 @@
         });
         // Setup Quill for all questions and options
         questions.forEach((q, qi) => {
-          // Question Quill
-          let container = document.getElementById(`qtext-quill-${qi}`);
-          if(container) {
-            let quill = new Quill(container, getQuillConfig());
-            if(q.text) quill.root.innerHTML = q.text;
-            quill.on('text-change', () => { questions[qi].text = quill.root.innerHTML; });
-            container.__quill = quill;
-          }
-          // Render options
-          renderOptions(qi);
-        });
+  // Question Quill
+  let container = document.getElementById(`qtext-quill-${qi}`);
+  if(container && !container.__quill) {
+    let quill = new Quill(container, getQuillConfig());
+    if(q.text) quill.root.innerHTML = q.text;
+    quill.on('text-change', () => { questions[qi].text = quill.root.innerHTML; });
+    container.__quill = quill;
+  }
+  // Render options
+  renderOptions(qi);
+});
       }
       window.removeQuestion = function(idx) {
         questions.splice(idx, 1);
@@ -333,12 +333,12 @@
         // Setup Quill for each option
         (questions[qi].options||[]).forEach((opt, oi) => {
           let container = document.getElementById(`q${qi}-opt-quill-${oi}`);
-          if(container) {
-            let quill = new Quill(container, getQuillConfig());
-            if(opt.value) quill.root.innerHTML = opt.value;
-            quill.on('text-change', () => { questions[qi].options[oi].value = quill.root.innerHTML; });
-            container.__quill = quill;
-          }
+if(container && !container.__quill) {
+  let quill = new Quill(container, getQuillConfig());
+  if(opt.value) quill.root.innerHTML = opt.value;
+  quill.on('text-change', () => { questions[qi].options[oi].value = quill.root.innerHTML; });
+  container.__quill = quill;
+}
         });
         // Correct answer select
         const corrSel = document.querySelector(`[data-question-idx="${qi}"] .correct-answer-select`);

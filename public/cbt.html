@@ -418,43 +418,57 @@ logStudentActivity('started');
       showResults(result);
     }
 
-    function showResults(result) {
-      // If result is not returned (API not implemented), fallback to local check
-      let correct = 0;
-      let total = questions.length;
-      let resultHtml = "<h2 class='text-xl font-bold mb-2 text-primary'>Test Submitted</h2>";
-      resultHtml += `<div class='mb-3'>Thank you, <b>${student.name}</b>!<br>Here are your results:</div><ul class='mb-3'>`;
+  function showResults(result) {
+  // If result is not returned (API not implemented), fallback to local check
+  let correct = 0;
+  let total = questions.length;
+  let resultHtml = "<h2 class='text-xl font-bold mb-2 text-primary'>Test Submitted</h2>";
+  resultHtml += `<div class='mb-3'>Thank you, <b>${student.name}</b>!<br>Here are your results:</div><ul class='mb-3'>`;
 
-      if (result && result.results && Array.isArray(result.results)) {
-        // If backend returns detailed answers
-        result.results.forEach((q, i) => {
-          let isCorrect = q.isCorrect;
-          if (isCorrect) correct++;
-          resultHtml += `<li class="mb-2 text-base">${questions[i].text}<br>
-            <b>Your Ans:</b> ${typeof answers[i] === 'number' ? String.fromCharCode(65+answers[i]) : '<span class="text-red-600">No Answer</span>'} |
-            <b>Correct:</b> ${typeof q.correctAnswer === 'number' ? String.fromCharCode(65+q.correctAnswer) : '-'}
-            ${isCorrect ? "<span class='text-green-600 ml-2'>✔️</span>" : "<span class='text-red-600 ml-2'>❌</span>"}
-          </li>`;
-        });
-      } else {
-        // Fallback to local check (if backend does not validate)
-        questions.forEach((q, i) => {
-          let correctIdx = typeof q.answer === 'number' ? q.answer : (typeof q.answer === 'string' ? q.options.findIndex(o => o.key === q.answer) : null);
-          let isCorrect = answers[i] === correctIdx;
-          if (isCorrect) correct++;
-          resultHtml += `<li class="mb-2 text-base">${q.text}<br>
-            <b>Your Ans:</b> ${typeof answers[i] === 'number' ? String.fromCharCode(65+answers[i]) : '<span class="text-red-600">No Answer</span>'} |
-            <b>Correct:</b> ${typeof correctIdx === 'number' ? String.fromCharCode(65+correctIdx) : '-'}
-            ${isCorrect ? "<span class='text-green-600 ml-2'>✔️</span>" : "<span class='text-red-600 ml-2'>❌</span>"}
-          </li>`;
-        });
-      }
-      resultHtml += "</ul>";
-      resultHtml += `<div class="font-bold text-lg text-primary">Score: ${correct} / ${total}</div>`;
-      document.getElementById('cbtResultArea').innerHTML = `<div class="py-8">${resultHtml}</div>`;
-      document.getElementById('cbtTimer').textContent = '';
-      document.getElementById('cbtQuestionNav').innerHTML = '';
-    }
+  if (result && result.results && Array.isArray(result.results)) {
+    // If backend returns detailed answers
+    result.results.forEach((q, i) => {
+      let isCorrect = q.isCorrect;
+      if (isCorrect) correct++;
+      resultHtml += `<li class="mb-2 text-base">${questions[i].text}<br>
+        <b>Your Ans:</b> ${typeof answers[i] === 'number' ? String.fromCharCode(65+answers[i]) : '<span class="text-red-600">No Answer</span>'} |
+        <b>Correct:</b> ${typeof q.correctAnswer === 'number' ? String.fromCharCode(65+q.correctAnswer) : '-'}
+        ${isCorrect ? "<span class='text-green-600 ml-2'>✔️</span>" : "<span class='text-red-600 ml-2'>❌</span>"}
+      </li>`;
+    });
+  } else {
+    // Fallback to local check (if backend does not validate)
+    questions.forEach((q, i) => {
+      let correctIdx = typeof q.answer === 'number' ? q.answer : (typeof q.answer === 'string' ? q.options.findIndex(o => o.key === q.answer) : null);
+      let isCorrect = answers[i] === correctIdx;
+      if (isCorrect) correct++;
+      resultHtml += `<li class="mb-2 text-base">${q.text}<br>
+        <b>Your Ans:</b> ${typeof answers[i] === 'number' ? String.fromCharCode(65+answers[i]) : '<span class="text-red-600">No Answer</span>'} |
+        <b>Correct:</b> ${typeof correctIdx === 'number' ? String.fromCharCode(65+correctIdx) : '-'}
+        ${isCorrect ? "<span class='text-green-600 ml-2'>✔️</span>" : "<span class='text-red-600 ml-2'>❌</span>"}
+      </li>`;
+    });
+  }
+  resultHtml += "</ul>";
+  resultHtml += `<div class="font-bold text-lg text-primary">Score: ${correct} / ${total}</div>`;
+  // --- LOGOUT BUTTON ---
+  resultHtml += `<button id="cbtLogoutBtn" class="cbt-btn mt-5" style="margin-top:2em;">Log Out</button>`;
+
+  document.getElementById('cbtResultArea').innerHTML = `<div class="py-8">${resultHtml}</div>`;
+  document.getElementById('cbtTimer').textContent = '';
+  document.getElementById('cbtQuestionNav').innerHTML = '';
+
+  // Attach logout handler
+  const logoutBtn = document.getElementById('cbtLogoutBtn');
+  if (logoutBtn) {
+    logoutBtn.onclick = function() {
+      localStorage.removeItem('student_token');
+      localStorage.removeItem('studentToken');
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+    };
+  }
+}
 
     // --- INIT ---
     fetchStudentAndExam();

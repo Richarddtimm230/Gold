@@ -75,7 +75,10 @@ async function fillTeacherDropdown2() {
 fillClassDropdown();
 fillTeacherDropdown2();
 
-// Classes Table
+
+
+// ============ CLASSES ============
+
 async function loadClasses() {
   const tbody = document.getElementById('classesTableBody');
   try {
@@ -90,15 +93,24 @@ async function loadClasses() {
       c.teachers && c.teachers.length ? c.teachers.map(t => `${t.first_name} ${t.last_name}`).join(', ') : '-'
     }</td>
     <td class="py-2 px-3">
-      <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editClass('${c._id}')">
-        <i class="fa fa-edit"></i>
-      </button>
+      <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editClass('${c._id}')"><i class="fa fa-edit"></i></button>
+      <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteClass('${c._id}', this)"><i class="fa fa-trash"></i></button>
     </td>
   </tr>`
 ).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">Error loading classes.</td></tr>'; }
 }
 loadClasses();
+window.deleteClass = async function(id, btn) {
+  if (!confirm("Delete this class?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`${API_BASE}/classes/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadClasses();
+    else alert("Failed to delete.");
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>'; }
+};
+
 
 // Add Class
 document.getElementById('classForm').onsubmit = async function(e){
@@ -153,8 +165,7 @@ document.getElementById('assignSubjectForm').onsubmit = async function(e) {
     document.getElementById('assignSubjectMessage').textContent = "Network error.";
   }
 };
-
-// Sessions Table
+// Update sessions table render to include delete button
 async function loadSessions() {
   await fillDropdown("/sessions", "termSessionSelect");
   await fillDropdown("/sessions", "resultsSessionSelect");
@@ -168,11 +179,25 @@ async function loadSessions() {
         <td class="py-2 px-3">${s.name}</td>
         <td class="py-2 px-3">${s.startDate ? s.startDate.slice(0,10) : ''}</td>
         <td class="py-2 px-3">${s.endDate ? s.endDate.slice(0,10) : ''}</td>
-        <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editSession('${s._id}')"><i class="fa fa-edit"></i></button></td>
+        <td class="py-2 px-3">
+          <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editSession('${s._id}')"><i class="fa fa-edit"></i></button>
+          <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteSession('${s._id}', this)"><i class="fa fa-trash"></i></button>
+        </td>
       </tr>`).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="4">Error loading sessions.</td></tr>'; }
 }
-loadSessions();
+  loadSessions();
+window.deleteSession = async function(id, btn) {
+  if (!confirm("Delete this session?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`${API_BASE}/sessions/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadSessions();
+    else alert("Failed to delete.");
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>'; }
+};
+
+
 
 // Edit Session
 function editSession(id) {
@@ -210,6 +235,8 @@ document.getElementById('sessionForm').onsubmit = async function(e){
 };
 
 // Terms Table
+
+
 async function loadTerms() {
   const tbody = document.getElementById('termsTableBody');
   try {
@@ -222,11 +249,24 @@ async function loadTerms() {
         <td class="py-2 px-3">${t.session?.name || '-'}</td>
         <td class="py-2 px-3">${t.startDate ? t.startDate.slice(0,10) : ''}</td>
         <td class="py-2 px-3">${t.endDate ? t.endDate.slice(0,10) : ''}</td>
-        <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editTerm('${t._id}')"><i class="fa fa-edit"></i></button></td>
+        <td class="py-2 px-3">
+          <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editTerm('${t._id}')"><i class="fa fa-edit"></i></button>
+          <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteTerm('${t._id}', this)"><i class="fa fa-trash"></i></button>
+        </td>
       </tr>`).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading terms.</td></tr>'; }
 }
 loadTerms();
+window.deleteTerm = async function(id, btn) {
+  if (!confirm("Delete this term?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`${API_BASE}/terms/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadTerms();
+    else alert("Failed to delete.");
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>'; }
+};
+
 
 // Edit Term
 function editTerm(id) {
@@ -271,6 +311,10 @@ fillDropdown("/classes", "cbtClassSelect");
 fillDropdown("/classes", "resultsClassSelect");
 
 // Exams Schedule Table
+
+
+// ============ EXAMS SCHEDULE ============
+
 async function loadExamSchedules() {
   const tbody = document.getElementById('examScheduleTableBody');
   try {
@@ -283,11 +327,24 @@ async function loadExamSchedules() {
         <td class="py-2 px-3">${ex.term?.name || '-'}</td>
         <td class="py-2 px-3">${ex.class?.name || '-'}</td>
         <td class="py-2 px-3">${ex.date ? ex.date.slice(0,10) : ''}</td>
-        <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editExamSchedule('${ex._id}')"><i class="fa fa-edit"></i></button></td>
+        <td class="py-2 px-3">
+          <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editExamSchedule('${ex._id}')"><i class="fa fa-edit"></i></button>
+          <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteExamSchedule('${ex._id}', this)"><i class="fa fa-trash"></i></button>
+        </td>
       </tr>`).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading schedules.</td></tr>'; }
 }
 loadExamSchedules();
+window.deleteExamSchedule = async function(id, btn) {
+  if (!confirm("Delete this exam schedule?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`${API_BASE}/exams/schedules/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadExamSchedules();
+    else alert("Failed to delete.");
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>'; }
+};
+
 
 // Edit Exam Schedule
 function editExamSchedule(id) {
@@ -388,7 +445,10 @@ document.getElementById('examModeForm').onsubmit = async function(e){
   }catch{ document.getElementById('examModeMessage').textContent = "Network error."; }
 };
 
-// CBT Table
+
+
+// ============ CBT & MOCKS ============
+
 async function loadCBTs() {
   const tbody = document.getElementById('cbtTableBody');
   try {
@@ -401,11 +461,24 @@ async function loadCBTs() {
         <td class="py-2 px-3">${c.class?.name || '-'}</td>
         <td class="py-2 px-3">${c.mode}</td>
         <td class="py-2 px-3">${c.date ? c.date.slice(0,10) : ''}</td>
-        <td class="py-2 px-3"><button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editCBT('${c._id}')"><i class="fa fa-edit"></i></button></td>
+        <td class="py-2 px-3">
+          <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editCBT('${c._id}')"><i class="fa fa-edit"></i></button>
+          <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteCBT('${c._id}', this)"><i class="fa fa-trash"></i></button>
+        </td>
       </tr>`).join('');
   } catch { tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading CBT/mocks.</td></tr>'; }
 }
 loadCBTs();
+window.deleteCBT = async function(id, btn) {
+  if (!confirm("Delete this CBT/mock?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`${API_BASE}/cbt/mocks/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadCBTs();
+    else alert("Failed to delete.");
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>'; }
+};
+
 
 // Edit CBT/Mock
 function editCBT(id) {
@@ -456,7 +529,7 @@ async function fillPushCBTTermDropdown() {
     document.getElementById('pushCBTTermSelect').innerHTML = data.map(t => `<option value="${t._id}">${t.name} (${t.session?.name || "-"})</option>`).join('');
   } catch {}
 }
-// Results Table
+
 async function loadResults(filter = {}) {
   const tbody = document.getElementById('resultsTableBody');
   tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>';

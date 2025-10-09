@@ -367,8 +367,43 @@ router.get('/me', studentAuthMiddleware, async (req, res) => {
     photo_url: student.photoBase64 || ''
   });
 });
-// GET /api/alumni - Get only graduated students
+// GET /api/alumni - Return only alumni (students with status and class as Graduated)
 router.get('/alumni', async (req, res) => {
+  try {
+    let query = { status: "Pending", class: "Graduated" };
+    if (req.query.year) query.graduationYear = req.query.year;
+    if (req.query.search) {
+      const search = req.query.search.trim();
+      query.$or = [
+        { surname: { $regex: search, $options: "i" } },
+        { firstname: { $regex: search, $options: "i" } },
+        { regNo: { $regex: search, $options: "i" } }
+      ];
+    }
+    const alumni = await Student.find(query).sort({ graduationYear: -1, surname: 1 });
+    res.json({
+      students: alumni.map(stu => ({
+        student_id: stu.student_id,
+        regNo: stu.regNo,
+        firstname: stu.firstname,
+        surname: stu.surname,
+        name: `${stu.firstname} ${stu.surname}`,
+        class: stu.class,
+        graduationYear: stu.graduationYear || stu.academicSession,
+        achievement: stu.achievement || "",
+        remark: stu.remark || "",
+        report: stu.report || "",
+        photoBase64: stu.photoBase64 || "",
+        photo_url: stu.photo_url || "",
+        academicSession: stu.academicSession || ""
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// GET /api/alumni - Get only graduated students
+router.get('/mni', async (req, res) => {
   try {
     const { search, graduationYear } = req.query;
     let query = { status: "Graduated" };

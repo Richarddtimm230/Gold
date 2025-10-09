@@ -746,21 +746,7 @@ document.getElementById('assignSubjectForm').onsubmit = async function(e) {
     }
     loadSessions();
 
-    // Save Session
-    document.getElementById('sessionForm').onsubmit = async function(e){
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      document.getElementById('sessionMessage').textContent = "Saving...";
-      try{
-        const res = await fetch(API_BASE + "/sessions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify(data)
-        });
-        document.getElementById('sessionMessage').textContent = res.ok ? "Saved!" : "Failed!";
-        loadSessions();
-      }catch{ document.getElementById('sessionMessage').textContent = "Network error."; }
-    };
+
 
     // Terms Table
     async function loadTerms() {
@@ -781,21 +767,7 @@ document.getElementById('assignSubjectForm').onsubmit = async function(e) {
     }
     loadTerms();
 
-    // Save Term
-    document.getElementById('termForm').onsubmit = async function(e){
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      document.getElementById('termMessage').textContent = "Saving...";
-      try{
-        const res = await fetch(API_BASE + "/terms", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify(data)
-        });
-        document.getElementById('termMessage').textContent = res.ok ? "Saved!" : "Failed!";
-        loadTerms();
-      }catch{ document.getElementById('termMessage').textContent = "Network error."; }
-    };
+
 
     // Exams: fill dropdowns
     fillDropdown("/terms", "examTermSelect");
@@ -866,21 +838,7 @@ document.getElementById('assignSubjectForm').onsubmit = async function(e) {
     }
     loadExamModes();
 
-    // Save Exam Mode
-    document.getElementById('examModeForm').onsubmit = async function(e){
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      document.getElementById('examModeMessage').textContent = "Saving...";
-      try{
-        const res = await fetch(API_BASE + "/exams/modes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify(data)
-        });
-        document.getElementById('examModeMessage').textContent = res.ok ? "Saved!" : "Failed!";
-        loadExamModes();
-      }catch{ document.getElementById('examModeMessage').textContent = "Network error."; }
-    };
+
 
     // CBT Table
     async function loadCBTs() {
@@ -901,21 +859,7 @@ document.getElementById('assignSubjectForm').onsubmit = async function(e) {
     }
     loadCBTs();
 
-    // Save CBT/Mock
-    document.getElementById('cbtForm').onsubmit = async function(e){
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      document.getElementById('cbtMessage').textContent = "Saving...";
-      try{
-        const res = await fetch(API_BASE + "/cbt/mocks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify(data)
-        });
-        document.getElementById('cbtMessage').textContent = res.ok ? "Saved!" : "Failed!";
-        loadCBTs();
-      }catch{ document.getElementById('cbtMessage').textContent = "Network error."; }
-    };
+    
 
     // Results Table
     async function loadResults(filter={}) {

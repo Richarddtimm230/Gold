@@ -84,7 +84,7 @@ app.use('/api/students', studentsRoute);
 
 
 app.use('/api/admin', adminRoute);
-
+app.use('/api/report/preferences', require('./routes/reportPreferences'));
 // Super Admin protected route
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') {

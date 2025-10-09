@@ -1,3 +1,4 @@
+
 const API_BASE_URL = "https://goldlincschools.onrender.com";
 const token = localStorage.getItem('teacherToken') || localStorage.getItem('token') || "";
 

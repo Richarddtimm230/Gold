@@ -10,7 +10,6 @@ let draftResults = [];
 let attendanceRecords = [];
 let gradebookData = {};
 let assignments = [];
-let teacherResults = [];
 
 // --- INITIAL FETCH & SETUP ---
 window.addEventListener('DOMContentLoaded', fetchAndSetup);
@@ -36,115 +35,17 @@ async function fetchAndSetup() {
   assignments = await fetchAssignments() || [];
   draftResults = await fetchDraftResults() || [];
 
-  teacherResults = await fetchTeacherAllResults();
-
   renderClassesList();
   renderStudentsBlock();
   renderSubjectsBlock();
   showAddSubjectBlock();
 }
 
+// --- BACKEND API CALLS ---
 function authHeaders() {
   return token ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } : { 'Content-Type': 'application/json' };
 }
 
-// --- API: CRUD for each section ---
-// Students
-async function deleteStudent(studentId, classId) {
-  if (!confirm("Are you sure you want to delete this student?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/student/${studentId}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-    if (!res.ok) throw new Error();
-    studentsByClass[classId] = await fetchStudentsByClass(classId);
-    renderStudentsBlock();
-    alert("Student deleted.");
-  } catch {
-    alert("Failed to delete student.");
-  }
-}
-// Subjects
-async function updateSubject(subjectId, classId, newName) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/classes/${classId}/subjects/${subjectId}`, {
-      method: "PATCH",
-      headers: authHeaders(),
-      body: JSON.stringify({ name: newName })
-    });
-    if (!res.ok) throw new Error();
-    subjectsByClass[classId] = await fetchSubjectsByClass(classId);
-    renderSubjectsBlock();
-    alert("Subject updated!");
-  } catch {
-    alert("Failed to update subject.");
-  }
-}
-async function deleteSubject(subjectId, classId) {
-  if (!confirm("Are you sure you want to delete this subject?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/classes/${classId}/subjects/${subjectId}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-    if (!res.ok) throw new Error();
-    subjectsByClass[classId] = await fetchSubjectsByClass(classId);
-    renderSubjectsBlock();
-    alert("Subject deleted.");
-  } catch {
-    alert("Failed to delete subject.");
-  }
-}
-// Assignments
-async function updateAssignment(assignmentId, updatedData) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments/${assignmentId}`, {
-      method: "PATCH",
-      headers: authHeaders(),
-      body: JSON.stringify(updatedData)
-    });
-    if (!res.ok) throw new Error();
-    assignments = await fetchAssignments();
-    renderAssignmentList();
-    alert("Assignment updated!");
-  } catch {
-    alert("Failed to update assignment.");
-  }
-}
-async function deleteAssignment(assignmentId) {
-  if (!confirm("Are you sure you want to delete this assignment?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments/${assignmentId}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-    if (!res.ok) throw new Error();
-    assignments = await fetchAssignments();
-    renderAssignmentList();
-    alert("Assignment deleted.");
-  } catch {
-    alert("Failed to delete assignment.");
-  }
-}
-// Results
-async function deleteResult(resultId) {
-  if (!confirm("Are you sure you want to delete this result?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results/${resultId}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-    if (!res.ok) throw new Error();
-    teacherResults = await fetchTeacherAllResults();
-    renderTeacherResults();
-    alert("Result deleted.");
-  } catch {
-    alert("Failed to delete result.");
-  }
-}
-
-// --- Backend API CALLS ---
 async function fetchTeacherProfile() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/me`, { headers: authHeaders() });
@@ -152,6 +53,7 @@ async function fetchTeacherProfile() {
     return await res.json();
   } catch { return null; }
 }
+
 async function fetchTeacherClasses() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/classes`, { headers: authHeaders() });
@@ -160,6 +62,7 @@ async function fetchTeacherClasses() {
     return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
+
 async function fetchTeacherNotifications() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/notifications`, { headers: authHeaders() });
@@ -168,6 +71,7 @@ async function fetchTeacherNotifications() {
     return Array.isArray(data.notifications) ? data.notifications : [];
   } catch { return []; }
 }
+
 async function fetchStudentsByClass(classId) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/students?classId=${encodeURIComponent(classId)}`, { headers: authHeaders() });
@@ -176,6 +80,7 @@ async function fetchStudentsByClass(classId) {
     return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
+
 async function fetchSubjectsByClass(classId) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/subjects?classId=${encodeURIComponent(classId)}`, { headers: authHeaders() });
@@ -184,6 +89,7 @@ async function fetchSubjectsByClass(classId) {
     return Array.isArray(data) ? data : [];
   } catch { return []; }
 }
+
 async function fetchAssignments() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, { headers: authHeaders() });
@@ -192,36 +98,17 @@ async function fetchAssignments() {
     return Array.isArray(data.assignments) ? data.assignments : [];
   } catch { return []; }
 }
-async function fetchDraftResults() {
+
+async function fetchTeacherResults(status = "") {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Draft`, { headers: authHeaders() });
+    let url = `${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results`;
+    if (status) url += `?status=${encodeURIComponent(status)}`;
+    const res = await fetch(url, { headers: authHeaders() });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data.results) ? data.results : [];
   } catch { return []; }
 }
-async function fetchTeacherAllResults() {
-  try {
-    const [draftRes, publishedRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Draft`, { headers: authHeaders() }),
-      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Published`, { headers: authHeaders() })
-    ]);
-    let draftResults = [];
-    let publishedResults = [];
-    if (draftRes.ok) {
-      const drData = await draftRes.json();
-      draftResults = Array.isArray(drData.results) ? drData.results : [];
-    }
-    if (publishedRes.ok) {
-      const prData = await publishedRes.json();
-      publishedResults = Array.isArray(prData.results) ? prData.results : [];
-    }
-    return [...draftResults, ...publishedResults].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-  } catch {
-    return [];
-  }
-}
-
 // --- UI LOGIC ---
 const sidebarBtns = document.querySelectorAll('.sidebar nav button');
 const sections = {
@@ -279,6 +166,7 @@ function renderClassesList() {
   classList.innerHTML = '';
   if (!teacher.classes || teacher.classes.length === 0) return;
 
+  // Auto-select first class if none is selected
   if (!selectedClassId) {
     selectedClassId = teacher.classes[0].id;
   }
@@ -328,8 +216,6 @@ function renderStudentsBlock() {
       <td class="actions" data-label="Actions">
         <button class="btn" onclick="openResultModal('${stu.id}','${selectedClassId}')">Enter/Update Result</button>
         <button class="btn" onclick="alert('Profile for ${stu.name}')">View Profile</button>
-        <button class="btn warning" onclick="editStudent('${stu.id}','${selectedClassId}')">Update</button>
-        <button class="btn danger" onclick="deleteStudent('${stu.id}','${selectedClassId}')">Delete</button>
       </td>
     </tr>`;
   });
@@ -337,48 +223,6 @@ function renderStudentsBlock() {
   block.innerHTML = html;
 }
 
-// Edit student modal and update logic
-function editStudent(studentId, classId) {
-  const stu = (studentsByClass[classId] || []).find(s => s.id === studentId);
-  if (!stu) return alert("Student not found.");
-  const modal = document.getElementById('editStudentModal');
-  document.getElementById('editStudentName').value = stu.name || '';
-  document.getElementById('editStudentRegNo').value = stu.regNo || '';
-  document.getElementById('editStudentEmail').value = stu.email || '';
-  modal.style.display = 'flex';
-  modal.dataset.studentId = studentId;
-  modal.dataset.classId = classId;
-}
-document.getElementById('editStudentForm').onsubmit = async function(e) {
-  e.preventDefault();
-  const modal = document.getElementById('editStudentModal');
-  const studentId = modal.dataset.studentId;
-  const classId = modal.dataset.classId;
-  const payload = {
-    name: document.getElementById('editStudentName').value,
-    regNo: document.getElementById('editStudentRegNo').value,
-    email: document.getElementById('editStudentEmail').value
-  };
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/student/${studentId}`, {
-      method: "PATCH",
-      headers: authHeaders(),
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error();
-    studentsByClass[classId] = await fetchStudentsByClass(classId);
-    renderStudentsBlock();
-    alert("Student updated!");
-    closeEditStudentModal();
-  } catch {
-    alert("Failed to update student.");
-  }
-};
-function closeEditStudentModal() {
-  document.getElementById('editStudentModal').style.display = 'none';
-}
-
-// --- Subjects Block ---
 function renderSubjectsBlock() {
   const block = document.getElementById('subjects-block');
   block.innerHTML = '';
@@ -390,19 +234,11 @@ function renderSubjectsBlock() {
   }
   let html = `<div class="card"><h2>Subjects for ${teacher.classes.find(c => c.id === selectedClassId).name}</h2><ul>`;
   subjects.forEach(subj => {
-    html += `<li>
-      ${subj.name || subj}
-      <button class="btn warning" onclick="promptUpdateSubject('${subj.id}','${selectedClassId}','${subj.name || subj}')">Update</button>
-      <button class="btn danger" onclick="deleteSubject('${subj.id}','${selectedClassId}')">Delete</button>
-    </li>`;
+    // Handles both object and string
+    html += `<li>${subj.name || subj}</li>`;
   });
   html += '</ul></div>';
   block.innerHTML = html;
-}
-// Prompt update subject
-function promptUpdateSubject(subjectId, classId, currentName) {
-  const newName = prompt("Update subject name:", currentName);
-  if (newName && newName !== currentName) updateSubject(subjectId, classId, newName);
 }
 
 // --- Add Subject to Class ---
@@ -416,6 +252,7 @@ function showAddSubjectBlock() {
   }
 }
 
+// Attach event listener for adding a subject
 const addSubjectForm = document.getElementById('add-subject-form');
 if (addSubjectForm) {
   addSubjectForm.onsubmit = async function(e) {
@@ -431,6 +268,7 @@ if (addSubjectForm) {
         body: JSON.stringify({ subjectName })
       });
       if (!res.ok) throw new Error();
+      // Always refetch to update UI with latest format
       subjectsByClass[selectedClassId] = await fetchSubjectsByClass(selectedClassId);
       renderSubjectsBlock();
       alert('Subject added!');
@@ -439,7 +277,6 @@ if (addSubjectForm) {
     }
   };
 }
-
 // --- Attendance ---
 function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');
@@ -485,6 +322,7 @@ document.getElementById('attendance-form').onsubmit = async function (e) {
     }
   });
   alert('Attendance saved!');
+  // Optionally: POST attendance to backend here, e.g.:
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/attendance`, {
       method: "POST",
@@ -532,7 +370,8 @@ function renderGradebookTable() {
   document.getElementById('gradebook-table').innerHTML = html;
 }
 
-// --- Assignments ---
+
+
 function renderAssignments() {
   const assignmentClassSel = document.getElementById('assignment-class');
   assignmentClassSel.innerHTML = '';
@@ -559,25 +398,10 @@ function populateAssignmentSubjects() {
   });
 }
 
-function openAssignmentModal(editId = null) {
+function openAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'flex';
   populateAssignmentSubjects();
   document.getElementById('assignment-class').onchange = populateAssignmentSubjects;
-  if (editId) {
-    // Populate form with assignment data
-    const assign = assignments.find(a => a._id === editId || a.id === editId);
-    if (assign) {
-      document.getElementById('assignment-class').value = assign.class && assign.class._id ? assign.class._id : assign.class;
-      document.getElementById('assignment-subject').value = assign.subject;
-      document.getElementById('assignment-title').value = assign.title;
-      document.getElementById('assignment-desc').value = assign.description || assign.desc;
-      document.getElementById('assignment-due').value = assign.dueDate ? assign.dueDate.slice(0,10) : (assign.due || '');
-      document.getElementById('assignmentForm').dataset.editId = editId;
-    }
-  } else {
-    document.getElementById('assignmentForm').reset();
-    document.getElementById('assignmentForm').dataset.editId = '';
-  }
 }
 
 function renderAssignmentList() {
@@ -586,8 +410,9 @@ function renderAssignmentList() {
     div.innerHTML = '<em>No assignments yet.</em>';
     return;
   }
-  let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th><th>Actions</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
+    // Defensive: handle both ObjectId and populated object
     const classId = a.class && a.class._id ? a.class._id : a.class;
     const cls = teacher.classes.find(c => c.id == classId);
     html += `<tr>
@@ -595,10 +420,6 @@ function renderAssignmentList() {
       <td data-label="Class">${(a.class && a.class.name) || (cls && cls.name) || classId || 'Unknown'}</td>
       <td data-label="Due">${a.dueDate ? a.dueDate.slice(0,10) : (a.due || '')}</td>
       <td data-label="Description">${a.description || a.desc}</td>
-      <td>
-        <button class="btn warning" onclick="openAssignmentModal('${a._id || a.id}')">Update</button>
-        <button class="btn danger" onclick="deleteAssignment('${a._id || a.id}')">Delete</button>
-      </td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -607,38 +428,33 @@ function renderAssignmentList() {
 
 function closeAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'none';
-  document.getElementById('assignmentForm').dataset.editId = '';
 }
-
+// Submission handler for creating assignments
 document.getElementById('assignmentForm').onsubmit = async function (e) {
   e.preventDefault();
-  const editId = e.target.dataset.editId;
   const classId = document.getElementById('assignment-class').value;
+  const fd = new FormData(this);
   const assignment = {
-    class: classId,
+    class: classId, // <--- use 'class', not 'classId'
     subject: document.getElementById('assignment-subject').value,
-    title: document.getElementById('assignment-title').value,
-    description: document.getElementById('assignment-desc').value,
-    dueDate: document.getElementById('assignment-due').value
+    title: fd.get('title'),
+    description: fd.get('desc'),
+    dueDate: fd.get('due')
   };
   try {
-    if (editId) {
-      await updateAssignment(editId, assignment);
-      alert('Assignment updated!');
-    } else {
-      const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(assignment)
-      });
-      if (!res.ok) throw new Error();
-      assignments = await fetchAssignments();
-      alert('Assignment created!');
-    }
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(assignment)
+    });
+    if (!res.ok) throw new Error();
+    // Instead of pushing returned assignment, always refetch
+    assignments = await fetchAssignments();
+    alert('Assignment created!');
     closeAssignmentModal();
     renderAssignmentList();
   } catch {
-    alert('Failed to create/update assignment.');
+    alert('Failed to create assignment.');
   }
 };
 window.openAssignmentModal = openAssignmentModal;
@@ -647,11 +463,9 @@ window.closeAssignmentModal = closeAssignmentModal;
 // --- Result Modal ---
 let currentResultStudentId = null;
 let currentResultClassId = null;
-let currentEditResultId = null;
-function openResultModal(studentId, classId, resultId=null) {
+function openResultModal(studentId, classId) {
   currentResultStudentId = studentId;
   currentResultClassId = classId;
-  currentEditResultId = resultId;
   let result = draftResults.find(r => r.studentId === studentId && r.classId === classId) || {};
   const subjects = subjectsByClass[classId] || [];
   let html = '<h4 style="margin:10px 0 7px 0;">Subjects & Scores</h4>';
@@ -695,12 +509,13 @@ function openResultModal(studentId, classId, resultId=null) {
 }
 function closeResultModal() {
   document.getElementById('resultModalBg').style.display = 'none';
-  currentResultStudentId = currentResultClassId = currentEditResultId = null;
+  currentResultStudentId = currentResultClassId = null;
 }
 document.getElementById('resultForm').onsubmit = async function (e) {
   e.preventDefault();
   const fd = new FormData(e.target);
   const subjects = subjectsByClass[currentResultClassId] || [];
+  // --- Build subjects array for backend ---
   let subjectsPayload = [];
   subjects.forEach(subj => {
     subjectsPayload.push({
@@ -711,6 +526,8 @@ document.getElementById('resultForm').onsubmit = async function (e) {
       comment: fd.get(`comment_${subj.id}`) || ''
     });
   });
+
+  // --- Skills ---
   let affectiveRatings = {};
   ['Punctuality', 'Attentiveness', 'Neatness', 'Honesty', 'Politeness', 'Perseverance', 'Relationship with Others', 'Organization Ability']
     .forEach(skill => affectiveRatings[skill] = Number(fd.get(`affective_${skill.toLowerCase().replace(/ /g, '_')}`)));
@@ -718,14 +535,17 @@ document.getElementById('resultForm').onsubmit = async function (e) {
   ['Hand Writing', 'Drawing and Painting', 'Speech / Verbal Fluency', 'Quantitative Reasoning', 'Processing Speed', 'Retentiveness', 'Visual Memory', 'Public Speaking', 'Sports and Games']
     .forEach(skill => psychomotorRatings[skill] = Number(fd.get(`psychomotor_${skill.toLowerCase().replace(/ |\//g, '_')}`)));
 
+  // --- Attendance ---
   let attendanceTotal = Number(fd.get('attendance_total'));
   let attendancePresent = Number(fd.get('attendance_present'));
   let attendanceAbsent = Number(fd.get('attendance_absent'));
   let attendancePercent = Number(fd.get('attendance_percent'));
 
-  const term = "FIRST TERM";
-  const session = "2024–2025";
+  // --- Term/session values: get from your UI (dropdown/select), or hardcode for now
+  const term = "FIRST TERM"; // Or get from a select/dropdown
+  const session = "2024–2025"; // Or get from a select/dropdown
 
+  // --- Compose payload for backend ---
   const payload = {
     student: currentResultStudentId,
     class: currentResultClassId,
@@ -738,35 +558,49 @@ document.getElementById('resultForm').onsubmit = async function (e) {
     attendancePresent,
     attendanceAbsent,
     attendancePercent,
-    status: "Draft"
+    status: "Draft" // Or "Published"
   };
 
+  // --- POST to new backend endpoint ---
   try {
-    let res, data;
-    if (currentEditResultId) {
-      res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results/${currentEditResultId}`, {
-        method: "PATCH",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-      });
-    } else {
-      res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(payload)
-      });
-    }
-    data = await res.json();
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to save results");
-    alert(currentEditResultId ? 'Results updated!' : 'Results saved!');
+    alert('Results saved!');
     closeResultModal();
     teacherResults = await fetchTeacherAllResults();
-    renderTeacherResults();
+    renderTeacherResults(); // You may want to fetch published results instead!
   } catch (err) {
     alert('Failed to save results: ' + err.message);
   }
 };
-
+async function fetchTeacherAllResults() {
+  try {
+    // Fetch drafts and published in parallel
+    const [draftRes, publishedRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Draft`, { headers: authHeaders() }),
+      fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Published`, { headers: authHeaders() })
+    ]);
+    let draftResults = [];
+    let publishedResults = [];
+    if (draftRes.ok) {
+      const drData = await draftRes.json();
+      draftResults = Array.isArray(drData.results) ? drData.results : [];
+    }
+    if (publishedRes.ok) {
+      const prData = await publishedRes.json();
+      publishedResults = Array.isArray(prData.results) ? prData.results : [];
+    }
+    // Combine both arrays (optionally sort by updatedAt descending)
+    return [...draftResults, ...publishedResults].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  } catch {
+    return [];
+  }
+}
 function renderTeacherResults() {
   const tbody = document.querySelector('#draft-results-table tbody');
   tbody.innerHTML = '';
@@ -781,15 +615,13 @@ function renderTeacherResults() {
       <td data-label="Status" style="color:${statusColor};font-weight:bold">${dr.status || ''}</td>
       <td data-label="Last Updated">${dr.updatedAt ? new Date(dr.updatedAt).toLocaleString() : ''}</td>
       <td data-label="Actions">
-        <button class="btn warning" onclick="openResultModal('${stu._id}','${cls._id}','${dr._id || dr.id}')">Update</button>
-        <button class="btn danger" onclick="deleteResult('${dr._id || dr.id}')">Delete</button>
-        <button class="btn" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
+        <button class="btn" onclick="openResultModal('${stu._id}','${cls._id}')">Edit</button>
+        <button class="btn danger" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
-}
-
+            }
 // --- Notifications ---
 function renderNotifications() {
   const list = document.getElementById('notification-list');
@@ -797,26 +629,9 @@ function renderNotifications() {
   notifications.forEach(note => {
     const div = document.createElement('div');
     div.className = 'notification';
-    div.innerHTML = `<span class="date">${note.date}</span> <span>${note.message}</span>
-      <button class="btn danger" onclick="deleteNotification('${note._id || note.id}')">Delete</button>`;
+    div.innerHTML = `<span class="date">${note.date}</span> <span>${note.message}</span>`;
     list.appendChild(div);
   });
-}
-// Delete notification
-async function deleteNotification(notificationId) {
-  if (!confirm("Delete this notification?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/notifications/${notificationId}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-    if (!res.ok) throw new Error();
-    notifications = await fetchTeacherNotifications();
-    renderNotifications();
-    alert("Notification deleted.");
-  } catch {
-    alert("Failed to delete notification.");
-  }
 }
 
 // --- Profile Update (Now connected to backend!) ---
@@ -851,24 +666,3 @@ window.openAssignmentModal = openAssignmentModal;
 window.closeAssignmentModal = closeAssignmentModal;
 window.openResultModal = openResultModal;
 window.closeResultModal = closeResultModal;
-window.promptUpdateSubject = promptUpdateSubject;
-window.deleteSubject = deleteSubject;
-window.editStudent = editStudent;
-window.deleteStudent = deleteStudent;
-window.deleteAssignment = deleteAssignment;
-window.deleteResult = deleteResult;
-window.deleteNotification = deleteNotification;
-
-// --- Student Edit Modal HTML (inject in teachers.html) ---
-// <div id="editStudentModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;background:rgba(32,40,71,0.23);align-items:center;justify-content:center;">
-//   <form id="editStudentForm" style="background:#fff;padding:30px;border-radius:10px;max-width:320px;">
-//     <h3>Edit Student</h3>
-//     <label>Name</label><input type="text" id="editStudentName"><br>
-//     <label>Reg. No.</label><input type="text" id="editStudentRegNo"><br>
-//     <label>Email</label><input type="email" id="editStudentEmail"><br>
-//     <div style="margin-top:12px;">
-//       <button type="submit" class="btn warning">Update</button>
-//       <button type="button" class="btn" onclick="closeEditStudentModal()">Cancel</button>
-//     </div>
-//   </form>
-// </div>

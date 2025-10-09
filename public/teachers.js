@@ -40,7 +40,16 @@ async function fetchAndSetup() {
   renderSubjectsBlock();
   showAddSubjectBlock();
 }
-
+function populateAssignmentCBTs() {
+  const cbtSel = document.getElementById('assignment-cbt');
+  cbtSel.innerHTML = '<option value="">None (regular assignment)</option>';
+  cbts.forEach(cbt => {
+    let opt = document.createElement('option');
+    opt.value = cbt._id;
+    opt.innerText = `${cbt.title} (${cbt.className || ''} - ${cbt.subjectName || ''})`;
+    cbtSel.appendChild(opt);
+  });
+}
 // --- BACKEND API CALLS ---
 function authHeaders() {
   return token ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } : { 'Content-Type': 'application/json' };
@@ -119,7 +128,8 @@ const sections = {
   assignments: document.getElementById('section-assignments'),
   draftResults: document.getElementById('section-draftResults'),
   notifications: document.getElementById('section-notifications'),
-  profile: document.getElementById('section-profile')
+  profile: document.getElementById('section-profile'),
+  cbtQuestions: document.getElementById('section-cbtQuestions')   // <--- comma before this line!
 };
 sidebarBtns.forEach(btn => {
   btn.onclick = function () {
@@ -133,6 +143,7 @@ sidebarBtns.forEach(btn => {
     if (sec === 'attendance') renderAttendance();
     if (sec === 'gradebook') renderGradebook();
     if (sec === 'assignments') renderAssignments();
+if (sec === 'cbtQuestions') renderCBTQuestionSection();
     if (sec === 'dashboard' || sec === 'classes') {
       renderClassesList();
       renderStudentsBlock();
@@ -398,10 +409,14 @@ function populateAssignmentSubjects() {
   });
 }
 
-function openAssignmentModal() {
+async function openAssignmentModal() {
   document.getElementById('assignmentModalBg').style.display = 'flex';
   populateAssignmentSubjects();
   document.getElementById('assignment-class').onchange = populateAssignmentSubjects;
+
+  // Fetch and populate CBTs
+  cbts = await fetchTeacherCBTs();
+  populateAssignmentCBTs();
 }
 
 function renderAssignmentList() {
@@ -410,15 +425,21 @@ function renderAssignmentList() {
     div.innerHTML = '<em>No assignments yet.</em>';
     return;
   }
-  let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>Description</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Title</th><th>Class</th><th>Due</th><th>CBT</th><th>Description</th></tr></thead><tbody>';
   assignments.forEach(a => {
-    // Defensive: handle both ObjectId and populated object
     const classId = a.class && a.class._id ? a.class._id : a.class;
     const cls = teacher.classes.find(c => c.id == classId);
+    let cbtTitle = '';
+    if (a.cbt) {
+      // Try to find CBT title if available
+      const found = cbts.find(cbt => cbt._id === a.cbt);
+      cbtTitle = found ? found.title : a.cbt;
+    }
     html += `<tr>
       <td data-label="Title">${a.title}</td>
       <td data-label="Class">${(a.class && a.class.name) || (cls && cls.name) || classId || 'Unknown'}</td>
       <td data-label="Due">${a.dueDate ? a.dueDate.slice(0,10) : (a.due || '')}</td>
+      <td data-label="CBT">${cbtTitle || '-'}</td>
       <td data-label="Description">${a.description || a.desc}</td>
     </tr>`;
   });
@@ -435,12 +456,15 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
   const classId = document.getElementById('assignment-class').value;
   const fd = new FormData(this);
   const assignment = {
-    class: classId, // <--- use 'class', not 'classId'
+    class: classId,
     subject: document.getElementById('assignment-subject').value,
     title: fd.get('title'),
     description: fd.get('desc'),
     dueDate: fd.get('due')
   };
+  const cbtId = document.getElementById('assignment-cbt').value;
+  if (cbtId) assignment.cbt = cbtId; // <-- Add CBT id if selected
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/assignments`, {
       method: "POST",
@@ -448,7 +472,6 @@ document.getElementById('assignmentForm').onsubmit = async function (e) {
       body: JSON.stringify(assignment)
     });
     if (!res.ok) throw new Error();
-    // Instead of pushing returned assignment, always refetch
     assignments = await fetchAssignments();
     alert('Assignment created!');
     closeAssignmentModal();
@@ -657,7 +680,162 @@ document.getElementById('profile-form').onsubmit = async function (e) {
     alert('Failed to update profile.');
   }
 };
+// --- CBT Question Upload Section ---
+let cbtQuestions = [];
 
+function renderCBTQuestionSection() {
+  // Populate classes and subjects dropdowns
+  const classSel = document.getElementById('cbt-class-select');
+  const subjSel = document.getElementById('cbt-subject-select');
+  classSel.innerHTML = '';
+  subjSel.innerHTML = '';
+  if (!teacher.classes) return;
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    classSel.appendChild(opt);
+  });
+  classSel.onchange = function() {
+    const subjects = subjectsByClass[classSel.value] || [];
+    subjSel.innerHTML = '';
+    subjects.forEach(subj => {
+      let opt = document.createElement('option');
+      opt.value = subj.id;
+      opt.innerText = subj.name;
+      subjSel.appendChild(opt);
+    });
+  };
+  // Trigger once
+  classSel.onchange();
+
+  // Setup question adder
+  cbtQuestions = [];
+  renderCBTQuestions();
+}
+
+function renderCBTQuestions() {
+  const listDiv = document.getElementById('cbt-questions-list');
+  listDiv.innerHTML = '';
+  cbtQuestions.forEach((q, idx) => {
+    let qDiv = document.createElement('div');
+    qDiv.className = 'cbt-question-block';
+    qDiv.innerHTML = `
+      <label>Question ${idx+1}</label>
+      <textarea class="cbt-question-text" placeholder="Question text">${q.text||''}</textarea>
+      <label>Score</label>
+      <input type="number" min="1" class="cbt-question-score" value="${q.score||1}">
+      <label>Options</label>
+      <div class="cbt-options-list"></div>
+      <button type="button" class="btn danger" onclick="removeCBTQuestion(${idx})">Remove Question</button>
+      <hr>
+    `;
+    listDiv.appendChild(qDiv);
+    // Render options
+    const optionsDiv = qDiv.querySelector('.cbt-options-list');
+    optionsDiv.innerHTML = '';
+    (q.options||[]).forEach((opt, oi) => {
+      let optDiv = document.createElement('div');
+      optDiv.innerHTML = `
+        <input type="text" class="cbt-option-text" value="${opt}" placeholder="Option ${String.fromCharCode(65+oi)}">
+        <input type="radio" name="correct_${idx}" ${q.answer===oi?'checked':''} onclick="setCBTCorrect(${idx},${oi})"> Correct
+        <button type="button" class="btn danger" onclick="removeCBTOption(${idx},${oi})">Remove</button>
+      `;
+      optionsDiv.appendChild(optDiv);
+    });
+    let addOptBtn = document.createElement('button');
+    addOptBtn.type = 'button';
+    addOptBtn.className = 'btn';
+    addOptBtn.textContent = '+ Add Option';
+    addOptBtn.onclick = () => { addCBTOption(idx); };
+    optionsDiv.appendChild(addOptBtn);
+
+    // Handlers for text/score
+    qDiv.querySelector('.cbt-question-text').oninput = (e) => { cbtQuestions[idx].text = e.target.value; };
+    qDiv.querySelector('.cbt-question-score').oninput = (e) => { cbtQuestions[idx].score = Number(e.target.value)||1; };
+    // Handlers for option text
+    optionsDiv.querySelectorAll('.cbt-option-text').forEach((inp, oi) => {
+      inp.oninput = (e) => { cbtQuestions[idx].options[oi] = e.target.value; };
+    });
+  });
+}
+
+window.removeCBTQuestion = function(idx) {
+  cbtQuestions.splice(idx,1);
+  renderCBTQuestions();
+};
+window.addCBTOption = function(qidx) {
+  if (!cbtQuestions[qidx].options) cbtQuestions[qidx].options = [];
+  cbtQuestions[qidx].options.push('');
+  renderCBTQuestions();
+};
+window.removeCBTOption = function(qidx, oidx) {
+  cbtQuestions[qidx].options.splice(oidx,1);
+  if (cbtQuestions[qidx].answer === oidx) cbtQuestions[qidx].answer = 0;
+  renderCBTQuestions();
+};
+window.setCBTCorrect = function(qidx, oidx) {
+  cbtQuestions[qidx].answer = oidx;
+};
+
+document.getElementById('cbt-add-question-btn').onclick = function() {
+  cbtQuestions.push({ text: '', options: [], answer: 0, score: 1 });
+  renderCBTQuestions();
+};
+
+document.getElementById('cbt-question-form').onsubmit = async function(e) {
+  e.preventDefault();
+  // Validate
+  const classId = document.getElementById('cbt-class-select').value;
+  const subjectId = document.getElementById('cbt-subject-select').value;
+  const title = document.getElementById('cbt-title').value.trim();
+  const duration = Number(document.getElementById('cbt-duration').value);
+  if (!classId || !subjectId || !title || !duration) {
+    document.getElementById('cbt-upload-msg').style.color = 'red';
+    document.getElementById('cbt-upload-msg').textContent = 'Please fill all fields.';
+    return;
+  }
+  if (!cbtQuestions.length) {
+    document.getElementById('cbt-upload-msg').style.color = 'red';
+    document.getElementById('cbt-upload-msg').textContent = 'Add at least one question.';
+    return;
+  }
+  for (let [i, q] of cbtQuestions.entries()) {
+    if (!q.text || !Array.isArray(q.options) || q.options.length < 2)
+      return document.getElementById('cbt-upload-msg').textContent = `Question ${i+1} must have text and at least 2 options.`;
+    for (let o of q.options) if (!o) return document.getElementById('cbt-upload-msg').textContent = `No empty options allowed.`;
+    if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length)
+      return document.getElementById('cbt-upload-msg').textContent = `Select a correct option for Question ${i+1}.`;
+  }
+  // Submit to backend (adjust endpoint as needed)
+  const payload = {
+    title,
+    class: classId,
+    subject: subjectId,
+    duration,
+    questions: cbtQuestions.map(q => ({
+      text: q.text,
+      options: q.options,
+      answer: q.answer,
+      score: q.score
+    }))
+  };
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    document.getElementById('cbt-upload-msg').style.color = 'green';
+    document.getElementById('cbt-upload-msg').textContent = 'CBT uploaded successfully!';
+    cbtQuestions = [];
+    renderCBTQuestions();
+  } catch (err) {
+    document.getElementById('cbt-upload-msg').style.color = 'red';
+    document.getElementById('cbt-upload-msg').textContent = 'Upload failed: ' + err.message;
+  }
+};
 // --- Initial Render (called after data is fetched) ---
 window.renderClassesList = renderClassesList;
 window.renderStudentsBlock = renderStudentsBlock;

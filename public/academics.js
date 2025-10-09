@@ -442,7 +442,20 @@ document.getElementById('cbtForm').onsubmit = async function(e){
     loadCBTs();
   }catch{ document.getElementById('cbtMessage').textContent = "Network error."; }
 };
-
+async function fillPushCBTSessionDropdown() {
+  try {
+    const res = await fetch("https://goldlincschools.onrender.com/api/academics/sessions", { headers: { Authorization: "Bearer " + token } });
+    const data = await res.json();
+    document.getElementById('pushCBTSessionSelect').innerHTML = data.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+  } catch {}
+}
+async function fillPushCBTTermDropdown() {
+  try {
+    const res = await fetch("https://goldlincschools.onrender.com/api/academics/terms", { headers: { Authorization: "Bearer " + token } });
+    const data = await res.json();
+    document.getElementById('pushCBTTermSelect').innerHTML = data.map(t => `<option value="${t._id}">${t.name} (${t.session?.name || "-"})</option>`).join('');
+  } catch {}
+}
 // Results Table
 async function loadResults(filter = {}) {
   const tbody = document.getElementById('resultsTableBody');
@@ -512,32 +525,33 @@ const pushCBTResultsMessage = document.getElementById('pushCBTResultsMessage');
 const pushCBTModalFeedback = document.getElementById('pushCBTModalFeedback');
 const cancelPushCBTModal = document.getElementById('cancelPushCBTModal');
 
-// Open modal on button click
 pushCBTResultsBtn.onclick = () => {
+  fillPushCBTSessionDropdown();
+  fillPushCBTTermDropdown();
   pushCBTModal.classList.remove('hidden');
   pushCBTModalFeedback.textContent = "";
 };
-
 // Close modal on cancel
 cancelPushCBTModal.onclick = () => {
   pushCBTModal.classList.add('hidden');
   pushCBTModalFeedback.textContent = "";
 };
 
-// Handle modal submit
 pushCBTModalForm.onsubmit = async function(e) {
   e.preventDefault();
   const formData = new FormData(pushCBTModalForm);
   const scoreField = formData.get('scoreField');
+  const sessionId = formData.get('sessionId');
+  const termId = formData.get('termId');
   pushCBTModalFeedback.textContent = "Pushing CBT results...";
   try {
     const res = await fetch("https://goldlincschools.onrender.com/api/results/push-cbt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem('adminToken') || localStorage.getItem('token'))
+        "Authorization": "Bearer " + token
       },
-      body: JSON.stringify({ scoreField })
+      body: JSON.stringify({ scoreField, sessionId, termId })
     });
     const data = await res.json();
     if (data.success) {
@@ -549,12 +563,11 @@ pushCBTModalForm.onsubmit = async function(e) {
   } catch (err) {
     pushCBTModalFeedback.textContent = "Network error";
   } finally {
-    // Optionally close the modal after a few seconds
     setTimeout(() => {
       pushCBTModal.classList.add('hidden');
     }, 2000);
   }
-};  
+};
 window.editSession = editSession;
 window.editTerm = editTerm;
 window.editExamSchedule = editExamSchedule;

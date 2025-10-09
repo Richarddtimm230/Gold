@@ -421,10 +421,10 @@
 </button>
 <div id="pushCBTResultsMessage" class="mt-2 text-sm"></div>
 
-<!-- Modal for Score Field Selection -->
+<!-- Modal for Score Field + Session + Term Selection -->
 <div id="pushCBTModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-    <h2 class="text-lg font-bold mb-3">Select Score Field for Universal Results</h2>
+    <h2 class="text-lg font-bold mb-3">Push CBT Results to Universal</h2>
     <form id="pushCBTModalForm" class="space-y-4">
       <div>
         <label class="block font-semibold mb-1">Where should the CBT score be saved?</label>
@@ -434,6 +434,14 @@
           <label><input type="radio" name="scoreField" value="midterm_score"> Midterm/Test Score</label><br>
           <label><input type="radio" name="scoreField" value="exam_score"> Exam Score</label>
         </div>
+      </div>
+      <div>
+        <label class="block font-semibold mb-1">Select Session</label>
+        <select name="sessionId" id="pushCBTSessionSelect" required class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]"></select>
+      </div>
+      <div>
+        <label class="block font-semibold mb-1">Select Term</label>
+        <select name="termId" id="pushCBTTermSelect" required class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]"></select>
       </div>
       <div class="flex gap-2 mt-4">
         <button type="submit" class="px-5 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700">Confirm & Push</button>

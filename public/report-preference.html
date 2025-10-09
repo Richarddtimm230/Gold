@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report Card Preferences - Admin</title>
+  <link rel="stylesheet" href="admin.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f6f8fa; }
+    .pref-container { max-width: 600px; margin: 60px auto 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ddeaff77; padding: 36px 30px;}
+    h2 { color: #22305a; font-size: 2em; margin-bottom: 18px;}
+    label { display: flex; align-items: center; gap: 12px; font-size: 1.12em; margin-bottom: 18px;}
+    input[type="checkbox"] { width: 22px; height: 22px;}
+    .btn { background: #2647a6; color: #fff; font-weight: bold; border: none; border-radius: 7px; padding: 12px 36px; font-size: 1.1em; cursor: pointer;}
+    .btn:disabled { opacity: 0.5;}
+    .status-msg { margin-top: 20px; font-weight: bold;}
+  </style>
+</head>
+<body>
+  <div class="pref-container">
+    <h2>Report Card Display Preferences</h2>
+    <form id="prefsForm">
+      <label><input type="checkbox" name="showTeacherRemark"> Show Teacher's Remark Column</label>
+      <label><input type="checkbox" name="showPsychomotorSkills"> Show Psychomotor Skills Table</label>
+      <label><input type="checkbox" name="showAffectiveSkills"> Show Affective Skills Table</label>
+      <label><input type="checkbox" name="showAttendance"> Show Attendance Table</label>
+      <label><input type="checkbox" name="showPrincipalComment"> Show Principal's Comment Section</label>
+      <label><input type="checkbox" name="showSubjectPosition"> Show Subject Position Column</label>
+      <label><input type="checkbox" name="showGradePoints"> Show Grade Points Column</label>
+      <label><input type="checkbox" name="showGPA"> Show GPA row</label>
+      <label><input type="checkbox" name="showResultSummary"> Show Result Summary</label>
+      <button class="btn" type="submit" id="saveBtn">Save Preferences</button>
+      <div class="status-msg" id="statusMsg"></div>
+    </form>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('prefsForm');
+  const statusMsg = document.getElementById('statusMsg');
+  const saveBtn = document.getElementById('saveBtn');
+  // Load current preferences
+  fetch('https://goldlincchools.onrender.com/api/report/preferences', { credentials: 'include' })
+    .then(r => r.json())
+    .then(pref => {
+      Object.keys(pref).forEach(key => {
+        if (form.elements[key])
+          form.elements[key].checked = !!pref[key];
+      });
+    });
+
+  form.onsubmit = async function(e) {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    statusMsg.textContent = "Saving...";
+    const data = {};
+    Array.from(form.elements).forEach(el => {
+      if (el.type === "checkbox" && el.name) data[el.name] = el.checked;
+    });
+    try {
+      const res = await fetch('https://goldlincschools.onrender.com/api/report/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        statusMsg.textContent = "Preferences saved!";
+      } else {
+        statusMsg.textContent = "Failed to save preferences.";
+      }
+    } catch {
+      statusMsg.textContent = "Network error.";
+    }
+    saveBtn.disabled = false;
+  };
+});
+  </script>
+</body>
+</html>

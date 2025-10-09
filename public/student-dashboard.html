@@ -772,25 +772,29 @@
     }
 
     // Timetable (today)
-    const timetableList = document.getElementById('timetableList');
-    timetableList.innerHTML = '';
-    const weekday = new Date().toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
-    let todayClasses = [];
-    if (data.timetable && Array.isArray(data.timetable)) {
-      const today = data.timetable.find(d => (d.day || '').toLowerCase() === weekday);
-      todayClasses = today ? today.subjects : [];
-    }
-    if (todayClasses && todayClasses.length > 0) {
-      todayClasses.forEach(sub => {
-        const div = document.createElement('div');
-        div.className = 'course-card';
-        div.innerHTML = `<div class="course-title">${sub.name || sub.subject || ''}</div>
-          <div class="course-meta">${sub.time || ''}</div>`;
-        timetableList.appendChild(div);
-      });
+    async function fetchAndRenderTimetable(studentClassId) {
+  const timetableList = document.getElementById('timetableList');
+  timetableList.innerHTML = '<div class="course-card">Loading...</div>';
+  try {
+    // Fetch scheduled mocks for today
+    const res = await fetch(API_BASE_URL + '/api/academics/cbt/mocks/today/' + studentClassId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const cbts = await res.json();
+    if (cbts && cbts.length > 0) {
+      timetableList.innerHTML = cbts.map(cbt =>
+        `<div class="course-card">
+          <div class="course-title">${cbt.title} (${cbt.mode})</div>
+          <div class="course-meta">${new Date(cbt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>`
+      ).join('');
     } else {
-      timetableList.innerHTML = `<div class="course-card">No classes today!</div>`;
+      timetableList.innerHTML = `<div class="course-card">No CBT/Mock scheduled today!</div>`;
     }
+  } catch (err) {
+    timetableList.innerHTML = `<div class="course-card">Error loading today's mocks</div>`;
+  }
+}
 
     // Courses/groups
     const coursesList = document.getElementById('coursesList');
@@ -836,6 +840,11 @@
     }
   }
   fetchStudentDashboard();
+  if (data.class && data.class._id) {
+  fetchAndRenderTimetable(data.class._id);
+} else {
+  timetableList.innerHTML = `<div class="course-card">No class info!</div>`;
+}
 
   // Course select logic (visual feedback)
   function selectCourse(idx, courses) {

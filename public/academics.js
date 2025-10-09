@@ -450,3 +450,8 @@ document.getElementById('resultsFilterForm').onsubmit = function(e) {
   const data = Object.fromEntries(new FormData(this));
   loadResults(data);
 };
+window.editSession = editSession;
+window.editTerm = editTerm;
+window.editExamSchedule = editExamSchedule;
+window.editExamMode = editExamMode;
+window.editCBT = editCBT;

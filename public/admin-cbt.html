@@ -412,12 +412,16 @@
 
 
 // Form submit handler (attach every time the form is (re)rendered!)
+// Prevents multiple handlers by removing previous event listeners if any.
 function attachUploadFormHandler() {
   const uploadForm = document.getElementById('uploadExamForm');
   if (!uploadForm) return;
-  // Remove previous submit handlers
-  uploadForm.onsubmit = null;
-  uploadForm.addEventListener('submit', async function handler(e) {
+
+  // Remove previous event listeners by cloning the node
+  const newForm = uploadForm.cloneNode(true);
+  uploadForm.parentNode.replaceChild(newForm, uploadForm);
+
+  newForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
     // Validate
@@ -430,20 +434,20 @@ function attachUploadFormHandler() {
       document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">All exam fields are required.</div>`; return;
     }
     // Validate questions
-    if (!questions.length) {
+    if (!window.questions || !window.questions.length) {
       document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Add at least one question.</div>`; return;
     }
-    for (let [i,q] of questions.entries()) {
+    for (let [i, q] of window.questions.entries()) {
       if (!q.text || !(q.options && q.options.length >= 2)) {
-        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} must have text and at least 2 options.</div>`; return;
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i + 1} must have text and at least 2 options.</div>`; return;
       }
-      for (let [j,o] of (q.options||[]).entries()) {
+      for (let [j, o] of (q.options || []).entries()) {
         if (!o.value) {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} Option ${String.fromCharCode(65+j)} cannot be empty.</div>`; return;
+          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i + 1} Option ${String.fromCharCode(65 + j)} cannot be empty.</div>`; return;
         }
       }
       if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i+1}.</div>`; return;
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i + 1}.</div>`; return;
       }
     }
     // Prepare payload
@@ -452,13 +456,12 @@ function attachUploadFormHandler() {
       class: classId,
       subject: subjectId,
       duration,
-      questions: questions.map(q => ({
-  text: q.text,
-  options: q.options, // send array of objects, not just strings!
-  answer: q.answer,
-  score: q.score || 1
-}))
-    
+      questions: window.questions.map(q => ({
+        text: q.text,
+        options: q.options,
+        answer: q.answer,
+        score: q.score || 1
+      }))
     };
     // POST /api/exam
     try {
@@ -472,12 +475,14 @@ function attachUploadFormHandler() {
         document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">${data.error}</div>`;
       } else {
         document.getElementById('uploadExamMsg').innerHTML = `<div class="text-green-600">Exam uploaded successfully.</div>`;
-        setTimeout(showExams, 1200);
+        setTimeout(() => {
+          if (typeof showExams === 'function') showExams();
+        }, 1200);
       }
     } catch (err) {
       document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Network or server error.</div>`;
     }
-  };
+  });
 }
     }
 

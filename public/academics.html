@@ -501,7 +501,180 @@
     }
     loadClasses();
 
-    // Add Class
+  function editSession(id) {
+    // Example: Load session data and populate the form for editing
+    fetch(`${API_BASE}/sessions/${id}`, { headers: { Authorization: "Bearer " + token }})
+      .then(res => res.json())
+      .then(session => {
+        const form = document.getElementById('sessionForm');
+        form.name.value = session.name || "";
+        form.startDate.value = session.startDate ? session.startDate.slice(0,10) : "";
+        form.endDate.value = session.endDate ? session.endDate.slice(0,10) : "";
+        form.setAttribute('data-edit-id', id);
+        document.getElementById('sessionMessage').textContent = "Editing session. Save to update.";
+      });
+  }
+
+  document.getElementById('sessionForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = this;
+    const data = Object.fromEntries(new FormData(form));
+    const editId = form.getAttribute('data-edit-id');
+    document.getElementById('sessionMessage').textContent = "Saving...";
+    try{
+      const method = editId ? "PUT" : "POST";
+      const url = API_BASE + "/sessions" + (editId ? "/" + editId : "");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('sessionMessage').textContent = res.ok ? "Saved!" : "Failed!";
+      form.removeAttribute('data-edit-id');
+      form.reset();
+      loadSessions();
+    }catch{ document.getElementById('sessionMessage').textContent = "Network error."; }
+  };
+
+  function editTerm(id) {
+    fetch(`${API_BASE}/terms/${id}`, { headers: { Authorization: "Bearer " + token }})
+      .then(res => res.json())
+      .then(term => {
+        const form = document.getElementById('termForm');
+        form.name.value = term.name || "";
+        form.sessionId.value = term.sessionId || "";
+        form.startDate.value = term.startDate ? term.startDate.slice(0,10) : "";
+        form.endDate.value = term.endDate ? term.endDate.slice(0,10) : "";
+        form.setAttribute('data-edit-id', id);
+        document.getElementById('termMessage').textContent = "Editing term. Save to update.";
+      });
+  }
+
+  document.getElementById('termForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = this;
+    const data = Object.fromEntries(new FormData(form));
+    const editId = form.getAttribute('data-edit-id');
+    document.getElementById('termMessage').textContent = "Saving...";
+    try{
+      const method = editId ? "PUT" : "POST";
+      const url = API_BASE + "/terms" + (editId ? "/" + editId : "");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('termMessage').textContent = res.ok ? "Saved!" : "Failed!";
+      form.removeAttribute('data-edit-id');
+      form.reset();
+      loadTerms();
+    }catch{ document.getElementById('termMessage').textContent = "Network error."; }
+  };
+
+  function editExamSchedule(id) {
+    fetch(`${API_BASE}/exams/schedules/${id}`, { headers: { Authorization: "Bearer " + token }})
+      .then(res => res.json())
+      .then(exam => {
+        const form = document.getElementById('examScheduleForm');
+        form.title.value = exam.title || "";
+        form.termId.value = exam.termId || "";
+        form.classId.value = exam.classId || "";
+        form.date.value = exam.date ? exam.date.slice(0,10) : "";
+        form.setAttribute('data-edit-id', id);
+        document.getElementById('examScheduleMessage').textContent = "Editing exam schedule. Save to update.";
+      });
+  }
+
+  document.getElementById('examScheduleForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = this;
+    const data = Object.fromEntries(new FormData(form));
+    const editId = form.getAttribute('data-edit-id');
+    document.getElementById('examScheduleMessage').textContent = "Saving...";
+    try{
+      const method = editId ? "PUT" : "POST";
+      const url = API_BASE + "/exams/schedules" + (editId ? "/" + editId : "");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('examScheduleMessage').textContent = res.ok ? "Saved!" : "Failed!";
+      form.removeAttribute('data-edit-id');
+      form.reset();
+      loadExamSchedules();
+    }catch{ document.getElementById('examScheduleMessage').textContent = "Network error."; }
+  };
+
+  function editExamMode(id) {
+    fetch(`${API_BASE}/exams/modes/${id}`, { headers: { Authorization: "Bearer " + token }})
+      .then(res => res.json())
+      .then(mode => {
+        const form = document.getElementById('examModeForm');
+        form.examId.value = mode.examId || "";
+        form.mode.value = mode.mode || "";
+        form.duration.value = mode.duration || "";
+        form.setAttribute('data-edit-id', id);
+        document.getElementById('examModeMessage').textContent = "Editing exam mode. Save to update.";
+      });
+  }
+
+  document.getElementById('examModeForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = this;
+    const data = Object.fromEntries(new FormData(form));
+    const editId = form.getAttribute('data-edit-id');
+    document.getElementById('examModeMessage').textContent = "Saving...";
+    try{
+      const method = editId ? "PUT" : "POST";
+      const url = API_BASE + "/exams/modes" + (editId ? "/" + editId : "");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('examModeMessage').textContent = res.ok ? "Saved!" : "Failed!";
+      form.removeAttribute('data-edit-id');
+      form.reset();
+      loadExamModes();
+    }catch{ document.getElementById('examModeMessage').textContent = "Network error."; }
+  };
+
+  function editCBT(id) {
+    fetch(`${API_BASE}/cbt/mocks/${id}`, { headers: { Authorization: "Bearer " + token }})
+      .then(res => res.json())
+      .then(cbt => {
+        const form = document.getElementById('cbtForm');
+        form.title.value = cbt.title || "";
+        form.classId.value = cbt.classId || "";
+        form.mode.value = cbt.mode || "";
+        form.date.value = cbt.date ? cbt.date.slice(0,10) : "";
+        form.setAttribute('data-edit-id', id);
+        document.getElementById('cbtMessage').textContent = "Editing CBT/mock. Save to update.";
+      });
+  }
+
+  document.getElementById('cbtForm').onsubmit = async function(e){
+    e.preventDefault();
+    const form = this;
+    const data = Object.fromEntries(new FormData(form));
+    const editId = form.getAttribute('data-edit-id');
+    document.getElementById('cbtMessage').textContent = "Saving...";
+    try{
+      const method = editId ? "PUT" : "POST";
+      const url = API_BASE + "/cbt/mocks" + (editId ? "/" + editId : "");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('cbtMessage').textContent = res.ok ? "Saved!" : "Failed!";
+      form.removeAttribute('data-edit-id');
+      form.reset();
+      loadCBTs();
+    }catch{ document.getElementById('cbtMessage').textContent = "Network error."; }
+  };
+
     document.getElementById('classForm').onsubmit = async function(e){
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));

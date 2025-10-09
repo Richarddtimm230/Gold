@@ -9,7 +9,7 @@ const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
-
+const CBT = require('../models/CBT');
 // GET /api/teachers/me - Get own teacher profile + classes + subjects
 router.get('/me', teacherAuth, async (req, res) => {
   const teacher = req.staff;
@@ -291,7 +291,48 @@ router.delete('/:id/notifications/:notificationId', teacherAuth, async (req, res
     res.status(500).json({ error: err.message });
   }
 });
+// GET /api/teachers/:id/cbt - List CBTs uploaded by teacher
+router.get('/:id/cbt', teacherAuth, async (req, res) => {
+  try {
+    const cbts = await CBT.find({ teacher: req.params.id })
+      .populate('class', 'name')
+      .populate('subject', 'name');
+    res.json({ cbts });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
+// POST /api/teachers/:id/cbt - Upload new CBT
+router.post('/:id/cbt', teacherAuth, async (req, res) => {
+  try {
+    const { class: classId, subject, title, duration, questions } = req.body;
+    const cbt = new CBT({
+      teacher: req.params.id,
+      class: classId,
+      subject,
+      title,
+      duration,
+      questions
+    });
+    await cbt.save();
+    await cbt.populate('class', 'name').populate('subject', 'name');
+    res.status(201).json({ cbt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+router.get('/cbt/:cbtId', teacherAuth, async (req, res) => {
+  try {
+    const cbt = await CBT.findById(req.params.cbtId)
+      .populate('class', 'name')
+      .populate('subject', 'name');
+    if (!cbt) return res.status(404).json({ error: "CBT not found" });
+    res.json({ cbt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 /* Note: For student update/delete, those should be in the students.js route file. */
 
 module.exports = router;

@@ -415,6 +415,34 @@
               <tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>
             </tbody>
           </table>
+          <!-- Push CBT Results Button -->
+<button id="pushCBTResultsBtn" class="px-6 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition">
+  Push CBT Results to Universal
+</button>
+<div id="pushCBTResultsMessage" class="mt-2 text-sm"></div>
+
+<!-- Modal for Score Field Selection -->
+<div id="pushCBTModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <h2 class="text-lg font-bold mb-3">Select Score Field for Universal Results</h2>
+    <form id="pushCBTModalForm" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1">Where should the CBT score be saved?</label>
+        <div class="space-y-2">
+          <label><input type="radio" name="scoreField" value="ca1_score" required> CA1 Score</label><br>
+          <label><input type="radio" name="scoreField" value="ca2_score"> CA2 Score</label><br>
+          <label><input type="radio" name="scoreField" value="midterm_score"> Midterm/Test Score</label><br>
+          <label><input type="radio" name="scoreField" value="exam_score"> Exam Score</label>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button type="submit" class="px-5 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700">Confirm & Push</button>
+        <button type="button" id="cancelPushCBTModal" class="px-5 py-2 rounded bg-gray-400 text-white font-bold hover:bg-gray-500">Cancel</button>
+      </div>
+      <div id="pushCBTModalFeedback" class="mt-2 text-sm"></div>
+    </form>
+  </div>
+</div>
         </div>
       </div>
     </div>

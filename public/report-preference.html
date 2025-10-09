@@ -35,45 +35,65 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('prefsForm');
-  const statusMsg = document.getElementById('statusMsg');
-  const saveBtn = document.getElementById('saveBtn');
-  // Load current preferences
-  fetch('https://goldlincchools.onrender.com/api/report/preferences', { credentials: 'include' })
-    .then(r => r.json())
-    .then(pref => {
-      Object.keys(pref).forEach(key => {
-        if (form.elements[key])
-          form.elements[key].checked = !!pref[key];
-      });
-    });
+      const form = document.getElementById('prefsForm');
+      const statusMsg = document.getElementById('statusMsg');
+      const saveBtn = document.getElementById('saveBtn');
+      const API_URL = 'https://goldlincschools.onrender.com/api/report/preferences';
 
-  form.onsubmit = async function(e) {
-    e.preventDefault();
-    saveBtn.disabled = true;
-    statusMsg.textContent = "Saving...";
-    const data = {};
-    Array.from(form.elements).forEach(el => {
-      if (el.type === "checkbox" && el.name) data[el.name] = el.checked;
-    });
-    try {
-      const res = await fetch('https://goldlincschools.onrender.com/api/report/preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        statusMsg.textContent = "Preferences saved!";
-      } else {
-        statusMsg.textContent = "Failed to save preferences.";
+      // Get the correct admin token from localStorage
+      function getAdminToken() {
+        return localStorage.getItem('adminToken') ||
+               localStorage.getItem('superadmin_token') ||
+               localStorage.getItem('token') || '';
       }
-    } catch {
-      statusMsg.textContent = "Network error.";
-    }
-    saveBtn.disabled = false;
-  };
-});
+
+      // Load current preferences with Authorization header
+      fetch(API_URL, {
+        headers: {
+          'Authorization': 'Bearer ' + getAdminToken()
+        }
+      })
+        .then(r => r.json())
+        .then(pref => {
+          Object.keys(pref).forEach(key => {
+            if (form.elements[key])
+              form.elements[key].checked = !!pref[key];
+          });
+        })
+        .catch(() => {
+          statusMsg.textContent = 'Failed to load preferences. Please ensure you are logged in as admin.';
+        });
+
+      form.onsubmit = async function(e) {
+        e.preventDefault();
+        saveBtn.disabled = true;
+        statusMsg.textContent = "Saving...";
+        const data = {};
+        Array.from(form.elements).forEach(el => {
+          if (el.type === "checkbox" && el.name) data[el.name] = el.checked;
+        });
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + getAdminToken()
+            },
+            body: JSON.stringify(data)
+          });
+          if (res.ok) {
+            statusMsg.textContent = "Preferences saved!";
+          } else if (res.status === 401) {
+            statusMsg.textContent = "Unauthorized. Please login as admin and try again.";
+          } else {
+            statusMsg.textContent = "Failed to save preferences.";
+          }
+        } catch {
+          statusMsg.textContent = "Network error.";
+        }
+        saveBtn.disabled = false;
+      };
+    });
   </script>
 </body>
 </html>

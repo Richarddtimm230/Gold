@@ -43,7 +43,31 @@ router.post('/classes/:classId/subjects', adminAuth, async (req, res) => {
     teacherId
   });
 });
+// Get today's CBT/Mock schedule for a class
+router.get('/cbt/mocks/today/:classId', async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
+    // Find mocks for this class scheduled for today
+    const cbts = await CBTMock.find({
+      class: classId,
+      date: { $gte: startOfDay, $lt: endOfDay }
+    }).populate('class');
+    res.json(cbts.map(c => ({
+      _id: c._id,
+      title: c.title,
+      class: c.class ? { _id: c.class._id, name: c.class.name } : undefined,
+      mode: c.mode,
+      date: c.date
+    })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 router.post('/classes', adminAuth, async (req, res) => {
   const { name, arms, teacherId } = req.body;
   if (!name) return res.status(400).json({ error: "Class name required" });

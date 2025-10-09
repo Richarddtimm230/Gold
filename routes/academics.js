@@ -308,4 +308,63 @@ router.get('/cbt/mocks/:id', adminAuth, async (req, res) => {
     date: cbt.date
   });
 });
+// Update a session by ID
+router.put('/sessions/:id', adminAuth, async (req, res) => {
+  const { name, startDate, endDate } = req.body;
+  const session = await Session.findByIdAndUpdate(
+    req.params.id,
+    { name, startDate, endDate },
+    { new: true }
+  );
+  if (!session) return res.status(404).json({ error: "Session not found" });
+  res.json(session);
+});
+
+// Update a term by ID
+router.put('/terms/:id', adminAuth, async (req, res) => {
+  const { name, sessionId, startDate, endDate } = req.body;
+  const term = await Term.findByIdAndUpdate(
+    req.params.id,
+    { name, session: sessionId, startDate, endDate },
+    { new: true }
+  );
+  if (!term) return res.status(404).json({ error: "Term not found" });
+  res.json(term);
+});
+
+// Update an exam schedule by ID
+router.put('/exams/schedules/:id', adminAuth, async (req, res) => {
+  const { title, termId, classId, date } = req.body;
+  const exam = await ExamSchedule.findByIdAndUpdate(
+    req.params.id,
+    { title, term: termId, class: classId, date },
+    { new: true }
+  );
+  if (!exam) return res.status(404).json({ error: "Exam schedule not found" });
+  res.json(exam);
+});
+
+// Update an exam mode by ID
+router.put('/exams/modes/:id', adminAuth, async (req, res) => {
+  const { examId, mode, duration } = req.body;
+  const examMode = await ExamMode.findByIdAndUpdate(
+    req.params.id,
+    { exam: examId, mode, duration },
+    { new: true }
+  );
+  if (!examMode) return res.status(404).json({ error: "Exam mode not found" });
+  res.json(examMode);
+});
+
+// Update a CBT/mock by ID
+router.put('/cbt/mocks/:id', adminAuth, async (req, res) => {
+  const { title, classId, mode, date } = req.body;
+  const cbt = await CBTMock.findByIdAndUpdate(
+    req.params.id,
+    { title, class: classId, mode, date },
+    { new: true }
+  );
+  if (!cbt) return res.status(404).json({ error: "CBT/mock not found" });
+  res.json(cbt);
+});
 module.exports = router;

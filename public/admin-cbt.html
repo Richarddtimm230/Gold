@@ -88,6 +88,20 @@
     .ql-container.ql-snow {
       border-radius: 0 0 0.5em 0.5em;
     }
+    .cbt-spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #bfcde7;
+  border-top: 3px solid #2647a6;
+  border-radius: 50%;
+  animation: cbt-spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-left: 7px;
+}
+@keyframes cbt-spin {
+  to { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -248,7 +262,9 @@
             <div id="questionsList"></div>
             <button type="button" class="cbt-btn mt-2" id="addQuestionBtn"><i class="fa fa-plus mr-1"></i> Add Question</button>
           </div>
-          <button type="submit" class="cbt-btn mt-2"><i class="fa fa-upload mr-1"></i> Upload Exam</button>
+          <button id="uploadExamBtn" class="cbt-btn mt-2">
+  <i class="fa fa-upload mr-1"></i> Upload Exam
+</button>
         </form>
         <div id="uploadExamMsg" class="mt-4"></div>
       `;
@@ -418,6 +434,14 @@ function attachUploadFormHandler() {
   uploadForm.onsubmit = async function(e) {
     e.preventDefault();
 
+    // Add spinner to submit button
+    const submitBtn = uploadForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Please wait...</span><span class="cbt-spinner" style="display:inline-block;width:18px;height:18px;border:3px solid #bfcde7;border-top:3px solid #2647a6;border-radius:50%;animation:cbt-spin 0.7s linear infinite;vertical-align:middle;margin-left:7px;"></span>`;
+    }
+
     // Validate
     const fd = new FormData(this);
     const title = fd.get('title');
@@ -425,23 +449,48 @@ function attachUploadFormHandler() {
     const subjectId = fd.get('subject');
     const duration = Number(fd.get('duration'));
     if (!title || !classId || !subjectId || !duration) {
-      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">All exam fields are required.</div>`; return;
+      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">All exam fields are required.</div>`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+      return;
     }
     // Validate questions
     if (!questions.length) {
-      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Add at least one question.</div>`; return;
+      document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Add at least one question.</div>`;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+      return;
     }
     for (let [i,q] of questions.entries()) {
       if (!q.text || !(q.options && q.options.length >= 2)) {
-        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} must have text and at least 2 options.</div>`; return;
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} must have text and at least 2 options.</div>`;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        return;
       }
       for (let [j,o] of (q.options||[]).entries()) {
         if (!o.value) {
-          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} Option ${String.fromCharCode(65+j)} cannot be empty.</div>`; return;
+          document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Question ${i+1} Option ${String.fromCharCode(65+j)} cannot be empty.</div>`;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+          }
+          return;
         }
       }
       if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i+1}.</div>`; return;
+        document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Select a valid correct option for Question ${i+1}.</div>`;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+        return;
       }
     }
     // Prepare payload
@@ -451,12 +500,11 @@ function attachUploadFormHandler() {
       subject: subjectId,
       duration,
       questions: questions.map(q => ({
-  text: q.text,
-  options: q.options, // send array of objects, not just strings!
-  answer: q.answer,
-  score: q.score || 1
-}))
-    
+        text: q.text,
+        options: q.options, // send array of objects, not just strings!
+        answer: q.answer,
+        score: q.score || 1
+      }))
     };
     // POST /api/exam
     try {
@@ -474,10 +522,35 @@ function attachUploadFormHandler() {
       }
     } catch (err) {
       document.getElementById('uploadExamMsg').innerHTML = `<div class="text-red-600">Network or server error.</div>`;
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
     }
   };
 }
+
+// Spinner CSS (add to your CSS if not present)
+if (!document.getElementById('cbt-spinner-style')) {
+  const style = document.createElement('style');
+  style.id = 'cbt-spinner-style';
+  style.innerHTML = `
+    @keyframes cbt-spin { to { transform: rotate(360deg); } }
+    .cbt-spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #bfcde7;
+      border-top: 3px solid #2647a6;
+      border-radius: 50%;
+      animation: cbt-spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-left: 7px;
     }
+  `;
+  document.head.appendChild(style);
+}
 
 // If you re-render the form (for example, after adding/removing questions), call attachUploadFormHandler() again.
 

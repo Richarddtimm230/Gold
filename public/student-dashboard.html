@@ -560,7 +560,7 @@
     </div>
     <div class="sidebar-nav">
       <button class="sidebar-link active" title="Home"><i class="fa fa-home"></i></button>
-      <button class="sidebar-link" title="E-Classroom" onclick="window.location.href='e-class.html'"><i class="fa fa-laptop"></i></button>
+      <button class="sidebar-link" title="CBT MOCK/EXAM" onclick="window.location.href='cbt.html'"><i class="fa fa-laptop"></i></button>
       <button class="sidebar-link" title="Assignments" onclick="window.location.href='assignments.html'"><i class="fa fa-file-alt"></i></button>
       <button class="sidebar-link" title="Fees" onclick="window.location.href='fees.html'"><i class="fa fa-wallet"></i></button>
       <button class="sidebar-link" title="Results" onclick="window.location.href='check-results.html'"><i class="fa fa-chart-bar"></i></button>
@@ -599,9 +599,9 @@
     <div class="main-content">
       <!-- Widget Buttons -->
       <div class="dashboard-widgets">
-        <div class="widget-card" tabindex="0" onclick="window.location.href='e-class.html'">
+        <div class="widget-card" tabindex="0" onclick="window.location.href='cbt.html'">
           <span class="icon"><i class="fa fa-laptop"></i></span>
-          <span class="label">E-Class</span>
+          <span class="label">CBT Mock/Exam</span>
         </div>
         <div class="widget-card" tabindex="0" onclick="window.location.href='assignments.html'">
           <span class="icon"><i class="fa fa-file-alt"></i></span>
@@ -679,9 +679,9 @@
       <i class="fa fa-home"></i>
       <div class="bottom-nav-label">Home</div>
     </button>
-    <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='e-class.html'">
+    <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='cbt.html'">
       <i class="fa fa-laptop"></i>
-      <div class="bottom-nav-label">E-Class</div>
+      <div class="bottom-nav-label">CBT</div>
     </button>
     <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
       <i class="fa fa-file-alt"></i>
@@ -771,30 +771,6 @@
       document.getElementById('notifDot').style.display = 'none';
     }
 
-    // Timetable (today)
-    async function fetchAndRenderTimetable(studentClassId) {
-  const timetableList = document.getElementById('timetableList');
-  timetableList.innerHTML = '<div class="course-card">Loading...</div>';
-  try {
-    // Fetch scheduled mocks for today
-    const res = await fetch(API_BASE_URL + '/api/academics/cbt/mocks/today/' + studentClassId, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const cbts = await res.json();
-    if (cbts && cbts.length > 0) {
-      timetableList.innerHTML = cbts.map(cbt =>
-        `<div class="course-card">
-          <div class="course-title">${cbt.title} (${cbt.mode})</div>
-          <div class="course-meta">${new Date(cbt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-        </div>`
-      ).join('');
-    } else {
-      timetableList.innerHTML = `<div class="course-card">No CBT/Mock scheduled today!</div>`;
-    }
-  } catch (err) {
-    timetableList.innerHTML = `<div class="course-card">Error loading today's mocks</div>`;
-  }
-}
 
     // Courses/groups
     const coursesList = document.getElementById('coursesList');
@@ -838,18 +814,44 @@
         );
       }
     }
-  }
-  fetchStudentDashboard();
-  if (data.class && data.class._id) {
+      if (data.class && data.class._id) {
   fetchAndRenderTimetable(data.class._id);
 } else {
   timetableList.innerHTML = `<div class="course-card">No class info!</div>`;
 }
+  }
+  fetchStudentDashboard();
+    // Timetable (today)
+    async function fetchAndRenderTimetable(studentClassId) {
+  const timetableList = document.getElementById('timetableList');
+  timetableList.innerHTML = '<div class="course-card">Loading...</div>';
+  try {
+    // Fetch scheduled mocks for today
+    const res = await fetch(API_BASE_URL + '/api/academics/cbt/mocks/today/' + studentClassId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const cbts = await res.json();
+    if (cbts && cbts.length > 0) {
+      timetableList.innerHTML = cbts.map(cbt =>
+        `<div class="course-card">
+          <div class="course-title">${cbt.title} (${cbt.mode})</div>
+          <div class="course-meta">${new Date(cbt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>`
+      ).join('');
+    } else {
+      timetableList.innerHTML = `<div class="course-card">No CBT/Mock scheduled today!</div>`;
+    }
+  } catch (err) {
+    timetableList.innerHTML = `<div class="course-card">Error loading today's mocks</div>`;
+  }
+}
+
 
   // Course select logic (visual feedback)
   function selectCourse(idx, courses) {
     courses.forEach((c, i) => c.selected = (i === idx));
     fetchStudentDashboard();
+    fetchAndRenderTimetable(data.class._id);
   }
 </script>
 </body>

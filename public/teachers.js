@@ -304,16 +304,15 @@ if (addSubjectForm) {
 }
 // Fetch all CBTs uploaded by this teacher
 async function fetchMyCBTQuestions() {
-  // Endpoint: GET /api/teachers/{teacherId}/cbt
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, { headers: authHeaders() });
     if (!res.ok) return [];
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.cbts || []); // <-- This ensures you always get an array!
   } catch {
     return [];
   }
 }
-
 function renderMyCBTQuestions() {
   const listDiv = document.getElementById('myCBTQuestionsList');
   const pushBtn = document.getElementById('pushToUniversalBtn');

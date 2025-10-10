@@ -135,26 +135,26 @@
         }
 
         tbody.innerHTML = assignments.map((a, i) => {
-          // Status badge
-          let statusClass = "badge-pending", statusLabel = "Pending";
-          if (a.status === "Completed" || a.status === "Submitted") { statusClass = "badge-completed"; statusLabel = "Submitted"; }
-          if (a.status === "Reviewed") { statusClass = "badge-reviewed"; statusLabel = "Reviewed"; }
-          if (a.status === "Overdue" || (a.dueDate && new Date(a.dueDate) < new Date() && !a.submitted)) { statusClass = "badge-overdue"; statusLabel = "Overdue"; }
-          // Score
-          let score = a.score !== undefined && a.score !== null ? `${a.score}/${a.totalScore || 100}` : "-";
-          return `
-            <tr>
-              <td class="py-2 px-4 font-semibold">${a.title}</td>
-              <td class="py-2 px-4">${a.subject?.name || a.subject || ''}</td>
-              <td class="py-2 px-4">${a.dueDate ? a.dueDate.slice(0,10) : ''}</td>
-              <td class="py-2 px-4"><span class="badge ${statusClass}">${statusLabel}</span></td>
-              <td class="py-2 px-4">${score}</td>
-              <td class="py-2 px-4">
-                <button class="text-primary hover-link font-bold" onclick="openAssignmentModal(${i})"><i class="fa fa-eye"></i> View</button>
-              </td>
-            </tr>
-          `;
-        }).join('');
+  let statusClass = "badge-pending", statusLabel = "Pending";
+  if (a.status === "Completed" || a.status === "Submitted") { statusClass = "badge-completed"; statusLabel = "Submitted"; }
+  if (a.status === "Reviewed") { statusClass = "badge-reviewed"; statusLabel = "Reviewed"; }
+  if (a.status === "Overdue" || (a.dueDate && new Date(a.dueDate) < new Date() && !a.submitted)) { statusClass = "badge-overdue"; statusLabel = "Overdue"; }
+  let score = a.score !== undefined && a.score !== null ? `${a.score}/${a.totalScore || 100}` : "-";
+  let cbtId = (a.cbt && typeof a.cbt === 'object') ? a.cbt._id : a.cbt;
+  let cbtBtn = cbtId ?
+    `<button class="text-green-700 hover-link font-bold" onclick="openCbtModal('${cbtId}','${a.subject && a.subject.name ? a.subject.name : a.subject}','${a.title.replace(/'/g,"&#39;")}')"><i class='fa fa-lightbulb'></i> Mock/CBT</button>`
+    : `<button class="text-primary hover-link font-bold" onclick="openAssignmentModal(${i})"><i class="fa fa-eye"></i> View</button>`;
+  return `
+    <tr>
+      <td class="py-2 px-4 font-semibold">${a.title}</td>
+      <td class="py-2 px-4">${a.subject?.name || a.subject || ''}</td>
+      <td class="py-2 px-4">${a.dueDate ? a.dueDate.slice(0,10) : ''}</td>
+      <td class="py-2 px-4"><span class="badge ${statusClass}">${statusLabel}</span></td>
+      <td class="py-2 px-4">${score}</td>
+      <td class="py-2 px-4">${cbtBtn}</td>
+    </tr>
+  `;
+}).join('');
 
         // Store assignments globally for modal use
         window._assignments = assignments;

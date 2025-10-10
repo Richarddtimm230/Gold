@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Report Card Preferences - Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Inter font for consistency -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
   <style>
     :root {
@@ -14,7 +15,7 @@
       --header-height: 64px;
       --border-radius: 12px;
       --shadow: 0 2px 8px rgba(0,0,0,0.05);
-      --neutral: #f8f9fa;
+      --neutral: #f6f8fa;
       --card-bg: #fff;
       --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
       --font-main: 'Inter', Arial, sans-serif;
@@ -29,25 +30,7 @@
       min-height: 100%;
       box-sizing: border-box;
     }
-    #pageSpinnerOverlay {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.96);
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      transition: opacity 0.4s;
-    }
-    .spinner {
-      width: 46px;
-      height: 46px;
-      border: 5px solid #e3e6ea;
-      border-top: 5px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    /* Sidebar styles */
     .sidebar {
       position: fixed;
       top: 0; left: 0;
@@ -138,10 +121,18 @@
         z-index: 1050;
         overflow: hidden;
       }
-      .sidebar.active { transform: translateX(0); }
-      .sidebar-toggle { display: inline-flex; }
-      .sidebar-overlay.active { display: block; }
-      body.sidebar-open { overflow: hidden; }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
     }
     .sidebar-toggle {
       display: none;
@@ -164,15 +155,8 @@
       background: rgba(0,0,0,0.25);
       z-index: 1040;
     }
-    .main-content {
-      min-height: 100vh;
-      margin-left: var(--sidebar-width);
-      padding: 0 2.5vw 2vw 2.5vw;
-      transition: margin-left 0.25s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+
+    /* Header */
     header {
       display: flex;
       align-items: center;
@@ -180,8 +164,11 @@
       gap: 1.8em;
       padding-top: 1.5vw;
       padding-bottom: 1.5vw;
-      width: 100%;
-      max-width: 900px;
+      background: #fff;
+      box-shadow: 0 1px 8px #e7eefa;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .school-title {
       display: flex;
@@ -211,22 +198,20 @@
     .header-actions .icon:hover {
       opacity: 1;
     }
-    /* Preferences card styling */
-    .pref-card {
-      max-width: 650px;
-      width: 100%;
-      margin: 42px auto 0 auto;
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      padding: 38px 36px 32px 36px;
+
+    /* Content area */
+    .main-content {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+      padding: 0 2.5vw 2vw 2.5vw;
+      transition: margin-left 0.25s;
       display: flex;
       flex-direction: column;
-      align-items: stretch;
+      align-items: center;
+      justify-content: flex-start;
     }
     @media (max-width: 1100px) {
       .main-content { margin-left: 0; padding: 0 3vw; }
-      .pref-card { margin-top: 32px; }
     }
     @media (max-width: 750px) {
       .main-content { margin-left: 0; padding: 0 3vw; }
@@ -235,12 +220,9 @@
       .sidebar-toggle { display: inline-flex; }
       .sidebar-overlay.active { display: block; }
       body.sidebar-open { overflow: hidden; }
-      .pref-card { padding: 22px 8px 26px 8px; }
-      header { gap: 0.9em; }
     }
     @media (max-width: 600px) {
       .main-content { padding: 0 2vw; }
-      .pref-card { padding: 8px 2px 16px 2px; }
       .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
       .avatar { width: 37px; height: 37px; }
       .name, .role { font-size: 0.96rem; }
@@ -253,75 +235,79 @@
     }
     ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
     ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
-    /* Form and checkbox stylings */
-    .pref-title {
+
+    /* Preferences Card */
+    .prefs-card {
+      max-width: 600px;
+      width: 100%;
+      margin: 40px auto 0 auto;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 2.5em 2em 2em 2em;
+      display: flex;
+      flex-direction: column;
+    }
+    .prefs-title {
       color: #22305a;
       font-size: 2em;
       margin-bottom: 18px;
       font-weight: 700;
+      letter-spacing: 0.01em;
       text-align: left;
     }
-    .prefs-form {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .prefs-checkbox-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 28px;
-      margin-bottom: 14px;
-    }
-    .prefs-checkbox-group hr {
-      grid-column: 1 / -1;
-      margin: 4px 0 12px 0;
-      border: none;
-      border-top: 1.5px solid #eaeaea;
-    }
-    label.prefs-label {
+    .prefs-form label {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 1.09em;
-      font-weight: 500;
+      font-size: 1.12em;
+      margin-bottom: 14px;
       cursor: pointer;
-      user-select: none;
+      color: #222;
+      font-weight: 500;
     }
-    input[type="checkbox"] {
+    .prefs-form input[type="checkbox"] {
       width: 22px;
       height: 22px;
       accent-color: var(--primary);
       margin-right: 2px;
     }
-    .btn {
+    .prefs-form hr {
+      border: none;
+      border-top: 1px solid #e4e7ef;
+      margin: 16px 0;
+    }
+    .prefs-save-btn {
       background: var(--primary);
       color: #fff;
       font-weight: bold;
       border: none;
       border-radius: 7px;
       padding: 12px 36px;
-      font-size: 1.1em;
+      font-size: 1.13em;
       cursor: pointer;
-      margin-top: 16px;
-      align-self: flex-end;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+      margin-top: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       transition: background 0.18s;
     }
-    .btn:disabled { opacity: 0.5; }
-    .btn:hover:not(:disabled) { background: #005ecb; }
+    .prefs-save-btn:disabled { opacity: 0.5; }
     .status-msg {
       margin-top: 18px;
       font-weight: bold;
-      font-size: 1.05em;
       color: #007bff;
-      min-height: 22px;
+      min-height: 24px;
+    }
+    @media (max-width: 700px) {
+      .prefs-card { padding: 1.1em 0.5em 1em 0.5em; }
+    }
+    @media (max-width: 400px) {
+      .prefs-title { font-size: 1.25em; }
+      .prefs-card { padding: 0.8em 0.2em; }
+      .prefs-form label { font-size: 1em; }
     }
   </style>
 </head>
 <body>
-  <div id="pageSpinnerOverlay">
-    <div class="spinner"></div>
-  </div>
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="profile">
@@ -360,56 +346,42 @@
         <span class="icon" title="Settings">⚙️</span>
       </div>
     </header>
-    <div class="pref-card">
-      <div class="pref-title">Report Card Display Preferences</div>
-      <form class="prefs-form" id="prefsForm" autocomplete="off">
-        <div class="prefs-checkbox-group">
-          <label class="prefs-label"><input type="checkbox" name="showTeacherRemark"> Show Teacher's Remark Column</label>
-          <label class="prefs-label"><input type="checkbox" name="showPsychomotorSkills"> Show Psychomotor Skills Table</label>
-          <label class="prefs-label"><input type="checkbox" name="showAffectiveSkills"> Show Affective Skills Table</label>
-          <label class="prefs-label"><input type="checkbox" name="showAttendance"> Show Attendance Table</label>
-          <label class="prefs-label"><input type="checkbox" name="showPrincipalComment"> Show Principal's Comment Section</label>
-          <label class="prefs-label"><input type="checkbox" name="showSubjectPosition"> Show Subject Position Column</label>
-          <label class="prefs-label"><input type="checkbox" name="showGradePoints"> Show Grade Points Column</label>
-          <label class="prefs-label"><input type="checkbox" name="showGPA"> Show GPA row</label>
-          <label class="prefs-label"><input type="checkbox" name="showResultSummary"> Show Result Summary</label>
-          <hr>
-          <label class="prefs-label"><input type="checkbox" name="showStudentPhoto"> Show Student Photo</label>
-          <label class="prefs-label"><input type="checkbox" name="showClassSize"> Show Class Size</label>
-          <label class="prefs-label"><input type="checkbox" name="showStudentAge"> Show Student Age</label>
-          <label class="prefs-label"><input type="checkbox" name="showStudentEmail"> Show Student Email</label>
-          <label class="prefs-label"><input type="checkbox" name="showNextTermDate"> Show Next Term Date</label>
-          <label class="prefs-label"><input type="checkbox" name="showPrintedDate"> Show Printed Date</label>
-          <label class="prefs-label"><input type="checkbox" name="showSchoolMotto"> Show School Motto</label>
-          <label class="prefs-label"><input type="checkbox" name="showSchoolLogo"> Show School Logo</label>
-          <label class="prefs-label"><input type="checkbox" name="showCoatOfArms"> Show Coat of Arms</label>
-          <label class="prefs-label"><input type="checkbox" name="showKeyToGrades"> Show Key to Grades Table</label>
-          <label class="prefs-label"><input type="checkbox" name="showRedSeal"> Show Red Seal/Stamp</label>
-          <label class="prefs-label"><input type="checkbox" name="showAttendanceNoOfDays"> Show No. of School Days in Attendance</label>
-          <label class="prefs-label"><input type="checkbox" name="showAttendancePresent"> Show Days Present in Attendance</label>
-          <label class="prefs-label"><input type="checkbox" name="showAttendanceAbsent"> Show Days Absent in Attendance</label>
-          <label class="prefs-label"><input type="checkbox" name="showAttendancePercent"> Show Attendance (%) in Attendance</label>
-          <label class="prefs-label"><input type="checkbox" name="showResultSummaryLabel"> Show Result Summary Label</label>
-        </div>
-        <button class="btn" type="submit" id="saveBtn">Save Preferences</button>
+    <div class="prefs-card">
+      <div class="prefs-title">Report Card Display Preferences</div>
+      <form id="prefsForm" class="prefs-form">
+        <label><input type="checkbox" name="showTeacherRemark"> Show Teacher's Remark Column</label>
+        <label><input type="checkbox" name="showPsychomotorSkills"> Show Psychomotor Skills Table</label>
+        <label><input type="checkbox" name="showAffectiveSkills"> Show Affective Skills Table</label>
+        <label><input type="checkbox" name="showAttendance"> Show Attendance Table</label>
+        <label><input type="checkbox" name="showPrincipalComment"> Show Principal's Comment Section</label>
+        <label><input type="checkbox" name="showSubjectPosition"> Show Subject Position Column</label>
+        <label><input type="checkbox" name="showGradePoints"> Show Grade Points Column</label>
+        <label><input type="checkbox" name="showGPA"> Show GPA row</label>
+        <label><input type="checkbox" name="showResultSummary"> Show Result Summary</label>
+        <hr>
+        <label><input type="checkbox" name="showStudentPhoto"> Show Student Photo</label>
+        <label><input type="checkbox" name="showClassSize"> Show Class Size</label>
+        <label><input type="checkbox" name="showStudentAge"> Show Student Age</label>
+        <label><input type="checkbox" name="showStudentEmail"> Show Student Email</label>
+        <label><input type="checkbox" name="showNextTermDate"> Show Next Term Date</label>
+        <label><input type="checkbox" name="showPrintedDate"> Show Printed Date</label>
+        <label><input type="checkbox" name="showSchoolMotto"> Show School Motto</label>
+        <label><input type="checkbox" name="showSchoolLogo"> Show School Logo</label>
+        <label><input type="checkbox" name="showCoatOfArms"> Show Coat of Arms</label>
+        <label><input type="checkbox" name="showKeyToGrades"> Show Key to Grades Table</label>
+        <label><input type="checkbox" name="showRedSeal"> Show Red Seal/Stamp</label>
+        <label><input type="checkbox" name="showAttendanceNoOfDays"> Show No. of School Days in Attendance</label>
+        <label><input type="checkbox" name="showAttendancePresent"> Show Days Present in Attendance</label>
+        <label><input type="checkbox" name="showAttendanceAbsent"> Show Days Absent in Attendance</label>
+        <label><input type="checkbox" name="showAttendancePercent"> Show Attendance (%) in Attendance</label>
+        <label><input type="checkbox" name="showResultSummaryLabel"> Show Result Summary Label</label>
+        <button class="prefs-save-btn" type="submit" id="saveBtn">Save Preferences</button>
         <div class="status-msg" id="statusMsg"></div>
       </form>
     </div>
   </main>
   <script>
-    // Spinner overlay logic
-    document.addEventListener('DOMContentLoaded', () => {
-      const spinner = document.getElementById('pageSpinnerOverlay');
-      if (spinner) spinner.style.display = 'flex';
-      setTimeout(() => {
-        if (spinner) {
-          spinner.style.opacity = '0';
-          setTimeout(() => { spinner.style.display = 'none'; }, 400);
-        }
-      }, 900);
-    });
-
-    // Sidebar mobile toggle logic
+    // Sidebar mobile toggle
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -434,12 +406,14 @@
       const saveBtn = document.getElementById('saveBtn');
       const API_URL = 'https://goldlincschools.onrender.com/api/report/preferences';
 
+      // Get admin token from localStorage
       function getAdminToken() {
         return localStorage.getItem('adminToken') ||
                localStorage.getItem('superadmin_token') ||
                localStorage.getItem('token') || '';
       }
 
+      // Load current preferences
       fetch(API_URL, {
         headers: {
           'Authorization': 'Bearer ' + getAdminToken()

@@ -11,6 +11,7 @@ const questionSchema = new mongoose.Schema({
   score: { type: Number, default: 1 }
 }, { _id: false });
 
+// models/CBTExam.js
 const examSchema = new mongoose.Schema({
   title: { type: String, required: true },
   class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true },
@@ -18,7 +19,8 @@ const examSchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   questions: { type: [questionSchema], required: true },
   scheduledFor: { type: Date },
-  status: { type: String, enum: ['Draft', 'Scheduled', 'Active', 'Completed', 'Stopped'], default: 'Draft' }
+  status: { type: String, enum: ['Draft', 'Scheduled', 'Active', 'Completed', 'Stopped'], default: 'Draft' },
+  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff'} // <-- ADD THIS LINE
 }, { timestamps: true });
 
 module.exports = mongoose.model('Exam', examSchema);

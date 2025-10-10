@@ -9,7 +9,7 @@ const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
-const CBT = require('../models/CBT');
+const CBT = require('../models/CBTExam');
 // GET /api/teachers/me - Get own teacher profile + classes + subjects
 router.get('/me', teacherAuth, async (req, res) => {
   const teacher = req.staff;

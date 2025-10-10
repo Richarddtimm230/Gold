@@ -248,11 +248,21 @@
   </div>
 <script>
   let reportPreferences = {};
-  // Fetch preferences before rendering report
-  fetch('https://goldlincschools.onrender.com/api/report/preferences', { credentials: 'include' })
-    .then(r => r.json())
-    .then(p => { reportPreferences = p; fillReport(); });
-
+  // Use adminToken, superadmin_token, or token for Authorization header if present
+  function getAdminToken() {
+    return localStorage.getItem('adminToken') ||
+           localStorage.getItem('superadmin_token') ||
+           localStorage.getItem('token') || '';
+  }
+  // Fetch preferences before rendering report, always with Authorization header
+  fetch('https://goldlincschools.onrender.com/api/report/preferences', {
+    headers: {
+      'Authorization': 'Bearer ' + getAdminToken()
+    }
+  })
+    .then(r => r.ok ? r.json() : {})
+    .then(p => { reportPreferences = p || {}; fillReport(); })
+    .catch(() => { reportPreferences = {}; fillReport(); });
   function getFormattedPrintDate() {
     const now = new Date();
     const dd = now.getDate().toString().padStart(2,'0');

@@ -302,6 +302,8 @@ if (addSubjectForm) {
     }
   };
 }
+// ... previous code remains the same ...
+
 // Fetch all CBTs uploaded by this teacher
 async function fetchMyCBTQuestions() {
   try {
@@ -313,6 +315,8 @@ async function fetchMyCBTQuestions() {
     return [];
   }
 }
+
+// --- UPDATED: My Uploaded CBTs section with expandable questions ---
 function renderMyCBTQuestions() {
   const listDiv = document.getElementById('myCBTQuestionsList');
   const pushBtn = document.getElementById('pushToUniversalBtn');
@@ -321,69 +325,66 @@ function renderMyCBTQuestions() {
     pushBtn.disabled = true;
     return;
   }
-  let html = `
-    <table class="cbt-quiz-table">
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="cbt-select-all"></th>
-          <th>Title</th>
-          <th>Class</th>
-          <th>Subject</th>
-          <th>Duration</th>
-          <th>Questions</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  let html = '';
   myUploadedCBTs.forEach((cbt, i) => {
+    const questionCount = cbt.questions ? cbt.questions.length : 0;
     html += `
-      <tr>
-        <td>
-          <input type="checkbox" class="cbt-select-checkbox" data-cbtid="${cbt._id}" ${selectedCBTIds.includes(cbt._id) ? 'checked' : ''}>
-        </td>
-        <td>${cbt.title || ''}</td>
-        <td>${cbt.className || ''}</td>
-        <td>${cbt.subjectName || ''}</td>
-        <td>${cbt.duration || ''} min</td>
-        <td>${cbt.questions ? cbt.questions.length : 0}</td>
-        <td>
-          <button class="cbt-delete-btn" title="Delete" data-cbtid="${cbt._id}"><i class="fa fa-trash"></i></button>
-        </td>
-      </tr>
+      <div class="cbt-item" style="border:1px solid #eee; border-radius:7px; margin-bottom:12px; box-shadow:0 2px 8px #0001;">
+        <div class="cbt-header" style="cursor:pointer; padding:12px 8px; font-weight:bold; font-size:1.1em; display:flex;align-items:center;" onclick="toggleCBTQuestions(${i})">
+          <input type="checkbox" class="cbt-select-checkbox" data-cbtid="${cbt._id}" ${selectedCBTIds.includes(cbt._id) ? 'checked' : ''} style="margin-right:9px;" onclick="event.stopPropagation();">
+          <span>${cbt.title || '(Untitled CBT)'}</span>
+          <span style="margin-left:auto; color:#555; font-size:0.9em;">${cbt.duration||''} min · ${questionCount} question${questionCount!==1?'s':''}</span>
+          <span style="margin-left:10px;" id="cbt-q-arrow-${i}">&#9654;</span>
+          <button class="cbt-delete-btn" title="Delete" data-cbtid="${cbt._id}" style="margin-left:12px; color:#c00; background:none; border:none; cursor:pointer;"><i class="fa fa-trash"></i></button>
+        </div>
+        <div class="cbt-questions" id="cbt-questions-${i}" style="display:none; padding:10px 20px 15px 35px;">
+          ${cbt.questions && cbt.questions.length
+            ? cbt.questions.map((q, qidx) => `
+                <div style="margin-bottom:1.2em;">
+                  <div style="font-weight:600;">Q${qidx+1}: <span style="font-weight:normal;" class="cbt-q-text">${q.text}</span></div>
+                  <ol style="margin:4px 0 0 20px; padding:0;">
+                    ${q.options.map((opt, oi) =>
+                      `<li style="margin:0.2em 0;${q.answer===oi?'font-weight:bold;color:#159d5e;':''}">${opt.value}${q.answer===oi ? ' <span style="color:#159d5e;">&#10003;</span>' : ''}</li>`).join('')}
+                  </ol>
+                  <div style="font-size:0.96em;color:#555;">Score: ${q.score||1}</div>
+                </div>
+              `).join('')
+            : '<div style="color:#999;">No questions in this CBT.</div>'
+          }
+        </div>
+      </div>
     `;
   });
-  html += '</tbody></table>';
   listDiv.innerHTML = html;
 
-  // --- Actions ---
-  // Select all
-  document.getElementById('cbt-select-all').onchange = function() {
-    if (this.checked) {
-      selectedCBTIds = myUploadedCBTs.map(q => q._id);
-    } else {
-      selectedCBTIds = [];
-    }
-    renderMyCBTQuestions();
+  // --- Toggle logic (accordion) ---
+  window.toggleCBTQuestions = function(idx) {
+    const qDiv = document.getElementById('cbt-questions-' + idx);
+    const arrow = document.getElementById('cbt-q-arrow-' + idx);
+    if (!qDiv) return;
+    const expanded = qDiv.style.display === '' || qDiv.style.display === 'block';
+    qDiv.style.display = expanded ? 'none' : 'block';
+    arrow.innerHTML = expanded ? '&#9654;' : '&#9660;';
   };
 
-  // Select individual
+  // Select individual checkboxes
   listDiv.querySelectorAll('.cbt-select-checkbox').forEach(cb => {
-    cb.onchange = function() {
+    cb.onchange = function(e) {
       const id = this.getAttribute('data-cbtid');
       if (this.checked) {
         if (!selectedCBTIds.includes(id)) selectedCBTIds.push(id);
       } else {
         selectedCBTIds = selectedCBTIds.filter(cid => cid !== id);
       }
-      // Enable/disable push button
       pushBtn.disabled = selectedCBTIds.length === 0;
+      e.stopPropagation && e.stopPropagation();
     };
   });
 
   // Delete
   listDiv.querySelectorAll('.cbt-delete-btn').forEach(btn => {
-    btn.onclick = async function() {
+    btn.onclick = async function(e) {
+      e.stopPropagation();
       const id = btn.getAttribute('data-cbtid');
       if (!confirm('Are you sure you want to delete this CBT?')) return;
       try {
@@ -399,7 +400,6 @@ function renderMyCBTQuestions() {
     }
   });
 
-  // Enable/disable push button
   pushBtn.disabled = selectedCBTIds.length === 0;
 }
 
@@ -409,6 +409,8 @@ async function showMyCBTQuestionsSection() {
   selectedCBTIds = [];
   renderMyCBTQuestions();
 }
+
+
 document.getElementById('pushToUniversalBtn').onclick = async function() {
   if (!selectedCBTIds.length) return;
   // Gather selected CBTs

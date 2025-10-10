@@ -133,7 +133,7 @@ function wrapFetch(){
         networkEntries.push({
           time:new Date(),method:args[1]?.method||'GET',url:args[0],status:res.status,
           duration:(performance.now()-start).toFixed(1),
-          response:body.length>2000?body.slice(0,200)+'...':body
+          response:body.length>2000?body.slice(0,20000)+'...':body
         });
         if(currentTab==='network') renderNetwork();
         return res;

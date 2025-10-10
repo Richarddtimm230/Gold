@@ -260,9 +260,10 @@
           // Score
           let score = a.score !== undefined && a.score !== null ? `${a.score}/${a.totalScore || 100}` : "-";
           // Action button: CBT or regular
-          let cbtBtn = (a.cbt) ?
-            `<button class="text-green-700 hover-link font-bold" onclick="openCbtModal('${a.cbt}','${a.subject && a.subject.name ? a.subject.name : a.subject}','${a.title.replace(/'/g,"&#39;")}')"><i class='fa fa-lightbulb'></i> Mock/CBT</button>`
-            : `<button class="text-primary hover-link font-bold" onclick="openAssignmentModal(${i})"><i class="fa fa-eye"></i> View</button>`;
+          let cbtId = (a.cbt && typeof a.cbt === 'object') ? a.cbt._id : a.cbt;
+let cbtBtn = cbtId ?
+  `<button class="text-green-700 hover-link font-bold" onclick="openCbtModal('${cbtId}','${a.subject && a.subject.name ? a.subject.name : a.subject}','${a.title.replace(/'/g,"&#39;")}')"><i class='fa fa-lightbulb'></i> Mock/CBT</button>`
+  : `<button class="text-primary hover-link font-bold" onclick="openAssignmentModal(${i})"><i class="fa fa-eye"></i> View</button>`;
           return `
             <tr>
               <td class="py-2 px-4 font-semibold">${a.title}</td>

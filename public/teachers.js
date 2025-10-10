@@ -690,7 +690,7 @@ document.getElementById('profile-form').onsubmit = async function (e) {
     alert('Failed to update profile.');
   }
 };
-// --- CBT Question Upload Section ---
+
 let cbtQuestions = [];
 
 function renderCBTQuestionSection() {
@@ -724,6 +724,21 @@ function renderCBTQuestionSection() {
   renderCBTQuestions();
 }
 
+function getQuillConfig() {
+  return {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ list: 'ordered'}, { list: 'bullet' }],
+        ['image', 'code-block'],
+        ['clean']
+      ]
+    }
+  };
+}
+
 function renderCBTQuestions() {
   const listDiv = document.getElementById('cbt-questions-list');
   listDiv.innerHTML = '';
@@ -731,42 +746,55 @@ function renderCBTQuestions() {
     let qDiv = document.createElement('div');
     qDiv.className = 'cbt-question-block';
     qDiv.innerHTML = `
-      <label>Question ${idx+1}</label>
-      <textarea class="cbt-question-text" placeholder="Question text">${q.text||''}</textarea>
-      <label>Score</label>
-      <input type="number" min="1" class="cbt-question-score" value="${q.score||1}">
-      <label>Options</label>
-      <div class="cbt-options-list"></div>
-      <button type="button" class="btn danger" onclick="removeCBTQuestion(${idx})">Remove Question</button>
-      <hr>
+      <div class="cbt-question-header">
+        <span>Question ${idx+1}</span>
+        <button type="button" class="cbt-remove-q-btn" title="Remove" onclick="removeCBTQuestion(${idx})"><i class="fa fa-trash"></i></button>
+      </div>
+      <div class="cbt-question-label">Question Text</div>
+      <div id="cbt-qtext-quill-${idx}" class="quill-editor"></div>
+      <div class="cbt-question-label">Score</div>
+      <input type="number" min="1" class="cbt-input cbt-qscore" value="${q.score||1}" placeholder="Score" style="max-width:110px;margin-bottom:0.7em;">
+      <div class="cbt-question-label">Options</div>
+      <div class="cbt-options-list" id="cbt-options-list-${idx}"></div>
+      <button type="button" class="cbt-add-opt-btn" onclick="addCBTOption(${idx})"><i class="fa fa-plus"></i> Add Option</button>
     `;
     listDiv.appendChild(qDiv);
-    // Render options
-    const optionsDiv = qDiv.querySelector('.cbt-options-list');
-    optionsDiv.innerHTML = '';
-    (q.options||[]).forEach((opt, oi) => {
-      let optDiv = document.createElement('div');
-      optDiv.innerHTML = `
-        <input type="text" class="cbt-option-text" value="${opt}" placeholder="Option ${String.fromCharCode(65+oi)}">
-        <input type="radio" name="correct_${idx}" ${q.answer===oi?'checked':''} onclick="setCBTCorrect(${idx},${oi})"> Correct
-        <button type="button" class="btn danger" onclick="removeCBTOption(${idx},${oi})">Remove</button>
-      `;
-      optionsDiv.appendChild(optDiv);
-    });
-    let addOptBtn = document.createElement('button');
-    addOptBtn.type = 'button';
-    addOptBtn.className = 'btn';
-    addOptBtn.textContent = '+ Add Option';
-    addOptBtn.onclick = () => { addCBTOption(idx); };
-    optionsDiv.appendChild(addOptBtn);
 
-    // Handlers for text/score
-    qDiv.querySelector('.cbt-question-text').oninput = (e) => { cbtQuestions[idx].text = e.target.value; };
-    qDiv.querySelector('.cbt-question-score').oninput = (e) => { cbtQuestions[idx].score = Number(e.target.value)||1; };
-    // Handlers for option text
-    optionsDiv.querySelectorAll('.cbt-option-text').forEach((inp, oi) => {
-      inp.oninput = (e) => { cbtQuestions[idx].options[oi] = e.target.value; };
-    });
+    // Initialize Quill for question
+    let qtextDiv = qDiv.querySelector(`#cbt-qtext-quill-${idx}`);
+    let qQuill = new Quill(qtextDiv, getQuillConfig());
+    if(q.text) qQuill.root.innerHTML = q.text;
+    qQuill.on('text-change', () => { cbtQuestions[idx].text = qQuill.root.innerHTML; });
+    qtextDiv.__quill = qQuill;
+
+    // Score handler
+    qDiv.querySelector('.cbt-qscore').oninput = (e) => {
+      cbtQuestions[idx].score = Number(e.target.value)||1;
+    };
+
+    // Render options
+    renderCBTOptions(idx);
+  });
+}
+
+function renderCBTOptions(qidx) {
+  const optionsDiv = document.getElementById(`cbt-options-list-${qidx}`);
+  optionsDiv.innerHTML = '';
+  (cbtQuestions[qidx].options||[]).forEach((opt, oi) => {
+    let optDiv = document.createElement('div');
+    optDiv.className = 'cbt-option-row';
+    optDiv.innerHTML = `
+      <input type="radio" class="cbt-option-radio" name="cbt-correct-${qidx}" ${cbtQuestions[qidx].answer===oi?'checked':''} onclick="setCBTCorrect(${qidx},${oi})" title="Mark as correct">
+      <div id="cbt-q${qidx}-opt-quill-${oi}" class="quill-editor" style="width:100%;max-width:420px;"></div>
+      <button type="button" class="cbt-remove-opt-btn" onclick="removeCBTOption(${qidx},${oi})" title="Remove"><i class="fa fa-trash"></i></button>
+    `;
+    optionsDiv.appendChild(optDiv);
+    // Quill for option
+    let optQuillDiv = optDiv.querySelector(`#cbt-q${qidx}-opt-quill-${oi}`);
+    let optQuill = new Quill(optQuillDiv, getQuillConfig());
+    if(opt.value) optQuill.root.innerHTML = opt.value;
+    optQuill.on('text-change', () => { cbtQuestions[qidx].options[oi].value = optQuill.root.innerHTML; });
+    optQuillDiv.__quill = optQuill;
   });
 }
 
@@ -776,11 +804,12 @@ window.removeCBTQuestion = function(idx) {
 };
 window.addCBTOption = function(qidx) {
   if (!cbtQuestions[qidx].options) cbtQuestions[qidx].options = [];
-  cbtQuestions[qidx].options.push('');
+  cbtQuestions[qidx].options.push({ value: '' });
   renderCBTQuestions();
 };
 window.removeCBTOption = function(qidx, oidx) {
   cbtQuestions[qidx].options.splice(oidx,1);
+  // Reset answer if needed
   if (cbtQuestions[qidx].answer === oidx) cbtQuestions[qidx].answer = 0;
   renderCBTQuestions();
 };
@@ -795,29 +824,29 @@ document.getElementById('cbt-add-question-btn').onclick = function() {
 
 document.getElementById('cbt-question-form').onsubmit = async function(e) {
   e.preventDefault();
-  // Validate
+  // ...validation and submission logic, unchanged from previous...
+  // Update options mapping for new object {value: ...}
   const classId = document.getElementById('cbt-class-select').value;
   const subjectId = document.getElementById('cbt-subject-select').value;
   const title = document.getElementById('cbt-title').value.trim();
   const duration = Number(document.getElementById('cbt-duration').value);
+  const msgDiv = document.getElementById('cbt-upload-msg');
   if (!classId || !subjectId || !title || !duration) {
-    document.getElementById('cbt-upload-msg').style.color = 'red';
-    document.getElementById('cbt-upload-msg').textContent = 'Please fill all fields.';
-    return;
+    msgDiv.style.color = 'red';
+    msgDiv.textContent = 'Please fill all fields.'; return;
   }
   if (!cbtQuestions.length) {
-    document.getElementById('cbt-upload-msg').style.color = 'red';
-    document.getElementById('cbt-upload-msg').textContent = 'Add at least one question.';
-    return;
+    msgDiv.style.color = 'red';
+    msgDiv.textContent = 'Add at least one question.'; return;
   }
   for (let [i, q] of cbtQuestions.entries()) {
     if (!q.text || !Array.isArray(q.options) || q.options.length < 2)
-      return document.getElementById('cbt-upload-msg').textContent = `Question ${i+1} must have text and at least 2 options.`;
-    for (let o of q.options) if (!o) return document.getElementById('cbt-upload-msg').textContent = `No empty options allowed.`;
+      return msgDiv.textContent = `Question ${i+1} must have text and at least 2 options.`;
+    for (let o of q.options) if (!o.value) return msgDiv.textContent = `No empty options allowed.`;
     if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length)
-      return document.getElementById('cbt-upload-msg').textContent = `Select a correct option for Question ${i+1}.`;
+      return msgDiv.textContent = `Select a correct option for Question ${i+1}.`;
   }
-  // Submit to backend (adjust endpoint as needed)
+  // Submit
   const payload = {
     title,
     class: classId,
@@ -825,7 +854,7 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
     duration,
     questions: cbtQuestions.map(q => ({
       text: q.text,
-      options: q.options,
+      options: q.options.map(o => o.value),
       answer: q.answer,
       score: q.score
     }))
@@ -837,15 +866,16 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(await res.text());
-    document.getElementById('cbt-upload-msg').style.color = 'green';
-    document.getElementById('cbt-upload-msg').textContent = 'CBT uploaded successfully!';
+    msgDiv.style.color = 'green';
+    msgDiv.textContent = 'CBT uploaded successfully!';
     cbtQuestions = [];
     renderCBTQuestions();
   } catch (err) {
-    document.getElementById('cbt-upload-msg').style.color = 'red';
-    document.getElementById('cbt-upload-msg').textContent = 'Upload failed: ' + err.message;
+    msgDiv.style.color = 'red';
+    msgDiv.textContent = 'Upload failed: ' + err.message;
   }
 };
+
 // --- Initial Render (called after data is fetched) ---
 window.renderClassesList = renderClassesList;
 window.renderStudentsBlock = renderStudentsBlock;

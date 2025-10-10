@@ -363,44 +363,149 @@
     };
   }
 
-  // 3. Schedule Exam
-  async function showScheduleExam() {
-    const exams = await fetch('https://goldlincschools.onrender.com/api/exam').then(r => r.json()).catch(() => []);
-    document.getElementById('contentArea').innerHTML = `
-      <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Schedule Exam</h2>
-      <form id="scheduleExamForm" class="space-y-4 max-w-xl">
-        <div>
-          <label>Exam <span class="text-red-500">*</span></label>
-          <select name="examId" required class="block w-full rounded border px-3 py-2 mt-1">
-            <option value="">Select Exam</option>
-            ${exams.map(e => `<option value="${e._id}">${e.title}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label>Schedule Date & Time <span class="text-red-500">*</span></label>
-          <input name="scheduledFor" type="datetime-local" required class="block w-full rounded border px-3 py-2 mt-1"/>
-        </div>
-        <button type="submit" class="cbt-btn mt-2"><i class="fa fa-calendar mr-1"></i> Schedule</button>
-      </form>
-      <div id="scheduleExamMsg" class="mt-4"></div>
-    `;
-    document.getElementById('scheduleExamForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const fd = new FormData(this);
-      const data = { scheduledFor: fd.get('scheduledFor') };
-      const res = await fetch(`https://goldlincschools.onrender.com/api/exam/${fd.get('examId')}/schedule`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).then(r => r.json());
-      if (res.error) {
-        document.getElementById('scheduleExamMsg').innerHTML = `<div class="text-red-600">${res.error}</div>`;
-      } else {
-        document.getElementById('scheduleExamMsg').innerHTML = `<div class="text-green-600">Exam scheduled successfully.</div>`;
-        setTimeout(showExams, 1000);
-      }
+// Replace your showScheduleExam function with this complete version:
+async function showScheduleExam() {
+  // Fetch all exams
+  document.getElementById('contentArea').innerHTML = `
+    <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Schedule & Merge Exams</h2>
+    <div id="schedule-loader" class="flex items-center justify-center py-10"><i class="fa fa-spinner fa-spin fa-2x text-blue-400"></i> <span class="ml-3 text-blue-700 font-bold">Loading exams...</span></div>
+  `;
+
+  // Show loader while fetching
+  const exams = await fetch('https://goldlincschools.onrender.com/api/exam').then(r => r.json()).catch(() => []);
+
+  // Build UI
+  document.getElementById('contentArea').innerHTML = `
+    <h2 class="text-2xl font-bold mb-5 text-[#22305a]">Schedule & Merge Exams</h2>
+    <form id="mergeScheduleExamForm" class="space-y-4 max-w-xl">
+      <div>
+        <label>Select Exams to Merge <span class="text-red-500">*</span></label>
+        <select name="examIds" id="mergeExamSelect" multiple required class="block w-full rounded border px-3 py-2 mt-1 h-40">
+          ${exams.map(e => `<option value="${e._id}">${e.title}</option>`).join('')}
+        </select>
+        <small>Select two or more exams to merge their questions. Use Ctrl/Cmd to select multiple.</small>
+      </div>
+      <div id="mergedQuestionsPreview" class="mt-4"></div>
+      <div class="mt-4">
+        <label>New Exam Title <span class="text-red-500">*</span></label>
+        <input type="text" name="mergedTitle" id="mergedTitle" class="block w-full rounded border px-3 py-2 mt-1" required />
+      </div>
+      <div class="mt-4">
+        <label>Duration (minutes) <span class="text-red-500">*</span></label>
+        <input type="number" name="duration" id="mergedDuration" class="block w-full rounded border px-3 py-2 mt-1" min="1" required />
+      </div>
+      <div class="mt-4">
+        <label>Schedule Date & Time <span class="text-red-500">*</span></label>
+        <input name="scheduledFor" type="datetime-local" required class="block w-full rounded border px-3 py-2 mt-1"/>
+      </div>
+      <button type="submit" class="cbt-btn mt-2 flex items-center" id="schedule-submit-btn">
+        <span> <i class="fa fa-calendar mr-1"></i> Schedule Merged Exam</span>
+        <span id="schedule-submit-spinner" style="display:none;" class="ml-2"><i class="fa fa-spinner fa-spin"></i></span>
+      </button>
+    </form>
+    <div id="mergeExamMsg" class="mt-4"></div>
+  `;
+
+  // Store merged questions globally in closure
+  let mergedQuestions = [];
+
+  // Handler for selecting exams
+  document.getElementById('mergeExamSelect').onchange = async function () {
+    const selected = Array.from(this.selectedOptions).map(opt => opt.value);
+    const previewDiv = document.getElementById('mergedQuestionsPreview');
+    if (selected.length < 2) {
+      previewDiv.innerHTML = "<div class='text-gray-500'>Select two or more exams to merge.</div>";
+      mergedQuestions = [];
+      return;
     }
-  }
+    previewDiv.innerHTML = `<div class="flex items-center text-blue-600 font-semibold py-4"><i class="fa fa-spinner fa-spin"></i> Merging questions...</div>`;
+
+    // Fetch details for selected exams
+    const questionSets = await Promise.all(selected.map(id =>
+      fetch(`https://goldlincschools.onrender.com/api/exam/${id}`).then(r => r.json())
+    ));
+
+    // Merge all questions (track source for display)
+    mergedQuestions = [];
+    questionSets.forEach(exam => {
+      (exam.questions || []).forEach(q => {
+        mergedQuestions.push({ ...q, sourceExamTitle: exam.title });
+      });
+    });
+
+    // Display questions (simple preview)
+    previewDiv.innerHTML =
+      mergedQuestions.map((q, idx) => `
+        <div class="mb-2 p-2 bg-[#f8fafc] rounded border flex items-start gap-3">
+          <div class="text-gray-500 mt-1">${idx + 1}.</div>
+          <div class="flex-1">
+            <div class="font-semibold text-[#22305a]">From: <span class="text-blue-700">${q.sourceExamTitle}</span></div>
+            <div class="mb-2">${q.text}</div>
+            <ol class="list-decimal ml-5">${(q.options || []).map((o, oi) => `<li>${o.value || o}</li>`).join('')}</ol>
+          </div>
+        </div>
+      `).join('');
+  };
+
+  // Form submit (schedule merged exam)
+  document.getElementById('mergeScheduleExamForm').onsubmit = async function (e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const mergedTitle = fd.get('mergedTitle');
+    const duration = Number(fd.get('duration'));
+    const scheduledFor = fd.get('scheduledFor');
+    const selected = Array.from(document.getElementById('mergeExamSelect').selectedOptions).map(opt => opt.value);
+    const previewDiv = document.getElementById('mergedQuestionsPreview');
+
+    // Validation
+    if (!mergedTitle || !duration || !scheduledFor || !mergedQuestions.length || selected.length < 2) {
+      document.getElementById('mergeExamMsg').innerHTML = `<div class="text-red-600">Please complete all fields and select at least 2 exams.</div>`;
+      return;
+    }
+
+    // Use class/subject of first selected exam (could allow admin to choose)
+    const questionSets = await Promise.all(selected.map(id =>
+      fetch(`https://goldlincschools.onrender.com/api/exam/${id}`).then(r => r.json())
+    ));
+    const firstExam = questionSets[0];
+
+    // Loader
+    const submitBtn = document.getElementById('schedule-submit-btn');
+    const spinner = document.getElementById('schedule-submit-spinner');
+    submitBtn.disabled = true;
+    spinner.style.display = '';
+
+    // POST the merged exam
+    const payload = {
+      title: mergedTitle,
+      class: firstExam.class,
+      subject: firstExam.subject,
+      duration,
+      questions: mergedQuestions.map(q => ({
+        text: q.text,
+        options: q.options,
+        answer: q.answer,
+        score: q.score
+      })),
+      scheduledFor
+    };
+    const res = await fetch('https://goldlincschools.onrender.com/api/exam', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    submitBtn.disabled = false;
+    spinner.style.display = 'none';
+
+    if (data.error) {
+      document.getElementById('mergeExamMsg').innerHTML = `<div class="text-red-600">${data.error}</div>`;
+    } else {
+      document.getElementById('mergeExamMsg').innerHTML = `<div class="text-green-600">Merged exam scheduled!</div>`;
+      setTimeout(showExams, 1200);
+    }
+  };
+}
 
   // 4. Results Viewer
   async function showResults() {

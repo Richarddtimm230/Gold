@@ -149,18 +149,18 @@ router.get('/:id/assignments', teacherAuth, async (req, res) => {
 // POST /api/teachers/:id/assignments
 router.post('/:id/assignments', teacherAuth, async (req, res) => {
   try {
-    const { class: classId, subject, title, description, dueDate } = req.body;
+    const { class: classId, subject, title, description, dueDate, cbt } = req.body;
     const assignment = new Assignment({
       teacher: req.params.id,
-      class: classId, // expects 'class' in body
+      class: classId,
       subject,
       title,
       description,
-      dueDate
+      dueDate,
+      cbt // <-- attach CBT here!
     });
     await assignment.save();
-// When creating/fetching assignments
-await assignment.populate({ path: 'class', select: 'name' });
+    await assignment.populate({ path: 'class', select: 'name' });
     res.status(201).json({ assignment });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Academics | Gold and Linc Schools</title>
+  <title>Gold and Linc Schools - Report Card Preferences</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Inter Font + FontAwesome -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+  <link rel="stylesheet" href="admin.css">
   <style>
     :root {
       --primary: #007bff;
@@ -16,7 +16,7 @@
       --header-height: 64px;
       --border-radius: 12px;
       --shadow: 0 2px 8px rgba(0,0,0,0.05);
-      --neutral: #f6f8fa;
+      --neutral: #f8f9fa;
       --card-bg: #fff;
       --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
       --font-main: 'Inter', Arial, sans-serif;
@@ -26,29 +26,11 @@
       padding: 0;
       font-family: var(--font-main);
       background: var(--neutral);
-      color: #22305a;
+      color: #222;
+      height: 100%;
       min-height: 100%;
       box-sizing: border-box;
     }
-    #pageSpinnerOverlay {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.96);
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      transition: opacity 0.4s;
-    }
-    .spinner {
-      width: 46px;
-      height: 46px;
-      border: 5px solid #e3e6ea;
-      border-top: 5px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
     .sidebar {
       position: fixed;
       top: 0; left: 0;
@@ -56,13 +38,14 @@
       min-width: 180px;
       max-width: 320px;
       height: 100vh;
+      max-height: 100vh;
       background: var(--sidebar-bg);
       box-shadow: var(--shadow);
       z-index: 1050;
       padding: 0 0 2rem 0;
       display: flex;
       flex-direction: column;
-      transition: transform 0.25s;
+      transition: transform 0.25s ease;
       overflow: hidden;
     }
     .profile {
@@ -80,6 +63,23 @@
     }
     .name { font-weight: 700; font-size: 1.13em; }
     .role { font-size: 0.98em; color: #888; margin-top: 2px; }
+    .search {
+      padding: 0.7em 1.2em;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+    }
+    .search input {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0.6em 0.9em;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 1em;
+      display: block;
+      background: #fff;
+    }
     .sidebar nav {
       flex: 1 1 0%;
       display: flex;
@@ -108,7 +108,7 @@
       border-left: 4px solid var(--primary);
       color: var(--primary);
     }
-    @media (max-width: 900px) {
+    @media (max-width: 750px) {
       .sidebar {
         width: var(--sidebar-width-mobile);
         min-width: 0;
@@ -121,10 +121,18 @@
         z-index: 1050;
         overflow: hidden;
       }
-      .sidebar.active { transform: translateX(0); }
-      .sidebar-toggle { display: inline-flex; }
-      .sidebar-overlay.active { display: block; }
-      body.sidebar-open { overflow: hidden; }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-toggle {
+        display: inline-flex;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      body.sidebar-open {
+        overflow: hidden;
+      }
     }
     .sidebar-toggle {
       display: none;
@@ -152,9 +160,6 @@
       margin-left: var(--sidebar-width);
       padding: 0 2.5vw 2vw 2.5vw;
       transition: margin-left 0.25s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
     header {
       display: flex;
@@ -163,8 +168,6 @@
       gap: 1.8em;
       padding-top: 1.5vw;
       padding-bottom: 1.5vw;
-      width: 100%;
-      max-width: 1100px;
     }
     .school-title {
       display: flex;
@@ -194,257 +197,289 @@
     .header-actions .icon:hover {
       opacity: 1;
     }
-
-    /* Tab Navigation */
-    .tablist {
-      display: flex;
-      gap: 6px;
-      margin: 1.5em 0 0.5em 0;
-      flex-wrap: wrap;
-      width: 100%;
-      max-width: 1100px;
-    }
-    .tablist button {
-      background: #f1f6fb;
-      color: #2647a6;
-      padding: 10px 25px;
-      border-radius: 7px;
-      font-weight: 600;
-      font-size: 1.04em;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      outline: none;
-    }
-    .tablist button.active, .tablist button:focus-visible {
-      background: #2647a6;
-      color: #fff;
-    }
-    .tablist button:hover:not(.active) { background: #e3e8ee; }
-
-    .tab-content {
-      margin-top: 18px;
-      width: 100%;
-      max-width: 1100px;
-    }
-
-    /* Card Section */
-    .section-card {
+    /* Preference Card Styles */
+    .pref-container {
+      max-width: 660px;
+      margin: 38px auto 0 auto;
       background: var(--card-bg);
       border-radius: var(--border-radius);
       box-shadow: var(--card-shadow);
-      padding: 28px 28px 22px 28px;
-      margin-bottom: 30px;
-      width: 100%;
+      padding: 42px 30px 34px 30px;
+      margin-top: 48px;
     }
-    .section-title {
-      font-size: 19px;
-      font-weight: bold;
-      color: #2647a6;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 13px;
-    }
-    .section-card form label {
-      font-size: 0.97em;
-      font-weight: 600;
-      margin-bottom: 3px;
-      color: #22305a;
-    }
-    .section-card input, .section-card select {
-      font-family: var(--font-main);
-      font-size: 1em;
-      border-radius: 8px !important;
-      border: 1px solid #ddeaff;
-      padding: 8px 12px;
-      margin-top: 2px;
-      margin-bottom: 0;
-      width: 100%;
-      outline: none;
-      background: #f9fafd;
-      transition: border 0.15s;
-    }
-    .section-card input:focus, .section-card select:focus {
-      border-color: #2647a6;
-    }
-    .section-card button[type="submit"], .section-card button[type="button"], #pushCBTResultsBtn {
-      background: var(--primary);
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 7px;
-      padding: 12px 36px;
-      font-size: 1.08em;
-      cursor: pointer;
-      margin-top: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-      transition: background 0.18s;
-    }
-    .section-card button[type="submit"]:hover, #pushCBTResultsBtn:hover {
-      background: #005ecb;
-    }
-    .section-card table {
-      width: 100%;
-      border-radius: 11px;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      overflow: hidden;
-      margin-bottom: 0;
-    }
-    .section-card th, .section-card td {
-      text-align: left;
-      padding: 0.95em 0.7em;
-      border-bottom: 1px solid #f0f3f7;
-    }
-    .section-card th {
-      background: #f5f8fd;
-      font-weight: 600;
-      color: #1a3157;
-      font-size: 1.04em;
-    }
-    .section-card td {
-      font-size: 1.02em;
-      color: #373737;
-      background: #fff;
-      vertical-align: top;
-    }
-    .section-card tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* Modal styling */
-    #pushCBTModal {
-      background: rgba(0,0,0,0.30);
-      justify-content: center; align-items: center;
-      z-index: 999;
-    }
-    #pushCBTModal .bg-white {
-      border-radius: var(--border-radius);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
-    }
-    #pushCBTModal label { font-size: 1em; }
-    #pushCBTModal input[type="radio"] { accent-color: var(--primary); }
-    #pushCBTModal button { border-radius: 6px; }
-
-    @media (max-width: 1100px) {
+    @media (max-width: 750px) {
       .main-content { margin-left: 0; padding: 0 3vw; }
-      header { max-width: 100vw;}
-      .tablist, .tab-content { max-width: 100vw;}
-    }
-    @media (max-width: 900px) {
-      .main-content { margin-left: 0; padding: 0 2vw; }
       .sidebar { width: var(--sidebar-width-mobile); min-width: 0; max-width: 95vw; }
       .sidebar.active { transform: translateX(0); }
       .sidebar-toggle { display: inline-flex; }
       .sidebar-overlay.active { display: block; }
       body.sidebar-open { overflow: hidden; }
-      header { gap: 0.9em;}
+      .pref-container { margin: 22px auto 0 auto; padding: 30px 7vw 26px 7vw;}
     }
     @media (max-width: 600px) {
-      .main-content { padding: 0 1vw; }
-      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem;}
-      .avatar { width: 37px; height: 37px;}
-      .name, .role { font-size: 0.96rem;}
-      .school-title span { font-size: 1.04rem;}
-      .section-card { padding: 10px 2px 10px 2px;}
+      .main-content { padding: 0 2vw; }
+      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .avatar { width: 37px; height: 37px; }
+      .name, .role { font-size: 0.96rem; }
+      .school-title span { font-size: 1.04rem; }
+      header { gap: 0.9em; }
+      .pref-container { padding: 18px 5vw 20px 5vw; }
     }
     @media (max-width: 400px) {
       html { font-size: 13px; }
       .sidebar { width: 97vw; }
+    }
+    .pref-container h2 {
+      color: #1a3157;
+      font-size: 1.55em;
+      margin-bottom: 16px;
+      text-align: left;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    #prefsForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3em;
+    }
+    .prefs-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7em 1.8em;
+    }
+    .prefs-col {
+      flex: 1 1 240px;
+      min-width: 180px;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+    }
+    label.pref-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.07em;
+      margin-bottom: 3px;
+      padding: 7px 0 4px 0;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background .13s;
+    }
+    label.pref-label:hover {
+      background: #f1f6fd;
+    }
+    input[type="checkbox"] {
+      width: 21px;
+      height: 21px;
+      accent-color: var(--primary);
+      margin: 0 5px 0 0;
+      flex-shrink: 0;
+      border-radius: 4px;
+      border: 1px solid #b7c9e8;
+      background: #f5f8fd;
+      transition: border .13s;
+    }
+    .divider {
+      width: 100%;
+      border: none;
+      border-top: 1.5px solid #f0f3f7;
+      margin: 21px 0 14px 0;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 7px;
+      padding: 13px 36px;
+      font-size: 1.11em;
+      cursor: pointer;
+      margin-top: 21px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: background 0.18s;
+      letter-spacing: 0.03em;
+    }
+    .btn:disabled { opacity: 0.5;}
+    .btn:hover:not(:disabled) { background: #005ecb;}
+    .status-msg {
+      margin-top: 18px;
+      font-weight: bold;
+      color: #1a8e4e;
+      min-height: 22px;
+      font-size: 1.05em;
+      letter-spacing: 0.01em;
     }
     ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
     ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <div id="pageSpinnerOverlay">
-    <div class="spinner"></div>
-  </div>
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="profile">
-      <img src="https://ui-avatars.com/api/?name=Admin&background=2647a6&color=fff" alt="Admin" class="avatar">
+      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
       <div>
-        <div class="name">ADMIN</div>
-        <div class="role">Academics Panel</div>
+        <div class="name">SCHOOL ICT</div>
+        <div class="role">System Administrator</div>
       </div>
     </div>
+    <div class="search">
+      <input type="text" placeholder="Quick search..." aria-label="Quick search">
+    </div>
     <nav>
-      <a href="#" class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</a>
-      <a href="#" data-tab="terms"><i class="fa fa-clock"></i> Terms</a>
-      <a href="#" data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</a>
-      <a href="#" data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</a>
-      <a href="#" data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</a>
-      <a href="#" data-tab="classes"><i class="fa fa-graduation-cap"></i> Classes</a>
-      <a href="#" data-tab="subjects"><i class="fa fa-book"></i> Subjects</a>
+      <a href="admin.html"><span>🏠</span> Dashboard</a>
+      <a href="admission"><span>🎓</span> Admission</a>
+      <a href="people.html"><span>👥</span> People</a>
+      <a href="academics"><span>📚</span> Academics</a>
+      <a href="e-class"><span>💻</span> E-Class</a>
+      <a href="results.html"><span>📄</span> Results</a>
+      <a href="finance"><span>💰</span> Finance</a>
+      <a href="attendance"><span>🗓️</span> Attendance</a>
+      <a href="admin"><span>⚙️</span> Admin</a>
     </nav>
   </aside>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <main class="main-content">
     <header>
-      <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar"><i class="fa fa-bars"></i></button>
+      <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
       <div class="school-title">
-        <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" alt="Logo" class="logo">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
         <span>GOLD AND LINC SCHOOLS</span>
       </div>
       <div class="header-actions">
         <span class="icon" title="Notifications">🔔</span>
         <span class="icon" title="Help">❓</span>
         <span class="icon" title="Settings">⚙️</span>
-        <button onclick="window.location.href='admin.html'" style="background: #2647a6; color: #fff; border:none; border-radius:7px; font-weight:600; font-size:1em; padding:7px 22px; margin-left: 18px; cursor:pointer;">
-          <i class="fa fa-arrow-left"></i> Admin
-        </button>
       </div>
     </header>
-    <div class="tablist" id="academicsTabs">
-      <button class="active" data-tab="sessions"><i class="fa fa-calendar"></i> Sessions</button>
-      <button data-tab="terms"><i class="fa fa-clock"></i> Terms</button>
-      <button data-tab="exams"><i class="fa fa-file-alt"></i> Examinations</button>
-      <button data-tab="cbt"><i class="fa fa-desktop"></i> CBT & Mocks</button>
-      <button data-tab="results"><i class="fa fa-chart-bar"></i> Results (CBT/Mocks)</button>
-      <button data-tab="classes"><i class="fa fa-graduation-cap"></i> Classes</button>
-      <button data-tab="subjects"><i class="fa fa-book"></i> Subjects</button>
-    </div>
-    <div class="tab-content" id="academicsTabContent">
-      <!-- All original sections (sessions, terms, classes, etc) remain unchanged -->
-      <!-- ... (PASTE ALL YOUR EXISTING SECTION HTML HERE, UNCHANGED) ... -->
+    <div class="pref-container">
+      <h2>Report Card Display Preferences</h2>
+      <form id="prefsForm">
+        <div class="prefs-grid">
+          <div class="prefs-col">
+            <label class="pref-label"><input type="checkbox" name="showTeacherRemark"> Show Teacher's Remark</label>
+            <label class="pref-label"><input type="checkbox" name="showPsychomotorSkills"> Show Psychomotor Skills</label>
+            <label class="pref-label"><input type="checkbox" name="showAffectiveSkills"> Show Affective Skills</label>
+            <label class="pref-label"><input type="checkbox" name="showAttendance"> Show Attendance Table</label>
+            <label class="pref-label"><input type="checkbox" name="showPrincipalComment"> Show Principal's Comment</label>
+            <label class="pref-label"><input type="checkbox" name="showSubjectPosition"> Show Subject Position</label>
+            <label class="pref-label"><input type="checkbox" name="showGradePoints"> Show Grade Points</label>
+            <label class="pref-label"><input type="checkbox" name="showGPA"> Show GPA row</label>
+            <label class="pref-label"><input type="checkbox" name="showResultSummary"> Show Result Summary</label>
+            <label class="pref-label"><input type="checkbox" name="showResultSummaryLabel"> Show Result Summary Label</label>
+          </div>
+          <div class="prefs-col">
+            <label class="pref-label"><input type="checkbox" name="showStudentPhoto"> Show Student Photo</label>
+            <label class="pref-label"><input type="checkbox" name="showClassSize"> Show Class Size</label>
+            <label class="pref-label"><input type="checkbox" name="showStudentAge"> Show Student Age</label>
+            <label class="pref-label"><input type="checkbox" name="showStudentEmail"> Show Student Email</label>
+            <label class="pref-label"><input type="checkbox" name="showNextTermDate"> Show Next Term Date</label>
+            <label class="pref-label"><input type="checkbox" name="showPrintedDate"> Show Printed Date</label>
+            <label class="pref-label"><input type="checkbox" name="showSchoolMotto"> Show School Motto</label>
+            <label class="pref-label"><input type="checkbox" name="showSchoolLogo"> Show School Logo</label>
+            <label class="pref-label"><input type="checkbox" name="showCoatOfArms"> Show Coat of Arms</label>
+            <label class="pref-label"><input type="checkbox" name="showKeyToGrades"> Show Key to Grades Table</label>
+            <label class="pref-label"><input type="checkbox" name="showRedSeal"> Show Red Seal/Stamp</label>
+          </div>
+          <div class="prefs-col">
+            <label class="pref-label"><input type="checkbox" name="showAttendanceNoOfDays"> Show No. of School Days</label>
+            <label class="pref-label"><input type="checkbox" name="showAttendancePresent"> Show Days Present</label>
+            <label class="pref-label"><input type="checkbox" name="showAttendanceAbsent"> Show Days Absent</label>
+            <label class="pref-label"><input type="checkbox" name="showAttendancePercent"> Show Attendance (%)</label>
+          </div>
+        </div>
+        <hr class="divider">
+        <button class="btn" type="submit" id="saveBtn">Save Preferences</button>
+        <div class="status-msg" id="statusMsg"></div>
+      </form>
     </div>
   </main>
-<script>
-  // Spinner overlay on load
-  document.addEventListener('DOMContentLoaded', () => {
-    const spinner = document.getElementById('pageSpinnerOverlay');
-    if (spinner) spinner.style.display = 'flex';
-    setTimeout(() => {
-      if (spinner) {
-        spinner.style.opacity = '0';
-        setTimeout(() => { spinner.style.display = 'none'; }, 400);
+  <script>
+    // Sidebar mobile toggle logic
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+    }
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // Preferences logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('prefsForm');
+      const statusMsg = document.getElementById('statusMsg');
+      const saveBtn = document.getElementById('saveBtn');
+      const API_URL = 'https://goldlincschools.onrender.com/api/report/preferences';
+
+      function getAdminToken() {
+        return localStorage.getItem('adminToken') ||
+               localStorage.getItem('superadmin_token') ||
+               localStorage.getItem('token') || '';
       }
-    }, 900);
-  });
 
-  // Sidebar mobile toggle logic
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  function openSidebar() {
-    sidebar.classList.add('active');
-    sidebarOverlay.classList.add('active');
-    document.body.classList.add('sidebar-open');
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-    document.body.classList.remove('sidebar-open');
-  }
-  sidebarToggle.addEventListener('click', openSidebar);
-  sidebarOverlay.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+      fetch(API_URL, {
+        headers: {
+          'Authorization': 'Bearer ' + getAdminToken()
+        }
+      })
+        .then(r => r.json())
+        .then(pref => {
+          Object.keys(pref).forEach(key => {
+            if (form.elements[key])
+              form.elements[key].checked = !!pref[key];
+          });
+        })
+        .catch(() => {
+          statusMsg.textContent = 'Failed to load preferences. Please ensure you are logged in as admin.';
+          statusMsg.style.color = '#c82333';
+        });
 
-  // Tab switching logic (copy your existing code or keep as is)
-</script>
-<!-- Your academics.js logic and all modals/scripts remain unchanged -->
-<script src="academics.js" defer></script>
+      form.onsubmit = async function(e) {
+        e.preventDefault();
+        saveBtn.disabled = true;
+        statusMsg.style.color = "#1a8e4e";
+        statusMsg.textContent = "Saving...";
+        const data = {};
+        Array.from(form.elements).forEach(el => {
+          if (el.type === "checkbox" && el.name) data[el.name] = el.checked;
+        });
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + getAdminToken()
+            },
+            body: JSON.stringify(data)
+          });
+          if (res.ok) {
+            statusMsg.textContent = "Preferences saved!";
+            statusMsg.style.color = "#1a8e4e";
+          } else if (res.status === 401) {
+            statusMsg.textContent = "Unauthorized. Please login as admin and try again.";
+            statusMsg.style.color = "#c82333";
+          } else {
+            statusMsg.textContent = "Failed to save preferences.";
+            statusMsg.style.color = "#c82333";
+          }
+        } catch {
+          statusMsg.textContent = "Network error.";
+          statusMsg.style.color = "#c82333";
+        }
+        saveBtn.disabled = false;
+      };
+    });
+  </script>
 </body>
 </html>

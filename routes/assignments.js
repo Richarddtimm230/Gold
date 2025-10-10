@@ -27,11 +27,11 @@ router.get('/me', studentAuth, async (req, res) => {
     }
 
     const assignments = await Assignment.find({
-      $or: [
-        { assignedTo: studentId },
-        { class: classValue }
-      ]
-    }).populate('subject');
+  $or: [
+    { assignedTo: studentId },
+    { class: classValue }
+  ]
+}).populate('subject').populate('cbt'); 
     const submissions = await AssignmentSubmission.find({ student: studentId });
     const assignmentData = assignments.map(ass => {
       const submission = submissions.find(sub => sub.assignment.toString() === ass._id.toString());

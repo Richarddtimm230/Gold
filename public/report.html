@@ -514,7 +514,18 @@
     if (reportPreferences && reportPreferences.showPrincipalComment === false) {
       document.querySelector(".comments-section").classList.add("hidden");
     }
-
+if (reportPreferences && reportPreferences.showStudentEmail === false) {
+  document.getElementById("stuEmail").parentElement.classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showStudentAge === false) {
+  document.getElementById("stuAge").parentElement.classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showClassSize === false) {
+  document.getElementById("classSize").parentElement.classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showStudentPhoto === false) {
+  document.getElementById("stuPhoto").classList.add("hidden");
+  }
     // Fill skills tables if available
     if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
       const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');

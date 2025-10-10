@@ -46,19 +46,21 @@ router.get('/me', studentAuth, async (req, res) => {
       }
       // Check overdue
       if (!submitted && new Date(ass.dueDate) < new Date()) status = "Overdue";
-      return {
-        _id: ass._id,
-        title: ass.title,
-        description: ass.description,
-        subject: ass.subject,
-        dueDate: ass.dueDate,
-        status,
-        score,
-        totalScore,
-        feedback,
-        submissionFile,
-        submitted
-      };
+      // ... inside the assignmentData map in /me route
+return {
+  _id: ass._id,
+  title: ass.title,
+  description: ass.description,
+  subject: ass.subject,
+  dueDate: ass.dueDate,
+  cbt: ass.cbt, // <-- ADD THIS LINE
+  status,
+  score,
+  totalScore,
+  feedback,
+  submissionFile,
+  submitted
+};
     });
     res.json(assignmentData);
   } catch (err) {

@@ -10,7 +10,7 @@ const AssignmentSchema = new mongoose.Schema({
   files: [{ url: String, name: String }],
   dueDate: { type: Date, required: true },
 
-cbt: { type: mongoose.Schema.Types.ObjectId, ref: 'CBT', required: false },
+cbt: { type: mongoose.Schema.Types.ObjectId, ref: 'CBTExam', required: false },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

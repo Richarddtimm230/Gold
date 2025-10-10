@@ -54,6 +54,60 @@
   gap: 1.2em;
   margin-bottom: 0.9em;
 }
+.cbt-loader-spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 3px solid #dbe7fa;
+  border-top: 3px solid #234b8a;
+  border-radius: 50%;
+  animation: cbt-spin 0.9s linear infinite;
+  vertical-align: middle;
+  margin-right: 7px;
+}
+@keyframes cbt-spin {
+  100% { transform: rotate(360deg);}
+}
+.cbt-quiz-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 1.5em;
+}
+.cbt-quiz-table th, .cbt-quiz-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f0f3f7;
+  text-align: left;
+  font-size: 1.04em;
+}
+.cbt-quiz-table th {
+  background: #f6f8fa;
+  font-weight: 700;
+  color: #234b8a;
+}
+.cbt-quiz-table tr:last-child td {
+  border-bottom: none;
+}
+.cbt-delete-btn {
+  color: #c82333;
+  background: none;
+  border: none;
+  font-size: 1.13em;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.cbt-delete-btn:hover {
+  background: #ffeaea;
+}
+.cbt-select-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: #234b8a;
+}
 .cbt-form-row > div {
   flex: 1 1 180px;
   min-width: 150px;

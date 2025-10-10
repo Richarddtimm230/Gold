@@ -1038,10 +1038,10 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
     subject: subjectId,
     duration,
     questions: cbtQuestions.map(q => ({
-      text: q.text,
-      options: q.options.map(o => o.value),
-      answer: q.answer,
-      score: q.score
+  text: q.text,
+  options: q.options.map(o => ({ value: o.value })), // <-- CORRECT!
+  answer: q.answer,
+  score: q.score
     }))
   };
   try {

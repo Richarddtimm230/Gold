@@ -95,11 +95,11 @@
 </head>
 <body>
   <div class="report-container" id="reportCardDom">
-    <img class="background-blur" src="logo-1679575828 (1).jpeg" alt="Blurred background" id="backgroundBlur">
+    <img class="background-blur" src="logo-1679575828 (1).jpeg" alt="Blurred background" id="backgroundBlurImg">
     <button class="no-print-btn" onclick="downloadPDF()">Download as PDF</button>
     <header>
       <div class="school-header">
-        <img src="logo-1679575828 (1).jpeg" alt="Golding Schools Logo" class="school-logo">
+        <img src="logo-1679575828 (1).jpeg" alt="Golding Schools Logo" class="school-logo" id="schoolLogoImg">
         <div class="school-info">
           <h1>GOLD AND LINC SCHOOLS</h1>
           <p>
@@ -110,7 +110,7 @@
             <span class="motto">Motto : FOR A SOLID BEGINNING...</span>
           </p>
         </div>
-        <img src="images (7).jpeg" alt="Nigeria Coat of Arms" class="coat-of-arms">
+        <img src="images (7).jpeg" alt="Nigeria Coat of Arms" class="coat-of-arms" id="coatOfArmsImg">
       </div>
       <div class="term-title">
         <h2 id="termTitle">FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
@@ -119,34 +119,34 @@
     <section class="student-info-section">
       <table class="student-info-table" id="studentInfoTable">
         <tr>
-          <td id="stuNameCell"><strong>Name:</strong> <span id="stuName"></span></td>
-          <td id="stuPhotoTd" rowspan="8" style="text-align:center; vertical-align:middle;">
+          <td><strong>Name:</strong> <span id="stuName"></span></td>
+          <td rowspan="8" style="text-align:center; vertical-align:middle;">
             <img id="stuPhoto" src="" alt="Student Photo">
           </td>
-          <td id="perfGradeCell"><strong>Performance Grade:</strong> <span id="perfGrade"></span></td>
+          <td><strong>Performance Grade:</strong> <span id="perfGrade"></span></td>
         </tr>
         <tr>
-          <td id="stuRegNoCell"><strong>Reg. No:</strong> <span id="stuRegNo"></span></td>
-          <td id="classSizeCell"><strong>Class Size:</strong> <span id="classSize"></span></td>
+          <td><strong>Reg. No:</strong> <span id="stuRegNo"></span></td>
+          <td><strong>Class Size:</strong> <span id="classSize"></span></td>
         </tr>
         <tr>
-          <td id="stuGenderCell"><strong>Gender:</strong> <span id="stuGender"></span></td>
-          <td id="numSubjectsCell"><strong>No. of Subjects:</strong> <span id="numSubjects"></span></td>
+          <td><strong>Gender:</strong> <span id="stuGender"></span></td>
+          <td><strong>No. of Subjects:</strong> <span id="numSubjects"></span></td>
         </tr>
         <tr>
-          <td id="stuAgeCell"><strong>Age:</strong> <span id="stuAge"></span></td>
-          <td id="stuTotalScoreCell"><strong>Student Total Score:</strong> <span id="stuTotalScore"></span></td>
+          <td><strong>Age:</strong> <span id="stuAge"></span></td>
+          <td><strong>Student Total Score:</strong> <span id="stuTotalScore"></span></td>
         </tr>
         <tr>
-          <td id="stuDOBCell"><strong>DOB:</strong> <span id="stuDOB"></span></td>
-          <td id="stuAverageCell"><strong>Student Average (%):</strong> <span id="stuAverage"></span></td>
+          <td><strong>DOB:</strong> <span id="stuDOB"></span></td>
+          <td><strong>Student Average (%):</strong> <span id="stuAverage"></span></td>
         </tr>
         <tr>
-          <td id="stuClassCell"><strong>Class:</strong> <span id="stuClass"></span></td>
+          <td><strong>Class:</strong> <span id="stuClass"></span></td>
           <td id="gpaCell"><strong>Grade Point Average:</strong> <span id="stuGPA"></span></td>
         </tr>
         <tr>
-          <td id="stuEmailCell"><strong>Email:</strong> <span id="stuEmail"></span></td>
+          <td><strong>Email:</strong> <span id="stuEmail"></span></td>
           <td id="summaryCell"><strong id="resultSummaryLabel">Result Summary:</strong> <span id="resultSummary"></span></td>
         </tr>
       </table>
@@ -204,7 +204,7 @@
       </table>
     </section>
     <section class="grades-key-section">
-      <table class="grades-key-table">
+      <table class="grades-key-table" id="gradesKeyTable">
         <tr>
           <th>Key to Grades</th>
           <td>70-100: <strong>A</strong></td>
@@ -242,8 +242,8 @@
         <span id="printDate"></span>
       </div>
     </section>
-    <div class="seal-container">
-      <img src="images (6).jpeg" alt="Red Seal" id="redSealImg" />
+    <div class="seal-container" id="sealContainer">
+      <img src="images (6).jpeg" alt="Red Seal" />
     </div>
   </div>
 <script>
@@ -326,7 +326,9 @@
     return age;
   }
 
-  function getElem(id) { return document.getElementById(id); }
+  function getPreference(pref, fallback = true) {
+    return reportPreferences && typeof reportPreferences[pref] !== "undefined" ? reportPreferences[pref] : fallback;
+  }
 
   function fillReport() {
     const dataStr = sessionStorage.getItem("reportData");
@@ -335,10 +337,30 @@
 
     // Set term & session
     if (data.term && data.session) {
-      getElem("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
+      document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
     }
 
-    // Student Info
+    // SCHOOL LOGO
+    if (!getPreference('showSchoolLogo')) {
+      document.getElementById("schoolLogoImg").classList.add("hidden");
+    }
+
+    // COAT OF ARMS
+    if (!getPreference('showCoatOfArms')) {
+      document.getElementById("coatOfArmsImg").classList.add("hidden");
+    }
+
+    // SCHOOL MOTTO
+    if (!getPreference('showSchoolMotto')) {
+      document.querySelector(".motto").classList.add("hidden");
+    }
+
+    // BACKGROUND BLUR (could also be toggled)
+    // if (!getPreference('showBackgroundBlur')) {
+    //   document.getElementById("backgroundBlurImg").classList.add("hidden");
+    // }
+
+    // Student name & info
     let studentPhoto = "";
     if (data.student) {
       let name = "";
@@ -347,32 +369,59 @@
       } else if (data.student.name) {
         name = data.student.name;
       }
-      getElem("stuName").innerText = name;
-      getElem("stuRegNo").innerText = data.student.regNo || data.regNo || "";
-      getElem("stuGender").innerText = data.student.gender || "";
+      document.getElementById("stuName").innerText = name;
+      document.getElementById("stuRegNo").innerText = data.student.regNo || data.regNo || "";
+      document.getElementById("stuGender").innerText = data.student.gender || "";
       let dobVal = data.student.dob || data.student.DOB || "";
-      getElem("stuDOB").innerText = formatDate(dobVal);
+      document.getElementById("stuDOB").innerText = formatDate(dobVal);
       let ageVal = data.student.age || calcAge(dobVal);
-      getElem("stuAge").innerText = ageVal ? ageVal : "";
-      getElem("stuEmail").innerText = data.student.studentEmail || data.student.email || data.student.parentEmail || "";
-      getElem("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
+      document.getElementById("stuAge").innerText = ageVal ? ageVal : "";
+      document.getElementById("stuEmail").innerText = data.student.studentEmail || data.student.email || data.student.parentEmail || "";
+      document.getElementById("stuClass").innerText = (data.class || "") + (data.student.classArm ? " - " + data.student.classArm : "");
       if (data.student.photoBase64) {
         studentPhoto = data.student.photoBase64;
       }
     } else {
-      getElem("stuRegNo").innerText = data.regNo || "";
-      getElem("stuClass").innerText = data.class || "";
+      document.getElementById("stuRegNo").innerText = data.regNo || "";
+      document.getElementById("stuClass").innerText = data.class || "";
     }
-    getElem("stuPhoto").src = studentPhoto || "images/default-avatar.png";
-    getElem("stuPhoto").alt = studentPhoto ? "Student Photo" : "No Photo";
-    getElem("classSize").innerText = data.classSize || "";
+    document.getElementById("stuPhoto").src = studentPhoto || "images/default-avatar.png";
+    document.getElementById("stuPhoto").alt = studentPhoto ? "Student Photo" : "No Photo";
+
+    // Hide Student Photo
+    if (!getPreference('showStudentPhoto')) {
+      document.getElementById("stuPhoto").classList.add("hidden");
+    }
+
+    // Class size
+    document.getElementById("classSize").innerText = data.classSize || "";
+    if (!getPreference('showClassSize')) {
+      document.getElementById("classSize").parentElement.classList.add("hidden");
+    }
+
+    // Age
+    if (!getPreference('showStudentAge')) {
+      document.getElementById("stuAge").parentElement.classList.add("hidden");
+    }
+
+    // Email
+    if (!getPreference('showStudentEmail')) {
+      document.getElementById("stuEmail").parentElement.classList.add("hidden");
+    }
+
+    // Number of subjects
     let numSubjects = Array.isArray(data.results) ? data.results.length : "";
-    getElem("numSubjects").innerText = numSubjects;
+    document.getElementById("numSubjects").innerText = numSubjects;
 
     // Principal's comment, name, next term date
-    if (data.principalComment) getElem("principalComment").innerText = data.principalComment;
-    if (data.principalName) getElem("principalName").innerText = data.principalName;
-    if (data.nextTermDate) getElem("nextTermDate").innerText = data.nextTermDate;
+    if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
+    if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
+    if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
+
+    // Hide next term date
+    if (!getPreference('showNextTermDate')) {
+      document.querySelector(".next-term").classList.add("hidden");
+    }
 
     // Results table
     const tbody = document.querySelector("#resultsTable tbody");
@@ -458,108 +507,68 @@
     else if (gpa > 0) gpaRemark = "Poor";
     else gpaRemark = "Fail";
 
-    getElem("stuTotalScore").innerText = `${totalScore} / ${maxTotal}`;
-    getElem("stuAverage").innerText = `${avgScore.toFixed(2)}%`;
-    getElem("stuGPA").innerText = gpa.toFixed(2);
-    getElem("perfGrade").innerText = perfGrade;
-    getElem("resultSummary").innerText = gpaRemark;
+    document.getElementById("stuTotalScore").innerText = `${totalScore} / ${maxTotal}`;
+    document.getElementById("stuAverage").innerText = `${avgScore.toFixed(2)}%`;
+    document.getElementById("stuGPA").innerText = gpa.toFixed(2);
+    document.getElementById("perfGrade").innerText = perfGrade;
+    document.getElementById("resultSummary").innerText = gpaRemark;
 
-    // --- Show/hide sections/fields based on preferences ---
-
-    // Student Photo
-    if (reportPreferences && reportPreferences.showStudentPhoto === false) {
-      getElem("stuPhotoTd").classList.add("hidden");
-    }
-    // Class Size
-    if (reportPreferences && reportPreferences.showClassSize === false) {
-      getElem("classSizeCell").classList.add("hidden");
-    }
-    // Student Age
-    if (reportPreferences && reportPreferences.showStudentAge === false) {
-      getElem("stuAgeCell").classList.add("hidden");
-    }
-    // Student Email
-    if (reportPreferences && reportPreferences.showStudentEmail === false) {
-      getElem("stuEmailCell").classList.add("hidden");
-    }
-    // Printed Date
-    if (reportPreferences && reportPreferences.showPrintedDate === false) {
-      getElem("printDate").classList.add("hidden");
-    }
-    // School Logo
-    if (reportPreferences && reportPreferences.showSchoolLogo === false) {
-      document.querySelector(".school-logo").classList.add("hidden");
-      getElem("backgroundBlur").classList.add("hidden");
-    }
-    // Coat of Arms
-    if (reportPreferences && reportPreferences.showCoatOfArms === false) {
-      document.querySelector(".coat-of-arms").classList.add("hidden");
-    }
-    // School Motto
-    if (reportPreferences && reportPreferences.showSchoolMotto === false) {
-      document.querySelector(".motto").classList.add("hidden");
-    }
-    // Key To Grades
-    if (reportPreferences && reportPreferences.showKeyToGrades === false) {
-      document.querySelector(".grades-key-section").classList.add("hidden");
-    }
-    // Next Term
-    if (reportPreferences && reportPreferences.showNextTermDate === false) {
-      document.querySelector(".next-term").classList.add("hidden");
-    }
-    // Red Seal
-    if (reportPreferences && reportPreferences.showRedSeal === false) {
-      document.querySelector(".seal-container").classList.add("hidden");
-    }
-    // GPA Row
-    if (reportPreferences && reportPreferences.showGPA === false) {
-      getElem("gpaCell").classList.add("hidden");
-    }
-    // Result summary row
-    if (reportPreferences && reportPreferences.showResultSummary === false) {
-      getElem("summaryCell").classList.add("hidden");
-    }
-    // Result summary label
-    if (reportPreferences && reportPreferences.showResultSummaryLabel === false) {
-      getElem("resultSummaryLabel").classList.add("hidden");
-    }
-    // Skills tables
-    if (reportPreferences && reportPreferences.showAffectiveSkills === false) {
-      getElem("affectiveSkillsTable").classList.add("hidden");
-    }
-    if (reportPreferences && reportPreferences.showPsychomotorSkills === false) {
-      getElem("psychomotorSkillsTable").classList.add("hidden");
-    }
-    // Attendance table
-    if (reportPreferences && reportPreferences.showAttendance === false) {
-      getElem("attendanceTable").classList.add("hidden");
-    }
-    // Principal's comment section
-    if (reportPreferences && reportPreferences.showPrincipalComment === false) {
-      document.querySelector(".comments-section").classList.add("hidden");
-    }
+    // Show/hide report sections according to preferences
     // Columns in results table
-    if (reportPreferences && reportPreferences.showTeacherRemark === false) {
+    if (!getPreference('showTeacherRemark')) {
       document.querySelectorAll('.teacher-remark-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.teacher-remark-col').forEach(el => el.classList.add('hidden'));
     }
-    if (reportPreferences && reportPreferences.showSubjectPosition === false) {
+    if (!getPreference('showSubjectPosition')) {
       document.querySelectorAll('.subject-pos-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.subject-pos-col').forEach(el => el.classList.add('hidden'));
     }
-    if (reportPreferences && reportPreferences.showGradePoints === false) {
+    if (!getPreference('showGradePoints')) {
       document.querySelectorAll('.grade-points-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.grade-points-col').forEach(el => el.classList.add('hidden'));
+    }
+    if (!getPreference('showGPA')) {
+      document.getElementById("gpaCell").classList.add("hidden");
+    }
+    if (!getPreference('showResultSummary')) {
+      document.getElementById("summaryCell").classList.add("hidden");
+    }
+    // Result Summary Label
+    if (!getPreference('showResultSummaryLabel')) {
+      document.getElementById("resultSummaryLabel").classList.add("hidden");
+    }
+    // Skills tables
+    if (!getPreference('showAffectiveSkills')) {
+      document.getElementById("affectiveSkillsTable").classList.add("hidden");
+    }
+    if (!getPreference('showPsychomotorSkills')) {
+      document.getElementById("psychomotorSkillsTable").classList.add("hidden");
+    }
+    // Attendance table
+    if (!getPreference('showAttendance')) {
+      document.getElementById("attendanceTable").classList.add("hidden");
+    }
+    // Principal's comment section
+    if (!getPreference('showPrincipalComment')) {
+      document.querySelector(".comments-section").classList.add("hidden");
+    }
+    // Key to Grades
+    if (!getPreference('showKeyToGrades')) {
+      document.getElementById("gradesKeyTable").parentElement.classList.add("hidden");
+    }
+    // Red Seal
+    if (!getPreference('showRedSeal')) {
+      document.getElementById("sealContainer").classList.add("hidden");
     }
 
     // Fill skills tables if available
     if (data.affectiveSkills && Array.isArray(data.affectiveSkills)) {
       const rows = data.affectiveSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
-      getElem("affectiveSkillsTable").querySelector("tbody").innerHTML = rows;
+      document.querySelector("#affectiveSkillsTable tbody").innerHTML = rows;
     }
     if (data.psychomotorSkills && Array.isArray(data.psychomotorSkills)) {
       const rows = data.psychomotorSkills.map(sk => `<tr><td>${sk.name}</td><td>${sk.score}</td></tr>`).join('');
-      getElem("psychomotorSkillsTable").querySelector("tbody").innerHTML = rows;
+      document.querySelector("#psychomotorSkillsTable tbody").innerHTML = rows;
     }
     // Attendance table (show summary only, no duplication)
     if (data.attendance && Array.isArray(data.attendance)) {
@@ -578,32 +587,28 @@
       }
       let totalDays = presentDays + absentDays;
       let attendanceRows = "";
-      attendanceRows += `<tr class="noOfDays"><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
-      attendanceRows += `<tr class="present"><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
-      attendanceRows += `<tr class="absent"><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
-      if (totalDays > 0 && presentDays > 0) {
+      if (getPreference('showAttendanceNoOfDays')) {
+        attendanceRows += `<tr class="noOfDays"><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
+      }
+      if (getPreference('showAttendancePresent')) {
+        attendanceRows += `<tr class="present"><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
+      }
+      if (getPreference('showAttendanceAbsent')) {
+        attendanceRows += `<tr class="absent"><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
+      }
+      if (getPreference('showAttendancePercent') && totalDays > 0 && presentDays > 0) {
         const pct = ((presentDays / totalDays) * 100).toFixed(2);
         attendanceRows += `<tr class="attendancePercent"><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
       }
-      getElem("attendanceTable").querySelector("tbody").innerHTML = attendanceRows;
-
-      // Attendance row field toggles
-      if (reportPreferences && reportPreferences.showAttendanceNoOfDays === false) {
-        getElem("attendanceTable").querySelector("tr.noOfDays")?.classList.add("hidden");
-      }
-      if (reportPreferences && reportPreferences.showAttendancePresent === false) {
-        getElem("attendanceTable").querySelector("tr.present")?.classList.add("hidden");
-      }
-      if (reportPreferences && reportPreferences.showAttendanceAbsent === false) {
-        getElem("attendanceTable").querySelector("tr.absent")?.classList.add("hidden");
-      }
-      if (reportPreferences && reportPreferences.showAttendancePercent === false) {
-        getElem("attendanceTable").querySelector("tr.attendancePercent")?.classList.add("hidden");
-      }
+      document.querySelector("#attendanceTable tbody").innerHTML = attendanceRows;
     }
 
-    // Printed date
-    getElem("printDate").innerText = getFormattedPrintDate();
+    // Printed Date
+    if (getPreference('showPrintedDate')) {
+      document.getElementById("printDate").innerText = getFormattedPrintDate();
+    } else {
+      document.getElementById("printDate").classList.add("hidden");
+    }
   }
 
   async function downloadPDF() {

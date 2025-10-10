@@ -104,5 +104,74 @@ router.post('/:id/stop', async (req, res) => {
   if (!exam) return res.status(404).json({ error: 'Exam not found.' });
   res.json({ success: true });
 });
+// GET /api/exams/summary - Fetch exam summaries only (no questions)
+router.get('/summary', async (req, res) => {
+  const exams = await Exam.find()
+    .populate('class', 'name')
+    .populate('subject', 'name')
+    .sort({ createdAt: -1 });
+  res.json(exams.map(ex => ({
+    _id: ex._id,
+    title: ex.title,
+    class: ex.class?._id,
+    className: ex.class?.name,
+    subject: ex.subject?._id,
+    subjectName: ex.subject?.name,
+    duration: ex.duration,
+    status: ex.status,
+    scheduledFor: ex.scheduledFor
+  })));
+});
 
+// POST /api/exams/merge - Merge selected exams into a new exam
+router.post('/merge', async (req, res) => {
+  const { examIds, title, class: classId, subject, duration, scheduledFor } = req.body;
+  if (!examIds || !Array.isArray(examIds) || examIds.length < 2) {
+    return res.status(400).json({ error: 'Select at least two exams to merge.' });
+  }
+  const exams = await Exam.find({ _id: { $in: examIds } });
+  if (exams.length !== examIds.length) return res.status(404).json({ error: 'One or more exams not found.' });
+
+  let mergedQuestions = [];
+  exams.forEach(ex => {
+    (ex.questions || []).forEach(q => mergedQuestions.push(q));
+  });
+
+  const examTitle = title || exams[0].title + ' (Merged)';
+  const examClass = classId || exams[0].class;
+  const examSubject = subject || exams[0].subject;
+  const examDuration = duration || exams[0].duration;
+  const examScheduledFor = scheduledFor || null;
+
+  const mergedExam = new Exam({
+    title: examTitle,
+    class: examClass,
+    subject: examSubject,
+    duration: examDuration,
+    scheduledFor: examScheduledFor,
+    status: examScheduledFor ? 'Scheduled' : 'Draft',
+    questions: mergedQuestions
+  });
+  await mergedExam.save();
+  res.status(201).json({ success: true, examId: mergedExam._id });
+});
+
+// GET /api/exams/bulk-details?ids=id1,id2,...
+router.get('/bulk-details', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!ids.length) return res.status(400).json({ error: 'No ids provided.' });
+  const exams = await Exam.find({ _id: { $in: ids } })
+    .populate('class', 'name')
+    .populate('subject', 'name');
+  res.json(exams.map(ex => ({
+    _id: ex._id,
+    title: ex.title,
+    className: ex.class?.name,
+    subjectName: ex.subject?.name,
+    duration: ex.duration,
+    status: ex.status,
+    scheduledFor: ex.scheduledFor,
+    questions: ex.questions
+  })));
+});
 module.exports = router;

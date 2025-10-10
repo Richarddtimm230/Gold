@@ -240,11 +240,11 @@
     .prefs-card {
       max-width: 600px;
       width: 100%;
-      margin: 40px auto 0 auto;
+      margin: 48px auto 0 auto;
       background: var(--card-bg);
       border-radius: var(--border-radius);
       box-shadow: var(--card-shadow);
-      padding: 2.5em 2em 2em 2em;
+      padding: 2.5em 2.2em 2em 2.2em;
       display: flex;
       flex-direction: column;
     }
@@ -259,18 +259,27 @@
     .prefs-form label {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 1.12em;
-      margin-bottom: 14px;
+      gap: 10px;
+      font-size: 1.09em;
+      margin-bottom: 10px;
       cursor: pointer;
       color: #222;
       font-weight: 500;
+      padding-left: 3px;
+      transition: background 0.12s;
+      border-radius: 5px;
+    }
+    .prefs-form label:hover, .prefs-form label:focus-within {
+      background: #f1f6fd;
+      color: var(--primary);
     }
     .prefs-form input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
       accent-color: var(--primary);
-      margin-right: 2px;
+      min-width: 22px;
+      min-height: 22px;
+      margin-right: 3px;
+      transition: box-shadow 0.14s;
+      box-shadow: 0 0 0 1.5px #cdd6e6;
     }
     .prefs-form hr {
       border: none;
@@ -286,22 +295,34 @@
       padding: 12px 36px;
       font-size: 1.13em;
       cursor: pointer;
-      margin-top: 18px;
+      margin-top: 22px;
+      margin-left: auto;
       box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       transition: background 0.18s;
+      display: block;
     }
-    .prefs-save-btn:disabled { opacity: 0.5; }
+    .prefs-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .status-msg {
       margin-top: 18px;
       font-weight: bold;
       color: #007bff;
       min-height: 24px;
     }
+    .section-title {
+      font-size: 1.11em;
+      font-weight: 700;
+      margin: 1.5em 0 0.6em 0;
+      color: #2153a2;
+      letter-spacing: 0.01em;
+    }
+    /* Responsive: card is almost full width on mobile, padding reduced */
     @media (max-width: 700px) {
-      .prefs-card { padding: 1.1em 0.5em 1em 0.5em; }
+      .prefs-card { padding: 1.1em 0.5em 1em 0.5em; width: 97vw; }
+      .prefs-save-btn { width: 100%; margin-left: 0; }
+      .prefs-title { font-size: 1.3em; }
     }
     @media (max-width: 400px) {
-      .prefs-title { font-size: 1.25em; }
+      .prefs-title { font-size: 1.07em; }
       .prefs-card { padding: 0.8em 0.2em; }
       .prefs-form label { font-size: 1em; }
     }
@@ -349,6 +370,7 @@
     <div class="prefs-card">
       <div class="prefs-title">Report Card Display Preferences</div>
       <form id="prefsForm" class="prefs-form">
+        <div class="section-title">Result Table Columns</div>
         <label><input type="checkbox" name="showTeacherRemark"> Show Teacher's Remark Column</label>
         <label><input type="checkbox" name="showPsychomotorSkills"> Show Psychomotor Skills Table</label>
         <label><input type="checkbox" name="showAffectiveSkills"> Show Affective Skills Table</label>
@@ -359,6 +381,7 @@
         <label><input type="checkbox" name="showGPA"> Show GPA row</label>
         <label><input type="checkbox" name="showResultSummary"> Show Result Summary</label>
         <hr>
+        <div class="section-title">Student Details & Report Info</div>
         <label><input type="checkbox" name="showStudentPhoto"> Show Student Photo</label>
         <label><input type="checkbox" name="showClassSize"> Show Class Size</label>
         <label><input type="checkbox" name="showStudentAge"> Show Student Age</label>
@@ -370,10 +393,12 @@
         <label><input type="checkbox" name="showCoatOfArms"> Show Coat of Arms</label>
         <label><input type="checkbox" name="showKeyToGrades"> Show Key to Grades Table</label>
         <label><input type="checkbox" name="showRedSeal"> Show Red Seal/Stamp</label>
+        <div class="section-title">Attendance Details</div>
         <label><input type="checkbox" name="showAttendanceNoOfDays"> Show No. of School Days in Attendance</label>
         <label><input type="checkbox" name="showAttendancePresent"> Show Days Present in Attendance</label>
         <label><input type="checkbox" name="showAttendanceAbsent"> Show Days Absent in Attendance</label>
         <label><input type="checkbox" name="showAttendancePercent"> Show Attendance (%) in Attendance</label>
+        <hr>
         <label><input type="checkbox" name="showResultSummaryLabel"> Show Result Summary Label</label>
         <button class="prefs-save-btn" type="submit" id="saveBtn">Save Preferences</button>
         <div class="status-msg" id="statusMsg"></div>
@@ -385,6 +410,12 @@
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
+    // Close sidebar on nav click (mobile)
+    sidebar.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 800) closeSidebar();
+      });
+    });
     function openSidebar() {
       sidebar.classList.add('active');
       sidebarOverlay.classList.add('active');

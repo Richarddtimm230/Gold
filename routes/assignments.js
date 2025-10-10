@@ -68,21 +68,30 @@ return {
   }
 });
 
-// --- Submit assignment (upload) ---
 router.post('/:assignmentId/submit', studentAuth, upload.single('file'), async (req, res) => {
   try {
     const { assignmentId } = req.params;
     const studentId = req.student._id;
-    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
 
-    // For demo, just save buffer as base64. In production, upload to cloud storage and save URL.
-    const fileUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    const fileMeta = { url: fileUrl, name: req.file.originalname };
+    // Find the assignment to check if it is CBT
+    const assignment = await Assignment.findById(assignmentId);
+
+    // If not CBT, require a file
+    if (!assignment.cbt && !req.file) {
+      return res.status(400).json({ error: "No file uploaded." });
+    }
+
+    // Save file if present
+    let fileMeta;
+    if (req.file) {
+      const fileUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      fileMeta = { url: fileUrl, name: req.file.originalname };
+    }
 
     // Upsert submission
     let submission = await AssignmentSubmission.findOne({ assignment: assignmentId, student: studentId });
     if (submission) {
-      submission.submissionFile = fileMeta;
+      if (fileMeta) submission.submissionFile = fileMeta;
       submission.status = 'Submitted';
       submission.submittedAt = new Date();
       await submission.save();
@@ -90,7 +99,7 @@ router.post('/:assignmentId/submit', studentAuth, upload.single('file'), async (
       submission = await AssignmentSubmission.create({
         assignment: assignmentId,
         student: studentId,
-        submissionFile: fileMeta,
+        ...(fileMeta && { submissionFile: fileMeta }),
         status: 'Submitted'
       });
     }

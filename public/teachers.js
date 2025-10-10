@@ -824,27 +824,59 @@ document.getElementById('cbt-add-question-btn').onclick = function() {
 
 document.getElementById('cbt-question-form').onsubmit = async function(e) {
   e.preventDefault();
+  const btn = document.getElementById('cbt-upload-btn');
+  const msgDiv = document.getElementById('cbt-upload-msg');
+  btn.disabled = true;
+  const originalBtnHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="cbt-loader-spinner"></span>Uploading...';
+  msgDiv.textContent = '';
+  msgDiv.style.color = '#15a55a';
+
   // ...validation and submission logic, unchanged from previous...
   // Update options mapping for new object {value: ...}
   const classId = document.getElementById('cbt-class-select').value;
   const subjectId = document.getElementById('cbt-subject-select').value;
   const title = document.getElementById('cbt-title').value.trim();
   const duration = Number(document.getElementById('cbt-duration').value);
-  const msgDiv = document.getElementById('cbt-upload-msg');
+
   if (!classId || !subjectId || !title || !duration) {
     msgDiv.style.color = 'red';
-    msgDiv.textContent = 'Please fill all fields.'; return;
+    msgDiv.textContent = 'Please fill all fields.';
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
+    return;
   }
   if (!cbtQuestions.length) {
     msgDiv.style.color = 'red';
-    msgDiv.textContent = 'Add at least one question.'; return;
+    msgDiv.textContent = 'Add at least one question.';
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
+    return;
   }
   for (let [i, q] of cbtQuestions.entries()) {
-    if (!q.text || !Array.isArray(q.options) || q.options.length < 2)
-      return msgDiv.textContent = `Question ${i+1} must have text and at least 2 options.`;
-    for (let o of q.options) if (!o.value) return msgDiv.textContent = `No empty options allowed.`;
-    if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length)
-      return msgDiv.textContent = `Select a correct option for Question ${i+1}.`;
+    if (!q.text || !Array.isArray(q.options) || q.options.length < 2) {
+      msgDiv.style.color = 'red';
+      msgDiv.textContent = `Question ${i+1} must have text and at least 2 options.`;
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHTML;
+      return;
+    }
+    for (let o of q.options) {
+      if (!o.value) {
+        msgDiv.style.color = 'red';
+        msgDiv.textContent = `No empty options allowed.`;
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHTML;
+        return;
+      }
+    }
+    if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
+      msgDiv.style.color = 'red';
+      msgDiv.textContent = `Select a correct option for Question ${i+1}.`;
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHTML;
+      return;
+    }
   }
   // Submit
   const payload = {
@@ -873,6 +905,9 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
   } catch (err) {
     msgDiv.style.color = 'red';
     msgDiv.textContent = 'Upload failed: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHTML;
   }
 };
 

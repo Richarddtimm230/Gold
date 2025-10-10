@@ -291,24 +291,15 @@ router.delete('/:id/notifications/:notificationId', teacherAuth, async (req, res
     res.status(500).json({ error: err.message });
   }
 });
-// GET /api/teachers/:id/cbt - List CBTs uploaded by teacher
-router.get('/:id/cbt', teacherAuth, async (req, res) => {
-  try {
-    const cbts = await CBT.find({ teacher: req.params.id })
-      .populate('class', 'name')
-      .populate('subject', 'name');
-    res.json({ cbts });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // POST /api/teachers/:id/cbt - Upload new CBT
 router.post('/:id/cbt', teacherAuth, async (req, res) => {
   try {
+    if (String(req.params.id) !== String(req.staff._id)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     const { class: classId, subject, title, duration, questions } = req.body;
     const cbt = new CBT({
-      teacher: req.params.id,
+      teacher: req.staff._id, // <--- use the authenticated teacher's ID only
       class: classId,
       subject,
       title,
@@ -316,12 +307,26 @@ router.post('/:id/cbt', teacherAuth, async (req, res) => {
       questions
     });
     await cbt.save();
-    // FIXED: populate both fields correctly
     await cbt.populate([
       { path: 'class', select: 'name' },
       { path: 'subject', select: 'name' }
     ]);
     res.status(201).json({ cbt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/teachers/:id/cbt - List CBTs uploaded by teacher
+router.get('/:id/cbt', teacherAuth, async (req, res) => {
+  try {
+    if (String(req.params.id) !== String(req.staff._id)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const cbts = await CBT.find({ teacher: req.staff._id }) // <--- use the authenticated teacher's ID only
+      .populate('class', 'name')
+      .populate('subject', 'name');
+    res.json({ cbts });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

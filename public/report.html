@@ -95,11 +95,11 @@
 </head>
 <body>
   <div class="report-container" id="reportCardDom">
-    <img class="background-blur" src="logo-1679575828 (1).jpeg" alt="Blurred background" id="backgroundBlurImg">
+    <img class="background-blur" src="logo-1679575828 (1).jpeg" alt="Blurred background">
     <button class="no-print-btn" onclick="downloadPDF()">Download as PDF</button>
     <header>
       <div class="school-header">
-        <img src="logo-1679575828 (1).jpeg" alt="Golding Schools Logo" class="school-logo" id="schoolLogoImg">
+        <img src="logo-1679575828 (1).jpeg" alt="Golding Schools Logo" class="school-logo">
         <div class="school-info">
           <h1>GOLD AND LINC SCHOOLS</h1>
           <p>
@@ -110,7 +110,7 @@
             <span class="motto">Motto : FOR A SOLID BEGINNING...</span>
           </p>
         </div>
-        <img src="images (7).jpeg" alt="Nigeria Coat of Arms" class="coat-of-arms" id="coatOfArmsImg">
+        <img src="images (7).jpeg" alt="Nigeria Coat of Arms" class="coat-of-arms">
       </div>
       <div class="term-title">
         <h2 id="termTitle">FIRST TERM, 2024-2025 (END OF TERM REPORT)</h2>
@@ -147,7 +147,7 @@
         </tr>
         <tr>
           <td><strong>Email:</strong> <span id="stuEmail"></span></td>
-          <td id="summaryCell"><strong id="resultSummaryLabel">Result Summary:</strong> <span id="resultSummary"></span></td>
+          <td id="summaryCell"><strong>Result Summary:</strong> <span id="resultSummary"></span></td>
         </tr>
       </table>
     </section>
@@ -204,7 +204,7 @@
       </table>
     </section>
     <section class="grades-key-section">
-      <table class="grades-key-table" id="gradesKeyTable">
+      <table class="grades-key-table">
         <tr>
           <th>Key to Grades</th>
           <td>70-100: <strong>A</strong></td>
@@ -242,17 +242,19 @@
         <span id="printDate"></span>
       </div>
     </section>
-    <div class="seal-container" id="sealContainer">
+    <div class="seal-container">
       <img src="images (6).jpeg" alt="Red Seal" />
     </div>
   </div>
 <script>
   let reportPreferences = {};
+  // Use adminToken, superadmin_token, or token for Authorization header if present
   function getAdminToken() {
     return localStorage.getItem('adminToken') ||
            localStorage.getItem('superadmin_token') ||
            localStorage.getItem('token') || '';
   }
+  // Fetch preferences before rendering report, always with Authorization header
   fetch('https://goldlincschools.onrender.com/api/report/preferences', {
     headers: {
       'Authorization': 'Bearer ' + getAdminToken()
@@ -261,7 +263,6 @@
     .then(r => r.ok ? r.json() : {})
     .then(p => { reportPreferences = p || {}; fillReport(); })
     .catch(() => { reportPreferences = {}; fillReport(); });
-
   function getFormattedPrintDate() {
     const now = new Date();
     const dd = now.getDate().toString().padStart(2,'0');
@@ -326,8 +327,14 @@
     return age;
   }
 
-  function getPreference(pref, fallback = true) {
-    return reportPreferences && typeof reportPreferences[pref] !== "undefined" ? reportPreferences[pref] : fallback;
+  // Helper to get grade remark for a total score
+  function getGradeRemark(total) {
+    if (total >= 70) return "Excellent";
+    if (total >= 60) return "Very Good";
+    if (total >= 50) return "Good";
+    if (total >= 45) return "Pass";
+    if (total >= 40) return "Poor";
+    return "Fail";
   }
 
   function fillReport() {
@@ -339,26 +346,6 @@
     if (data.term && data.session) {
       document.getElementById("termTitle").innerText = `${data.term}, ${data.session} (END OF TERM REPORT)`;
     }
-
-    // SCHOOL LOGO
-    if (!getPreference('showSchoolLogo')) {
-      document.getElementById("schoolLogoImg").classList.add("hidden");
-    }
-
-    // COAT OF ARMS
-    if (!getPreference('showCoatOfArms')) {
-      document.getElementById("coatOfArmsImg").classList.add("hidden");
-    }
-
-    // SCHOOL MOTTO
-    if (!getPreference('showSchoolMotto')) {
-      document.querySelector(".motto").classList.add("hidden");
-    }
-
-    // BACKGROUND BLUR (could also be toggled)
-    // if (!getPreference('showBackgroundBlur')) {
-    //   document.getElementById("backgroundBlurImg").classList.add("hidden");
-    // }
 
     // Student name & info
     let studentPhoto = "";
@@ -388,26 +375,8 @@
     document.getElementById("stuPhoto").src = studentPhoto || "images/default-avatar.png";
     document.getElementById("stuPhoto").alt = studentPhoto ? "Student Photo" : "No Photo";
 
-    // Hide Student Photo
-    if (!getPreference('showStudentPhoto')) {
-      document.getElementById("stuPhoto").classList.add("hidden");
-    }
-
     // Class size
     document.getElementById("classSize").innerText = data.classSize || "";
-    if (!getPreference('showClassSize')) {
-      document.getElementById("classSize").parentElement.classList.add("hidden");
-    }
-
-    // Age
-    if (!getPreference('showStudentAge')) {
-      document.getElementById("stuAge").parentElement.classList.add("hidden");
-    }
-
-    // Email
-    if (!getPreference('showStudentEmail')) {
-      document.getElementById("stuEmail").parentElement.classList.add("hidden");
-    }
 
     // Number of subjects
     let numSubjects = Array.isArray(data.results) ? data.results.length : "";
@@ -417,11 +386,6 @@
     if (data.principalComment) document.getElementById("principalComment").innerText = data.principalComment;
     if (data.principalName) document.getElementById("principalName").innerText = data.principalName;
     if (data.nextTermDate) document.getElementById("nextTermDate").innerText = data.nextTermDate;
-
-    // Hide next term date
-    if (!getPreference('showNextTermDate')) {
-      document.querySelector(".next-term").classList.add("hidden");
-    }
 
     // Results table
     const tbody = document.querySelector("#resultsTable tbody");
@@ -515,50 +479,40 @@
 
     // Show/hide report sections according to preferences
     // Columns in results table
-    if (!getPreference('showTeacherRemark')) {
+    if (reportPreferences && reportPreferences.showTeacherRemark === false) {
       document.querySelectorAll('.teacher-remark-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.teacher-remark-col').forEach(el => el.classList.add('hidden'));
     }
-    if (!getPreference('showSubjectPosition')) {
+    if (reportPreferences && reportPreferences.showSubjectPosition === false) {
       document.querySelectorAll('.subject-pos-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.subject-pos-col').forEach(el => el.classList.add('hidden'));
     }
-    if (!getPreference('showGradePoints')) {
+    if (reportPreferences && reportPreferences.showGradePoints === false) {
       document.querySelectorAll('.grade-points-col').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('#resultsTable th.grade-points-col').forEach(el => el.classList.add('hidden'));
     }
-    if (!getPreference('showGPA')) {
+    // GPA Row
+    if (reportPreferences && reportPreferences.showGPA === false) {
       document.getElementById("gpaCell").classList.add("hidden");
     }
-    if (!getPreference('showResultSummary')) {
+    // Result summary row
+    if (reportPreferences && reportPreferences.showResultSummary === false) {
       document.getElementById("summaryCell").classList.add("hidden");
     }
-    // Result Summary Label
-    if (!getPreference('showResultSummaryLabel')) {
-      document.getElementById("resultSummaryLabel").classList.add("hidden");
-    }
     // Skills tables
-    if (!getPreference('showAffectiveSkills')) {
+    if (reportPreferences && reportPreferences.showAffectiveSkills === false) {
       document.getElementById("affectiveSkillsTable").classList.add("hidden");
     }
-    if (!getPreference('showPsychomotorSkills')) {
+    if (reportPreferences && reportPreferences.showPsychomotorSkills === false) {
       document.getElementById("psychomotorSkillsTable").classList.add("hidden");
     }
     // Attendance table
-    if (!getPreference('showAttendance')) {
+    if (reportPreferences && reportPreferences.showAttendance === false) {
       document.getElementById("attendanceTable").classList.add("hidden");
     }
     // Principal's comment section
-    if (!getPreference('showPrincipalComment')) {
+    if (reportPreferences && reportPreferences.showPrincipalComment === false) {
       document.querySelector(".comments-section").classList.add("hidden");
-    }
-    // Key to Grades
-    if (!getPreference('showKeyToGrades')) {
-      document.getElementById("gradesKeyTable").parentElement.classList.add("hidden");
-    }
-    // Red Seal
-    if (!getPreference('showRedSeal')) {
-      document.getElementById("sealContainer").classList.add("hidden");
     }
 
     // Fill skills tables if available
@@ -587,28 +541,17 @@
       }
       let totalDays = presentDays + absentDays;
       let attendanceRows = "";
-      if (getPreference('showAttendanceNoOfDays')) {
-        attendanceRows += `<tr class="noOfDays"><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
-      }
-      if (getPreference('showAttendancePresent')) {
-        attendanceRows += `<tr class="present"><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
-      }
-      if (getPreference('showAttendanceAbsent')) {
-        attendanceRows += `<tr class="absent"><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
-      }
-      if (getPreference('showAttendancePercent') && totalDays > 0 && presentDays > 0) {
+      attendanceRows += `<tr><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
+      attendanceRows += `<tr><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
+      attendanceRows += `<tr><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
+      if (totalDays > 0 && presentDays > 0) {
         const pct = ((presentDays / totalDays) * 100).toFixed(2);
-        attendanceRows += `<tr class="attendancePercent"><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
+        attendanceRows += `<tr><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
       }
       document.querySelector("#attendanceTable tbody").innerHTML = attendanceRows;
     }
 
-    // Printed Date
-    if (getPreference('showPrintedDate')) {
-      document.getElementById("printDate").innerText = getFormattedPrintDate();
-    } else {
-      document.getElementById("printDate").classList.add("hidden");
-    }
+    document.getElementById("printDate").innerText = getFormattedPrintDate();
   }
 
   async function downloadPDF() {

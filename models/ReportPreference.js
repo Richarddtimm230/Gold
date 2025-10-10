@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const ReportPreferenceSchema = new mongoose.Schema({
   _id: { type: String, default: "global" },
+
+  // Existing preferences
   showTeacherRemark: { type: Boolean, default: true },
   showPsychomotorSkills: { type: Boolean, default: true },
   showAffectiveSkills: { type: Boolean, default: true },
@@ -10,7 +12,8 @@ const ReportPreferenceSchema = new mongoose.Schema({
   showGradePoints: { type: Boolean, default: true },
   showGPA: { type: Boolean, default: true },
   showResultSummary: { type: Boolean, default: true },
-  // --- Additional preferences ---
+
+  // New preferences (add more as needed)
   showStudentPhoto: { type: Boolean, default: true },
   showClassSize: { type: Boolean, default: true },
   showStudentAge: { type: Boolean, default: true },
@@ -26,7 +29,6 @@ const ReportPreferenceSchema = new mongoose.Schema({
   showAttendancePresent: { type: Boolean, default: true },
   showAttendanceAbsent: { type: Boolean, default: true },
   showAttendancePercent: { type: Boolean, default: true },
-  showResultSummaryLabel: { type: Boolean, default: true },
 }, { collection: "reportpreferences" });
 
 module.exports = mongoose.model("ReportPreference", ReportPreferenceSchema);

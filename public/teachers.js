@@ -316,7 +316,7 @@ async function fetchMyCBTQuestions() {
   }
 }
 
-// --- UPDATED: My Uploaded CBTs section with expandable questions ---
+
 function renderMyCBTQuestions() {
   const listDiv = document.getElementById('myCBTQuestionsList');
   const pushBtn = document.getElementById('pushToUniversalBtn');
@@ -340,11 +340,26 @@ function renderMyCBTQuestions() {
         <div class="cbt-questions" id="cbt-questions-${i}" style="display:none; padding:10px 20px 15px 35px;">
           ${cbt.questions && cbt.questions.length
             ? cbt.questions.map((q, qidx) => `
-                <div style="margin-bottom:1.2em;">
-                  <div style="font-weight:600;">Q${qidx+1}: <span style="font-weight:normal;" class="cbt-q-text">${q.text}</span></div>
+                <div class="cbt-question-view" style="margin-bottom:1.2em; border-bottom:1px solid #eee; padding-bottom:10px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="font-weight:600;">
+                      Q${qidx+1}: 
+                      <span style="font-weight:normal;" class="cbt-q-text">${q.text}</span>
+                    </div>
+                    <div>
+                      <button class="cbt-edit-q-btn" title="Edit" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#1e88e5;font-size:1.1em;margin-right:10px;cursor:pointer;">
+                        <i class="fa fa-edit"></i>
+                      </button>
+                      <button class="cbt-delete-q-btn" title="Delete" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#c00;font-size:1.1em;cursor:pointer;">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
                   <ol style="margin:4px 0 0 20px; padding:0;">
                     ${q.options.map((opt, oi) =>
-                      `<li style="margin:0.2em 0;${q.answer===oi?'font-weight:bold;color:#159d5e;':''}">${opt.value}${q.answer===oi ? ' <span style="color:#159d5e;">&#10003;</span>' : ''}</li>`).join('')}
+                      `<li style="margin:0.2em 0;${q.answer===oi?'font-weight:bold;color:#159d5e;':''}">
+                        <span class="cbt-q-opt">${opt.value}${q.answer===oi ? ' <span style="color:#159d5e;">&#10003;</span>' : ''}</span>
+                      </li>`).join('')}
                   </ol>
                   <div style="font-size:0.96em;color:#555;">Score: ${q.score||1}</div>
                 </div>
@@ -357,7 +372,18 @@ function renderMyCBTQuestions() {
   });
   listDiv.innerHTML = html;
 
-  // --- Toggle logic (accordion) ---
+  // --- Style images in rendered HTML (questions/options) ---
+  setTimeout(() => {
+    document.querySelectorAll('.cbt-q-text img, .cbt-q-opt img').forEach(img => {
+      img.style.maxWidth = '96%';
+      img.style.height = 'auto';
+      img.style.display = 'block';
+      img.style.margin = '12px 0';
+      img.style.borderRadius = '7px';
+      img.style.boxShadow = '0 2px 10px #0001';
+    });
+  }, 0);
+
   window.toggleCBTQuestions = function(idx) {
     const qDiv = document.getElementById('cbt-questions-' + idx);
     const arrow = document.getElementById('cbt-q-arrow-' + idx);
@@ -381,26 +407,113 @@ function renderMyCBTQuestions() {
     };
   });
 
-  // Delete
+  // Delete CBT (entire)
   listDiv.querySelectorAll('.cbt-delete-btn').forEach(btn => {
     btn.onclick = async function(e) {
       e.stopPropagation();
       const id = btn.getAttribute('data-cbtid');
-      if (!confirm('Are you sure you want to delete this CBT?')) return;
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt/${id}`, { method: "DELETE", headers: authHeaders() });
-        if (!res.ok) throw new Error();
+      // No alert, just delete and refresh!
+      const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt/${id}`, { method: "DELETE", headers: authHeaders() });
+      if (res.ok) {
         myUploadedCBTs = await fetchMyCBTQuestions();
         selectedCBTIds = selectedCBTIds.filter(cid => cid !== id);
         renderMyCBTQuestions();
-        alert('CBT deleted.');
-      } catch {
-        alert('Failed to delete CBT.');
       }
     }
   });
 
+  // Delete Question within a CBT
+  listDiv.querySelectorAll('.cbt-delete-q-btn').forEach(btn => {
+    btn.onclick = async function(e) {
+      e.stopPropagation();
+      const cbtIdx = parseInt(btn.getAttribute('data-cbtidx'));
+      const qIdx = parseInt(btn.getAttribute('data-qidx'));
+      const cbt = myUploadedCBTs[cbtIdx];
+      cbt.questions.splice(qIdx, 1);
+      await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt/${cbt._id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ questions: cbt.questions })
+      });
+      myUploadedCBTs = await fetchMyCBTQuestions();
+      renderMyCBTQuestions();
+    }
+  });
+
+  // Edit Question (opens modal)
+  listDiv.querySelectorAll('.cbt-edit-q-btn').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const cbtIdx = parseInt(btn.getAttribute('data-cbtidx'));
+      const qIdx = parseInt(btn.getAttribute('data-qidx'));
+      openEditCBTQuestionModal(cbtIdx, qIdx);
+    }
+  });
+
   pushBtn.disabled = selectedCBTIds.length === 0;
+}
+
+// --- Edit Modal Logic ---
+function ensureEditModal() {
+  if (!document.getElementById('cbt-edit-modal-bg')) {
+    const m = document.createElement('div');
+    m.id = 'cbt-edit-modal-bg';
+    m.innerHTML = `
+      <div id="cbt-edit-modal">
+        <div style="font-size:1.1em; font-weight:bold; margin-bottom:0.8em;">Edit Question</div>
+        <div id="cbt-edit-modal-fields"></div>
+        <div style="text-align:right;">
+          <button id="cbt-edit-modal-cancel" style="margin-right:10px;">Cancel</button>
+          <button id="cbt-edit-modal-save" style="background:#1e88e5;color:#fff;">Save</button>
+        </div>
+      </div>
+    `;
+    m.style.display = "none";
+    document.body.appendChild(m);
+  }
+}
+function openEditCBTQuestionModal(cbtIdx, qIdx) {
+  ensureEditModal();
+  const modalBg = document.getElementById('cbt-edit-modal-bg');
+  const fieldsDiv = document.getElementById('cbt-edit-modal-fields');
+  const cbt = myUploadedCBTs[cbtIdx];
+  const q = cbt.questions[qIdx];
+  // Simple HTML form (can be improved!)
+  fieldsDiv.innerHTML = `
+    <label>Question Text (supports HTML):</label>
+    <textarea id="cbt-edit-q-text" rows="3" style="width:99%;">${q.text.replace(/<\/?[^>]+(>|$)/g, "")}</textarea>
+    <label>Options (one per line):</label>
+    <textarea id="cbt-edit-q-opts" rows="4" style="width:99%;">${q.options.map(o=>o.value.replace(/<\/?[^>]+(>|$)/g, "")).join('\n')}</textarea>
+    <label>Correct Option (1-based):</label>
+    <input type="number" id="cbt-edit-q-answer" min="1" max="${q.options.length}" value="${(q.answer||0)+1}">
+    <label>Score:</label>
+    <input type="number" min="1" id="cbt-edit-q-score" value="${q.score||1}">
+  `;
+  modalBg.style.display = "flex";
+  document.getElementById('cbt-edit-modal-cancel').onclick = ()=>{ modalBg.style.display="none"; };
+  document.getElementById('cbt-edit-modal-save').onclick = async function() {
+    // Save changes
+    const newText = document.getElementById('cbt-edit-q-text').value;
+    const newOpts = document.getElementById('cbt-edit-q-opts').value.split('\n').filter(Boolean).map(val=>({value:val}));
+    let newAns = parseInt(document.getElementById('cbt-edit-q-answer').value) - 1;
+    if (newAns < 0) newAns = 0;
+    if (newAns >= newOpts.length) newAns = newOpts.length - 1;
+    const newScore = parseInt(document.getElementById('cbt-edit-q-score').value) || 1;
+    cbt.questions[qIdx] = {
+      text: newText,
+      options: newOpts,
+      answer: newAns,
+      score: newScore,
+    };
+    await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt/${cbt._id}`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify({ questions: cbt.questions })
+    });
+    modalBg.style.display = "none";
+    myUploadedCBTs = await fetchMyCBTQuestions();
+    renderMyCBTQuestions();
+  };
 }
 
 // Initial fetch and render for the section
@@ -409,8 +522,7 @@ async function showMyCBTQuestionsSection() {
   selectedCBTIds = [];
   renderMyCBTQuestions();
 }
-
-
+  
 document.getElementById('pushToUniversalBtn').onclick = async function() {
   if (!selectedCBTIds.length) return;
   // Gather selected CBTs

@@ -499,6 +499,39 @@
     if (reportPreferences && reportPreferences.showResultSummary === false) {
       document.getElementById("summaryCell").classList.add("hidden");
     }
+    if (reportPreferences && reportPreferences.showKeyToGrades === false) {
+  document.querySelector(".grades-key-section").classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showSchoolMotto === false) {
+  document.querySelector(".motto").classList.add("hidden");
+}
+    if (reportPreferences && reportPreferences.showSchoolLogo === false) {
+  document.querySelector(".school-logo").classList.add("hidden");
+}
+if (reportPreferences && reportPreferences.showCoatOfArms === false) {
+  document.querySelector(".coat-of-arms").classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showPrintedDate === false) {
+  document.getElementById("printDate").classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showRedSeal === false) {
+  document.querySelector(".seal-container").classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showNextTermDate === false) {
+  document.querySelector(".next-term").classList.add("hidden");
+  }
+    if (reportPreferences && reportPreferences.showAttendanceNoOfDays === false) {
+  document.querySelector("#attendanceTable tr.noOfDays").classList.add("hidden");
+}
+if (reportPreferences && reportPreferences.showAttendancePresent === false) {
+  document.querySelector("#attendanceTable tr.present").classList.add("hidden");
+}
+if (reportPreferences && reportPreferences.showAttendanceAbsent === false) {
+  document.querySelector("#attendanceTable tr.absent").classList.add("hidden");
+}
+if (reportPreferences && reportPreferences.showAttendancePercent === false) {
+  document.querySelector("#attendanceTable tr.attendancePercent").classList.add("hidden");
+}
     // Skills tables
     if (reportPreferences && reportPreferences.showAffectiveSkills === false) {
       document.getElementById("affectiveSkillsTable").classList.add("hidden");
@@ -550,14 +583,16 @@ if (reportPreferences && reportPreferences.showStudentEmail === false) {
         presentDays = att.present || presentDays;
         absentDays = att.absent || absentDays;
       }
+
+
       let totalDays = presentDays + absentDays;
       let attendanceRows = "";
-      attendanceRows += `<tr><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
-      attendanceRows += `<tr><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
-      attendanceRows += `<tr><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
+      attendanceRows += `<tr class="noOfDays"><td><b>No. of School Days</b></td><td>${totalDays || ""}</td></tr>`;
+attendanceRows += `<tr class="present"><td><b>Days Present</b></td><td>${presentDays || ""}</td></tr>`;
+attendanceRows += `<tr class="absent"><td><b>Days Absent</b></td><td>${absentDays || ""}</td></tr>`;
       if (totalDays > 0 && presentDays > 0) {
         const pct = ((presentDays / totalDays) * 100).toFixed(2);
-        attendanceRows += `<tr><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
+        attendanceRows += `<tr class="attendancePercent"><td><b>Attendance (%)</b></td><td>${pct}%</td></tr>`;
       }
       document.querySelector("#attendanceTable tbody").innerHTML = attendanceRows;
     }

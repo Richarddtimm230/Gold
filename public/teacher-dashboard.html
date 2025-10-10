@@ -119,26 +119,40 @@
     </section>
 
 <!-- Add this after other <section> blocks -->
+<!-- ...other code above... -->
 <section id="section-cbtQuestions" style="display:none;">
-  <div class="card">
-    <h2>CBT Questions Uploader</h2>
-    <form id="cbt-question-form">
-      <label>Class</label>
-      <select id="cbt-class-select" required></select>
-      <label>Subject</label>
-      <select id="cbt-subject-select" required></select>
-      <label>Title</label>
-      <input type="text" id="cbt-title" required>
-      <label>Duration (minutes)</label>
-      <input type="number" id="cbt-duration" min="1" required>
-      <label>Questions</label>
+  <div class="card cbt-card">
+    <h2 class="cbt-title" style="margin-bottom: 1.2em;">CBT Questions Uploader</h2>
+    <form id="cbt-question-form" autocomplete="off">
+      <div class="cbt-form-row">
+        <div>
+          <label>Class</label>
+          <select id="cbt-class-select" required class="cbt-input"></select>
+        </div>
+        <div>
+          <label>Subject</label>
+          <select id="cbt-subject-select" required class="cbt-input"></select>
+        </div>
+        <div>
+          <label>Title</label>
+          <input type="text" id="cbt-title" required class="cbt-input">
+        </div>
+        <div>
+          <label>Duration (minutes)</label>
+          <input type="number" id="cbt-duration" min="1" required class="cbt-input" style="max-width:110px;">
+        </div>
+      </div>
+      <label class="block" style="margin-top:1.5em;margin-bottom:0.8em;">Questions</label>
       <div id="cbt-questions-list"></div>
-      <button type="button" class="btn" id="cbt-add-question-btn">+ Add Question</button>
-      <button type="submit" class="btn" style="margin-top:12px;">Upload CBT</button>
+      <button type="button" class="btn cbt-add-q-btn" id="cbt-add-question-btn">
+        <i class="fa fa-plus"></i> Add Question
+      </button>
+      <button type="submit" class="btn cbt-upload-btn" style="margin-top:14px;">Upload CBT</button>
     </form>
-    <div id="cbt-upload-msg" style="margin-top:10px;color:green;"></div>
+    <div id="cbt-upload-msg" style="margin-top:12px;color:green;"></div>
   </div>
 </section>
+<!-- ...rest of file unchanged... -->
     <!-- Profile/Settings Section -->
     <section id="section-profile" style="display:none;">
       <div class="card profile-settings">

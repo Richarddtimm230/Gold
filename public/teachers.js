@@ -340,30 +340,31 @@ function renderMyCBTQuestions() {
         <div class="cbt-questions" id="cbt-questions-${i}" style="display:none; padding:10px 20px 15px 35px;">
           ${cbt.questions && cbt.questions.length
             ? cbt.questions.map((q, qidx) => `
-                <div class="cbt-question-view" style="margin-bottom:1.2em; border-bottom:1px solid #eee; padding-bottom:10px;">
-                  <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div style="font-weight:600;">
-                      Q${qidx+1}: 
-                      <span style="font-weight:normal;" class="cbt-q-text">${q.text}</span>
-                    </div>
-                    <div>
-                      <button class="cbt-edit-q-btn" title="Edit" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#1e88e5;font-size:1.1em;margin-right:10px;cursor:pointer;">
-                        <i class="fa fa-edit"></i>
-                      </button>
-                      <button class="cbt-delete-q-btn" title="Delete" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#c00;font-size:1.1em;cursor:pointer;">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <ol style="margin:4px 0 0 20px; padding:0;">
-                    ${q.options.map((opt, oi) =>
-                      `<li style="margin:0.2em 0;${q.answer===oi?'font-weight:bold;color:#159d5e;':''}">
-                        <span class="cbt-q-opt">${opt.value}${q.answer===oi ? ' <span style="color:#159d5e;">&#10003;</span>' : ''}</span>
-                      </li>`).join('')}
-                  </ol>
-                  <div style="font-size:0.96em;color:#555;">Score: ${q.score||1}</div>
-                </div>
-              `).join('')
+  <div class="cbt-question-view" style="margin-bottom:1.2em; border-bottom:1px solid #eee; padding-bottom:10px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-weight:600;">
+        Q${qidx+1}: 
+        <span style="font-weight:normal;" class="cbt-q-text">${q.text}</span>
+      </div>
+      <div>
+        <button class="cbt-edit-q-btn" title="Edit" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#1e88e5;font-size:1.1em;margin-right:10px;cursor:pointer;">
+          <i class="fa fa-edit"></i>
+        </button>
+        <button class="cbt-delete-q-btn" title="Delete" data-cbtidx="${i}" data-qidx="${qidx}" style="background:none;border:none;color:#c00;font-size:1.1em;cursor:pointer;">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    <ol style="margin:4px 0 0 20px; padding:0;">
+      ${q.options.map((opt, oi) =>
+        `<li style="margin:0.2em 0;${q.answer===oi?'font-weight:bold;color:#159d5e;':''}">
+          <span class="cbt-q-opt">${opt.value}${q.answer===oi ? ' <span style="color:#159d5e;">&#10003;</span>' : ''}</span>
+        </li>`
+      ).join('')}
+    </ol>
+    <div style="font-size:0.96em;color:#555;">Score: ${q.score||1}</div>
+  </div>
+`).join('')
             : '<div style="color:#999;">No questions in this CBT.</div>'
           }
         </div>

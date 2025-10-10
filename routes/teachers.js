@@ -337,6 +337,76 @@ router.get('/cbt/:cbtId', teacherAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// GET /api/teachers/:id/cbt/:cbtId - Get a specific CBT uploaded by teacher
+router.get('/:id/cbt/:cbtId', teacherAuth, async (req, res) => {
+  try {
+    const cbt = await CBT.findOne({ _id: req.params.cbtId, teacher: req.params.id })
+      .populate('class', 'name')
+      .populate('subject', 'name');
+    if (!cbt) return res.status(404).json({ error: "CBT not found or not owned by teacher." });
+    res.json({ cbt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// DELETE /api/teachers/:id/cbt/:cbtId - Delete a CBT uploaded by teacher
+router.delete('/:id/cbt/:cbtId', teacherAuth, async (req, res) => {
+  try {
+    // Only allow delete if this teacher owns the CBT
+    const cbt = await CBT.findOneAndDelete({ _id: req.params.cbtId, teacher: req.params.id });
+    if (!cbt) return res.status(404).json({ error: "CBT not found or not owned by teacher." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// PATCH /api/teachers/:id/cbt/:cbtId - Update a CBT uploaded by teacher
+router.patch('/:id/cbt/:cbtId', teacherAuth, async (req, res) => {
+  try {
+    const cbt = await CBT.findOneAndUpdate(
+      { _id: req.params.cbtId, teacher: req.params.id },
+      req.body,
+      { new: true }
+    );
+    if (!cbt) return res.status(404).json({ error: "CBT not found or not owned by teacher." });
+    await cbt.populate([
+      { path: 'class', select: 'name' },
+      { path: 'subject', select: 'name' }
+    ]);
+    res.json({ success: true, cbt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// POST /api/teachers/:id/cbt/push
+router.post('/:id/cbt/push', teacherAuth, async (req, res) => {
+  try {
+    // Accepts: { cbtIds: [ ... ] }
+    const { cbtIds } = req.body;
+    if (!Array.isArray(cbtIds) || !cbtIds.length) {
+      return res.status(400).json({ error: "cbtIds array is required" });
+    }
+    const cbts = await CBT.find({ _id: { $in: cbtIds }, teacher: req.params.id });
+    if (!cbts.length) return res.status(404).json({ error: "No CBTs found" });
+
+    // For each CBT, create a new Exam entry (universal document)
+    let pushed = [];
+    for (const cbt of cbts) {
+      const exam = new Exam({
+        title: cbt.title,
+        class: cbt.class, // make sure this matches Exam model's expectations
+        subject: cbt.subject,
+        duration: cbt.duration,
+        questions: cbt.questions
+      });
+      await exam.save();
+      pushed.push(exam._id);
+    }
+    res.json({ success: true, pushed });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 /* Note: For student update/delete, those should be in the students.js route file. */
 
 module.exports = router;

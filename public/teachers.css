@@ -71,6 +71,19 @@
 #cbt-questions-list {
   margin-bottom: 1.1em;
 }
+.cbt-loader-spinner {
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 3px solid #dbe7fa;
+  border-top: 3px solid #234b8a;
+  border-radius: 50%;
+  animation: cbt-spin 0.9s linear infinite;
+  vertical-align: middle;
+  margin-right: 7px;
+}
+@keyframes cbt-spin {
+  100% { transform: rotate(360deg);}
+    }
 .cbt-question-block {
   background: #fff;
   border-radius: 12px;

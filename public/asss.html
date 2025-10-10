@@ -390,7 +390,7 @@ let cbtBtn = cbtId ?
       // Fetch CBT info
       let cbt = null;
       try {
-        const res = await fetch(`${API_BASE}/cbt/${cbtId}`, { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch(`${API_BASE}/exam/${cbtId}`, { headers: { 'Authorization': 'Bearer ' + token } });
         if (!res.ok) throw new Error();
         const data = await res.json();
         cbt = data.cbt || data;

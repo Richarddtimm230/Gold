@@ -140,7 +140,8 @@ const sections = {
   draftResults: document.getElementById('section-draftResults'),
   notifications: document.getElementById('section-notifications'),
   profile: document.getElementById('section-profile'),
-  cbtQuestions: document.getElementById('section-cbtQuestions')   // <--- comma before this line!
+  cbtQuestions: document.getElementById('section-cbtQuestions'),   // <--- comma before this line!
+  myCBTQuestions: document.getElementById('section-myCBTQuestions')
 };
 sidebarBtns.forEach(btn => {
   btn.onclick = function () {

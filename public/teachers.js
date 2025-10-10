@@ -12,7 +12,8 @@ let attendanceRecords = [];
 let gradebookData = {};
 let assignments = [];
 let cbts = [];
-
+let myUploadedCBTs = [];
+let selectedCBTIds = [];
 // --- INITIAL FETCH & SETUP ---
 window.addEventListener('DOMContentLoaded', fetchAndSetup);
 async function fetchTeacherCBTs() {
@@ -153,6 +154,8 @@ sidebarBtns.forEach(btn => {
     if (sec === 'attendance') renderAttendance();
     if (sec === 'gradebook') renderGradebook();
     if (sec === 'assignments') renderAssignments();
+    // In your sidebar nav logic
+if (sec === 'myCBTQuestions') showMyCBTQuestionsSection();
 if (sec === 'cbtQuestions') renderCBTQuestionSection();
     if (sec === 'dashboard' || sec === 'classes') {
       renderClassesList();
@@ -298,6 +301,155 @@ if (addSubjectForm) {
     }
   };
 }
+// Fetch all CBTs uploaded by this teacher
+async function fetchMyCBTQuestions() {
+  // Endpoint: GET /api/teachers/{teacherId}/cbt
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, { headers: authHeaders() });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+function renderMyCBTQuestions() {
+  const listDiv = document.getElementById('myCBTQuestionsList');
+  const pushBtn = document.getElementById('pushToUniversalBtn');
+  if (!myUploadedCBTs.length) {
+    listDiv.innerHTML = '<div style="color:#888; padding:2em 0;">No CBTs uploaded yet.</div>';
+    pushBtn.disabled = true;
+    return;
+  }
+  let html = `
+    <table class="cbt-quiz-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="cbt-select-all"></th>
+          <th>Title</th>
+          <th>Class</th>
+          <th>Subject</th>
+          <th>Duration</th>
+          <th>Questions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  myUploadedCBTs.forEach((cbt, i) => {
+    html += `
+      <tr>
+        <td>
+          <input type="checkbox" class="cbt-select-checkbox" data-cbtid="${cbt._id}" ${selectedCBTIds.includes(cbt._id) ? 'checked' : ''}>
+        </td>
+        <td>${cbt.title || ''}</td>
+        <td>${cbt.className || ''}</td>
+        <td>${cbt.subjectName || ''}</td>
+        <td>${cbt.duration || ''} min</td>
+        <td>${cbt.questions ? cbt.questions.length : 0}</td>
+        <td>
+          <button class="cbt-delete-btn" title="Delete" data-cbtid="${cbt._id}"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+  html += '</tbody></table>';
+  listDiv.innerHTML = html;
+
+  // --- Actions ---
+  // Select all
+  document.getElementById('cbt-select-all').onchange = function() {
+    if (this.checked) {
+      selectedCBTIds = myUploadedCBTs.map(q => q._id);
+    } else {
+      selectedCBTIds = [];
+    }
+    renderMyCBTQuestions();
+  };
+
+  // Select individual
+  listDiv.querySelectorAll('.cbt-select-checkbox').forEach(cb => {
+    cb.onchange = function() {
+      const id = this.getAttribute('data-cbtid');
+      if (this.checked) {
+        if (!selectedCBTIds.includes(id)) selectedCBTIds.push(id);
+      } else {
+        selectedCBTIds = selectedCBTIds.filter(cid => cid !== id);
+      }
+      // Enable/disable push button
+      pushBtn.disabled = selectedCBTIds.length === 0;
+    };
+  });
+
+  // Delete
+  listDiv.querySelectorAll('.cbt-delete-btn').forEach(btn => {
+    btn.onclick = async function() {
+      const id = btn.getAttribute('data-cbtid');
+      if (!confirm('Are you sure you want to delete this CBT?')) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt/${id}`, { method: "DELETE", headers: authHeaders() });
+        if (!res.ok) throw new Error();
+        myUploadedCBTs = await fetchMyCBTQuestions();
+        selectedCBTIds = selectedCBTIds.filter(cid => cid !== id);
+        renderMyCBTQuestions();
+        alert('CBT deleted.');
+      } catch {
+        alert('Failed to delete CBT.');
+      }
+    }
+  });
+
+  // Enable/disable push button
+  pushBtn.disabled = selectedCBTIds.length === 0;
+}
+
+// Initial fetch and render for the section
+async function showMyCBTQuestionsSection() {
+  myUploadedCBTs = await fetchMyCBTQuestions();
+  selectedCBTIds = [];
+  renderMyCBTQuestions();
+}
+document.getElementById('pushToUniversalBtn').onclick = async function() {
+  if (!selectedCBTIds.length) return;
+  // Gather selected CBTs
+  const selectedCBTs = myUploadedCBTs.filter(q => selectedCBTIds.includes(q._id));
+  if (!selectedCBTs.length) return;
+
+  // Confirm action
+  if (!confirm(`Push ${selectedCBTs.length} selected CBT(s) to universal document?`)) return;
+
+  this.disabled = true;
+  this.innerHTML = '<span class="cbt-loader-spinner"></span>Pushing...';
+
+  // Push one by one, or as batch if your API supports (here, do individually as in admin-cbt)
+  let successCount = 0;
+  for (const cbt of selectedCBTs) {
+    try {
+      // Use the same structure as admin-cbt (POST /api/exam)
+      const payload = {
+        title: cbt.title,
+        class: cbt.class, // use the proper class id, not name
+        subject: cbt.subject, // use the proper subject id, not name
+        duration: cbt.duration,
+        questions: (cbt.questions || []).map(q => ({
+          text: q.text,
+          options: q.options,
+          answer: q.answer,
+          score: q.score
+        }))
+      };
+      const res = await fetch('https://goldlincschools.onrender.com/api/exam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) successCount++;
+    } catch {}
+  }
+  this.disabled = false;
+  this.innerHTML = 'Push Selected to Universal Document';
+  alert(`${successCount} CBT(s) pushed to universal successfully.`);
+};
 // --- Attendance ---
 function renderAttendance() {
   const attendanceClassSel = document.getElementById('attendance-class');

@@ -133,7 +133,7 @@ function wrapFetch(){
         networkEntries.push({
           time:new Date(),method:args[1]?.method||'GET',url:args[0],status:res.status,
           duration:(performance.now()-start).toFixed(1),
-          response:body.length>2000?body.slice(0,20000)+'...':body
+          response: body  // No truncation
         });
         if(currentTab==='network') renderNetwork();
         return res;
@@ -163,7 +163,7 @@ function wrapXHR(){
         networkEntries.push({
           time:new Date(),method,url,status:xhr.status,
           duration:(performance.now()-start).toFixed(1),
-          response:xhr.responseText?.slice(0,2000)
+          response: xhr.responseText // No truncation
         });
         if(currentTab==='network') renderNetwork();
       });
@@ -435,7 +435,7 @@ function renderApiTester(){
   wrap.innerHTML = `
     <div class="mb-2">
       <label for="api-url" class="block mb-2">API URL:</label>
-      <input id="api-url" class="w-full bg-gray-800 text-gray-200 p-2 rounded mb-2" value="http://localhost:10000/api/auth">
+      <input id="api-url" class="w-full bg-gray-800 text-gray-200 p-2 rounded mb-2" value="https://goldlincschools.onrender.com/api/auth">
       <select id="api-method" class="bg-gray-800 text-gray-200 rounded mb-2">
         <option>GET</option>
         <option>POST</option>

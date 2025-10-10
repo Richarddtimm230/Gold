@@ -27,7 +27,7 @@
       <button data-section="profile">Profile/Settings</button>
       <!-- Add in the sidebar menu where other buttons are -->
 <button data-section="cbtQuestions">CBT Questions</button>
-      
+      <button data-section="myCBTQuestions">My Uploaded CBTs</button>
     </nav>
     <div class="profile-section">
       <div style="font-size:1.1em;"><strong>Mr. John Doe</strong></div>
@@ -79,7 +79,15 @@
         <div id="gradebook-table"></div>
       </div>
     </section>
-
+<section id="section-myCBTQuestions" style="display:none;">
+  <div class="card cbt-card">
+    <h2 class="cbt-title mb-3">My Uploaded CBTs</h2>
+    <div style="margin-bottom: 1em;">
+      <button class="btn cbt-upload-btn" id="pushToUniversalBtn" disabled>Push Selected to Question Bank</button>
+    </div>
+    <div id="myCBTQuestionsList"></div>
+  </div>
+</section>
     <!-- Assignments Section -->
     <section id="section-assignments" style="display:none;">
       <div class="card students-table">

@@ -573,7 +573,7 @@ document.getElementById('mergeScheduleExamForm').onsubmit = async function (e) {
   e.preventDefault();
   // Get selected exam IDs
   const selected = Array.from(document.getElementById('mergeExamSelect').selectedOptions).map(opt => opt.value);
-  if (selected.length < 2) {
+  if (selected.length < 1) {
     document.getElementById('mergeExamMsg').innerHTML = `<div class="text-red-600">Please select at least 2 exams to merge.</div>`;
     return;
   }

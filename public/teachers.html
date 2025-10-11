@@ -4,296 +4,104 @@
   <meta charset="UTF-8">
   <title>Staff Management | School Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Professional Google Font -->
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,700&display=swap" rel="stylesheet">
-  <style>
-    html,body{
-      margin:0;padding:0;background:#f5f7fb;
-      font-family:'Inter', 'Segoe UI', Arial, sans-serif;
-      color:#252942;
-    }
-    /* Branding Header */
-    .portal-header {
-      background: linear-gradient(90deg, #1d3557 0%, #457b9d 100%);
-      color: #fff;
-      padding: 0 0 8px 0;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-    }
-    .portal-header-inner {
-      max-width: 970px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 18px 18px 0 18px;
-    }
-    .school-logo {
-      width:54px;height:54px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;
-      font-size:2rem;font-weight:700;color:#1d3557;box-shadow:0 3px 12px rgba(0,0,0,0.08);
-      flex-shrink:0;
-    }
-    .portal-title {
-      font-size:2.1rem;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;
-    }
-    .portal-subtitle {
-      font-size:1.1rem;font-weight:500;opacity:.92;
-    }
-    .enroll-container{
-      max-width: 970px; margin: 0 auto 30px auto; background:#fff; border-radius:12px;
-      box-shadow:0 3px 24px rgba(32,40,71,0.07); padding:32px 20px 28px 20px;
-      border-top: 5px solid #457b9d;
-    }
-    h2{
-      margin-top:0;text-align:center;color:#1d3557;
-      font-size:1.5rem;font-weight:700;letter-spacing:0.2px;
-      margin-bottom:26px;
-    }
-    /* Tabs */
-    .form-tabs{
-      display:flex;gap:3px;margin-bottom:32px;background:#e9f1fa;border-radius:9px;
-      box-shadow:0 1px 4px rgba(32,40,71,0.04);
-    }
-    .form-tab{
-      flex:1;background:transparent;border:none;
-      padding:13px 0;font-weight:600;font-size:16px;
-      color:#252942;border-radius:8px 8px 0 0;
-      cursor:pointer;transition:all .13s;
-      border-bottom:3px solid transparent;
-      letter-spacing:0.1px;
-    }
-    .form-tab.active{
-      background:#fff;color:#457b9d;border-bottom:3px solid #457b9d;
-      box-shadow:0 2px 8px rgba(69,123,157,0.06);
-      z-index:2;
-    }
-    .form-section{display:none;}
-    .form-section.active{display:block;}
-    /* Section Headings */
-    .section-heading {
-      font-size: 1.19rem;
-      font-weight: 600;
-      color: #1d3557;
-      background: #f5f7fb;
-      border-left: 4px solid #457b9d;
-      padding: 7px 0 7px 16px;
-      margin: 32px 0 18px 0;
-      border-radius: 7px 0 0 7px;
-      letter-spacing: 0.05em;
-    }
-    .section-heading:first-of-type { margin-top: 0; }
-    /* Form Styles */
-    .form-row{display:flex;gap:18px;}
-    .form-group{flex:1 1 0;display:flex;flex-direction:column;margin-bottom:20px;}
-    .form-group label{font-weight:500;margin-bottom:5px;color:#34405a;}
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group input[type="date"],
-    .form-group input[type="password"],
-    .form-group input[type="tel"],
-    .form-group select{
-      padding:9px 12px;border-radius:7px;border:1px solid #c6d0e0;font-size:15px;background:#f9fbfd;
-      transition:border-color .15s;
-    }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline:none;border-color:#457b9d;
-      background:#fff;
-    }
-    .form-group textarea{
-      padding:9px 12px;border-radius:7px;border:1px solid #c6d0e0;font-size:15px;min-height:44px;background:#f9fbfd;}
-    .form-group input[type="file"]{padding:3px 0;}
-    .photo-uploader{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
-    .photo-box{
-      width:92px;height:92px;border-radius:12px;overflow:hidden;background:#f5f7fb;
-      border:2.5px dashed #b7c2d8;display:flex;align-items:center;justify-content:center;margin-bottom:4px;
-      transition:border-color .12s;
-    }
-    .photo-box img{width:88px;height:88px;object-fit:cover;border-radius:10px;}
-    .photo-placeholder{color:#b0bbd5;font-size:42px;}
-    button[type=submit],.form-actions button{
-      background: linear-gradient(90deg, #457b9d 60%, #1d3557 100%);
-      color:#fff;border:none;border-radius:7px;padding:11px 38px;font-size:16px;font-weight:600;cursor:pointer;transition:background .13s;
-      box-shadow:0 2px 8px rgba(32,40,71,0.07);
-    }
-    button[type=submit]:hover,.form-actions button:hover{background: linear-gradient(90deg, #1d3557, #457b9d);}
-    .form-actions{text-align:right;margin-top:10px;}
-    .note{font-size:14px;color:#8a98b3;margin-bottom:11px;}
-    @media (max-width:700px){
-      .portal-header-inner{flex-direction:column;align-items:flex-start;padding:18px 2vw 0 2vw;}
-      .portal-title{font-size:1.35rem;}
-      .enroll-container {padding:14px 2vw 14px 2vw;}
-      .form-row{flex-direction:column;gap:0;}
-    }
-    /* Staff List */
-    .staff-list-section{padding:0 10px 10px 10px;}
-    .staff-list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-    .staff-search{padding:7px 14px;border-radius:6px;border:1px solid #c6d0e0;font-size:15px;width:245px;background:#f9fbfd;}
-    .staff-table{width:100%;border-collapse:separate;border-spacing:0 2px;}
-    .staff-table th,.staff-table td{padding:10px 6px;text-align:left;}
-    .staff-table th{background:#e9f1fa;color:#34405a;font-size:15px;}
-    .staff-table tr{transition:background .09s;}
-    .staff-table tr:hover{background:#f0f6ff;cursor:pointer;}
-    .staff-avatar{width:38px;height:38px;border-radius:7px;object-fit:cover;background:#f4f4f4;}
-    .empty-staff-list{color:#9ba4b5;text-align:center;padding:30px;font-size:15px;}
-    /* Modal - Fullscreen on Desktop */
-    .modal-overlay{
-      display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;
-      background:rgba(32,40,71,0.23);align-items:center;justify-content:center;
-    }
-    .modal-overlay.active{display:flex;}
-    .modal-content{
-      background:#fff;
-      border-radius:0;
-      box-shadow:none;
-      position:fixed;
-      top:0; left:0; right:0; bottom:0;
-      width:100vw; height:100vh; max-width:none; max-height:none;
-      overflow-y:auto;
-      padding:0;
-      animation:modalFadeIn .22s cubic-bezier(.3,1.7,.7,.7);
-      display:flex;
-      flex-direction:column;
-    }
-    @keyframes modalFadeIn{from{opacity:.12;}to{opacity:1;}}
-    .modal-close{
-      position:absolute;
-      top:18px; right:28px;
-      font-size:30px;color:#bbb;
-      cursor:pointer;transition:color .15s;
-      z-index:2;
-    }
-    .modal-close:hover{color:#1d3557;}
-    .modal-main {
-      margin: 0 auto;
-      width: 100%;
-      max-width: 760px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 44px rgba(32,40,71,0.13);
-      padding: 40px 38px 30px 38px;
-      margin-top: 54px;
-      margin-bottom: 54px;
-      position: relative;
-    }
-    @media (max-width:900px){
-      .modal-main {padding: 30px 7vw 20px 7vw;}
-    }
-    @media (max-width:600px){
-      .modal-main {
-        max-width: 100vw;
-        border-radius: 0;
-        margin-top: 0;
-        margin-bottom: 0;
-        padding: 16px 2vw 12px 2vw;
-      }
-      .modal-close {top: 11px; right: 15px; font-size: 26px;}
-    }
-    .modal-photo{width:90px;height:90px;border-radius:13px;object-fit:cover;background:#f5f7fb;margin-bottom:10px;}
-    .modal-details{margin-bottom:7px;}
-    .modal-details label{display:block;font-weight:600;margin-bottom:1px;}
-    .modal-details span{display:block;margin-bottom:5px;}
-    .modal-title{font-size:22px;font-weight:700;color:#1d3557;margin-bottom:4px;}
-    .modal-section{margin-bottom:16px;}
-    .modal-section-title{font-size:15px;font-weight:600;color:#457b9d;margin-bottom:3px;}
-  </style>
+  <!-- Tailwind CSS CDN (for Flowbite) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Flowbite CSS & JS -->
+  <link href="https://unpkg.com/flowbite@2.3.0/dist/flowbite.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/flowbite@2.3.0/dist/flowbite.min.js"></script>
 </head>
-<body>
-  <!-- School Branding Header -->
-  <div class="portal-header">
-    <div class="portal-header-inner">
-      <div class="school-logo" aria-label="School Logo">SP</div>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <!-- Header -->
+  <header class="bg-blue-900 text-white py-5 shadow">
+    <div class="max-w-5xl mx-auto px-4 flex items-center gap-4">
+      <div class="bg-white rounded-lg w-14 h-14 flex items-center justify-center text-2xl font-bold text-blue-900 shadow">
+        SP
+      </div>
       <div>
-        <div class="portal-title">GOLD AND LINC SCHOOLS</div>
-        <div class="portal-subtitle">Professional Staff Management & Records</div>
+        <div class="text-2xl font-bold tracking-wide">GOLD AND LINC SCHOOLS</div>
+        <div class="text-sm opacity-80">Professional Staff Management & Records</div>
       </div>
     </div>
-  </div>
-  <div class="enroll-container">
-    <h2>Staff Management</h2>
-    <div class="form-tabs">
-      <button class="form-tab active" data-tab="enroll">Enroll Staff</button>
-      <button class="form-tab" data-tab="view">View Staff</button>
-    </div>
-    <!-- Enroll Staff Section -->
-    <div class="form-section active" id="tab-enroll">
-      <form id="staffEnrollForm" enctype="multipart/form-data" autocomplete="off">
-        <!-- PERSONAL DETAILS -->
-        <div class="section-heading">Personal Details</div>
-        <div class="form-row">
-          <div class="form-group" style="max-width:140px;align-items:center;">
-            <label>Photo</label>
-            <div class="photo-uploader">
-              <div class="photo-box" id="photoBox">
-                <span class="photo-placeholder" id="photoPlaceholder">🖼️</span>
-                <img src="" id="staffPhoto" style="display:none;" alt="Photo">
+  </header>
+  <main class="max-w-5xl mx-auto my-8 bg-white rounded-xl shadow p-6">
+    <!-- Tabs -->
+    <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 mb-6" id="tablist" role="tablist">
+      <li class="mr-2">
+        <button id="tab-enroll-tab" data-tabs-target="#tab-enroll" type="button" role="tab" aria-controls="tab-enroll" aria-selected="true" class="inline-block p-4 rounded-t-lg border-b-2 active text-blue-900 border-blue-900">Enroll Staff</button>
+      </li>
+      <li class="mr-2">
+        <button id="tab-view-tab" data-tabs-target="#tab-view" type="button" role="tab" aria-controls="tab-view" aria-selected="false" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:text-blue-900 hover:border-blue-300">View Staff</button>
+      </li>
+    </ul>
+    <!-- Tab panels -->
+    <div id="tab-enroll" role="tabpanel" aria-labelledby="tab-enroll-tab">
+      <form id="staffEnrollForm" class="space-y-8" enctype="multipart/form-data" autocomplete="off">
+        <!-- Personal Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Photo</label>
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                <img id="staffPhoto" class="w-24 h-24 object-cover rounded-lg hidden" src="" alt="Staff photo">
+                <span id="photoPlaceholder" class="text-gray-300 text-4xl">&#128247;</span>
               </div>
-              <input type="file" id="photoInput" name="photo" accept="image/*">
+              <input type="file" id="photoInput" name="photo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700" />
             </div>
           </div>
-          <div style="flex:3;">
-            <div class="form-row">
-              <div class="form-group">
-                <label>First Name</label>
-                <input type="text" name="first_name" required>
-              </div>
-              <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" name="last_name" required>
-              </div>
-              <div class="form-group">
-                <label>Other Name(s)</label>
-                <input type="text" name="other_names">
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">First Name</label>
+              <input type="text" name="first_name" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Gender</label>
-                <select name="gender" required>
-                  <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Date of Birth</label>
-                <input type="date" name="dob" required>
-              </div>
-              <div class="form-group">
-                <label>Marital Status</label>
-                <select name="marital_status" required>
-                  <option value="">Select</option>
-                  <option>Single</option>
-                  <option>Married</option>
-                  <option>Divorced</option>
-                  <option>Widowed</option>
-                </select>
-              </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Last Name</label>
+              <input type="text" name="last_name" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Other Name(s)</label>
+              <input type="text" name="other_names" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+              <select name="gender" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Date of Birth</label>
+              <input type="date" name="dob" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Marital Status</label>
+              <select name="marital_status" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
+                <option value="">Select</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Divorced</option>
+                <option>Widowed</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block mb-2 text-sm font-medium text-gray-900">Home Address</label>
+              <input type="text" name="address" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
             </div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Home Address</label>
-            <input type="text" name="address" required>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Phone Number</label>
+            <input type="tel" name="phone" required placeholder="+234..." class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" name="phone" required placeholder="+234...">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
+            <input type="email" name="email" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" name="email" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Designation</label>
-            <select name="designation" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Designation</label>
+            <select name="designation" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
               <option value="">Select</option>
               <option>Teacher</option>
               <option>Head Teacher</option>
@@ -309,49 +117,44 @@
               <option>Other</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Department</label>
-            <input type="text" name="department" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Department</label>
+            <input type="text" name="department" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Staff Type</label>
-            <select name="staff_type" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Staff Type</label>
+            <select name="staff_type" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
               <option value="">Select</option>
               <option>Teaching</option>
               <option>Non-Teaching</option>
             </select>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date Joined</label>
-            <input type="date" name="date_joined" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Date Joined</label>
+            <input type="date" name="date_joined" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Highest Qualification</label>
-            <input type="text" name="qualification" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Highest Qualification</label>
+            <input type="text" name="qualification" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Years of Experience</label>
-            <input type="text" name="experience" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Years of Experience</label>
+            <input type="text" name="experience" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label>Previous Employer/School</label>
-            <input type="text" name="previous_employer">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Previous Employer/School</label>
+            <input type="text" name="previous_employer" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Specialization/Subjects</label>
-            <input type="text" name="specialization" placeholder="e.g. English, Mathematics">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Specialization/Subjects</label>
+            <input type="text" name="specialization" placeholder="e.g. English, Mathematics" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
         </div>
-        <div class="note">Provide at least one valid identification.</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>ID Type</label>
-            <select name="id_type" required>
+        <div class="text-gray-500 text-sm">Provide at least one valid identification.</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">ID Type</label>
+            <select name="id_type" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
               <option value="">Select</option>
               <option>National ID</option>
               <option>Voter's Card</option>
@@ -361,130 +164,140 @@
               <option>Other</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>ID Number</label>
-            <input type="text" name="id_number" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">ID Number</label>
+            <input type="text" name="id_number" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>ID Upload</label>
-            <input type="file" name="id_upload" accept="image/*,application/pdf">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Bank Name</label>
-            <input type="text" name="bank_name" required>
-          </div>
-          <div class="form-group">
-            <label>Account Name</label>
-            <input type="text" name="account_name" required>
-          </div>
-          <div class="form-group">
-            <label>Account Number</label>
-            <input type="text" name="account_number" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">ID Upload</label>
+            <input type="file" name="id_upload" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700" />
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Pension Scheme</label>
-            <input type="text" name="pension" placeholder="Optional">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Bank Name</label>
+            <input type="text" name="bank_name" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-          <div class="form-group">
-            <label>Tax ID (TIN)</label>
-            <input type="text" name="tax_id" placeholder="Optional">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Account Name</label>
+            <input type="text" name="account_name" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
-        </div>
-        <!-- NEXT OF KIN -->
-        <div class="section-heading">Next of Kin</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" name="kin_name" required>
-          </div>
-          <div class="form-group">
-            <label>Relationship</label>
-            <input type="text" name="kin_relationship" required>
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" name="kin_phone" required>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Account Number</label>
+            <input type="text" name="account_number" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" name="kin_address">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Pension Scheme</label>
+            <input type="text" name="pension" placeholder="Optional" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Tax ID (TIN)</label>
+            <input type="text" name="tax_id" placeholder="Optional" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
         </div>
-        <!-- LOGIN DETAILS -->
-        <div class="section-heading">Login Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Email (for portal login)</label>
-            <input type="email" name="login_email" required>
+        <div class="pt-2 border-t border-gray-200 mt-4">
+          <div class="text-lg font-semibold text-blue-900 mb-3 mt-5">Next of Kin</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Full Name</label>
+              <input type="text" name="kin_name" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Relationship</label>
+              <input type="text" name="kin_relationship" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Phone Number</label>
+              <input type="tel" name="kin_phone" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="login_password" required>
-          </div>
-          <div class="form-group">
-            <label>Access Level</label>
-            <select name="access_level" required>
-              <option value="">Select</option>
-              <option>Teacher</option>
-              <option>Head Teacher</option>
-              <option>Principal</option>
-              <option>HR</option>
-              <option>Account/Admin</option>
-            </select>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Address</label>
+            <input type="text" name="kin_address" class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
           </div>
         </div>
-        <div id="enrollSpinner" style="display:none; text-align:center; margin-bottom:12px;">
-          <img src="https://i.imgur.com/llF5iyg.gif" alt="Loading..." width="40">
-          <div style="font-size:14px; color:#457b9d;">Submitting, please wait...</div>
+        <div class="pt-2 border-t border-gray-200 mt-4">
+          <div class="text-lg font-semibold text-blue-900 mb-3 mt-5">Login Details</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Email (for portal login)</label>
+              <input type="email" name="login_email" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+              <input type="password" name="login_password" required class="form-input block w-full rounded-lg border-gray-300 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Access Level</label>
+              <select name="access_level" required class="form-select block w-full rounded-lg border-gray-300 focus:border-blue-500">
+                <option value="">Select</option>
+                <option>Teacher</option>
+                <option>Head Teacher</option>
+                <option>Principal</option>
+                <option>HR</option>
+                <option>Account/Admin</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="form-actions">
-          <button type="submit">Submit Enrollment</button>
+        <div id="enrollSpinner" class="hidden text-center my-3">
+          <svg class="inline animate-spin w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+          <div class="text-blue-700 mt-2 text-sm">Submitting, please wait...</div>
+        </div>
+        <div class="text-right">
+          <button type="submit" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-8 rounded-lg shadow focus:outline-none">Submit Enrollment</button>
         </div>
       </form>
     </div>
-    <!-- View Staff Section -->
-    <div class="form-section staff-list-section" id="tab-view">
-      <div class="staff-list-header">
-        <div style="font-size:17px;font-weight:600;color:#1d3557;">All Staff</div>
-        <input type="text" class="staff-search" id="staffSearch" placeholder="Search staff...">
+    <div class="hidden" id="tab-view" role="tabpanel" aria-labelledby="tab-view-tab">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+        <div class="text-lg font-bold text-blue-900">All Staff</div>
+        <input type="text" class="form-input w-full md:w-64 rounded-lg border-gray-300" id="staffSearch" placeholder="Search staff..." />
       </div>
       <div id="staffList">
-        <div class="empty-staff-list">Loading staff...</div>
+        <div class="text-gray-400 text-center p-8">Loading staff...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Staff Modal -->
+<div id="staffModal" tabindex="-1" aria-hidden="true"
+  class="hidden fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full bg-black bg-opacity-40 flex items-start">
+  <div class="relative w-full max-w-2xl mx-auto mt-16">
+    <div class="bg-white rounded-lg shadow relative">
+      <div class="flex justify-between items-center px-6 py-4 border-b rounded-t">
+        <h3 class="text-xl font-semibold text-blue-900" id="modalTitle">Staff Details</h3>
+        <button ... id="modalCloseBtn">...</button>
+      </div>
+      <div class="p-6 overflow-y-auto max-h-[80vh]" id="modalBody">
+        <!-- Dynamic content here -->
       </div>
     </div>
   </div>
-  <!-- Staff Details Modal -->
-  <div class="modal-overlay" id="staffModal">
-    <div class="modal-content" id="staffModalContent">
-      <span class="modal-close" id="modalCloseBtn">&times;</span>
-      <div class="modal-main">
-        <div id="modalBody">
-          <!-- Dynamic content goes here -->
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+
+  <!-- Flowbite & Custom JS -->
   <script>
     // --- Backend API base URL ---
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-    // Tab navigation
-    document.querySelectorAll('.form-tab').forEach(tab=>{
-      tab.onclick = function() {
-        document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
-        document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
-        window.scrollTo(0,0);
-        if(tab.dataset.tab === 'view') loadStaffList();
-      }
+    // Tab switching logic
+    document.querySelectorAll('[data-tabs-target]').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('[role="tabpanel"]').forEach(panel => panel.classList.add('hidden'));
+        document.querySelectorAll('[role="tab"]').forEach(t => {
+          t.classList.remove('active', 'text-blue-900', 'border-blue-900');
+          t.classList.add('hover:text-blue-900', 'hover:border-blue-300');
+        });
+        document.querySelector(this.getAttribute('data-tabs-target')).classList.remove('hidden');
+        this.classList.add('active', 'text-blue-900', 'border-blue-900');
+        this.classList.remove('hover:text-blue-900', 'hover:border-blue-300');
+        if(this.getAttribute('data-tabs-target') === '#tab-view') loadStaffList();
+      });
     });
+
     // Photo uploader (enroll form)
     document.getElementById('photoInput').onchange = function(e) {
       const file = e.target.files[0];
@@ -492,18 +305,20 @@
       const reader = new FileReader();
       reader.onload = function(ev) {
         document.getElementById('staffPhoto').src = ev.target.result;
-        document.getElementById('staffPhoto').style.display = 'block';
-        document.getElementById('photoPlaceholder').style.display = 'none';
+        document.getElementById('staffPhoto').classList.remove('hidden');
+        document.getElementById('photoPlaceholder').classList.add('hidden');
       }
       reader.readAsDataURL(file);
     };
+
+    // Staff enrollment form submission
     document.getElementById('staffEnrollForm').onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
       // Show spinner, disable submit button
       const spinner = document.getElementById('enrollSpinner');
-      spinner.style.display = '';
+      spinner.classList.remove('hidden');
       const submitBtn = form.querySelector('button[type="submit"]');
       const origText = submitBtn.textContent;
       submitBtn.textContent = 'Submitting...';
@@ -519,28 +334,26 @@
         } else {
           alert(respData.message || 'Staff enrollment successful!');
           form.reset();
-          // Reset photo UI if you use it
-          document.getElementById('staffPhoto').style.display = 'none';
-          document.getElementById('photoPlaceholder').style.display = '';
+          // Reset photo UI
+          document.getElementById('staffPhoto').classList.add('hidden');
+          document.getElementById('photoPlaceholder').classList.remove('hidden');
           // Optionally, switch tabs
-          document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
-          document.querySelector('.form-tab[data-tab="enroll"]').classList.add('active');
-          document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
-          document.getElementById('tab-enroll').classList.add('active');
+          document.getElementById('tab-enroll-tab').click();
         }
       } catch (err) {
         alert('Network or server error: ' + err.message);
       } finally {
-        spinner.style.display = 'none';
+        spinner.classList.add('hidden');
         submitBtn.textContent = origText;
         submitBtn.disabled = false;
       }
-    }
-    // -------- STAFF LIST + MODAL --------
+    };
+
+    // Staff list logic
     let staffDataCache = [];
     async function loadStaffList() {
       const staffListDiv = document.getElementById('staffList');
-      staffListDiv.innerHTML = '<div class="empty-staff-list">Loading staff...</div>';
+      staffListDiv.innerHTML = '<div class="text-gray-400 text-center p-8">Loading staff...</div>';
       try {
         const resp = await fetch(API_BASE_URL + '/api/staffs');
         if (!resp.ok) throw new Error('Failed to fetch staff list');
@@ -548,36 +361,25 @@
         staffDataCache = staff;
         renderStaffList(staff);
       } catch (err) {
-        staffListDiv.innerHTML = '<div class="empty-staff-list">Could not load staff. Please try again.</div>';
+        staffListDiv.innerHTML = '<div class="text-red-600 text-center p-8">Could not load staff. Please try again.</div>';
       }
-    }
-    async function saveAssignedClasses(staffId) {
-  const select = document.getElementById('assignClassesSelect');
-  const classIds = Array.from(select.selectedOptions).map(opt => opt.value);
-  const res = await fetch(API_BASE_URL + `/api/staffs/${staffId}/classes`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ classIds })
-  });
-  const data = await res.json();
-  if (res.ok) alert("Classes assigned!"); else alert(data.error);
     }
     function renderStaffList(staff) {
       const staffListDiv = document.getElementById('staffList');
       if (!staff || staff.length === 0) {
-        staffListDiv.innerHTML = '<div class="empty-staff-list">No staff found.</div>';
+        staffListDiv.innerHTML = '<div class="text-gray-400 text-center p-8">No staff found.</div>';
         return;
       }
-      let html = '<table class="staff-table"><thead><tr><th></th><th>Name</th><th>Designation</th><th>Department</th></tr></thead><tbody>';
+      let html = '<div class="overflow-x-auto"><table class="min-w-full text-sm text-left text-gray-700"><thead class="text-xs uppercase bg-blue-50 text-blue-900"><tr><th class="p-2"></th><th class="p-2">Name</th><th class="p-2">Designation</th><th class="p-2">Department</th></tr></thead><tbody>';
       for(const s of staff) {
-        html += `<tr data-id="${s.id}">
-          <td><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=457b9d&color=fff'}" class="staff-avatar" alt="Staff"></td>
-          <td>${s.first_name || ''} ${s.last_name || ''}</td>
-          <td>${s.designation || ''}</td>
-          <td>${s.department || ''}</td>
+        html += `<tr class="hover:bg-blue-50 cursor-pointer" data-id="${s.id}">
+          <td class="p-2"><img src="${s.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=457b9d&color=fff'}" class="w-10 h-10 rounded object-cover bg-gray-200" alt=""></td>
+          <td class="p-2">${s.first_name || ''} ${s.last_name || ''}</td>
+          <td class="p-2">${s.designation || ''}</td>
+          <td class="p-2">${s.department || ''}</td>
         </tr>`;
       }
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       staffListDiv.innerHTML = html;
       // Add click handlers
       staffListDiv.querySelectorAll('tbody tr').forEach(row=>{
@@ -594,105 +396,80 @@
       );
       renderStaffList(filtered);
     };
-    // Modal logic
+
+    // Modal logic (Flowbite style)
     const staffModal = document.getElementById('staffModal');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
-    modalCloseBtn.onclick = ()=>{ staffModal.classList.remove('active'); };
-    staffModal.onclick = function(e){ if(e.target===staffModal) staffModal.classList.remove('active'); };
+    modalCloseBtn.onclick = ()=>{ staffModal.classList.add('hidden'); };
+    staffModal.onclick = function(e){ if(e.target===staffModal) staffModal.classList.add('hidden'); };
     async function showStaffModal(id) {
       const modalBody = document.getElementById('modalBody');
-      modalBody.innerHTML = '<div style="text-align:center;padding:36px;">Loading...</div>';
-      staffModal.classList.add('active');
+      modalBody.innerHTML = '<div class="text-center py-8 text-gray-400">Loading...</div>';
+      staffModal.classList.remove('hidden');
       try {
-        // Fetch staff details
         const resp = await fetch(API_BASE_URL + `/api/staffs/${id}`);
         if (!resp.ok) throw new Error('Failed to fetch staff details');
         const s = await resp.json();
-        // Compose modal content
         modalBody.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px;">
-            <img class="modal-photo" src="${s.photo_url||'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=457b9d&color=fff'}" alt="Staff Photo">
-            <div class="modal-title">${s.first_name||''} ${s.last_name||''}</div>
-            <div style="color:#457b9d;text-align:center;">${s.designation||''} &middot; ${s.department||''}</div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Basic Details</div>
-            <div class="modal-details">
-              <label>Other Name(s):</label><span>${s.other_names||'-'}</span>
-              <label>Gender:</label><span>${s.gender||'-'}</span>
-              <label>Date of Birth:</label><span>${s.dob||'-'}</span>
-              <label>Marital Status:</label><span>${s.marital_status||'-'}</span>
+          <div class="flex flex-col md:flex-row md:items-center gap-6 mb-6">
+            <img class="w-24 h-24 rounded-lg object-cover bg-gray-200 border" src="${s.photo_url||'https://ui-avatars.com/api/?name=' + encodeURIComponent((s.first_name||'')+' '+(s.last_name||'')) + '&background=457b9d&color=fff'}" alt="Staff photo">
+            <div>
+              <div class="text-2xl font-bold text-blue-900">${s.first_name||''} ${s.last_name||''}</div>
+              <div class="text-blue-700">${s.designation||''} &middot; ${s.department||''}</div>
+              <div class="mt-2 text-gray-500 text-sm">Staff Type: ${s.staff_type||'-'} | Joined: ${s.date_joined||'-'}</div>
             </div>
           </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Contact</div>
-            <div class="modal-details">
-              <label>Phone:</label><span>${s.phone||'-'}</span>
-              <label>Email:</label><span>${s.email||'-'}</span>
-              <label>Address:</label><span>${s.address||'-'}</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Basic Details</div>
+              <div class="mb-1"><span class="font-medium">Other Name(s):</span> ${s.other_names||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Gender:</span> ${s.gender||'-'}</div>
+              <div class="mb-1"><span class="font-medium">DOB:</span> ${s.dob||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Marital Status:</span> ${s.marital_status||'-'}</div>
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Employment</div>
-            <div class="modal-details">
-              <label>Staff Type:</label><span>${s.staff_type||'-'}</span>
-              <label>Date Joined:</label><span>${s.date_joined||'-'}</span>
-              <label>Qualification:</label><span>${s.qualification||'-'}</span>
-              <label>Experience:</label><span>${s.experience||'-'}</span>
-              <label>Previous Employer:</label><span>${s.previous_employer||'-'}</span>
-              <label>Specialization/Subjects:</label><span>${s.specialization||'-'}</span>
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Contact</div>
+              <div class="mb-1"><span class="font-medium">Phone:</span> ${s.phone||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Email:</span> ${s.email||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Address:</span> ${s.address||'-'}</div>
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Identification</div>
-            <div class="modal-details">
-              <label>ID Type:</label><span>${s.id_type||'-'}</span>
-              <label>ID Number:</label><span>${s.id_number||'-'}</span>
-              ${s.id_upload_url?`<label>ID Upload:</label><span><a href="${s.id_upload_url}" target="_blank" style="color:#457b9d;text-decoration:underline;">View ID</a></span>`:''}
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Employment</div>
+              <div class="mb-1"><span class="font-medium">Qualification:</span> ${s.qualification||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Experience:</span> ${s.experience||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Previous Employer:</span> ${s.previous_employer||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Specialization:</span> ${s.specialization||'-'}</div>
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Next of Kin</div>
-            <div class="modal-details">
-              <label>Name:</label><span>${s.kin_name||'-'}</span>
-              <label>Relationship:</label><span>${s.kin_relationship||'-'}</span>
-              <label>Phone:</label><span>${s.kin_phone||'-'}</span>
-              <label>Address:</label><span>${s.kin_address||'-'}</span>
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Identification</div>
+              <div class="mb-1"><span class="font-medium">ID Type:</span> ${s.id_type||'-'}</div>
+              <div class="mb-1"><span class="font-medium">ID Number:</span> ${s.id_number||'-'}</div>
+              ${s.id_upload_url?`<div class="mb-1"><span class="font-medium">ID Upload:</span> <a href="${s.id_upload_url}" target="_blank" class="text-blue-600 underline">View ID</a></div>`:''}
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Bank Details</div>
-            <div class="modal-details">
-              <label>Bank Name:</label><span>${s.bank_name||'-'}</span>
-              <label>Account Name:</label><span>${s.account_name||'-'}</span>
-              <label>Account Number:</label><span>${s.account_number||'-'}</span>
-              <label>Pension Scheme:</label><span>${s.pension||'-'}</span>
-              <label>Tax ID:</label><span>${s.tax_id||'-'}</span>
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Next of Kin</div>
+              <div class="mb-1"><span class="font-medium">Name:</span> ${s.kin_name||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Relationship:</span> ${s.kin_relationship||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Phone:</span> ${s.kin_phone||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Address:</span> ${s.kin_address||'-'}</div>
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Emergency Contact</div>
-            <div class="modal-details">
-              <label>Name:</label><span>${s.emergency_name||'-'}</span>
-              <label>Phone:</label><span>${s.emergency_phone||'-'}</span>
-              <label>Relationship:</label><span>${s.emergency_relationship||'-'}</span>
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Bank Details</div>
+              <div class="mb-1"><span class="font-medium">Bank Name:</span> ${s.bank_name||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Account Name:</span> ${s.account_name||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Account Number:</span> ${s.account_number||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Pension:</span> ${s.pension||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Tax ID:</span> ${s.tax_id||'-'}</div>
             </div>
-          </div>
-          <div class="modal-section">
-            <div class="modal-section-title">Portal Login</div>
-            <div class="modal-details">
-              <label>Email:</label><span>${s.login_email||'-'}</span>
-              <label>Access Level:</label><span>${s.access_level||'-'}</span>
-              <label>Assigned Classes:</label>
-<select id="assignClassesSelect" multiple>
-  <!-- options filled dynamically with class names -->
-</select>
-<button onclick="saveAssignedClasses(staffId)">Assign Classes</button>
+            <div>
+              <div class="font-semibold mb-2 text-blue-800">Portal Login</div>
+              <div class="mb-1"><span class="font-medium">Email:</span> ${s.login_email||'-'}</div>
+              <div class="mb-1"><span class="font-medium">Access Level:</span> ${s.access_level||'-'}</div>
             </div>
           </div>
         `;
       } catch (err) {
-        modalBody.innerHTML = '<div style="color:#b00;text-align:center;padding:36px;">Could not load staff details.</div>';
+        modalBody.innerHTML = '<div class="text-red-600 text-center py-8">Could not load staff details.</div>';
       }
     }
   </script>

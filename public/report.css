@@ -239,8 +239,6 @@ body {
   right: 14px;
   z-index: 50;
 }
-
-/* PRINT LAYOUT FIXES FOR A4 */
 @media print {
   html, body {
     width: 210mm !important;
@@ -258,9 +256,10 @@ body {
   .report-container {
     width: 210mm !important;
     max-width: 210mm !important;
-    min-width: 0 !important;
-    min-height: 297mm !important;
+    min-width: 210mm !important;
+    height: 297mm !important;
     max-height: 297mm !important;
+    min-height: 297mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     border: none !important;
@@ -269,11 +268,9 @@ body {
     position: relative !important;
     overflow: hidden !important;
     page-break-inside: avoid !important;
+    display: block !important;
   }
-  section, .seal-container, .skills-tables-section {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
+  /* All tables and sections fill container */
   .results-table,
   .student-info-table,
   .grades-key-table,
@@ -286,7 +283,11 @@ body {
   .no-print-btn {
     display: none !important;
   }
-  /* Tighter spacing for print to fit more content */
+  section, .seal-container, .skills-tables-section {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  /* Compact the padding for print */
   .student-info-table td,
   .results-table th, .results-table td,
   .skills-table th, .skills-table td,

@@ -5,89 +5,71 @@
   <title>Gold and Linc Schools - Report Card</title>
   <link rel="stylesheet" href="report.css">
   <style>
-    @media print {
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-        box-shadow: none !important;
-      }
-      @page {
-        size: A4 portrait;
-        margin: 0;
-      }
-      .report-container {
-        width: 100vw !important;
-        min-width: 0 !important;
-        max-width: 100vw !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        background: #fff !important;
-      }
-      .results-table,
-      .student-info-table,
-      .grades-key-table,
-      .skills-table,
-      .attendance,
-      .skills-tables-section {
-        width: 100% !important;
-        max-width: 100vw !important;
-      }
-      .no-print-btn {
-        display: none !important;
-      }
-      section, .seal-container {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-    }
-    .report-container {
-      width: 100vw;
-      max-width: 100vw;
-      margin: 0 auto;
-      background: #fff;
-    }
-    .background-blur {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 60%;
-      height: 60%;
-      transform: translate(-50%, -50%);
-      filter: blur(30px);
-      opacity: 0.08;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .seal-container {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-    }
-    .seal-container img {
-      height: 80px;
-      width: auto;
-    }
-    .student-info-table img#stuPhoto {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 2px solid #ccc;
-      box-shadow: 0 2px 7px #eee;
-      background: #fafafa;
-      justify-content: center;
-      display: block;
-    }
-    .student-info-table td {
-      vertical-align: middle;
-    }
+@media print {
+  html, body {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  .report-container {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    min-width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    min-height: 297mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    position: relative !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+  }
+  /* All tables and sections fill container */
+  .results-table,
+  .student-info-table,
+  .grades-key-table,
+  .skills-table,
+  .attendance,
+  .skills-tables-section {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .no-print-btn {
+    display: none !important;
+  }
+  section, .seal-container, .skills-tables-section {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  /* Compact the padding for print */
+  .student-info-table td,
+  .results-table th, .results-table td,
+  .skills-table th, .skills-table td,
+  .grades-key-table th, .grades-key-table td {
+    padding: 2px 3px !important;
+    font-size: 0.95rem !important;
+  }
+  .school-logo, .coat-of-arms {
+    height: 60px !important;
+    width: 60px !important;
+  }
+  .seal-container img {
+    height: 50px !important;
+  }
+}
+
     .hidden { display: none !important; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -593,6 +575,9 @@ if (reportPreferences && reportPreferences.showStudentEmail === false) {
       document.querySelector('.no-print-btn').style.visibility = 'visible';
     });
   }
+  window.onbeforeprint = () => {
+  alert("For best results, select 'A4' paper size and set margins to 'None' in your print dialog.");
+};
 </script>
 </body>
 </html>

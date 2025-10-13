@@ -62,6 +62,30 @@
         #editStudentModal button[type=submit] { background: #007bff; color: #fff; border: none; padding:.5em 1em; border-radius: 4px; }
         #editStudentModal .modal-actions { text-align: right; }
         #editModalSpinner { display:none; margin-left: 10px; }
+        /* Stats section styles */
+        .students-stats-section {
+            display: flex;
+            gap: 2.5em;
+            align-items: center;
+            background: #f5f8ff;
+            border-radius: 7px;
+            margin: 1em 0 1.1em 0;
+            padding: 0.9em 1.2em;
+            font-size: 1.07em;
+            font-weight: 600;
+        }
+        .students-stats-item {
+            color: #2647a6;
+        }
+        .students-stats-item span {
+            color: #22305a;
+            font-weight: 700;
+            font-size: 1.12em;
+            margin-left: 4px;
+        }
+        @media (max-width: 700px) {
+            .students-stats-section { flex-direction: column; gap: 0.7em; padding: 0.7em 0.7em; font-size: 0.99em;}
+        }
     </style>
 </head>
 <body>
@@ -141,6 +165,8 @@
                         <label for="academic-session">Academic Session</label>
                         <select id="academic-session" name="academicSession">
                             <option value="">All Sessions</option>
+                            <option value="2024-2025">2025-2026</option>
+                            <option value="2023-2024">2026-2027</option>
                             <option value="2024-2025">2024-2025</option>
                             <option value="2023-2024">2023-2024</option>
                         </select>
@@ -166,6 +192,12 @@
                     <button type="submit" class="btn-view">View</button>
                 </div>
             </form>
+            <!-- Students Stats Section -->
+            <div class="students-stats-section" id="studentsStatsSection">
+                <div class="students-stats-item">Total Male: <span id="totalMale">0</span></div>
+                <div class="students-stats-item">Total Female: <span id="totalFemale">0</span></div>
+                <div class="students-stats-item">Total Students: <span id="totalStudents">0</span></div>
+            </div>
             <div class="students-list-section">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7em;">
                     <h3 class="students-list-title">Students List</h3>
@@ -179,6 +211,7 @@
                     <table class="students-table" id="students-table">
                         <thead>
                         <tr>
+                            <th>S/N</th>
                             <th>Photo</th>
                             <th>Surname</th>
                             <th>Firstname</th>
@@ -202,7 +235,7 @@
                         </thead>
                         <tbody id="students-table-body">
                         <tr>
-                            <td colspan="19" style="text-align:center;color:#888;">No students found.</td>
+                            <td colspan="20" style="text-align:center;color:#888;">No students found.</td>
                         </tr>
                         </tbody>
                     </table>
@@ -218,7 +251,6 @@
             <div class="modal-header">Edit Student</div>
             <form id="editStudentForm">
                 <div id="editModalSpinner"><div class="mini-spinner"></div></div>
-                <!-- fields will be dynamically generated -->
                 <div id="editFieldsWrapper"></div>
                 <div class="modal-actions">
                     <button type="submit">Save Changes</button>
@@ -230,10 +262,8 @@
     <button class="support-tab" aria-label="Open Support">Support</button>
     <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
 <script>
-    // BACKEND URL
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
-    // Spinner overlay logic
     document.addEventListener('DOMContentLoaded', () => {
         const spinner = document.getElementById('pageSpinnerOverlay');
         if (spinner) spinner.style.display = 'flex';
@@ -245,7 +275,6 @@
         }, 1200);
     });
 
-    // Sidebar mobile toggle logic
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -265,7 +294,6 @@
         if (e.key === 'Escape') closeSidebar();
     });
 
-    // Students table logic
     let studentsData = [];
     let filteredData = [];
     let currentPage = 1;
@@ -276,7 +304,6 @@
         if (spinner) spinner.style.display = show ? 'flex' : 'none';
     }
 
-    // Fetch students from backend
     async function fetchStudents(filters = {}) {
         showTableSpinner(true);
         let url = API_BASE_URL + '/api/student';
@@ -289,29 +316,31 @@
         try {
             const res = await fetch(url);
             if (res.ok) {
-    const data = await res.json();
-    // Handle both { students: [...] } and raw array response
-    let studentsList;
-    if (Array.isArray(data)) {
-        studentsList = data;
-    } else if (Array.isArray(data.students)) {
-        studentsList = data.students;
-    } else {
-        studentsList = [];
-    }
-    studentsData = studentsList;
-    filteredData = studentsData;
-    currentPage = 1;
-    renderStudentsTable();
-} else {
-    studentsData = [];
-    filteredData = [];
-    renderStudentsTable();
-}
+                const data = await res.json();
+                let studentsList;
+                if (Array.isArray(data)) {
+                    studentsList = data;
+                } else if (Array.isArray(data.students)) {
+                    studentsList = data.students;
+                } else {
+                    studentsList = [];
+                }
+                studentsData = studentsList;
+                filteredData = studentsData;
+                currentPage = 1;
+                renderStudentsTable();
+                renderStudentsStats();
+            } else {
+                studentsData = [];
+                filteredData = [];
+                renderStudentsTable();
+                renderStudentsStats();
+            }
         } catch (err) {
             studentsData = [];
             filteredData = [];
             renderStudentsTable();
+            renderStudentsStats();
         } finally {
             showTableSpinner(false);
         }
@@ -351,12 +380,14 @@
         const pageData = filteredData.slice(start, end);
 
         if(pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;color:#888;">No students found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="20" style="text-align:center;color:#888;">No students found.</td></tr>`;
         } else {
+            let serial = start + 1;
             for(const stu of pageData) {
                 const studentId = stu.student_id || stu._id || stu.regNo || '';
                 tbody.innerHTML += `
                     <tr>
+                        <td>${serial}</td>
                         <td><img src="${stu.photoBase64 || stu.photo || 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png'}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"></td>
                         <td>
                           <a href="student-profile.html?student_id=${encodeURIComponent(studentId)}" target="_blank" style="color:#007bff;text-decoration:underline;cursor:pointer;">
@@ -393,9 +424,11 @@
                         </td>
                     </tr>
                 `;
+                serial++;
             }
         }
         renderPagination(totalPages);
+        renderStudentsStats();
     }
 
     function renderPagination(totalPages) {
@@ -435,119 +468,43 @@
         if (isNaN(d)) return dateStr;
         return d.toLocaleDateString();
     }
-// --- EDIT & DELETE Functionality ---
-// --- EDIT & DELETE Functionality ---
-// NO authentication required for edit/delete requests (for debugging/development use only)
 
-window.editStudent = async function(studentId) {
-    studentId = decodeURIComponent(studentId);
-    const stu = studentsData.find(s => (s.student_id || s._id || s.regNo) == studentId);
-    if (!stu) return alert('Student not found!');
-    openEditModal(stu);
-};
-
-window.deleteStudent = async function(studentId) {
-    studentId = decodeURIComponent(studentId);
-    if (!confirm('Are you sure you want to delete this student?')) return;
-    showTableSpinner(true);
-    try {
-        let res = await fetch(`${API_BASE_URL}/api/student/${studentId}`, {
-            method: "DELETE"
-            // No headers for authentication
-        });
-        if (res.ok) {
-            studentsData = studentsData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
-            filteredData = filteredData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
-            renderStudentsTable();
-            alert('Student deleted!');
-        } else {
-            let msg = 'Failed to delete student.';
-            try {
-                const data = await res.json();
-                if (data.error) msg += ' ' + data.error;
-            } catch(e){}
-            alert(msg);
+    function renderStudentsStats() {
+        // Count total male, female, and total
+        let male = 0, female = 0;
+        for (const stu of filteredData) {
+            if (stu.gender && stu.gender.toLowerCase().startsWith("m")) male++;
+            else if (stu.gender && stu.gender.toLowerCase().startsWith("f")) female++;
         }
-    } catch (e) {
-        alert('Network error.');
-    } finally {
-        showTableSpinner(false);
+        document.getElementById("totalMale").textContent = male;
+        document.getElementById("totalFemale").textContent = female;
+        document.getElementById("totalStudents").textContent = filteredData.length;
     }
-};
 
-function openEditModal(stu) {
-    const modal = document.getElementById('editStudentModal');
-    const form = document.getElementById('editStudentForm');
-    const fields = [
-        {label: 'Surname', name: 'surname', type: 'text', required:true},
-        {label: 'First Name', name: 'firstname', type: 'text', required:true},
-        {label: 'Other Names', name: 'othernames', type: 'text'},
-        {label: 'Gender', name: 'gender', type: 'text', required:true},
-        {label: 'DOB', name: 'dob', type: 'date', required:true},
-        {label: 'Nationality', name: 'nationality', type: 'text'},
-        {label: 'State of Origin', name: 'state', type: 'text'},
-        {label: 'LGA', name: 'lga', type: 'text'},
-        {label: 'Home Address', name: 'address', type: 'text'},
-        {label: 'Reg No', name: 'regNo', type: 'text', readonly:true},
-        {label: 'Scratch Card', name: 'scratchCard', type: 'text', readonly:true},
-        {label: 'Class', name: 'class', type: 'text', required:true},
-        {label: 'Class Arm', name: 'classArm', type: 'text'},
-        {label: 'Previous School', name: 'previousSchool', type: 'text'},
-        {label: 'Admission Date', name: 'admissionDate', type: 'date'},
-        {label: 'Academic Session', name: 'academicSession', type: 'text'},
-        {label: 'Parent Name', name: 'parentName', type: 'text', required:true},
-        {label: 'Parent Relationship', name: 'parentRelationship', type: 'text'},
-        {label: 'Parent Phone', name: 'parentPhone', type: 'text'},
-        {label: 'Parent Email', name: 'parentEmail', type: 'email'},
-        {label: 'Parent Address', name: 'parentAddress', type: 'text'},
-        {label: 'Parent Occupation', name: 'parentOccupation', type: 'text'},
-        {label: 'Student Email', name: 'studentEmail', type: 'email'},
-        {label: 'Student Phone', name: 'studentPhone', type: 'text'},
-        {label: 'Religion', name: 'religion', type: 'text'},
-        {label: 'Blood Group', name: 'bloodGroup', type: 'text'},
-        {label: 'Genotype', name: 'genotype', type: 'text'},
-        {label: 'Medical', name: 'medical', type: 'text'}
-    ];
-    const wrapper = document.getElementById('editFieldsWrapper');
-    wrapper.innerHTML = '';
-    fields.forEach(f => {
-        let val = stu[f.name] || '';
-        if (f.type === "date" && val) {
-            val = (new Date(val)).toISOString().slice(0,10);
-        }
-        wrapper.innerHTML += `
-            <div class="edit-form-row">
-                <div style="flex:1">
-                    <label>${f.label}${f.required? ' *':''}</label>
-                    <input name="${f.name}" type="${f.type}" value="${val}" ${f.readonly?'readonly':''} ${f.required?'required':''} />
-                </div>
-            </div>
-        `;
-    });
-    form.onsubmit = async function(e) {
-        e.preventDefault();
-        const spinner = document.getElementById('editModalSpinner');
-        spinner.style.display = 'inline-block';
-        const formData = new FormData(form);
-        let editData = {};
-        for (const [k,v] of formData.entries()) editData[k]=v;
+    // --- EDIT & DELETE Functionality ---
+    window.editStudent = async function(studentId) {
+        studentId = decodeURIComponent(studentId);
+        const stu = studentsData.find(s => (s.student_id || s._id || s.regNo) == studentId);
+        if (!stu) return alert('Student not found!');
+        openEditModal(stu);
+    };
+
+    window.deleteStudent = async function(studentId) {
+        studentId = decodeURIComponent(studentId);
+        if (!confirm('Are you sure you want to delete this student?')) return;
+        showTableSpinner(true);
         try {
-            const studentId = stu.student_id || stu._id || stu.regNo;
-            let res = await fetch(`${API_BASE_URL}/api/student/${encodeURIComponent(studentId)}`, {
-                method: "PUT",
-                headers: {
-                    'Content-Type': 'application/json'
-                    // No Authorization header
-                },
-                body: JSON.stringify(editData)
+            let res = await fetch(`${API_BASE_URL}/api/student/${studentId}`, {
+                method: "DELETE"
             });
             if (res.ok) {
-                alert('Student updated!');
-                Object.assign(stu, editData);
+                studentsData = studentsData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
+                filteredData = filteredData.filter(s => (s.student_id || s._id || s.regNo) != studentId);
                 renderStudentsTable();
-                closeEditModal();
+                renderStudentsStats();
+                alert('Student deleted!');
             } else {
-                let msg = 'Failed to update student.';
+                let msg = 'Failed to delete student.';
                 try {
                     const data = await res.json();
                     if (data.error) msg += ' ' + data.error;
@@ -557,25 +514,107 @@ function openEditModal(stu) {
         } catch (e) {
             alert('Network error.');
         } finally {
-            spinner.style.display = 'none';
+            showTableSpinner(false);
         }
     };
-    modal.style.display = "flex";
-}
-function closeEditModal() {
-    document.getElementById('editStudentModal').style.display = "none";
-}
 
-// Close modal on background click
-document.getElementById('editStudentModal').onclick = function(e) {
-    if (e.target === this) closeEditModal();
-};
+    function openEditModal(stu) {
+        const modal = document.getElementById('editStudentModal');
+        const form = document.getElementById('editStudentForm');
+        const fields = [
+            {label: 'Surname', name: 'surname', type: 'text', required:true},
+            {label: 'First Name', name: 'firstname', type: 'text', required:true},
+            {label: 'Other Names', name: 'othernames', type: 'text'},
+            {label: 'Gender', name: 'gender', type: 'text', required:true},
+            {label: 'DOB', name: 'dob', type: 'date', required:true},
+            {label: 'Nationality', name: 'nationality', type: 'text'},
+            {label: 'State of Origin', name: 'state', type: 'text'},
+            {label: 'LGA', name: 'lga', type: 'text'},
+            {label: 'Home Address', name: 'address', type: 'text'},
+            {label: 'Reg No', name: 'regNo', type: 'text', readonly:true},
+            {label: 'Scratch Card', name: 'scratchCard', type: 'text', readonly:true},
+            {label: 'Class', name: 'class', type: 'text', required:true},
+            {label: 'Class Arm', name: 'classArm', type: 'text'},
+            {label: 'Previous School', name: 'previousSchool', type: 'text'},
+            {label: 'Admission Date', name: 'admissionDate', type: 'date'},
+            {label: 'Academic Session', name: 'academicSession', type: 'text'},
+            {label: 'Parent Name', name: 'parentName', type: 'text', required:true},
+            {label: 'Parent Relationship', name: 'parentRelationship', type: 'text'},
+            {label: 'Parent Phone', name: 'parentPhone', type: 'text'},
+            {label: 'Parent Email', name: 'parentEmail', type: 'email'},
+            {label: 'Parent Address', name: 'parentAddress', type: 'text'},
+            {label: 'Parent Occupation', name: 'parentOccupation', type: 'text'},
+            {label: 'Student Email', name: 'studentEmail', type: 'email'},
+            {label: 'Student Phone', name: 'studentPhone', type: 'text'},
+            {label: 'Religion', name: 'religion', type: 'text'},
+            {label: 'Blood Group', name: 'bloodGroup', type: 'text'},
+            {label: 'Genotype', name: 'genotype', type: 'text'},
+            {label: 'Medical', name: 'medical', type: 'text'}
+        ];
+        const wrapper = document.getElementById('editFieldsWrapper');
+        wrapper.innerHTML = '';
+        fields.forEach(f => {
+            let val = stu[f.name] || '';
+            if (f.type === "date" && val) {
+                val = (new Date(val)).toISOString().slice(0,10);
+            }
+            wrapper.innerHTML += `
+                <div class="edit-form-row">
+                    <div style="flex:1">
+                        <label>${f.label}${f.required? ' *':''}</label>
+                        <input name="${f.name}" type="${f.type}" value="${val}" ${f.readonly?'readonly':''} ${f.required?'required':''} />
+                    </div>
+                </div>
+            `;
+        });
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            const spinner = document.getElementById('editModalSpinner');
+            spinner.style.display = 'inline-block';
+            const formData = new FormData(form);
+            let editData = {};
+            for (const [k,v] of formData.entries()) editData[k]=v;
+            try {
+                const studentId = stu.student_id || stu._id || stu.regNo;
+                let res = await fetch(`${API_BASE_URL}/api/student/${encodeURIComponent(studentId)}`, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(editData)
+                });
+                if (res.ok) {
+                    alert('Student updated!');
+                    Object.assign(stu, editData);
+                    renderStudentsTable();
+                    renderStudentsStats();
+                    closeEditModal();
+                } else {
+                    let msg = 'Failed to update student.';
+                    try {
+                        const data = await res.json();
+                        if (data.error) msg += ' ' + data.error;
+                    } catch(e){}
+                    alert(msg);
+                }
+            } catch (e) {
+                alert('Network error.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        };
+        modal.style.display = "flex";
+    }
+    function closeEditModal() {
+        document.getElementById('editStudentModal').style.display = "none";
+    }
+
+    document.getElementById('editStudentModal').onclick = function(e) {
+        if (e.target === this) closeEditModal();
+    };
     
-        // Initial fetch
     fetchStudents();
 
-
-    // --- DOWNLOAD ALL STUDENTS AS PDF FUNCTIONALITY ---
     window.downloadAllStudentsPDF = function() {
         if (!filteredData || filteredData.length === 0) {
             alert("No students to download.");
@@ -584,7 +623,6 @@ document.getElementById('editStudentModal').onclick = function(e) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-        // SCHOOL HEADER
         let y = 15;
         doc.setFontSize(20);
         doc.setTextColor(32, 201, 151);
@@ -605,23 +643,20 @@ document.getElementById('editStudentModal').onclick = function(e) {
         doc.setTextColor(44,62,80);
         doc.text("Students List", 148, y, { align: "center" });
 
-        // Table column headers
         y += 10;
         doc.setFontSize(11);
         doc.setFillColor(32, 201, 151);
         doc.setTextColor(255,255,255);
 
-        // New columns: Reg No, Student ID, Scratch Card
         const colTitles = ["S/N", "Full Name", "Email", "Phone", "Class", "Reg No", "Student ID", "Scratch Card"];
         const colWidths = [12, 50, 55, 32, 28, 32, 32, 34];
         let x = 10;
         colTitles.forEach((title, i) => {
-            doc.rect(x, y, colWidths[i], 8, 'F'); // filled cell
+            doc.rect(x, y, colWidths[i], 8, 'F');
             doc.text(title, x + 2, y + 6);
             x += colWidths[i];
         });
 
-        // Table rows
         y += 8;
         doc.setFontSize(10);
         doc.setTextColor(40, 40, 40);
@@ -630,7 +665,6 @@ document.getElementById('editStudentModal').onclick = function(e) {
         let serial = 1;
         filteredData.forEach((stu, idx) => {
             x = 10;
-            // Prevent overflow: new page if needed
             if (y + rowHeight > 200) {
                 doc.addPage();
                 y = 15;
@@ -655,7 +689,6 @@ document.getElementById('editStudentModal').onclick = function(e) {
             cells.forEach((cell, i) => {
                 doc.rect(x, y, colWidths[i], rowHeight);
                 let txt = String(cell || '');
-                // Truncate long fields for PDF
                 if (txt.length > 32 && i !== 0) txt = txt.substring(0,30) + '...';
                 doc.text(txt, x + 2, y + rowHeight - 2);
                 x += colWidths[i];
@@ -664,7 +697,6 @@ document.getElementById('editStudentModal').onclick = function(e) {
             serial++;
         });
 
-        // Footer
         let pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -673,7 +705,6 @@ document.getElementById('editStudentModal').onclick = function(e) {
             doc.text(`Page ${i} of ${pageCount}`, 292, 208, { align: "right" });
         }
 
-        // Download PDF
         doc.save("goldlinc_students_list.pdf");
     }
 

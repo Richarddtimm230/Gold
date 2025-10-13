@@ -312,7 +312,7 @@ router.get('/', async (req, res) => {
     if (directLookup) {
       students = await Student.find(query).limit(1);
     } else {
-      const pageSize = parseInt(req.query.pageSize) || 20;
+      const pageSize = parseInt(req.query.pageSize) || 20000;
       const sort = { surname: 1 };
       if (req.query.startAfter) {
         students = await Student.find({ ...query, surname: { $gt: req.query.startAfter } }).sort(sort).limit(pageSize);

@@ -733,7 +733,7 @@
         <section class="profile-section tab-content" id="tab-account">
           <div class="section-title"><i class="fa fa-user-shield"></i> Account & Security</div>
           <div class="account-actions-list">
-            <button class="account-action-btn" onclick="alert('Change password coming soon!')"><i class="fa fa-key"></i> Change Password</button>
+     <button class="account-action-btn" onclick="showPasswordModal()"><i class="fa fa-key"></i> Change Password</button>
             <button class="account-action-btn" onclick="alert('Update email coming soon!')"><i class="fa fa-envelope"></i> Update Email</button>
             <button class="account-action-btn" onclick="alert('Configure 2FA coming soon!')"><i class="fa fa-shield-alt"></i> 2FA Security</button>
             <button class="account-action-btn" onclick="alert('Download profile as PDF coming soon!')"><i class="fa fa-download"></i> Download Profile</button>
@@ -765,7 +765,21 @@
       </nav>
     </div>
   </div>
-
+<!-- Password Change Modal -->
+<div id="changePasswordModal" style="display:none; position:fixed; z-index:99999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:10px; box-shadow:0 2px 20px #2647a633; padding:28px 26px; max-width:340px; margin:auto; position:relative;">
+    <button onclick="closePasswordModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.3rem;color:#2647a6;cursor:pointer;"><i class="fa fa-times"></i></button>
+    <h3 style="margin-top:0;color:#2647a6;">Change Password</h3>
+    <div id="passChangeMsg" style="color:#e74c3c; margin-bottom:10px; font-size:0.99rem;"></div>
+    <form id="changePasswordForm" autocomplete="off">
+      <label style="font-weight:600;">Current Password</label>
+      <input type="password" name="oldPassword" required style="width:100%;margin-bottom:14px;padding:8px;border-radius:6px;border:1px solid #e3eefd;">
+      <label style="font-weight:600;">New Password</label>
+      <input type="password" name="newPassword" required minlength="6" style="width:100%;margin-bottom:14px;padding:8px;border-radius:6px;border:1px solid #e3eefd;">
+      <button type="submit" style="width:100%;background:#2647a6;color:#fff;padding:10px 0;border:none;border-radius:7px;font-weight:700;font-size:1rem;cursor:pointer;">Change Password</button>
+    </form>
+  </div>
+</div>
   <script>
     // Spinner overlay logic
 document.addEventListener('DOMContentLoaded', () => {
@@ -1034,7 +1048,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     }
+// Show/hide modal
+function showPasswordModal() {
+  document.getElementById("changePasswordModal").style.display = "flex";
+  document.getElementById("passChangeMsg").textContent = "";
+  document.getElementById("changePasswordForm").reset();
+}
+function closePasswordModal() {
+  document.getElementById("changePasswordModal").style.display = "none";
+}
 
+// Handle password change
+document.getElementById("changePasswordForm").onsubmit = async function(e) {
+  e.preventDefault();
+  const oldPassword = this.oldPassword.value;
+  const newPassword = this.newPassword.value;
+  const msgEl = document.getElementById("passChangeMsg");
+
+  msgEl.style.color = "#2647a6";
+  msgEl.textContent = "Processing...";
+  const token = getToken();
+  try {
+    const res = await fetch("https://goldlincschools.onrender.com/api/students/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      msgEl.style.color = "#18ba89";
+      msgEl.textContent = "Password changed successfully!";
+      setTimeout(closePasswordModal, 1500);
+    } else {
+      msgEl.style.color = "#e74c3c";
+      msgEl.textContent = data.error || "Failed to change password.";
+    }
+  } catch (err) {
+    msgEl.style.color = "#e74c3c";
+    msgEl.textContent = "Network error. Try again.";
+  }
+};
     // --- On page load ---
     document.addEventListener('DOMContentLoaded', () => {
       fillProfileFromBackend();

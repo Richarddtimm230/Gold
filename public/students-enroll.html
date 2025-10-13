@@ -180,14 +180,11 @@
             <div class="form-row">
               <div class="form-group" style="position: relative;">
                 <label>Password *</label>
-                <input type="password" name="password" id="password" required style="padding-right: 36px;" />
+                <input type="password" name="password" id="password" required style="padding-right: 36px;" readonly />
                 <span id="toggle-password" style="position:absolute;right:10px;top:40px;cursor:pointer;">
                   <i class="fa fa-eye" id="eye-icon"></i>
                 </span>
-                <div class="checkbox-inline">
-                  <input type="checkbox" id="auto-pass" />
-                  <label for="auto-pass">Auto Generate Password</label>
-                </div>
+                <!-- Auto Generate Password checkbox removed -->
               </div>
             </div>
           </div>
@@ -252,14 +249,6 @@
       }
     };
 
-    document.getElementById('auto-pass').onchange = function() {
-      document.getElementById('password').value = this.checked ? generatePassword() : '';
-    };
-
-    function generatePassword() {
-      return Math.random().toString(36).slice(-8) + Math.floor(Math.random() * 100);
-    }
-
     // Auto generate student email based on first name and surname
     document.getElementById('auto-email').onchange = function() {
       if (this.checked) {
@@ -275,9 +264,10 @@
         document.getElementById('studentEmail').readOnly = false;
         document.getElementById('studentEmail').value = '';
       }
+      updatePasswordFromEmail(); // Update password when email changes
     };
 
-    // If surname or firstname changes and auto-email is checked, update email
+    // If surname or firstname changes and auto-email is checked, update email and password
     function updateAutoEmail() {
       const autoEmail = document.getElementById('auto-email');
       if (autoEmail.checked) {
@@ -288,10 +278,20 @@
           email = firstname + surname + '@goldlincschools.com';
         }
         document.getElementById('studentEmail').value = email;
+        updatePasswordFromEmail();
       }
     }
     document.querySelector('input[name="surname"]').addEventListener('input', updateAutoEmail);
     document.querySelector('input[name="firstname"]').addEventListener('input', updateAutoEmail);
+
+    // Whenever studentEmail input changes, update password to match email
+    document.getElementById('studentEmail').addEventListener('input', updatePasswordFromEmail);
+    function updatePasswordFromEmail() {
+      const email = document.getElementById('studentEmail').value;
+      document.getElementById('password').value = email;
+    }
+
+    // Remove auto-pass password logic
 
     function validateStep(step) {
       const form = document.forms[0];

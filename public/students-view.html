@@ -258,9 +258,6 @@
             </form>
         </div>
     </div>
-
-    <button class="support-tab" aria-label="Open Support">Support</button>
-    <button class="eclass-fab" aria-label="Open e-Class">e-Class</button>
 <script>
     const API_BASE_URL = "https://goldlincschools.onrender.com";
 
@@ -357,7 +354,7 @@
             let pass = true;
             if (classVal && (stu.class !== classVal && (stu.class?.name !== classVal))) pass = false;
             if (classArmVal && stu.classArm && stu.classArm.toLowerCase() !== classArmVal) pass = false;
-            if (sessionVal && stu.academicSession !== sessionVal) pass = false;
+            if (sessionVal && (stu.academicSession || '').trim().toLowerCase() !== sessionVal.trim().toLowerCase()) pass = false;
             if (searchVal) {
                 const fields = [
                     stu.surname, stu.firstname, stu.othernames, stu.regNo,

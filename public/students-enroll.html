@@ -139,7 +139,11 @@
               <div class="form-group">
                 <label>Academic Session</label>
                 <select name="academicSession">
-                  <option>2027-2028</option><option>2026-2027</option><option>2025-2026</option><option>2024-2025</option><option>2023-2024</option>
+                  <option>2025-2026</option>
+                  <option>2027-2028</option>
+                  <option>2026-2027</option>
+                  <option>2024-2025</option>
+                  <option>2023-2024</option>
                 </select>
               </div>
             </div>
@@ -180,11 +184,14 @@
             <div class="form-row">
               <div class="form-group" style="position: relative;">
                 <label>Password *</label>
-                <input type="password" name="password" id="password" required style="padding-right: 36px;" readonly />
+                <input type="password" name="password" id="password" required style="padding-right: 36px;" />
                 <span id="toggle-password" style="position:absolute;right:10px;top:40px;cursor:pointer;">
                   <i class="fa fa-eye" id="eye-icon"></i>
                 </span>
-                <!-- Auto Generate Password checkbox removed -->
+                <div class="checkbox-inline">
+                  <input type="checkbox" id="auto-pass" />
+                  <label for="auto-pass">Use Email as Password</label>
+                </div>
               </div>
             </div>
           </div>
@@ -264,7 +271,10 @@
         document.getElementById('studentEmail').readOnly = false;
         document.getElementById('studentEmail').value = '';
       }
-      updatePasswordFromEmail(); // Update password when email changes
+      // If auto-pass is checked, update password as well
+      if (document.getElementById('auto-pass').checked) {
+        updatePasswordFromEmail();
+      }
     };
 
     // If surname or firstname changes and auto-email is checked, update email and password
@@ -278,26 +288,42 @@
           email = firstname + surname + '@goldlincschools.com';
         }
         document.getElementById('studentEmail').value = email;
-        updatePasswordFromEmail();
+        if (document.getElementById('auto-pass').checked) {
+          updatePasswordFromEmail();
+        }
       }
     }
     document.querySelector('input[name="surname"]').addEventListener('input', updateAutoEmail);
     document.querySelector('input[name="firstname"]').addEventListener('input', updateAutoEmail);
 
-    // Whenever studentEmail input changes, update password to match email
-    document.getElementById('studentEmail').addEventListener('input', updatePasswordFromEmail);
+    // Whenever studentEmail input changes, update password to match email if auto-pass is checked
+    document.getElementById('studentEmail').addEventListener('input', function() {
+      if (document.getElementById('auto-pass').checked) {
+        updatePasswordFromEmail();
+      }
+    });
+
+    // Handle auto-pass toggle
+    document.getElementById('auto-pass').onchange = function() {
+      if (this.checked) {
+        updatePasswordFromEmail();
+        document.getElementById('password').readOnly = true;
+      } else {
+        document.getElementById('password').value = '';
+        document.getElementById('password').readOnly = false;
+      }
+    };
+
     function updatePasswordFromEmail() {
       const email = document.getElementById('studentEmail').value;
       document.getElementById('password').value = email;
     }
 
-    // Remove auto-pass password logic
-
     function validateStep(step) {
       const form = document.forms[0];
       if (step === 1) return form.surname.value && form.firstname.value && form.dob.value && form.gender.value;
       if (step === 2) return form.regNo.value && form.scratchCard.value && form.class.value && form.parentName.value && form.parentRelationship.value && form.parentPhone.value;
-      if (step === 3) return form.studentEmail.value; // Make sure student email is required
+      if (step === 3) return form.studentEmail.value && form.password.value; // Make sure student email and password are required
       return true;
     }
 

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CBT Mock/Exam | Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Inter Font + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2647a6;
+      --bg: #f6f8fa;
+      --card: #fff;
+      --radius: 20px;
+      --shadow: 0 4px 32px 0 rgba(38,71,166,0.10);
+      --accent: #ddeaff;
+      --accent2: #e3eefd;
+      --text-main: #22305a;
+      --text-muted: #7a90b3;
+      --success: #18ba89;
+      --danger: #e74c3c;
+      --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      width: 100vw;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+    .cbt-root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 100vw;
+    }
+    .cbt-card {
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 42px 38px 38px 38px;
+      max-width: 430px;
+      width: 94vw;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      margin-top: 60px;
+    }
+    .cbt-icon {
+      font-size: 3.2rem;
+      color: var(--primary);
+      background: var(--accent2);
+      border-radius: 50%;
+      padding: 19px;
+      margin-bottom: 13px;
+      box-shadow: 0 2px 18px #ddeaff66;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 90px; height: 90px;
+    }
+    .cbt-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 6px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .cbt-message {
+      font-size: 1.09rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .cbt-note {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 3px;
+      margin-bottom: 0;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .cbt-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 13px 0;
+      width: 100%;
+      font-size: 1.13rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ddeaff73;
+      transition: background var(--transition), box-shadow var(--transition);
+      margin-top: 18px;
+      letter-spacing: 0.01em;
+    }
+    .cbt-btn:hover, .cbt-btn:focus-visible {
+      background: #18308b;
+      box-shadow: 0 4px 18px #ddeaff88;
+      outline: none;
+    }
+    @media (max-width: 600px) {
+      .cbt-card {
+        padding: 24px 7vw 28px 7vw;
+        margin-top: 30px;
+      }
+      .cbt-title { font-size: 1.18rem;}
+      .cbt-btn { font-size: 1.05rem;}
+      .cbt-icon { font-size: 2.2rem; width: 66px; height: 66px; padding: 10px;}
+    }
+    @media (max-width: 400px) {
+      .cbt-card { padding: 18px 3vw 18px 3vw;}
+    }
+  </style>
+</head>
+<body>
+  <div class="cbt-root">
+    <div class="cbt-card">
+      <div class="cbt-icon">
+        <i class="fa fa-laptop"></i>
+      </div>
+      <div class="cbt-title">CBT Mock/Exam</div>
+      <div class="cbt-message">
+        <strong>No exam is currently scheduled here.</strong><br>
+        Please visit the <span style="color:var(--primary);font-weight:600;">ICT unit</span> for any scheduled exams or mocks.
+      </div>
+      <div class="cbt-note">
+        For more details or clarifications about upcoming exams, kindly check with your class teacher or the ICT department.
+      </div>
+      <button class="cbt-btn" onclick="window.location.href='student-dashboard.html'"><i class="fa fa-arrow-left"></i> Back to Dashboard</button>
+    </div>
+  </div>
+</body>
+</html>

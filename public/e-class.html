@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>E-Class | Gold and Linc Schools</title>
+  <title>CBT Mock/Exam | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Fonts & Icons -->
+  <!-- Inter Font + FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
@@ -12,15 +12,14 @@
       --primary: #2647a6;
       --bg: #f6f8fa;
       --card: #fff;
-      --radius: 18px;
+      --radius: 20px;
       --shadow: 0 4px 32px 0 rgba(38,71,166,0.10);
-      --shadow-hover: 0 8px 44px 0 rgba(38,71,166,0.15);
       --accent: #ddeaff;
       --accent2: #e3eefd;
-      --danger: #e74c3c;
-      --success: #18ba89;
       --text-main: #22305a;
-      --text-muted: #a6b1d0;
+      --text-muted: #7a90b3;
+      --success: #18ba89;
+      --danger: #e74c3c;
       --transition: 0.18s cubic-bezier(.39,.58,.57,1.01);
     }
     html, body {
@@ -30,847 +29,118 @@
       color: var(--text-main);
       min-height: 100vh;
       width: 100vw;
-      overflow-x: hidden;
       box-sizing: border-box;
+      overflow-x: hidden;
     }
-    body { width: 100vw; }
-    .eclass-root {
+    .cbt-root {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      width: 100vw;
+      align-items: center;
+      justify-content: center;
       box-sizing: border-box;
+      width: 100vw;
     }
-    .eclass-main {
-      flex: 1;
-      max-width: 900px;
-      width: 100%;
+    .cbt-card {
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 42px 38px 38px 38px;
+      max-width: 430px;
+      width: 94vw;
       margin: 0 auto;
-      padding: 0 2vw 90px 2vw;
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      align-items: center;
+      gap: 22px;
+      margin-top: 60px;
     }
-    .eclass-header {
-      padding: 18px 0 0 0;
+    .cbt-icon {
+      font-size: 3.2rem;
+      color: var(--primary);
+      background: var(--accent2);
+      border-radius: 50%;
+      padding: 19px;
+      margin-bottom: 13px;
+      box-shadow: 0 2px 18px #ddeaff66;
       display: flex;
       align-items: center;
-      gap: 18px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      box-sizing: border-box;
+      justify-content: center;
+      width: 90px; height: 90px;
     }
-    .eclass-title {
-      font-size: 1.7rem;
+    .cbt-title {
+      font-size: 1.4rem;
       font-weight: 800;
       color: var(--primary);
-      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .cbt-message {
+      font-size: 1.09rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .cbt-note {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 3px;
       margin-bottom: 0;
-      margin-right: 12px;
-      flex: 1;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      text-align: center;
+      line-height: 1.4;
     }
-    .eclass-actions {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .eclass-actions button, .eclass-actions a {
+    .cbt-btn {
       background: var(--primary);
       color: #fff;
       border: none;
       border-radius: 9px;
-      padding: 9px 23px;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 13px 0;
+      width: 100%;
+      font-size: 1.13rem;
+      font-weight: 700;
       cursor: pointer;
       box-shadow: 0 2px 8px #ddeaff73;
       transition: background var(--transition), box-shadow var(--transition);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 7px;
+      margin-top: 18px;
+      letter-spacing: 0.01em;
     }
-    .eclass-actions button:hover, .eclass-actions a:hover {
+    .cbt-btn:hover, .cbt-btn:focus-visible {
       background: #18308b;
-    }
-    .eclass-section {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px 20px 20px 20px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .section-title {
-      font-size: 1.16rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 7px;
-      letter-spacing: 0.02em;
-    }
-    /* Class list/table */
-    .class-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 7px;
-      box-sizing: border-box;
-    }
-    .class-table th, .class-table td {
-      padding: 12px 8px;
-      text-align: left;
-      border-bottom: 1px solid #e3eefd;
-      font-size: 1.02rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 140px;
-      box-sizing: border-box;
-    }
-    .class-table th {
-      color: var(--primary);
-      background: var(--accent2);
-      font-weight: 600;
-    }
-    .class-table tr:last-child td {
-      border-bottom: none;
-    }
-    .status-live {
-      color: var(--success);
-      font-weight: bold;
-    }
-    .status-ended {
-      color: var(--danger);
-      font-weight: bold;
-    }
-    .status-upcoming {
-      color: #f39c12;
-      font-weight: bold;
-    }
-    .join-btn {
-      background: var(--success);
-      color: #fff;
-      border: none; border-radius: 6px;
-      padding: 7px 18px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 1px 4px #ddeaff70;
-      transition: background var(--transition);
-      font-size: 0.98rem;
-      margin-left: 4px;
-    }
-    .join-btn:active, .join-btn:hover {
-      background: #12ab7a;
-    }
-
-    /* Chat Section */
-    .chat-section {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 0 0 0 0;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 100vw;
-      box-sizing: border-box;
-      min-height: 410px;
-      height: 410px;
-      overflow: hidden;
-      position: relative;
-    }
-    .chat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background: var(--accent2);
-      border-radius: var(--radius) var(--radius) 0 0;
-      border-bottom: 1px solid #e3eefd;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--primary);
-    }
-    .chat-users-list {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      overflow-x: auto;
-      max-width: 60vw;
-    }
-    .chat-user-avatar {
-      width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #ddeaff;
-      border: 2px solid #e3eefd; cursor: pointer;
-      transition: border 0.15s;
-    }
-    .chat-user-avatar:hover {
-      border: 2px solid var(--primary);
-    }
-    .chat-messages {
-      flex: 1 1 auto;
-      overflow-y: auto;
-      padding: 19px 13px 10px 13px;
-      background: #f6f8fa;
-      min-height: 0;
-      box-sizing: border-box;
-      width: 100%;
-      max-width: 100vw;
-    }
-    .chat-message {
-      display: flex;
-      align-items: flex-end;
-      margin-bottom: 10px;
-      position: relative;
-      max-width: 95%;
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-    .chat-message.sent { flex-direction: row-reverse; }
-    .chat-message .chat-bubble {
-      background: #ddeaff;
-      color: #22305a;
-      border-radius: 12px 12px 3px 12px;
-      padding: 9px 14px;
-      margin: 0 8px;
-      max-width: 70vw;
-      min-width: 30px;
-      font-size: 1.02rem;
-      word-break: break-word;
-      transition: background 0.16s;
-      box-shadow: 0 1px 6px #ddeaff55;
-      position: relative;
-    }
-    .chat-message.sent .chat-bubble {
-      background: var(--primary);
-      color: #fff;
-      border-radius: 12px 12px 12px 3px;
-    }
-    .chat-message .chat-meta {
-      font-size: 0.83rem;
-      color: #a6b1d0;
-      margin: 0 6px;
-    }
-    .chat-message.tagged {
-      background: #fffbe8;
-    }
-    .chat-bubble .audio-msg {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-    .chat-bubble .audio-msg .fa-play {
-      font-size: 1.2rem;
-      color: var(--primary);
-      cursor: pointer;
-    }
-    .chat-bubble .attached-file {
-      display: flex; align-items: center; gap: 6px;
-      color: var(--primary);
-      font-size: 0.98rem;
-    }
-    .chat-bubble .tagged-ref {
-      background: #fff6c2;
-      color: #856404;
-      border-radius: 7px;
-      padding: 3px 7px;
-      margin-bottom: 5px;
-      font-size: 0.92rem;
-      display: inline-block;
-    }
-    .chat-input-panel {
-      display: flex;
-      align-items: center;
-      padding: 11px 10px;
-      border-top: 1px solid #e3eefd;
-      background: #f6f8fa;
-      gap: 10px;
-      width: 100%;
-      max-width: 100vw;
-    }
-    .chat-input {
-      flex: 1;
-      border-radius: 8px;
-      padding: 9px 12px;
-      border: 1.4px solid #dbe2ee;
-      background: #fff;
-      font-size: 1.02rem;
+      box-shadow: 0 4px 18px #ddeaff88;
       outline: none;
-      margin-right: 6px;
-      min-width: 0;
     }
-    .chat-action-btn {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-    .chat-action-btn:active, .chat-action-btn:hover {
-      background: #18308b;
-    }
-    .chat-upload-label, .chat-audio-label {
-      cursor: pointer;
-      margin: 0 6px;
-    }
-    .chat-upload-input, .chat-audio-input {
-      display: none;
-    }
-    /* Private chat modal */
-    .modal-overlay {
-      display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
-      background: rgba(20,40,100,0.16); z-index: 2000;
-      align-items: center; justify-content: center;
-      transition: opacity 0.18s;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 10px 40px #0c205d33;
-      max-width: 96vw; width: 420px;
-      padding: 30px 19px 25px 19px;
-      position: relative;
-      animation: fadeinup 0.3s;
-    }
-    .modal-close {
-      position: absolute;
-      top: 15px; right: 18px;
-      background: none;
-      border: none;
-      font-size: 1.2rem;
-      color: var(--danger);
-      cursor: pointer;
-    }
-    @keyframes fadeinup {
-      from { opacity: 0; transform: translateY(30px);}
-      to { opacity: 1; transform: none;}
-    }
-    /* Materials, Attendance, Settings, etc (same as before) */
-    .material-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; margin-bottom: 10px; }
-    .material-item { background: var(--accent2); border-radius: 8px; padding: 10px 13px; font-size: 0.99rem; color: var(--primary); display: flex; align-items: center; gap: 7px; box-shadow: 0 1px 5px #ddeaff60; margin-bottom: 3px; text-decoration: none; transition: background 0.1s; }
-    .material-item:hover { background: var(--accent);}
-    .attendance-summary { font-size: 1.07rem; color: var(--primary); font-weight: 600; margin-bottom: 7px; }
-    .attendance-records { max-height: 140px; overflow-y: auto; border-radius: 7px; background: var(--accent2); padding: 9px 7px; font-size: 0.99rem; box-shadow: 0 1px 4px #ddeaff60; margin-bottom: 7px; }
-    .attendance-record { padding: 3px 0; color: #3a4a80; border-bottom: 1px solid #e3eefd; }
-    .attendance-record:last-child { border-bottom: none; }
-    .settings-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
-    .settings-item { display: flex; justify-content: space-between; align-items: center; background: var(--accent2); border-radius: 8px; padding: 12px 16px; font-size: 1.05rem; color: var(--primary);}
-    .switch { position: relative; display: inline-block; width: 38px; height: 22px;}
-    .switch input { opacity: 0; width: 0; height: 0;}
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccd8ee; border-radius: 22px; transition: 0.2s;}
-    .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 2.5px; background: var(--primary); border-radius: 50%; transition: 0.2s;}
-    .switch input:checked + .slider { background: var(--accent);}
-    .switch input:checked + .slider:before { transform: translateX(15px); background: var(--success);}
-    @media (max-width: 650px) {
-      .eclass-main { padding: 0 2vw 90px 2vw; }
-      .eclass-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .eclass-title { font-size: 1.13rem;}
-      .eclass-section { padding: 16px 7px 14px 7px;}
-      .section-title { font-size: 1.01rem;}
-      .class-table th, .class-table td { font-size: 0.95rem; max-width: 90px;}
-      .modal-card { width: 97vw; max-width: 99vw; padding: 19px 3vw 17px 3vw;}
-      .chat-section { min-height: 300px; height: 320px;}
-      .chat-messages { max-width: 99vw;}
-      .chat-bubble { max-width: 80vw;}
-    }
-    @media (max-width: 430px) {
-      .eclass-main { padding: 0 0 80px 0; }
-      .eclass-section, .chat-section { padding: 10px 2vw 8px 2vw;}
-      .modal-card { padding: 10px 2vw 8px 2vw;}
-    }
-    @media (max-width: 700px) {
-      body { padding-bottom: 68px !important; }
-      .bottom-nav {
-        display: flex !important;
-        position: fixed;
-        left: 0; right: 0; bottom: 0;
-        width: 100vw; height: 53px;
-        background: var(--primary);
-        box-shadow: 0 -2px 12px #ddeaff;
-        z-index: 9999;
-        align-items: center;
-        justify-content: space-evenly;
-        border-radius: 18px 18px 0 0;
-        max-width: 100vw;
-        min-width: 0;
-        box-sizing: border-box;
+    @media (max-width: 600px) {
+      .cbt-card {
+        padding: 24px 7vw 28px 7vw;
+        margin-top: 30px;
       }
-      .bottom-nav-btn {
-        flex: 1;
-        background: none;
-        border: none;
-        outline: none;
-        color: #fff;
-        font-size: 1.33rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        opacity: 0.85;
-        transition: color var(--transition), opacity var(--transition);
-        height: 100%;
-        cursor: pointer;
-        min-width: 0;
-      }
-      .bottom-nav-btn.active, .bottom-nav-btn:active, .bottom-nav-btn:focus {
-        color: var(--accent2);
-        opacity: 1;
-      }
-      .bottom-nav-label {
-        font-size: 0.71rem;
-        margin-top: 1px;
-        color: #e4ecff;
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+      .cbt-title { font-size: 1.18rem;}
+      .cbt-btn { font-size: 1.05rem;}
+      .cbt-icon { font-size: 2.2rem; width: 66px; height: 66px; padding: 10px;}
+    }
+    @media (max-width: 400px) {
+      .cbt-card { padding: 18px 3vw 18px 3vw;}
     }
   </style>
 </head>
 <body>
-  <div class="eclass-root">
-    <!-- Header & Main Actions -->
-    <div class="eclass-header">
-      <div class="eclass-title">E-Classroom</div>
-      <div class="eclass-actions">
-        <button onclick="openScheduleModal()"><i class="fa fa-calendar"></i> My Timetable</button>
-        <button onclick="openSettingsModal()"><i class="fa fa-cog"></i> Settings</button>
-        <a href="dashboard.html"><i class="fa fa-arrow-left"></i> Dashboard</a>
-      </div>
-    </div>
-    <main class="eclass-main">
-      <!-- Live / Upcoming Classes Section -->
-      <section class="eclass-section">
-        <div class="section-title"><i class="fa fa-circle" style="color:#18ba89"></i> Live & Upcoming Classes</div>
-        <table class="class-table" id="classTable">
-          <thead>
-            <tr>
-              <th>Subject</th>
-              <th>Teacher</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- JS will populate -->
-          </tbody>
-        </table>
-      </section>
-      <!-- Subject Group Chat Section -->
-      <section class="chat-section" id="groupChatSection">
-        <div class="chat-header">
-          Class Group Chat
-          <div class="chat-users-list" id="chatUsers">
-            <!-- Avatars -->
-          </div>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <form class="chat-input-panel" onsubmit="return sendMessage(event)">
-          <label class="chat-audio-label" title="Send Audio">
-            <input type="file" class="chat-audio-input" accept="audio/*" onchange="uploadAudio(event)">
-            <i class="fa fa-microphone"></i>
-          </label>
-          <label class="chat-upload-label" title="Upload File">
-            <input type="file" class="chat-upload-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4,.mp3" onchange="uploadFile(event)">
-            <i class="fa fa-paperclip"></i>
-          </label>
-          <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." autocomplete="off">
-          <button class="chat-action-btn" type="submit"><i class="fa fa-paper-plane"></i></button>
-        </form>
-      </section>
-      <!-- Class Materials Section -->
-      <section class="eclass-section">
-        <div class="section-title"><i class="fa fa-book"></i> Class Materials & Resources</div>
-        <div class="material-list" id="materialList">
-          <!-- JS will populate -->
-        </div>
-      </section>
-      <!-- Attendance Section -->
-      <section class="eclass-section">
-        <div class="section-title"><i class="fa fa-user-check"></i> Attendance</div>
-        <div class="attendance-summary" id="attendanceSummary"></div>
-        <div class="attendance-records" id="attendanceRecords"></div>
-      </section>
-    </main>
-
-    <!-- Schedule Modal -->
-    <div class="modal-overlay" id="scheduleModal">
-      <div class="modal-card">
-        <button class="modal-close" onclick="closeModal('scheduleModal')"><i class="fa fa-times"></i></button>
-        <div class="section-title"><i class="fa fa-calendar"></i> My Timetable</div>
-        <div id="scheduleContent">Loading...</div>
-      </div>
-    </div>
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal">
-      <div class="modal-card">
-        <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fa fa-times"></i></button>
-        <div class="section-title"><i class="fa fa-cog"></i> E-Class Settings</div>
-        <div class="settings-list">
-          <div class="settings-item">
-            Notifications
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="settings-item">
-            Join Classes with Audio Only
-            <label class="switch">
-              <input type="checkbox">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="settings-item">
-            Dark Mode
-            <label class="switch">
-              <input type="checkbox" onchange="toggleDarkMode(this)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Private Chat Modal -->
-    <div class="modal-overlay" id="privateChatModal">
-      <div class="modal-card" style="width:98vw;max-width:430px;">
-        <button class="modal-close" onclick="closeModal('privateChatModal')"><i class="fa fa-times"></i></button>
-        <div class="section-title" id="privateChatTitle"><i class="fa fa-user"></i> Private Chat</div>
-        <div class="chat-messages" id="privateChatMessages" style="height:220px;min-height:150px;"></div>
-        <form class="chat-input-panel" onsubmit="return sendPrivateMessage(event)">
-          <input type="text" class="chat-input" id="privateChatInput" placeholder="Type a message..." autocomplete="off">
-          <button class="chat-action-btn" type="submit"><i class="fa fa-paper-plane"></i></button>
-        </form>
-      </div>
-    </div>
-    <!-- Sticky Bottom Nav (matches dashboard) -->
-    <nav class="bottom-nav">
-      <button class="bottom-nav-btn" title="Home" onclick="window.location.href='dashboard.html'">
-        <i class="fa fa-home"></i>
-        <div class="bottom-nav-label">Home</div>
-      </button>
-      <button class="bottom-nav-btn active" title="E-Class" onclick="window.location.href='e-class.html'">
+  <div class="cbt-root">
+    <div class="cbt-card">
+      <div class="cbt-icon">
         <i class="fa fa-laptop"></i>
-        <div class="bottom-nav-label">E-Class</div>
-      </button>
-      <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
-        <i class="fa fa-file-alt"></i>
-        <div class="bottom-nav-label">Tasks</div>
-      </button>
-      <button class="bottom-nav-btn" title="Fees" onclick="window.location.href='fees.html'">
-        <i class="fa fa-wallet"></i>
-        <div class="bottom-nav-label">Fees</div>
-      </button>
-      <button class="bottom-nav-btn" title="Profile" onclick="window.location.href='profile.html'">
-        <i class="fa fa-user"></i>
-        <div class="bottom-nav-label">Me</div>
-      </button>
-    </nav>
+      </div>
+      <div class="cbt-title">CBT Mock/Exam</div>
+      <div class="cbt-message">
+        <strong>No exam is currently scheduled here.</strong><br>
+        Please visit the <span style="color:var(--primary);font-weight:600;">ICT unit</span> for any scheduled exams or mocks.
+      </div>
+      <div class="cbt-note">
+        For more details or clarifications about upcoming exams, kindly check with your class teacher or the ICT department.
+      </div>
+      <button class="cbt-btn" onclick="window.location.href='student-dashboard.html'"><i class="fa fa-arrow-left"></i> Back to Dashboard</button>
+    </div>
   </div>
-  <script>
-    // Dummy data for demonstration
-    const demoClasses = [
-      {subject: "Mathematics", teacher: "Mr. Okoro", time: "09:00 - 10:30", status: "live", url: "#"},
-      {subject: "English", teacher: "Mrs. Adeleke", time: "11:00 - 12:30", status: "upcoming", url: "#"},
-      {subject: "Biology", teacher: "Mr. Bashir", time: "13:00 - 14:30", status: "ended", url: "#"},
-    ];
-    const demoMaterials = [
-      {icon: "fa-file-pdf", text: "Maths Notes (PDF)", url: "#"},
-      {icon: "fa-link", text: "Recorded Biology Class", url: "#"},
-      {icon: "fa-file-word", text: "English Assignment", url: "#"},
-      {icon: "fa-file-powerpoint", text: "Biology Slides", url: "#"},
-    ];
-    const demoAttendance = [
-      {date: "2025-06-02", status: "Present"},
-      {date: "2025-06-03", status: "Present"},
-      {date: "2025-06-04", status: "Absent"},
-      {date: "2025-06-05", status: "Present"},
-    ];
-    const demoSchedule = [
-      {day: "Monday", classes: [ {time: "09:00", subject: "Mathematics"}, {time: "11:00", subject: "English"} ]},
-      {day: "Tuesday", classes: [ {time: "10:00", subject: "Biology"} ]},
-      {day: "Wednesday", classes: [ {time: "09:00", subject: "Chemistry"}, {time: "12:00", subject: "Physics"} ]},
-      {day: "Thursday", classes: [ {time: "10:00", subject: "English"} ]},
-      {day: "Friday", classes: [ {time: "09:00", subject: "Mathematics"} ]}
-    ];
-    const demoUsers = [
-      {id: 1, name: "Janet", avatar: "https://ui-avatars.com/api/?name=Janet&background=2647a6&color=fff"},
-      {id: 2, name: "Ali", avatar: "https://ui-avatars.com/api/?name=Ali&background=2647a6&color=fff"},
-      {id: 3, name: "Blessing", avatar: "https://ui-avatars.com/api/?name=Blessing&background=2647a6&color=fff"},
-      {id: 4, name: "Teacher", avatar: "https://ui-avatars.com/api/?name=Teacher&background=2647a6&color=fff"}
-    ];
-    // Demo group chat messages
-    let demoGroupMessages = [
-      {id: 1, userId: 1, name: "Janet", time: "09:10", text: "Good morning everyone! 😊"},
-      {id: 2, userId: 2, name: "Ali", time: "09:11", text: "Morning Janet!", audio: null, file: null},
-      {id: 3, userId: 3, name: "Blessing", time: "09:12", text: "Please, where do I find the Maths notes?", file: null, audio: null},
-      {id: 4, userId: 4, name: "Teacher", time: "09:13", text: "Check the materials section. I'll upload the new one after class.", file: null, audio: null}
-    ];
-    let taggedMessage = null;
-
-    // Demo private chat store (per user)
-    let demoPrivateChats = {
-      2: [{from: 1, to: 2, time: "09:15", text: "Hi Ali, can you help with homework?"}]
-    };
-    let privateChatUser = null;
-
-    // Populate classes table
-    function populateClasses() {
-      const tbody = document.querySelector("#classTable tbody");
-      tbody.innerHTML = "";
-      demoClasses.forEach(cls => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${cls.subject}</td>
-          <td>${cls.teacher}</td>
-          <td>${cls.time}</td>
-          <td>
-            <span class="status-${cls.status}">
-              ${cls.status.charAt(0).toUpperCase() + cls.status.slice(1)}
-            </span>
-          </td>
-          <td>
-            ${cls.status === "live" ? `<button class="join-btn" onclick="alert('Joining class...')"><i class='fa fa-sign-in-alt'></i> Join Now</button>` : 
-              (cls.status === "upcoming" ? `<button class="join-btn" style="background:#f39c12;" onclick="alert('Class not started yet!')"><i class='fa fa-clock'></i> Not Started</button>` : 
-              `<button class="join-btn" style="background:#aaa;" disabled><i class='fa fa-times'></i> Ended</button>`)}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-    // Populate materials
-    function populateMaterials() {
-      const list = document.getElementById("materialList");
-      list.innerHTML = "";
-      demoMaterials.forEach(mat => {
-        const a = document.createElement("a");
-        a.className = "material-item";
-        a.href = mat.url;
-        a.target = "_blank";
-        a.innerHTML = `<i class="fa ${mat.icon}"></i> ${mat.text}`;
-        list.appendChild(a);
-      });
-    }
-    // Populate attendance
-    function populateAttendance() {
-      const summary = document.getElementById("attendanceSummary");
-      const records = document.getElementById("attendanceRecords");
-      let present = demoAttendance.filter(a => a.status === "Present").length;
-      summary.textContent = `Present: ${present} / ${demoAttendance.length} days`;
-      records.innerHTML = demoAttendance.map(a =>
-        `<div class="attendance-record">
-          ${a.date}: <span style="color:${a.status === "Present" ? "green" : "red"};font-weight:600">${a.status}</span>
-        </div>`).join("");
-    }
-    // Schedule modal
-    function openScheduleModal() {
-      document.getElementById("scheduleModal").classList.add("active");
-      const el = document.getElementById("scheduleContent");
-      el.innerHTML = demoSchedule.map(day =>
-        `<div style="margin-bottom:9px;"><b>${day.day}</b>: ` +
-        day.classes.map(cls => `<span style="margin-right:11px;"><i class='fa fa-clock'></i> ${cls.time} - ${cls.subject}</span>`).join("") +
-        `</div>`
-      ).join("");
-    }
-    function openSettingsModal() {
-      document.getElementById("settingsModal").classList.add("active");
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove("active");
-    }
-    // Dark mode toggle
-    function toggleDarkMode(cb) {
-      if (cb.checked) {
-        document.body.style.background = "#181b2d";
-        document.body.style.color = "#fff";
-        document.querySelectorAll('.eclass-section, .modal-card, .news-card').forEach(el => {
-          el.style.background = "#23284b";
-          el.style.color = "#fff";
-        });
-      } else {
-        document.body.style.background = "var(--bg)";
-        document.body.style.color = "var(--text-main)";
-        document.querySelectorAll('.eclass-section, .modal-card, .news-card').forEach(el => {
-          el.style.background = "";
-          el.style.color = "";
-        });
-      }
-    }
-    // Show sticky bottom nav on mobile
-    function showBottomNav() {
-      if (window.innerWidth <= 700) {
-        document.querySelector('.bottom-nav').style.display = 'flex';
-      } else {
-        document.querySelector('.bottom-nav').style.display = 'none';
-      }
-    }
-    window.addEventListener('resize', showBottomNav);
-    showBottomNav();
-
-    // ===== Chat UI Logic =====
-    function myUserId() { return 1; }
-    function getUserById(id) { return demoUsers.find(u => u.id === id) || demoUsers[0]; }
-    function renderChatUsers() {
-      const el = document.getElementById("chatUsers");
-      el.innerHTML = "";
-      demoUsers.forEach(u => {
-        const img = document.createElement("img");
-        img.className = "chat-user-avatar";
-        img.src = u.avatar;
-        img.title = u.name;
-        img.onclick = () => openPrivateChat(u.id, u.name);
-        el.appendChild(img);
-      });
-    }
-    function renderChatMessages() {
-      const el = document.getElementById("chatMessages");
-      el.innerHTML = "";
-      demoGroupMessages.forEach((msg, i) => {
-        const div = document.createElement("div");
-        div.className = "chat-message" + (msg.userId === myUserId() ? " sent" : "") + (msg.id === taggedMessage ? " tagged" : "");
-        // Swipe-to-tag (WhatsApp style)
-        let startX;
-        div.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; });
-        div.addEventListener('touchmove', function(e) {
-          if (!startX) return;
-          let dx = e.touches[0].clientX - startX;
-          if (Math.abs(dx) > 60) {
-            tagMessage(msg.id);
-            startX = null;
-          }
-        });
-        div.onclick = function(e) {
-          if (e.detail === 2) tagMessage(msg.id);
-        };
-        let taggedRef = msg.tagged ? `<div class="tagged-ref">@${msg.tagged.name}: ${msg.tagged.text}</div>` : "";
-        div.innerHTML = `
-          <div class="chat-bubble">
-            ${taggedRef}
-            ${msg.audio ? `<div class="audio-msg"><i class="fa fa-play"></i><audio src="${msg.audio}" controls style="display:none"></audio>Audio Message</div>` : ""}
-            ${msg.file ? `<div class="attached-file"><i class="fa fa-paperclip"></i> <a href="${msg.file}" target="_blank">File</a></div>` : ""}
-            ${msg.text}
-          </div>
-          <div class="chat-meta">${getUserById(msg.userId).name} • ${msg.time}</div>
-        `;
-        el.appendChild(div);
-      });
-      el.scrollTop = el.scrollHeight;
-    }
-    function tagMessage(id) {
-      taggedMessage = id;
-      renderChatMessages();
-    }
-    function sendMessage(e) {
-      e.preventDefault();
-      const input = document.getElementById("chatInput");
-      let text = input.value.trim();
-      if (!text && !pendingAudio && !pendingFile) return false;
-      let msgObj = {
-        id: demoGroupMessages.length + 1,
-        userId: myUserId(),
-        name: getUserById(myUserId()).name,
-        time: new Date().toLocaleTimeString().slice(0,5),
-        text: text,
-      };
-      if (taggedMessage) {
-        let taggedMsg = demoGroupMessages.find(m => m.id === taggedMessage);
-        if (taggedMsg) msgObj.tagged = {name: getUserById(taggedMsg.userId).name, text: taggedMsg.text};
-        taggedMessage = null;
-      }
-      if (pendingAudio) {
-        msgObj.audio = pendingAudio;
-        pendingAudio = null;
-      }
-      if (pendingFile) {
-        msgObj.file = pendingFile;
-        pendingFile = null;
-      }
-      demoGroupMessages.push(msgObj);
-      input.value = "";
-      renderChatMessages();
-      return false;
-    }
-    // Audio/file upload
-    let pendingAudio = null, pendingFile = null;
-    function uploadAudio(event) {
-      const file = event.target.files[0];
-      if (file) {
-        pendingAudio = URL.createObjectURL(file);
-        document.getElementById("chatInput").value = "[Audio message ready]";
-      }
-    }
-    function uploadFile(event) {
-      const file = event.target.files[0];
-      if (file) {
-        pendingFile = URL.createObjectURL(file);
-        document.getElementById("chatInput").value = "[File ready]";
-      }
-    }
-    // Private chat
-    function openPrivateChat(userId, userName) {
-      privateChatUser = userId;
-      document.getElementById("privateChatModal").classList.add("active");
-      document.getElementById("privateChatTitle").innerHTML = `<i class="fa fa-user"></i> Chat with ${userName}`;
-      renderPrivateChat();
-    }
-    function renderPrivateChat() {
-      const msgs = demoPrivateChats[privateChatUser] || [];
-      const el = document.getElementById("privateChatMessages");
-      el.innerHTML = "";
-      msgs.forEach(msg => {
-        const div = document.createElement("div");
-        div.className = "chat-message" + (msg.from === myUserId() ? " sent" : "");
-        div.innerHTML = `
-          <div class="chat-bubble">${msg.text}</div>
-          <div class="chat-meta">${getUserById(msg.from).name} • ${msg.time}</div>
-        `;
-        el.appendChild(div);
-      });
-      el.scrollTop = el.scrollHeight;
-    }
-    function sendPrivateMessage(e) {
-      e.preventDefault();
-      const input = document.getElementById("privateChatInput");
-      let text = input.value.trim();
-      if (!text) return false;
-      let msgObj = {
-        from: myUserId(),
-        to: privateChatUser,
-        time: new Date().toLocaleTimeString().slice(0,5),
-        text: text
-      };
-      if (!demoPrivateChats[privateChatUser]) demoPrivateChats[privateChatUser] = [];
-      demoPrivateChats[privateChatUser].push(msgObj);
-      input.value = "";
-      renderPrivateChat();
-      return false;
-    }
-
-    // Run on load
-    populateClasses();
-    populateMaterials();
-    populateAttendance();
-    renderChatUsers();
-    renderChatMessages();
-  </script>
 </body>
 </html>

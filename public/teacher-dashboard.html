@@ -238,6 +238,41 @@
     </div>
   </main>
 </div>
+
+  <style>
+    /* Spinner overlay styles */
+    #dashboardSpinnerOverlay {
+      position: fixed;
+      z-index: 99999;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s;
+    }
+    #dashboardSpinnerOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .dashboard-spinner {
+      border: 6px solid #ddeaff;
+      border-top: 6px solid #2647a6;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: dashboard-spin 1s linear infinite;
+    }
+    @keyframes dashboard-spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+  <!-- Spinner overlay -->
+  <div id="dashboardSpinnerOverlay">
+    <div class="dashboard-spinner"></div>
+  </div>
+  
 <script src="teachers.js"></script>
 </body>
 </html>

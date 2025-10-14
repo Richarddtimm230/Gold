@@ -25,7 +25,16 @@ router.get('/', async (req, res) => {
     finishedAt: r.finishedAt
   })));
 });
-
+// DELETE /api/results/:id - Delete a CBT result
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Result.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Result not found.' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // POST /api/result - Save a new CBT result
 router.post('/', async (req, res) => {
   try {

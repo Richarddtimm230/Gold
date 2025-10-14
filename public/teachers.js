@@ -46,35 +46,37 @@ async function fetchTeacherCBTs() {
   } catch { return []; }
 }
 async function fetchAndSetup() {
-  teacher = await fetchTeacherProfile();
-  if (!teacher) {
-    hideDashboardSpinner();
-    return alert("Failed to load teacher profile.");
+  try {
+    teacher = await fetchTeacherProfile();
+    if (!teacher) throw new Error("Failed to load teacher profile.");
+
+    document.querySelector('.profile-section strong').textContent = teacher.name;
+    document.querySelector('.profile-section small').textContent = teacher.designation || '';
+    document.querySelector('header h1').textContent = `Welcome, ${teacher.name}`;
+    document.querySelector('.avatar').textContent = (teacher.name || '').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+    teacher.classes = await fetchTeacherClasses();
+    notifications = await fetchTeacherNotifications();
+
+    studentsByClass = {};
+    subjectsByClass = {};
+    for (const cls of teacher.classes) {
+      studentsByClass[cls.id] = await fetchStudentsByClass(cls.id);
+      subjectsByClass[cls.id] = await fetchSubjectsByClass(cls.id);
+    }
+
+    assignments = await fetchAssignments() || [];
+    draftResults = await fetchDraftResults() || [];
+
+    renderClassesList();
+    renderStudentsBlock();
+    renderSubjectsBlock();
+    showAddSubjectBlock();
+  } catch (err) {
+    alert(err.message || "Dashboard failed to load.");
+  } finally {
+    hideDashboardSpinner(); // <-- ALWAYS hide spinner
   }
-  document.querySelector('.profile-section strong').textContent = teacher.name;
-  document.querySelector('.profile-section small').textContent = teacher.designation || '';
-  document.querySelector('header h1').textContent = `Welcome, ${teacher.name}`;
-  document.querySelector('.avatar').textContent = (teacher.name || '').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-
-  teacher.classes = await fetchTeacherClasses();
-  notifications = await fetchTeacherNotifications();
-
-  studentsByClass = {};
-  subjectsByClass = {};
-  for (const cls of teacher.classes) {
-    studentsByClass[cls.id] = await fetchStudentsByClass(cls.id);
-    subjectsByClass[cls.id] = await fetchSubjectsByClass(cls.id);
-  }
-
-  assignments = await fetchAssignments() || [];
-  draftResults = await fetchDraftResults() || [];
-
-  renderClassesList();
-  renderStudentsBlock();
-  renderSubjectsBlock();
-  showAddSubjectBlock();
-
-  hideDashboardSpinner();
 }
 function populateAssignmentCBTs() {
   const cbtSel = document.getElementById('assignment-cbt');

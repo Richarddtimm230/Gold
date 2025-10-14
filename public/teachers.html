@@ -314,6 +314,73 @@
       reader.readAsDataURL(file);
     };
 
+  // Utility to clean up and slugify full name for email
+  function slugifyName(fullName) {
+    return fullName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // remove special chars
+      .replace(/\s+/g, '');        // remove spaces
+  }
+
+  // Form fields
+  const firstNameInput = document.querySelector('input[name="first_name"]');
+  const lastNameInput = document.querySelector('input[name="last_name"]');
+  const otherNamesInput = document.querySelector('input[name="other_names"]');
+  const loginEmailInput = document.querySelector('input[name="login_email"]');
+  const loginPasswordInput = document.querySelector('input[name="login_password"]');
+
+  // State trackers
+  let emailManuallyEdited = false;
+  let passwordManuallyEdited = false;
+
+  // Listen to name changes for auto email generation
+  function handleNameChange() {
+    if (emailManuallyEdited) return;
+    const fullName =
+      (firstNameInput.value.trim() + " " +
+      otherNamesInput.value.trim() + " " +
+      lastNameInput.value.trim()).replace(/\s+/g, ' ').trim();
+    const base = slugifyName(fullName);
+    const generatedEmail = base ? (base + "@goldlincschools.com") : "";
+    loginEmailInput.value = generatedEmail;
+    // Also set password if not manually edited
+    if (!passwordManuallyEdited) {
+      loginPasswordInput.value = generatedEmail;
+    }
+  }
+
+  firstNameInput.addEventListener('input', handleNameChange);
+  lastNameInput.addEventListener('input', handleNameChange);
+  otherNamesInput.addEventListener('input', handleNameChange);
+
+  // Listen for manual email edit
+  loginEmailInput.addEventListener('input', function() {
+    emailManuallyEdited = true;
+    if (!passwordManuallyEdited) {
+      loginPasswordInput.value = loginEmailInput.value;
+    }
+  });
+
+  loginEmailInput.addEventListener('change', function() {
+    // If matches auto-generated, allow further auto, else lock
+    const fullName =
+      (firstNameInput.value.trim() + " " +
+      otherNamesInput.value.trim() + " " +
+      lastNameInput.value.trim()).replace(/\s+/g, ' ').trim();
+    const base = slugifyName(fullName);
+    const generatedEmail = base ? (base + "@goldlincschools.com") : "";
+    emailManuallyEdited = (loginEmailInput.value !== generatedEmail);
+  });
+
+  // Listen for manual password edit
+  loginPasswordInput.addEventListener('input', function() {
+    passwordManuallyEdited = true;
+  });
+
+  loginPasswordInput.addEventListener('change', function() {
+    passwordManuallyEdited = true;
+  });
+
     // Staff enrollment form submission
     document.getElementById('staffEnrollForm').onsubmit = async function(e) {
       e.preventDefault();

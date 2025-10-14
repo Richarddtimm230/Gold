@@ -12,7 +12,24 @@ const CBTMockResult = require('../models/CBTMockResult');
 
 const Staff = require('../models/Staff');
 const Subject = require('../models/Subject');
+router.delete('/subjects/:id', adminAuth, async (req, res) => {
+  const subject = await Subject.findByIdAndDelete(req.params.id);
+  if (!subject) return res.status(404).json({ error: "Subject not found" });
+  res.json({ success: true });
+});
+router.delete('/classes/:classId/subjects/:subjectId', adminAuth, async (req, res) => {
+  const { classId, subjectId } = req.params;
+  let cls = await Class.findById(classId);
+  if (!cls) return res.status(404).json({ error: "Class not found" });
 
+  const initialCount = cls.subjects.length;
+  cls.subjects = cls.subjects.filter(s => String(s.subject) !== String(subjectId));
+  if (cls.subjects.length === initialCount) {
+    return res.status(404).json({ error: "Subject not assigned to this class" });
+  }
+  await cls.save();
+  res.json({ success: true });
+});
 // Add a new subject to a class and assign to a teacher
 router.post('/classes/:classId/subjects', adminAuth, async (req, res) => {
   const { classId } = req.params;

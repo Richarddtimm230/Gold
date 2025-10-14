@@ -102,7 +102,7 @@ async function loadClasses() {
 }
 loadClasses();
 window.deleteClass = async function(id, btn) {
-  if (!confirm("Delete this class?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`${API_BASE}/classes/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
@@ -188,7 +188,7 @@ async function loadSessions() {
 }
   loadSessions();
 window.deleteSession = async function(id, btn) {
-  if (!confirm("Delete this session?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`${API_BASE}/sessions/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
@@ -258,7 +258,7 @@ async function loadTerms() {
 }
 loadTerms();
 window.deleteTerm = async function(id, btn) {
-  if (!confirm("Delete this term?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`${API_BASE}/terms/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
@@ -336,7 +336,7 @@ async function loadExamSchedules() {
 }
 loadExamSchedules();
 window.deleteExamSchedule = async function(id, btn) {
-  if (!confirm("Delete this exam schedule?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`${API_BASE}/exams/schedules/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
@@ -470,7 +470,7 @@ async function loadCBTs() {
 }
 loadCBTs();
 window.deleteCBT = async function(id, btn) {
-  if (!confirm("Delete this CBT/mock?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`${API_BASE}/cbt/mocks/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
@@ -649,7 +649,7 @@ pushCBTModalForm.onsubmit = async function(e) {
   }
 };
 window.deleteCBTResult = async function(id, btn) {
-  if (!confirm("Delete this CBT result?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     // For CBT results - adjust the endpoint if your API differs
@@ -719,7 +719,7 @@ window.viewSubject = function(id) {
   // Implement modal or details view if needed
 };
 window.deleteSubject = async function(id, btn) {
-  if (!confirm("Delete this subject?")) return;
+  // No confirmation, delete immediately
   btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
   try {
     const res = await fetch(`https://goldlincschools.onrender.com/api/academics/subjects/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });

@@ -126,7 +126,18 @@ router.post('/classes', adminAuth, async (req, res) => {
   });
 });
 router.get('/classes', adminAuth, async (req, res) => {
-  const classes = await Class.find().populate('teachers');
+  // Use deep populate to get subject and teacher details
+  const classes = await Class.find()
+    .populate('teachers')
+    .populate({
+      path: 'subjects.subject', // populate the subject field inside subjects array
+      model: 'Subject'
+    })
+    .populate({
+      path: 'subjects.teacher',
+      model: 'Staff'
+    });
+
   res.json(classes.map(c => ({
     _id: c._id,
     name: c.name,
@@ -137,7 +148,7 @@ router.get('/classes', adminAuth, async (req, res) => {
       last_name: t.last_name,
       email: t.email
     })),
-    subjects: c.subjects
+    subjects: c.subjects // now includes populated subject and teacher objects
   })));
 });
 router.get('/sessions', adminAuth, async (req, res) => {

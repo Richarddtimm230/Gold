@@ -675,6 +675,69 @@ window.deleteCBTResult = async function(id, btn) {
     btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>';
   }
 };
+// --- Render Uploaded Subjects ---
+async function loadUploadedSubjects() {
+  const tbody = document.getElementById('uploadedSubjectsTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Loading...</td></tr>';
+  try {
+    // Adjust endpoint if needed for your API
+    const res = await fetch("https://goldlincschools.onrender.com/api/academics/classes", { headers: { Authorization: "Bearer " + token } });
+    const classes = await res.json();
+    let rows = [];
+    classes.forEach(cls => {
+      if (Array.isArray(cls.subjects)) {
+        cls.subjects.forEach(subj => {
+          rows.push(`
+            <tr>
+              <td class="py-2 px-3">${subj.name || '-'}</td>
+              <td class="py-2 px-3">${cls.name || '-'}</td>
+              <td class="py-2 px-3">${subj.teacher ? (subj.teacher.name || `${subj.teacher.first_name || ''} ${subj.teacher.last_name || ''}`) : '-'}</td>
+              <td class="py-2 px-3">${subj.uploadedAt ? new Date(subj.uploadedAt).toLocaleDateString() : '-'}</td>
+              <td class="py-2 px-3">
+                <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" title="View" onclick="viewSubject('${subj._id}')"><i class="fa fa-eye"></i></button>
+                <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" title="Delete" onclick="deleteSubject('${subj._id}', this)"><i class="fa fa-trash"></i></button>
+              </td>
+            </tr>
+          `);
+        });
+      }
+    });
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">No subjects uploaded.</td></tr>';
+    } else {
+      tbody.innerHTML = rows.join('');
+    }
+  } catch {
+    tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="5">Error loading uploaded subjects.</td></tr>';
+  }
+}
+
+// Optional: Subject view/delete handlers
+window.viewSubject = function(id) {
+  alert("Subject details for " + id);
+  // Implement modal or details view if needed
+};
+window.deleteSubject = async function(id, btn) {
+  if (!confirm("Delete this subject?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    const res = await fetch(`https://goldlincschools.onrender.com/api/academics/subjects/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (res.ok) loadUploadedSubjects();
+    else alert("Failed to delete.");
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>';
+  }
+};
+
+// Show tab logic (add loadUploadedSubjects when showing "subjects" tab)
+function showTab(tab) {
+  document.querySelectorAll('.tablist button').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.section-card').forEach(sec => sec.classList.toggle('hidden', sec.dataset.section !== tab));
+  document.querySelectorAll('.sidebar nav a').forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tab));
+  // Load uploaded subjects when entering the subjects tab
+  if (tab === "subjects") loadUploadedSubjects();
+}
 window.editSession = editSession;
 window.editTerm = editTerm;
 window.editExamSchedule = editExamSchedule;

@@ -532,19 +532,16 @@ async function fillPushCBTTermDropdown() {
 
 async function loadResults(filter = {}) {
   const tbody = document.getElementById('resultsTableBody');
-  tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="7">Loading...</td></tr>';
   try {
     let results = [];
     // If "CBT" is selected, use the dedicated CBT results API
     if (filter.type === "CBT") {
-      // You may want to construct query params for filtering if needed
       let url = "https://goldlincschools.onrender.com/api/result";
-      // Optionally, add query parameters for filtering by class or student, e.g.:
-      // if (filter.classId) url += '?classId=' + encodeURIComponent(filter.classId);
       const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
       results = await res.json();
       if (!results.length) {
-        tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No CBT results found.</td></tr>';
+        tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="7">No CBT results found.</td></tr>';
         return;
       }
       tbody.innerHTML = results.map(r =>
@@ -555,6 +552,11 @@ async function loadResults(filter = {}) {
           <td class="py-2 px-3">${r.examTitle || '-'}</td>
           <td class="py-2 px-3">${r.score}/${r.total}</td>
           <td class="py-2 px-3">${r.finishedAt ? r.finishedAt.slice(0, 10) : ''}</td>
+          <td class="py-2 px-3">
+            <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteCBTResult('${r._id}', this)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
         </tr>`
       ).join('');
       return;
@@ -567,7 +569,7 @@ async function loadResults(filter = {}) {
     const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
     results = await res.json();
     if (!results.length) {
-      tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">No results found.</td></tr>';
+      tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="7">No results found.</td></tr>';
       return;
     }
     tbody.innerHTML = results.map(r =>
@@ -578,10 +580,15 @@ async function loadResults(filter = {}) {
         <td class="py-2 px-3">${r.exam?.title || r.mock?.title || '-'}</td>
         <td class="py-2 px-3">${r.score}</td>
         <td class="py-2 px-3">${r.date ? r.date.slice(0, 10) : ''}</td>
+        <td class="py-2 px-3">
+          <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" onclick="deleteCBTResult('${r._id}', this)">
+            <i class="fa fa-trash"></i>
+          </button>
+        </td>
       </tr>`
     ).join('');
   } catch {
-    tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="6">Error loading results.</td></tr>';
+    tbody.innerHTML = '<tr><td class="py-2 px-3" colspan="7">Error loading results.</td></tr>';
   }
 }
 
@@ -639,6 +646,33 @@ pushCBTModalForm.onsubmit = async function(e) {
     setTimeout(() => {
       pushCBTModal.classList.add('hidden');
     }, 2000);
+  }
+};
+window.deleteCBTResult = async function(id, btn) {
+  if (!confirm("Delete this CBT result?")) return;
+  btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+  try {
+    // For CBT results - adjust the endpoint if your API differs
+    let url;
+    if (window.location.href.includes("/academics.html")) {
+      // Try both endpoints if needed
+      url = `https://goldlincschools.onrender.com/api/result/${id}`;
+      let res = await fetch(url, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+      if (!res.ok) {
+        // Try alternate endpoint if needed
+        url = API_BASE + `/results/cbt-mocks/${id}`;
+        res = await fetch(url, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+      }
+      if (res.ok) {
+        loadResults(); // reload table
+      } else {
+        alert("Failed to delete.");
+      }
+    }
+  } catch {
+    alert("Network error.");
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa fa-trash"></i>';
   }
 };
 window.editSession = editSession;

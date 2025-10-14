@@ -1,7 +1,24 @@
 
 const API_BASE_URL = "https://goldlincschools.onrender.com";
 const token = localStorage.getItem('teacherToken') || localStorage.getItem('token') || "";
+// --- Spinner overlay control ---
+function showDashboardSpinner() {
+  const spinner = document.getElementById('dashboardSpinnerOverlay');
+  if (spinner) spinner.classList.remove('hidden');
+}
+function hideDashboardSpinner() {
+  const spinner = document.getElementById('dashboardSpinnerOverlay');
+  if (spinner) {
+    spinner.classList.add('hidden');
+    setTimeout(() => { spinner.style.display = 'none'; }, 400); // Wait for fade
+  }
+}
 
+// --- INITIAL FETCH & SETUP ---
+window.addEventListener('DOMContentLoaded', () => {
+  showDashboardSpinner();
+  fetchAndSetup();
+});
 // --- DATA HOLDERS ---
 let teacher = null;
 let studentsByClass = {};
@@ -27,7 +44,10 @@ async function fetchTeacherCBTs() {
 }
 async function fetchAndSetup() {
   teacher = await fetchTeacherProfile();
-  if (!teacher) return alert("Failed to load teacher profile.");
+  if (!teacher) {
+    hideDashboardSpinner();
+    return alert("Failed to load teacher profile.");
+  }
   document.querySelector('.profile-section strong').textContent = teacher.name;
   document.querySelector('.profile-section small').textContent = teacher.designation || '';
   document.querySelector('header h1').textContent = `Welcome, ${teacher.name}`;
@@ -50,6 +70,8 @@ async function fetchAndSetup() {
   renderStudentsBlock();
   renderSubjectsBlock();
   showAddSubjectBlock();
+
+  hideDashboardSpinner();
 }
 function populateAssignmentCBTs() {
   const cbtSel = document.getElementById('assignment-cbt');

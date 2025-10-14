@@ -17,6 +17,14 @@ router.delete('/subjects/:id', adminAuth, async (req, res) => {
   if (!subject) return res.status(404).json({ error: "Subject not found" });
   res.json({ success: true });
 });
+router.get('/subjects/:id', adminAuth, async (req, res) => {
+  const subject = await Subject.findById(req.params.id);
+  if (!subject) return res.status(404).json({ error: "Subject not found" });
+  res.json({
+    _id: subject._id,
+    name: subject.name
+  });
+});
 router.delete('/classes/:classId/subjects/:subjectId', adminAuth, async (req, res) => {
   const { classId, subjectId } = req.params;
   let cls = await Class.findById(classId);

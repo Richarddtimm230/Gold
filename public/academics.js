@@ -692,11 +692,11 @@ async function loadUploadedSubjects() {
           const subjectId = subj.subject || subj._id;
           rows.push(`
             <tr>
-              <td class="py-2 px-3">${subj.name || '-'}</td>
-              <td class="py-2 px-3">${cls.name || '-'}</td>
-              <td class="py-2 px-3">${subj.teacher ? (subj.teacher.name || `${subj.teacher.first_name || ''} ${subj.teacher.last_name || ''}`) : '-'}</td>
-              <td class="py-2 px-3">${subj.uploadedAt ? new Date(subj.uploadedAt).toLocaleDateString() : '-'}</td>
-              <td class="py-2 px-3">
+      <td class="py-2 px-3">${subj.subject?.name || '-'}</td>
+      <td class="py-2 px-3">${cls.name || '-'}</td>
+      <td class="py-2 px-3">${subj.teacher ? (subj.teacher.name || `${subj.teacher.first_name || ''} ${subj.teacher.last_name || ''}`) : '-'}</td>
+      <td class="py-2 px-3">${subj.uploadedAt ? new Date(subj.uploadedAt).toLocaleDateString() : '-'}</td>
+      <td class="py-2 px-3">
                 <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" title="View" onclick="viewSubject('${subjectId}')"><i class="fa fa-eye"></i></button>
                 <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" title="Delete" onclick="deleteSubjectFromClass('${cls._id}', '${subjectId}', this)"><i class="fa fa-trash"></i></button>
               </td>

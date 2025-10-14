@@ -698,7 +698,7 @@ async function loadUploadedSubjects() {
       <td class="py-2 px-3">${subj.uploadedAt ? new Date(subj.uploadedAt).toLocaleDateString() : '-'}</td>
       <td class="py-2 px-3">
                 <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" title="View" onclick="viewSubject('${subjectId}')"><i class="fa fa-eye"></i></button>
-                <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" title="Delete" onclick="deleteSubjectFromClass('${cls._id}', '${subjectId}', this)"><i class="fa fa-trash"></i></button>
+                <button class="px-2 py-1 rounded bg-red-600 text-white text-xs" title="Delete" onclick="deleteSubjectFromClass('${cls._id}', '${subj.subject?._id || subj.subject}', this)"><i class="fa fa-trash"></i></button>
               </td>
             </tr>
           `);

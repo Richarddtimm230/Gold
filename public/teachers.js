@@ -4,7 +4,11 @@ const token = localStorage.getItem('teacherToken') || localStorage.getItem('toke
 // --- Spinner overlay control ---
 function showDashboardSpinner() {
   const spinner = document.getElementById('dashboardSpinnerOverlay');
-  if (spinner) spinner.classList.remove('hidden');
+  if (spinner) {
+    spinner.classList.remove('hidden');
+    spinner.style.display = 'flex';
+    spinner.style.opacity = '1';
+  }
 }
 function hideDashboardSpinner() {
   const spinner = document.getElementById('dashboardSpinnerOverlay');
@@ -14,11 +18,6 @@ function hideDashboardSpinner() {
   }
 }
 
-// --- INITIAL FETCH & SETUP ---
-window.addEventListener('DOMContentLoaded', () => {
-  showDashboardSpinner();
-  fetchAndSetup();
-});
 // --- DATA HOLDERS ---
 let teacher = null;
 let studentsByClass = {};
@@ -32,7 +31,11 @@ let cbts = [];
 let myUploadedCBTs = [];
 let selectedCBTIds = [];
 // --- INITIAL FETCH & SETUP ---
-window.addEventListener('DOMContentLoaded', fetchAndSetup);
+window.addEventListener('DOMContentLoaded', () => {
+  showDashboardSpinner();
+  fetchAndSetup();
+});
+
 async function fetchTeacherCBTs() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, { headers: authHeaders() });

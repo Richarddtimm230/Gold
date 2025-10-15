@@ -35,7 +35,38 @@ window.addEventListener('DOMContentLoaded', () => {
   showDashboardSpinner();
   fetchAndSetup();
 });
-
+async function fetchDraftResults() {
+  try {
+    // You may need to adjust the endpoint if your API differs!
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/results?status=Draft`, { headers: authHeaders() });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Defensive: some APIs use {results: [...]}, others just return an array
+    return Array.isArray(data.results) ? data.results : [];
+  } catch {
+    return [];
+  }
+}
+function renderDraftResults() {
+  const tbody = document.querySelector('#draft-results-table tbody');
+  if (!draftResults.length) {
+    tbody.innerHTML = '<tr><td colspan="6">No draft results found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = draftResults.map(r => `
+    <tr>
+      <td>${r.student?.name || '-'}</td>
+      <td>${r.class?.name || '-'}</td>
+      <td>${r.term || '-'}</td>
+      <td>${r.status || '-'}</td>
+      <td>${r.updatedAt ? new Date(r.updatedAt).toLocaleString() : '-'}</td>
+      <td>
+        <button onclick="openResultModal('${r.student?._id}','${r.class?._id}')">Edit</button>
+        <button class="btn danger" onclick="alert('You cannot publish. Contact Admin.')">Publish</button>
+      </td>
+    </tr>
+  `).join('');
+}
 async function fetchTeacherCBTs() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt`, { headers: authHeaders() });

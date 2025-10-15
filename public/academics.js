@@ -80,13 +80,27 @@ fillTeacherDropdown2();
 // ============ CLASSES ============
 
 // Fill teacher checkboxes for Classes tab
+function toggleTeacherDropdown() {
+  document.getElementById('teacherDropdownMenu').classList.toggle('hidden');
+  // Optionally, close on click outside
+  document.addEventListener('click', function handler(e) {
+    if (!document.getElementById('teacherDropdownMenu').contains(e.target) &&
+        e.target.id !== "teacherDropdownBtn") {
+      document.getElementById('teacherDropdownMenu').classList.add('hidden');
+      document.removeEventListener('click', handler);
+    }
+  });
+}
+
 async function fillTeacherCheckboxes() {
   try {
     const res = await fetch("https://goldlincschools.onrender.com/api/teachers", { headers: { Authorization: "Bearer " + token }});
     const data = await res.json();
-    const container = document.getElementById('classTeacherCheckboxes');
+    const container = document.getElementById('teacherDropdownMenu');
     container.innerHTML = data.map(t =>
-      `<label><input type="checkbox" name="teacherIds" value="${t.id}"> ${t.name} (${t.email})</label>`
+      `<label class="flex items-center px-3 py-2 hover:bg-[#f1f6fb]">
+        <input type="checkbox" name="teacherIds" value="${t.id}" class="mr-2"> ${t.name} (${t.email})
+      </label>`
     ).join('');
   } catch{}
 }

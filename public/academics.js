@@ -79,6 +79,21 @@ fillTeacherDropdown2();
 
 // ============ CLASSES ============
 
+// Fill teacher checkboxes for Classes tab
+async function fillTeacherCheckboxes() {
+  try {
+    const res = await fetch("https://goldlincschools.onrender.com/api/teachers", { headers: { Authorization: "Bearer " + token }});
+    const data = await res.json();
+    const container = document.getElementById('classTeacherCheckboxes');
+    container.innerHTML = data.map(t =>
+      `<label><input type="checkbox" name="teacherIds" value="${t.id}"> ${t.name} (${t.email})</label>`
+    ).join('');
+  } catch{}
+}
+fillTeacherCheckboxes();
+
+// ============ CLASSES ============
+
 async function loadClasses() {
   const tbody = document.getElementById('classesTableBody');
   try {
@@ -90,7 +105,7 @@ async function loadClasses() {
     <td class="py-2 px-3">${c.name}</td>
     <td class="py-2 px-3">${c.arms && c.arms.length ? c.arms.join(', ') : '-'}</td>
     <td class="py-2 px-3">${
-      c.teachers && c.teachers.length ? c.teachers.map(t => `${t.first_name} ${t.last_name}`).join(', ') : '-'
+      c.teachers && c.teachers.length ? c.teachers.map(t => `${t.first_name ?? t.name ?? ''} ${t.last_name ?? ''}`).join(', ') : '-'
     }</td>
     <td class="py-2 px-3">
       <button class="px-2 py-1 rounded bg-[#2647a6] text-white text-xs" onclick="editClass('${c._id}')"><i class="fa fa-edit"></i></button>
@@ -118,6 +133,9 @@ document.getElementById('classForm').onsubmit = async function(e){
   const form = this;
   const data = Object.fromEntries(new FormData(form));
   data.arms = data.arms ? data.arms.split(',').map(a => a.trim()).filter(a => a) : [];
+  // Get checked teachers
+  const teacherCheckboxes = form.querySelectorAll('input[name="teacherIds"]:checked');
+  data.teacherIds = Array.from(teacherCheckboxes).map(cb => cb.value);
   const editId = form.getAttribute('data-edit-id');
   document.getElementById('classMessage').textContent = "Saving...";
   try{
@@ -132,8 +150,11 @@ document.getElementById('classForm').onsubmit = async function(e){
     form.removeAttribute('data-edit-id');
     form.reset();
     loadClasses();
+    // Uncheck all teacher checkboxes after reset
+    Array.from(document.querySelectorAll('#classTeacherCheckboxes input[type="checkbox"]')).forEach(cb => cb.checked = false);
   }catch{ document.getElementById('classMessage').textContent = "Network error."; }
 };
+
 function editClass(id) {
   fetch(`${API_BASE}/classes/${id}`, { headers: { Authorization: "Bearer " + token }})
     .then(res => res.json())
@@ -141,7 +162,11 @@ function editClass(id) {
       const form = document.getElementById('classForm');
       form.name.value = cls.name || "";
       form.arms.value = cls.arms && cls.arms.length ? cls.arms.join(', ') : "";
-      form.teacherId.value = cls.teachers && cls.teachers.length ? cls.teachers[0]._id : "";
+      // Preselect teachers (checkboxes)
+      const teacherCheckboxes = form.querySelectorAll('input[name="teacherIds"]');
+      teacherCheckboxes.forEach(cb => {
+        cb.checked = cls.teachers?.some(t => t._id === cb.value || t.id === cb.value);
+      });
       form.setAttribute('data-edit-id', id);
       document.getElementById('classMessage').textContent = "Editing class. Save to update.";
     });

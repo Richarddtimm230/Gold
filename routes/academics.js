@@ -447,21 +447,32 @@ router.put('/exams/modes/:id', adminAuth, async (req, res) => {
 });
 // Update a class by ID
 router.put('/classes/:id', adminAuth, async (req, res) => {
-  const { name, arms, teacherId } = req.body;
+  const { name, arms, teacherIds } = req.body;
   const update = {
     name,
     arms: Array.isArray(arms) ? arms : [],
   };
-  if (teacherId) {
-    update.teachers = [teacherId];
+  if (teacherIds) {
+    update.teachers = Array.isArray(teacherIds) ? teacherIds : [teacherIds];
   }
   const cls = await Class.findByIdAndUpdate(
     req.params.id,
     update,
     { new: true }
-  );
+  ).populate('teachers');
   if (!cls) return res.status(404).json({ error: "Class not found" });
-  res.json(cls);
+  res.json({
+    _id: cls._id,
+    name: cls.name,
+    arms: cls.arms,
+    teachers: cls.teachers.map(t => ({
+      _id: t._id,
+      first_name: t.first_name,
+      last_name: t.last_name,
+      email: t.email
+    })),
+    subjects: cls.subjects
+  });
 });
 // Get individual class by ID
 router.get('/classes/:id', adminAuth, async (req, res) => {

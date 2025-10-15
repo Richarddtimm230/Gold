@@ -163,45 +163,45 @@
     </div>
   </div>
 </div>
-      <!-- Classes Section -->
-      <div class="section-card hidden" data-section="classes">
-        <div class="section-title"><i class="fa fa-graduation-cap"></i> Class Management</div>
-        <form id="classForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
-          <div>
-            <label class="block text-sm font-bold mb-1">Class Name</label>
-            <input type="text" name="name" placeholder="JSS 1" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
-          </div>
-          <div>
-            <label class="block text-sm font-bold mb-1">Arms (comma separated)</label>
-            <input type="text" name="arms" placeholder="A,B,C" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]">
-          </div>
-          <div>
-            <label class="block text-sm font-bold mb-1">Assign Teacher</label>
-            <select name="teacherId" id="classTeacherSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required></select>
-          </div>
-          <div class="md:col-span-3">
-            <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
-              <i class="fa fa-save mr-1"></i> Add Class
-            </button>
-          </div>
-        </form>
-        <div id="classMessage" class="text-sm mb-4"></div>
-        <div>
-          <table class="min-w-full text-sm">
-            <thead class="bg-[#e9f0fe]">
-              <tr>
-                <th class="py-2 px-3">Class</th>
-                <th class="py-2 px-3">Arms</th>
-                <th class="py-2 px-3">Teachers</th>
-                <th class="py-2 px-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="classesTableBody">
-              <tr><td class="py-2 px-3" colspan="4">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<!-- Classes Section -->
+<div class="section-card hidden" data-section="classes">
+  <div class="section-title"><i class="fa fa-graduation-cap"></i> Class Management</div>
+  <form id="classForm" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
+    <div>
+      <label class="block text-sm font-bold mb-1">Class Name</label>
+      <input type="text" name="name" placeholder="JSS 1" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+    </div>
+    <div>
+      <label class="block text-sm font-bold mb-1">Arms (comma separated)</label>
+      <input type="text" name="arms" placeholder="A,B,C" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]">
+    </div>
+    <div>
+      <label class="block text-sm font-bold mb-1">Assign Teacher(s)</label>
+      <div id="classTeacherCheckboxes" class="flex flex-col gap-1"></div>
+    </div>
+    <div class="md:col-span-3">
+      <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
+        <i class="fa fa-save mr-1"></i> Add Class
+      </button>
+    </div>
+  </form>
+  <div id="classMessage" class="text-sm mb-4"></div>
+  <div>
+    <table class="min-w-full text-sm">
+      <thead class="bg-[#e9f0fe]">
+        <tr>
+          <th class="py-2 px-3">Class</th>
+          <th class="py-2 px-3">Arms</th>
+          <th class="py-2 px-3">Teachers</th>
+          <th class="py-2 px-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="classesTableBody">
+        <tr><td class="py-2 px-3" colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
       <!-- Terms Section -->
       <div class="section-card hidden" data-section="terms">
         <div class="section-title"><i class="fa fa-clock"></i> Term Management</div>

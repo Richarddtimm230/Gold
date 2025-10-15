@@ -92,8 +92,39 @@ router.get('/', async (req, res) => {
 });
 
 
+// POST /api/classes/:id/teachers
+router.post('/:id/teachers', async (req, res) => {
+  try {
+    const { teacherId } = req.body;
+    if (!teacherId) return res.status(400).json({ error: 'Teacher ID required' });
 
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ error: 'Class not found' });
 
+    cls.teachers.push(teacherId);
+    await cls.save();
+
+    res.json({ id: cls._id, ...cls.toObject() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// POST /api/classes - Create a new class
+router.post('/', async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Class name required' });
+
+    const existing = await Class.findOne({ name });
+    if (existing) return res.status(409).json({ error: 'Class already exists' });
+
+    const newClass = new Class({ name, arms: [], subjects: [], teachers: [] });
+    await newClass.save();
+    res.status(201).json({ id: newClass._id, name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // POST /api/classes/:id/arms - Add/replace arms
 router.post('/:id/arms', async (req, res) => {
@@ -148,87 +179,6 @@ router.post('/non/:id/subjects', async (req, res) => {
   }
 });
 
-// ...other code above...
 
-// PATCH: Accept one OR multiple teacher IDs in POST /api/classes/:id/teachers
-router.post('/:id/teachers', async (req, res) => {
-  try {
-    // Accept either teacherId (string) or teacherIds (array)
-    let teacherIds = [];
-    if (Array.isArray(req.body.teacherIds)) {
-      teacherIds = req.body.teacherIds;
-    } else if (req.body.teacherId) {
-      teacherIds = [req.body.teacherId];
-    } else {
-      return res.status(400).json({ error: 'Teacher ID(s) required' });
-    }
-
-    const cls = await Class.findById(req.params.id);
-    if (!cls) return res.status(404).json({ error: 'Class not found' });
-
-    // Avoid duplicates
-    teacherIds.forEach(id => {
-      if (!cls.teachers.some(existingId => String(existingId) === String(id))) {
-        cls.teachers.push(id);
-      }
-    });
-
-    await cls.save();
-
-    res.json({ id: cls._id, teachers: cls.teachers });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PATCH: Accept teachers array when creating or updating a class
-router.post('/', async (req, res) => {
-  try {
-    const { name, arms, teachers } = req.body;
-    if (!name) return res.status(400).json({ error: 'Class name required' });
-
-    const existing = await Class.findOne({ name });
-    if (existing) return res.status(409).json({ error: 'Class already exists' });
-
-    // Accept teachers as array if provided, otherwise empty array
-    const newClass = new Class({
-      name,
-      arms: Array.isArray(arms) ? arms : [],
-      subjects: [],
-      teachers: Array.isArray(teachers) ? teachers : [],
-    });
-    await newClass.save();
-    res.status(201).json({ id: newClass._id, name, teachers: newClass.teachers });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PATCH: Accept teachers array when updating a class
-router.put('/:id', async (req, res) => {
-  try {
-    const { name, arms, teachers } = req.body;
-
-    const update = {};
-    if (name) update.name = name;
-    if (Array.isArray(arms)) update.arms = arms;
-    if (Array.isArray(teachers)) update.teachers = teachers;
-
-    const updated = await Class.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Class not found' });
-
-    res.json({
-      id: updated._id,
-      name: updated.name,
-      arms: updated.arms,
-      teachers: updated.teachers,
-      subjects: updated.subjects,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ...other code below...
 
 module.exports = router;

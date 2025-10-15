@@ -4,7 +4,6 @@ const router = express.Router();
 
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
-const Staff = require('../models/Staff');
 // ... other code above
 
 // Only keep THIS endpoint for adding subjects to a class as a teacher
@@ -70,39 +69,20 @@ router.post('/:classId/subjects', teacherAuth, async (req, res) => {
       : null
   });
 });
-
-// GET /api/classes - List classes, always populate teachers and subjects
+// NOTE: No authentication middleware here, so all authenticated users can access
 router.get('/', async (req, res) => {
   try {
     const teacherId = req.query.teacher_id;
     let query = {};
     if (teacherId) query.teachers = teacherId; // teachers should be array of ObjectId
-
-    // PATCH: populate BOTH teachers and subjects
-    const classes = await Class.find(query)
-      .populate({ path: 'teachers', model: 'Staff', select: 'first_name last_name email' })
-      .populate({ path: 'subjects.subject', model: 'Subject' }) // if you want subject details in subjects array
-      .populate({ path: 'subjects.teacher', model: 'Staff', select: 'first_name last_name email' });
-
+    const classes = await Class.find(query).populate('subjects');
     const output = classes.map(cls => {
       return {
         id: cls._id,
         name: cls.name,
         arms: Array.isArray(cls.arms) ? cls.arms : [],
-        teachers: Array.isArray(cls.teachers) ? cls.teachers.map(t => ({
-          id: t._id,
-          name: `${t.first_name ?? ''} ${t.last_name ?? ''}`.trim() || t.name,
-          email: t.email
-        })) : [],
-        subjects: Array.isArray(cls.subjects) ? cls.subjects.map(sub => ({
-          id: sub.subject?._id ?? sub.subject,
-          name: sub.subject?.name ?? '',
-          teacher: sub.teacher ? {
-            id: sub.teacher._id,
-            name: `${sub.teacher.first_name ?? ''} ${sub.teacher.last_name ?? ''}`.trim() || sub.teacher.name,
-            email: sub.teacher.email
-          } : null
-        })) : []
+        teachers: Array.isArray(cls.teachers) ? cls.teachers : [],
+        subjects: cls.subjects.map(sub => ({ id: sub._id, name: sub.name }))
       };
     });
     res.json({ classes: output });
@@ -111,109 +91,36 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/classes/:id/teachers - Add one or multiple teachers to a class
+
+// POST /api/classes/:id/teachers
 router.post('/:id/teachers', async (req, res) => {
   try {
-    // Accept either teacherId (string) or teacherIds (array)
-    let teacherIds = [];
-    if (Array.isArray(req.body.teacherIds)) {
-      teacherIds = req.body.teacherIds;
-    } else if (req.body.teacherId) {
-      teacherIds = [req.body.teacherId];
-    } else {
-      return res.status(400).json({ error: 'Teacher ID(s) required' });
-    }
+    const { teacherId } = req.body;
+    if (!teacherId) return res.status(400).json({ error: 'Teacher ID required' });
 
     const cls = await Class.findById(req.params.id);
     if (!cls) return res.status(404).json({ error: 'Class not found' });
 
-    // Avoid duplicates
-    teacherIds.forEach(id => {
-      if (!cls.teachers.some(existingId => String(existingId) === String(id))) {
-        cls.teachers.push(id);
-      }
-    });
-
+    cls.teachers.push(teacherId);
     await cls.save();
 
-    // Populate for response
-    await cls.populate({ path: 'teachers', model: 'Staff', select: 'first_name last_name email' });
-    res.json({
-      id: cls._id,
-      teachers: cls.teachers.map(t => ({
-        id: t._id,
-        name: `${t.first_name ?? ''} ${t.last_name ?? ''}`.trim() || t.name,
-        email: t.email
-      }))
-    });
+    res.json({ id: cls._id, ...cls.toObject() });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-// POST /api/classes - Create a new class, accept teachers as array
+// POST /api/classes - Create a new class
 router.post('/', async (req, res) => {
   try {
-    const { name, arms, teachers } = req.body;
+    const { name } = req.body;
     if (!name) return res.status(400).json({ error: 'Class name required' });
 
     const existing = await Class.findOne({ name });
     if (existing) return res.status(409).json({ error: 'Class already exists' });
 
-    // Accept teachers as array if provided, otherwise empty array
-    const newClass = new Class({
-      name,
-      arms: Array.isArray(arms) ? arms : [],
-      subjects: [],
-      teachers: Array.isArray(teachers) ? teachers : [],
-    });
+    const newClass = new Class({ name, arms: [], subjects: [], teachers: [] });
     await newClass.save();
-
-    // Populate for response
-    await newClass.populate({ path: 'teachers', model: 'Staff', select: 'first_name last_name email' });
-    res.status(201).json({
-      id: newClass._id,
-      name: newClass.name,
-      arms: newClass.arms,
-      teachers: newClass.teachers.map(t => ({
-        id: t._id,
-        name: `${t.first_name ?? ''} ${t.last_name ?? ''}`.trim() || t.name,
-        email: t.email
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PUT /api/classes/:id - Update a class, accept teachers as array
-router.put('/:id', async (req, res) => {
-  try {
-    const { name, arms, teachers } = req.body;
-
-    const update = {};
-    if (name) update.name = name;
-    if (Array.isArray(arms)) update.arms = arms;
-    if (Array.isArray(teachers)) update.teachers = teachers;
-
-    const updated = await Class.findByIdAndUpdate(req.params.id, update, { new: true }).populate({
-      path: 'teachers',
-      model: 'Staff',
-      select: 'first_name last_name email'
-    });
-    if (!updated) return res.status(404).json({ error: 'Class not found' });
-
-    res.json({
-      id: updated._id,
-      name: updated.name,
-      arms: updated.arms,
-      teachers: updated.teachers.map(t => ({
-        id: t._id,
-        name: `${t.first_name ?? ''} ${t.last_name ?? ''}`.trim() || t.name,
-        email: t.email
-      })),
-      subjects: updated.subjects
-    });
+    res.status(201).json({ id: newClass._id, name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -271,5 +178,7 @@ router.post('/non/:id/subjects', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 module.exports = router;

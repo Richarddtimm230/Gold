@@ -94,34 +94,50 @@ router.get('/cbt/mocks/today/:classId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Create a new class and assign teachers
 router.post('/classes', adminAuth, async (req, res) => {
-  const { name, arms, teacherId } = req.body;
+  const { name, arms, teacherIds } = req.body;
   if (!name) return res.status(400).json({ error: "Class name required" });
 
   let existing = await Class.findOne({ name });
   if (existing) return res.status(409).json({ error: "Class already exists" });
 
+  // Accept teacherIds as an array or single value
+  let teacherArr = [];
+  if (teacherIds) {
+    teacherArr = Array.isArray(teacherIds) ? teacherIds : [teacherIds];
+  }
+
   const newClass = new Class({
     name,
     arms: Array.isArray(arms) ? arms : [],
-    teachers: teacherId ? [teacherId] : [],
+    teachers: teacherArr,
     subjects: []
   });
   await newClass.save();
 
-  // Assign this class to the teacher's Staff document if teacherId provided
-  if (teacherId) {
-    await Staff.findByIdAndUpdate(
-      teacherId,
+  // Assign this class to each teacher's Staff document if teacherIds provided
+  if (teacherArr.length > 0) {
+    await Staff.updateMany(
+      { _id: { $in: teacherArr } },
       { $addToSet: { classes: newClass._id } }
     );
   }
+
+  // Populate teachers for response
+  await newClass.populate('teachers');
 
   res.status(201).json({
     _id: newClass._id,
     name: newClass.name,
     arms: newClass.arms,
-    teachers: newClass.teachers,
+    teachers: newClass.teachers.map(t => ({
+      _id: t._id,
+      first_name: t.first_name,
+      last_name: t.last_name,
+      email: t.email
+    })),
     subjects: newClass.subjects
   });
 });

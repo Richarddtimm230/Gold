@@ -126,7 +126,7 @@ router.get('/summary', async (req, res) => {
 // POST /api/exams/merge - Merge selected exams into a new exam
 router.post('/merge', async (req, res) => {
   const { examIds, title, class: classId, subject, duration, scheduledFor } = req.body;
-  if (!examIds || !Array.isArray(examIds) || examIds.length < 2) {
+  if (!examIds || !Array.isArray(examIds) || examIds.length < 1) {
     return res.status(400).json({ error: 'Select at least two exams to merge.' });
   }
   const exams = await Exam.find({ _id: { $in: examIds } });

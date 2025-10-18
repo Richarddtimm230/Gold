@@ -71,7 +71,6 @@ router.post('/', async (req, res) => {
       student: studentId,
       exam,
       answers,
-    class,
       score: calculatedScore,
       startedAt,
       finishedAt

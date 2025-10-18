@@ -38,7 +38,7 @@ router.delete('/:id', async (req, res) => {
 // POST /api/result - Save a new CBT result
 router.post('/', async (req, res) => {
   try {
-    const { exam, answers, startedAt, finishedAt } = req.body;
+    const { exam, class, answers, startedAt, finishedAt } = req.body;
     const studentId = req.user ? req.user._id : req.body.student;
 
     if (!exam || !answers || !studentId) {
@@ -71,6 +71,7 @@ router.post('/', async (req, res) => {
       student: studentId,
       exam,
       answers,
+      class,
       score: calculatedScore,
       startedAt,
       finishedAt

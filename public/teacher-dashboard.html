@@ -24,6 +24,9 @@
       <button data-section="gradebook">Gradebook</button>
       <button data-section="assignments">Assignments</button>
       <button data-section="draftResults">Draft Results</button>
+      <!-- Find your sidebar <nav> and add after "Draft Results" or where you prefer -->
+<button data-section="cbtResults">CBT Results</button>
+      
       <button data-section="notifications">Notifications</button>
       <button data-section="profile">Profile/Settings</button>
       <!-- Add in the sidebar menu where other buttons are -->
@@ -70,7 +73,15 @@
         </form>
       </div>
     </section>
+<!-- Add sidebar button -->
 
+<!-- Add section block after other <section> blocks -->
+<section id="section-cbtResults" style="display:none;">
+  <div class="card cbt-results-card">
+    <h2 style="margin-bottom:1.5em;">CBT Results</h2>
+    <div id="cbtResultsContainer"></div>
+  </div>
+</section>
     <!-- Gradebook Section -->
     <section id="section-gradebook" style="display:none;">
       <div class="card students-table">

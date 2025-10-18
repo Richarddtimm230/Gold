@@ -10,6 +10,8 @@ const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
 const CBT = require('../models/CBTExam');
+const Exam = require('../models/CBTExam'); // If your results reference Exam
+
 // GET /api/teachers/me - Get own teacher profile + classes + subjects
 router.get('/me', teacherAuth, async (req, res) => {
   const teacher = req.staff;
@@ -55,6 +57,84 @@ router.get('/me', teacherAuth, async (req, res) => {
   });
 });
 
+
+// GET /api/teachers/:id/cbt-results?classId=...
+router.get('/:id/cbt-results', teacherAuth, async (req, res) => {
+  try {
+    // Only allow a teacher to fetch their own results
+    if (String(req.params.id) !== String(req.staff._id)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // Find all classes assigned to this teacher
+    const classes = await Class.find({ teachers: req.staff._id });
+    const classIds = classes.map(c => String(c._id));
+
+    let query = {};
+    if (req.query.classId) {
+      // Only allow for classes assigned to this teacher!
+      if (!classIds.includes(req.query.classId)) {
+        return res.status(403).json({ error: "Not assigned to this class" });
+      }
+      query.class = req.query.classId;
+    } else {
+      // All classes for this teacher
+      query.class = { $in: classIds };
+    }
+
+    // Fetch all CBT Results for the classes
+    const results = await CBT.find(query)
+      .populate('student', 'firstname surname')
+      .populate('class', 'name')
+      .populate('exam', 'title')
+      .sort({ createdAt: -1 });
+
+    // Format results for UI
+    const formatted = results.map(r => ({
+      _id: r._id,
+      studentName: r.student ? `${r.student.firstname} ${r.student.surname}` : '',
+      classId: r.class ? r.class._id : '',
+      className: r.class ? r.class.name : '',
+      examTitle: r.exam ? r.exam.title : '',
+      score: r.score,
+      total: r.total,
+      startedAt: r.startedAt,
+      finishedAt: r.finishedAt,
+      answers: r.answers
+    }));
+
+    res.json({ results: formatted });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/teachers/:id/cbt-results/:resultId
+router.get('/:id/cbt-results/:resultId', teacherAuth, async (req, res) => {
+  try {
+    if (String(req.params.id) !== String(req.staff._id)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const result = await CBT.findById(req.params.resultId)
+      .populate('student', 'firstname surname')
+      .populate('class', 'name')
+      .populate('exam', 'title');
+    if (!result) return res.status(404).json({ error: "Result not found" });
+    res.json({
+      _id: result._id,
+      studentName: result.student ? `${result.student.firstname} ${result.student.surname}` : '',
+      className: result.class ? result.class.name : '',
+      examTitle: result.exam ? result.exam.title : '',
+      score: result.score,
+      total: result.total,
+      startedAt: result.startedAt,
+      finishedAt: result.finishedAt,
+      answers: result.answers
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // PATCH /api/teachers/me - Update own profile
 router.patch('/me', teacherAuth, async (req, res) => {
   if (req.body.login_password) {

@@ -198,9 +198,12 @@ const sections = {
   draftResults: document.getElementById('section-draftResults'),
   notifications: document.getElementById('section-notifications'),
   profile: document.getElementById('section-profile'),
-  cbtQuestions: document.getElementById('section-cbtQuestions'),   // <--- comma before this line!
-  myCBTQuestions: document.getElementById('section-myCBTQuestions')
+  cbtQuestions: document.getElementById('section-cbtQuestions'),
+  myCBTQuestions: document.getElementById('section-myCBTQuestions'),
+  cbtResults: document.getElementById('section-cbtResults') // <-- Add this line
 };
+
+// --- Add to sidebar navigation logic ---
 sidebarBtns.forEach(btn => {
   btn.onclick = function () {
     sidebarBtns.forEach(b => b.classList.remove('active'));
@@ -213,9 +216,9 @@ sidebarBtns.forEach(btn => {
     if (sec === 'attendance') renderAttendance();
     if (sec === 'gradebook') renderGradebook();
     if (sec === 'assignments') renderAssignments();
-    // In your sidebar nav logic
-if (sec === 'myCBTQuestions') showMyCBTQuestionsSection();
-if (sec === 'cbtQuestions') renderCBTQuestionSection();
+    if (sec === 'myCBTQuestions') showMyCBTQuestionsSection();
+    if (sec === 'cbtQuestions') renderCBTQuestionSection();
+    if (sec === 'cbtResults') renderCBTResultsSection(); // <-- Add this line
     if (sec === 'dashboard' || sec === 'classes') {
       renderClassesList();
       renderStudentsBlock();
@@ -360,7 +363,111 @@ if (addSubjectForm) {
     }
   };
 }
-// ... previous code remains the same ...
+// --- Add to sections map ---
+
+
+
+
+// --- CBT Results Section Logic ---
+async function fetchCBTResultsForClass(classId) {
+  try {
+    // Adjust endpoint if needed!
+    const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt-results?classId=${encodeURIComponent(classId)}`, { headers: authHeaders() });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Defensive: array or {results: [...]}
+    return Array.isArray(data) ? data : (data.results || []);
+  } catch {
+    return [];
+  }
+}
+
+async function renderCBTResultsSection() {
+  const container = document.getElementById('cbtResultsContainer');
+  container.innerHTML = '<div style="padding:2em;text-align:center;color:#888;"><i class="fa fa-spinner fa-spin"></i> Loading CBT results...</div>';
+  if (!teacher || !teacher.classes || teacher.classes.length === 0) {
+    container.innerHTML = '<div style="padding:2em;text-align:center;color:#888;">No classes assigned.</div>';
+    return;
+  }
+  let html = '';
+  // Loop through each class
+  for (const cls of teacher.classes) {
+    const results = await fetchCBTResultsForClass(cls.id);
+    html += `
+      <div class="card" style="margin-bottom:2.5em;box-shadow:0 2px 12px #ddeaff44;">
+        <h3 style="color:#2647a6;font-size:1.2em;margin-bottom:0.5em;">Class: <span style="color:#1e88e5;">${cls.name}</span></h3>
+        ${results.length === 0
+          ? `<div style="color:#888;padding:1em 0;">No CBT results for this class.</div>`
+          : `<table style="width:100%;border-collapse:collapse;">
+              <thead style="background:#f6f8fa;">
+                <tr>
+                  <th style="padding:8px;">Exam Title</th>
+                  <th style="padding:8px;">Student</th>
+                  <th style="padding:8px;">Score</th>
+                  <th style="padding:8px;">Started</th>
+                  <th style="padding:8px;">Finished</th>
+                  <th style="padding:8px;">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${results.map(r => `
+                  <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:8px;">${r.examTitle || '-'}</td>
+                    <td style="padding:8px;">${r.studentName || '-'}</td>
+                    <td style="padding:8px;font-weight:bold;color:#159d5e;">${r.score} / ${r.total}</td>
+                    <td style="padding:8px;">${r.startedAt ? new Date(r.startedAt).toLocaleString() : '-'}</td>
+                    <td style="padding:8px;">${r.finishedAt ? new Date(r.finishedAt).toLocaleString() : '-'}</td>
+                    <td style="padding:8px;"><button class="btn" onclick="viewCBTResult('${r._id}')"><i class="fa fa-eye"></i></button></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`
+        }
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// --- CBT Result Detail Modal ---
+window.viewCBTResult = async function(resultId) {
+  // GET /api/teachers/{teacherId}/cbt-results/{resultId}
+  const res = await fetch(`${API_BASE_URL}/api/teachers/${encodeURIComponent(teacher.id)}/cbt-results/${resultId}`, { headers: authHeaders() });
+  const r = await res.json();
+  // Modal style (reuse modal or create new)
+  let modal = document.getElementById('cbtResultModalBg');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'cbtResultModalBg';
+    modal.className = 'form-modal-bg';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="form-modal">
+        <button class="close-btn" onclick="document.getElementById('cbtResultModalBg').style.display='none';">&times;</button>
+        <h3>CBT Result Detail</h3>
+        <div id="cbtResultDetail"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+  document.getElementById('cbtResultDetail').innerHTML = `
+    <div><b>Student:</b> ${r.studentName}</div>
+    <div><b>Class:</b> ${r.className}</div>
+    <div><b>Exam Title:</b> ${r.examTitle}</div>
+    <div><b>Score:</b> ${r.score} / ${r.total}</div>
+    <div><b>Started:</b> ${r.startedAt ? new Date(r.startedAt).toLocaleString() : '-'}</div>
+    <div><b>Finished:</b> ${r.finishedAt ? new Date(r.finishedAt).toLocaleString() : '-'}</div>
+    <div><b>Answers:</b><pre style="background:#f8fafc;border-radius:7px;padding:1em;margin-top:0.6em;">${JSON.stringify(r.answers, null, 2)}</pre></div>
+  `;
+};
+
+// Optional: Hide modal when clicking outside
+document.body.addEventListener('click', function(e) {
+  const modal = document.getElementById('cbtResultModalBg');
+  if (modal && modal.style.display === 'flex' && e.target === modal) modal.style.display = 'none';
+});
 
 // Fetch all CBTs uploaded by this teacher
 async function fetchMyCBTQuestions() {

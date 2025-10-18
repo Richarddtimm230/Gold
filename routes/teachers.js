@@ -9,7 +9,7 @@ const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
-const CBTResult = require('../models/ResultCBT');
+const ResultCBT = require('../models/ResultCBT');
 const CBT = require('../models/CBTExam'); // If your results reference Exam
 
 // GET /api/teachers/me - Get own teacher profile + classes + subjects

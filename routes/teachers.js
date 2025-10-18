@@ -9,8 +9,8 @@ const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 const Student = require('../models/Student');
 const teacherAuth = require('../middleware/teacherAuth'); // Should set req.staff
-const CBT = require('../models/CBTExam');
-const Exam = require('../models/CBTExam'); // If your results reference Exam
+const CBTResult = require('../models/ResultCBT');
+const CBT = require('../models/CBTExam'); // If your results reference Exam
 
 // GET /api/teachers/me - Get own teacher profile + classes + subjects
 router.get('/me', teacherAuth, async (req, res) => {
@@ -83,7 +83,7 @@ router.get('/:id/cbt-results', teacherAuth, async (req, res) => {
     }
 
     // Fetch all CBT Results for the classes
-    const results = await CBT.find(query)
+    const results = await ResultCBT.find(query)
       .populate('student', 'firstname surname')
       .populate('class', 'name')
       .populate('exam', 'title')
@@ -115,7 +115,7 @@ router.get('/:id/cbt-results/:resultId', teacherAuth, async (req, res) => {
     if (String(req.params.id) !== String(req.staff._id)) {
       return res.status(403).json({ error: "Forbidden" });
     }
-    const result = await CBT.findById(req.params.resultId)
+    const result = await ResultCBT.findById(req.params.resultId)
       .populate('student', 'firstname surname')
       .populate('class', 'name')
       .populate('exam', 'title');

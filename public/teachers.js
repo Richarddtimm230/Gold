@@ -30,6 +30,99 @@ let assignments = [];
 let cbts = [];
 let myUploadedCBTs = [];
 let selectedCBTIds = [];
+
+// ADD AT THE TOP (after cbtQuestions = [];)
+let cbtDraftKey = 'cbtDraft_current';
+let cbtDraftRestoreWarned = false;
+
+// --- UTILS FOR CBT DRAFT ---
+function saveCBTDraftToLocalStorage() {
+  const classId = document.getElementById('cbt-class-select')?.value || '';
+  const subjectId = document.getElementById('cbt-subject-select')?.value || '';
+  const title = document.getElementById('cbt-title')?.value || '';
+  const duration = document.getElementById('cbt-duration')?.value || '';
+  // Save cbtQuestions array as well
+  const draft = {
+    classId, subjectId, title, duration,
+    questions: JSON.parse(JSON.stringify(cbtQuestions))
+  };
+  localStorage.setItem(cbtDraftKey, JSON.stringify(draft));
+}
+
+function loadCBTDraftFromLocalStorage() {
+  const raw = localStorage.getItem(cbtDraftKey);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function clearCBTDraftFromLocalStorage() {
+  localStorage.removeItem(cbtDraftKey);
+}
+
+// HOOK INTO CBT QUESTION FORM: (edit renderCBTQuestionSection)
+
+function renderCBTQuestionSection() {
+  const classSel = document.getElementById('cbt-class-select');
+  const subjSel = document.getElementById('cbt-subject-select');
+  classSel.innerHTML = '';
+  subjSel.innerHTML = '';
+
+  if (!teacher.classes) return;
+  teacher.classes.forEach(cls => {
+    let opt = document.createElement('option');
+    opt.value = cls.id;
+    opt.innerText = cls.name;
+    classSel.appendChild(opt);
+  });
+
+  // --- Draft Restore ---
+
+  if (!cbtDraftRestoreWarned) {
+    cbtDraftRestoreWarned = true;
+    const draft = loadCBTDraftFromLocalStorage();
+    if (draft && (draft.title || (draft.questions && draft.questions.length > 0))) {
+      if (confirm("It looks like you have an unfinished CBT draft. Restore it?")) {
+        // Restore all fields
+        setTimeout(() => {
+          classSel.value = draft.classId || '';
+          classSel.dispatchEvent(new Event('change')); // To populate subjects
+          // Wait a moment for subject dropdown to update
+          setTimeout(() => {
+            subjSel.value = draft.subjectId || '';
+            document.getElementById('cbt-title').value = draft.title || '';
+            document.getElementById('cbt-duration').value = draft.duration || '';
+            cbtQuestions = Array.isArray(draft.questions) ? draft.questions : [];
+            renderCBTQuestions();
+          }, 200);
+        }, 100);
+      } else {
+        clearCBTDraftFromLocalStorage();
+      }
+    }
+  }
+
+  classSel.onchange = function() {
+    const subjects = subjectsByClass[classSel.value] || [];
+    subjSel.innerHTML = '';
+    subjects.forEach(subj => {
+      let opt = document.createElement('option');
+      opt.value = subj.id;
+      opt.innerText = subj.name;
+      subjSel.appendChild(opt);
+    });
+    saveCBTDraftToLocalStorage();
+  };
+  classSel.onchange();
+
+  // Hook into value changes to auto-save
+  ['cbt-class-select', 'cbt-subject-select', 'cbt-title', 'cbt-duration'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.oninput = saveCBTDraftToLocalStorage;
+  });
+
+  cbtQuestions = cbtQuestions || [];
+  renderCBTQuestions();
+}
 // --- INITIAL FETCH & SETUP ---
 window.addEventListener('DOMContentLoaded', () => {
   showDashboardSpinner();
@@ -1196,17 +1289,21 @@ function renderCBTQuestions() {
     let qtextDiv = qDiv.querySelector(`#cbt-qtext-quill-${idx}`);
     let qQuill = new Quill(qtextDiv, getQuillConfig());
     if(q.text) qQuill.root.innerHTML = q.text;
-    qQuill.on('text-change', () => { cbtQuestions[idx].text = qQuill.root.innerHTML; });
+    qQuill.on('text-change', () => { 
+      cbtQuestions[idx].text = qQuill.root.innerHTML; 
+      saveCBTDraftToLocalStorage();
+    });
     qtextDiv.__quill = qQuill;
 
-    // Score handler
     qDiv.querySelector('.cbt-qscore').oninput = (e) => {
       cbtQuestions[idx].score = Number(e.target.value)||1;
+      saveCBTDraftToLocalStorage();
     };
 
-    // Render options
     renderCBTOptions(idx);
   });
+  // Save on update
+  saveCBTDraftToLocalStorage();
 }
 
 function renderCBTOptions(qidx) {
@@ -1225,33 +1322,42 @@ function renderCBTOptions(qidx) {
     let optQuillDiv = optDiv.querySelector(`#cbt-q${qidx}-opt-quill-${oi}`);
     let optQuill = new Quill(optQuillDiv, getQuillConfig());
     if(opt.value) optQuill.root.innerHTML = opt.value;
-    optQuill.on('text-change', () => { cbtQuestions[qidx].options[oi].value = optQuill.root.innerHTML; });
+    optQuill.on('text-change', () => { 
+      cbtQuestions[qidx].options[oi].value = optQuill.root.innerHTML; 
+      saveCBTDraftToLocalStorage();
+    });
     optQuillDiv.__quill = optQuill;
   });
+  saveCBTDraftToLocalStorage();
 }
 
-window.removeCBTQuestion = function(idx) {
-  cbtQuestions.splice(idx,1);
-  renderCBTQuestions();
+// MODIFIED window.removeCBTQuestion etc
+window.removeCBTQuestion = function(idx) { 
+  cbtQuestions.splice(idx,1); 
+  renderCBTQuestions(); 
+  saveCBTDraftToLocalStorage();
 };
-window.addCBTOption = function(qidx) {
+window.addCBTOption = function(qidx) { 
   if (!cbtQuestions[qidx].options) cbtQuestions[qidx].options = [];
   cbtQuestions[qidx].options.push({ value: '' });
   renderCBTQuestions();
+  saveCBTDraftToLocalStorage();
 };
 window.removeCBTOption = function(qidx, oidx) {
   cbtQuestions[qidx].options.splice(oidx,1);
-  // Reset answer if needed
   if (cbtQuestions[qidx].answer === oidx) cbtQuestions[qidx].answer = 0;
   renderCBTQuestions();
+  saveCBTDraftToLocalStorage();
 };
 window.setCBTCorrect = function(qidx, oidx) {
   cbtQuestions[qidx].answer = oidx;
+  saveCBTDraftToLocalStorage();
 };
 
 document.getElementById('cbt-add-question-btn').onclick = function() {
   cbtQuestions.push({ text: '', options: [], answer: 0, score: 1 });
   renderCBTQuestions();
+  saveCBTDraftToLocalStorage();
 };
 
 document.getElementById('cbt-question-form').onsubmit = async function(e) {
@@ -1264,8 +1370,7 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
   msgDiv.textContent = '';
   msgDiv.style.color = '#15a55a';
 
-  // ...validation and submission logic, unchanged from previous...
-  // Update options mapping for new object {value: ...}
+  // ... validation logic unchanged ...
   const classId = document.getElementById('cbt-class-select').value;
   const subjectId = document.getElementById('cbt-subject-select').value;
   const title = document.getElementById('cbt-title').value.trim();
@@ -1317,10 +1422,10 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
     subject: subjectId,
     duration,
     questions: cbtQuestions.map(q => ({
-  text: q.text,
-  options: q.options.map(o => ({ value: o.value })), // <-- CORRECT!
-  answer: q.answer,
-  score: q.score
+      text: q.text,
+      options: q.options.map(o => ({ value: o.value })), 
+      answer: q.answer,
+      score: q.score
     }))
   };
   try {
@@ -1334,6 +1439,7 @@ document.getElementById('cbt-question-form').onsubmit = async function(e) {
     msgDiv.textContent = 'CBT uploaded successfully!';
     cbtQuestions = [];
     renderCBTQuestions();
+    clearCBTDraftFromLocalStorage(); // <-- CLEAR DRAFT ON SUCCESS
   } catch (err) {
     msgDiv.style.color = 'red';
     msgDiv.textContent = 'Upload failed: ' + err.message;

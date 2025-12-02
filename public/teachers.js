@@ -1219,11 +1219,11 @@ document.getElementById('profile-form').onsubmit = async function (e) {
 let cbtQuestions = [];
 
 function renderCBTQuestionSection() {
-  // Populate classes and subjects dropdowns
   const classSel = document.getElementById('cbt-class-select');
   const subjSel = document.getElementById('cbt-subject-select');
   classSel.innerHTML = '';
   subjSel.innerHTML = '';
+
   if (!teacher.classes) return;
   teacher.classes.forEach(cls => {
     let opt = document.createElement('option');
@@ -1231,22 +1231,50 @@ function renderCBTQuestionSection() {
     opt.innerText = cls.name;
     classSel.appendChild(opt);
   });
-  classSel.onchange = function() {
-    const subjects = subjectsByClass[classSel.value] || [];
-    subjSel.innerHTML = '';
-    subjects.forEach(subj => {
-      let opt = document.createElement('option');
-      opt.value = subj.id;
-      opt.innerText = subj.name;
-      subjSel.appendChild(opt);
-    });
-  };
-  // Trigger once
-  classSel.onchange();
 
-  // Setup question adder
-  cbtQuestions = [];
-  renderCBTQuestions();
+  let justRestoredDraft = false;
+  if (!cbtDraftRestoreWarned) {
+    cbtDraftRestoreWarned = true;
+    const draft = loadCBTDraftFromLocalStorage();
+    if (draft && (draft.title || (draft.questions && draft.questions.length > 0))) {
+      if (confirm("It looks like you have an unfinished CBT draft. Restore it?")) {
+        justRestoredDraft = true;
+        cbtQuestions = Array.isArray(draft.questions) ? draft.questions : [];
+        setTimeout(() => {
+          classSel.value = draft.classId || '';
+          classSel.dispatchEvent(new Event('change'));
+          setTimeout(() => {
+            subjSel.value = draft.subjectId || '';
+            document.getElementById('cbt-title').value = draft.title || '';
+            document.getElementById('cbt-duration').value = draft.duration || '';
+            renderCBTQuestions(); // Will fill in Quill editors with draft text/options
+          }, 200);
+        }, 100);
+      } else {
+        clearCBTDraftFromLocalStorage();
+      }
+    }
+  }
+  if (!justRestoredDraft) {
+    cbtQuestions = [];
+    classSel.onchange = function() {
+      const subjects = subjectsByClass[classSel.value] || [];
+      subjSel.innerHTML = '';
+      subjects.forEach(subj => {
+        let opt = document.createElement('option');
+        opt.value = subj.id;
+        opt.innerText = subj.name;
+        subjSel.appendChild(opt);
+      });
+      saveCBTDraftToLocalStorage();
+    };
+    classSel.onchange();
+    ['cbt-class-select', 'cbt-subject-select', 'cbt-title', 'cbt-duration'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.oninput = saveCBTDraftToLocalStorage;
+    });
+    renderCBTQuestions();
+  }
 }
 
 function getQuillConfig() {

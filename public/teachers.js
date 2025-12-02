@@ -1218,6 +1218,19 @@ document.getElementById('profile-form').onsubmit = async function (e) {
 
 let cbtQuestions = [];
 
+function trySetSubjectDropdown(subjectSel, value, tries = 0) {
+  if (!value) return;
+  for (let i = 0; i < subjectSel.options.length; ++i) {
+    if (subjectSel.options[i].value === value) {
+      subjectSel.value = value;
+      return;
+    }
+  }
+  if (tries < 15) {
+    setTimeout(() => trySetSubjectDropdown(subjectSel, value, tries + 1), 80);
+  }
+}
+
 function renderCBTQuestionSection() {
   const classSel = document.getElementById('cbt-class-select');
   const subjSel = document.getElementById('cbt-subject-select');
@@ -1244,10 +1257,10 @@ function renderCBTQuestionSection() {
           classSel.value = draft.classId || '';
           classSel.dispatchEvent(new Event('change'));
           setTimeout(() => {
-            subjSel.value = draft.subjectId || '';
+            trySetSubjectDropdown(subjSel, draft.subjectId || '');
             document.getElementById('cbt-title').value = draft.title || '';
             document.getElementById('cbt-duration').value = draft.duration || '';
-            renderCBTQuestions(); // Will fill in Quill editors with draft text/options
+            renderCBTQuestions();
           }, 200);
         }, 100);
       } else {

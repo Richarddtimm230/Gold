@@ -1218,16 +1218,19 @@ document.getElementById('profile-form').onsubmit = async function (e) {
 
 let cbtQuestions = [];
 
-function trySetSubjectDropdown(subjectSel, value, tries = 0) {
-  if (!value) return;
+function trySetSubjectDropdown(subjectSel, value, cb, tries = 0) {
+  if (!value) { if(cb) cb(); return; }
   for (let i = 0; i < subjectSel.options.length; ++i) {
     if (subjectSel.options[i].value === value) {
       subjectSel.value = value;
+      if(cb) cb();
       return;
     }
   }
-  if (tries < 15) {
-    setTimeout(() => trySetSubjectDropdown(subjectSel, value, tries + 1), 80);
+  if (tries < 20) {
+    setTimeout(() => trySetSubjectDropdown(subjectSel, value, cb, tries + 1), 80);
+  } else {
+    if(cb) cb();
   }
 }
 
@@ -1253,16 +1256,16 @@ function renderCBTQuestionSection() {
       if (confirm("It looks like you have an unfinished CBT draft. Restore it?")) {
         justRestoredDraft = true;
         cbtQuestions = Array.isArray(draft.questions) ? draft.questions : [];
-        setTimeout(() => {
-          classSel.value = draft.classId || '';
-          classSel.dispatchEvent(new Event('change'));
-          setTimeout(() => {
-            trySetSubjectDropdown(subjSel, draft.subjectId || '');
-            document.getElementById('cbt-title').value = draft.title || '';
-            document.getElementById('cbt-duration').value = draft.duration || '';
-            renderCBTQuestions();
-          }, 200);
-        }, 100);
+        // 1. Set class; 2. When changed, populate subjects; 3. TRY subject, then fill the rest and render
+        classSel.value = draft.classId || '';
+        classSel.dispatchEvent(new Event('change')); // populates subjSel
+
+        // Try setting subjectId after class/subject dropdown is updated.
+        trySetSubjectDropdown(subjSel, draft.subjectId || '', () => {
+          document.getElementById('cbt-title').value = draft.title || '';
+          document.getElementById('cbt-duration').value = draft.duration || '';
+          renderCBTQuestions();
+        });
       } else {
         clearCBTDraftFromLocalStorage();
       }

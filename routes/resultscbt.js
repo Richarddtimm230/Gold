@@ -67,14 +67,18 @@ router.post('/', async (req, res) => {
       }
     }
 
-    const result = new Result({
-      student: studentId,
-      exam,
-      answers,
-      score: calculatedScore,
-      startedAt,
-      finishedAt
-    });
+    const studentDoc = await Student.findById(studentId);
+if (!studentDoc) return res.status(400).json({ error: 'Student not found.' });
+
+const result = new Result({
+  student: studentId,
+  exam,
+  answers,
+  score: calculatedScore,
+  startedAt,
+  finishedAt,
+  class: studentDoc.class  // Add this line!
+});
 
     await result.save();
     res.status(201).json({ success: true, resultId: result._id, score: calculatedScore });

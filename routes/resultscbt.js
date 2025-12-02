@@ -3,6 +3,7 @@ const router = express.Router();
 const Result = require('../models/ResultCBT');
 const Exam = require('../models/CBTExam');
 const Student = require('../models/Student');
+const Class = require('../models/Class'); // Ensure this is available
 
 // GET /api/results - List all results
 router.get('/', async (req, res) => {
@@ -25,6 +26,7 @@ router.get('/', async (req, res) => {
     finishedAt: r.finishedAt
   })));
 });
+
 // DELETE /api/results/:id - Delete a CBT result
 router.delete('/:id', async (req, res) => {
   try {
@@ -35,6 +37,7 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 // POST /api/result - Save a new CBT result
 router.post('/', async (req, res) => {
   try {
@@ -52,10 +55,9 @@ router.post('/', async (req, res) => {
     let calculatedScore = 0;
     if (Array.isArray(examDoc.questions) && Array.isArray(answers)) {
       for (let i = 0; i < answers.length; i++) {
-        // Accept both object or number answers in the DB
         const correct = typeof examDoc.questions[i]?.answer === 'number'
-            ? examDoc.questions[i].answer
-            : null;
+          ? examDoc.questions[i].answer
+          : null;
         if (
           answers[i] !== null &&
           typeof answers[i] !== 'undefined' &&
@@ -67,18 +69,28 @@ router.post('/', async (req, res) => {
       }
     }
 
+    // --- Correct: Always save ObjectId for class ---
+    // Find the student's class and always use the Class ObjectId
     const studentDoc = await Student.findById(studentId);
-if (!studentDoc) return res.status(400).json({ error: 'Student not found.' });
+    if (!studentDoc) return res.status(400).json({ error: 'Student not found.' });
+    let classId = studentDoc.class;
 
-const result = new Result({
-  student: studentId,
-  exam,
-  answers,
-  score: calculatedScore,
-  startedAt,
-  finishedAt,
-  class: studentDoc.class  // Add this line!
-});
+    // If it's a string and not an ObjectId, try to resolve using the name
+    if (typeof classId === 'string' && !classId.match(/^[a-f\d]{24}$/i)) {
+      const classDoc = await Class.findOne({ name: classId });
+      if (!classDoc) return res.status(400).json({ error: 'Class not found for name: ' + classId });
+      classId = classDoc._id;
+    }
+
+    const result = new Result({
+      student: studentId,
+      exam,
+      answers,
+      score: calculatedScore,
+      startedAt,
+      finishedAt,
+      class: classId // Must be ObjectId
+    });
 
     await result.save();
     res.status(201).json({ success: true, resultId: result._id, score: calculatedScore });

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAU Exam Wizard - Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.1/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.1/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/dist/heroicons.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-4xl min-h-screen bg-white rounded-lg shadow-xl flex flex-col overflow-hidden md:h-screen" style="height: 100vh;">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+            <h1 class="text-2xl font-bold text-center">OAU Exam Wizard</h1>
+            <p class="text-center text-blue-100 text-sm mt-1">Your AI-powered exam assistant</p>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-2 space-y-6 bg-gray-50"></div>
+
+        <!-- Attachment Preview Area -->
+        <div id="attachment-preview" class="hidden px-6 py-3 bg-gray-100 border-t border-gray-200">
+            <div id="preview-list" class="flex flex-wrap gap-3"></div>
+            <button id="clear-attachments" class="text-sm text-red-600 hover:text-red-800">Clear all</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t border-gray-200 bg-white p-4 mb-10 md:mb-8">
+            <form id="chat-form" class="flex items-end gap-3 flex-wrap sm:flex-col">
+                <!-- Attachment Button -->
+                <label class="cursor-pointer flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.586a6 6 0 108.486 ..."/>
+                    </svg>
+                    <input id="file-input" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif" class="hidden" />
+                </label>
+                <div class="flex-1 w-full">
+                    <textarea id="message-input" rows="1" class="w-full resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                <button id="send-button" type="submit" class="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Backend base URL
+        const BACKEND_URL = "https://examguard-jmvj.onrender.com";
+
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const fileInput = document.getElementById('file-input');
+        const attachmentPreview = document.getElementById('attachment-preview');
+        const previewList = document.getElementById('preview-list');
+        const clearAttachments = document.getElementById('clear-attachments');
+        const chatForm = document.getElementById('chat-form');
+
+        let attachedFiles = [];
+        let chatHistory = [];
+
+        // Initial message bubble
+        function showInitialMessage() {
+            chatContainer.innerHTML = `
+                <div class="flex items-start gap-3 max-w-3xl">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                        AI
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="bg-white rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm max-w-lg">
+                            <p class="text-gray-800">Hello! I'm the OAU Exam Wizard. Upload any exam material or ask a question, and I'll guide you as a seasoned OAU lecturer. Once done, I'll generate realistic MCQs to test your learning. Let's get started!</p>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1 ml-2">Just now</span>
+                    </div>
+                </div>
+            `;
+        }
+        showInitialMessage();
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+            updateSendButton();
+        });
+
+        function updateSendButton() {
+            sendButton.disabled = messageInput.value.trim() === '' && attachedFiles.length === 0;
+        }
+
+        // File Handling
+        fileInput.addEventListener('change', () => {
+            const newFiles = Array.from(fileInput.files);
+            attachedFiles = attachedFiles.concat(newFiles);
+            renderPreviews();
+            updateSendButton();
+        });
+
+        function renderPreviews() {
+            previewList.innerHTML = '';
+            attachedFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-300';
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'w-12 h-12 object-cover rounded';
+                    div.appendChild(img);
+                } else {
+                    div.innerHTML += `<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z"/>
+                        </svg>
+                        </div>`;
+                }
+                const info = document.createElement('div');
+                info.className = 'text-sm';
+                info.innerHTML = `<p class="font-medium text-gray-800 truncate max-w-xs">${file.name}</p>
+                                  <p class="text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>`;
+                div.appendChild(info);
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'ml-2 text-red-600 hover:text-red-800';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => {
+                    attachedFiles.splice(index, 1);
+                    renderPreviews();
+                    updateSendButton();
+                };
+                div.appendChild(removeBtn);
+                previewList.appendChild(div);
+            });
+
+            attachmentPreview.classList.toggle('hidden', attachedFiles.length === 0);
+        }
+
+        clearAttachments.addEventListener('click', () => {
+            attachedFiles = [];
+            renderPreviews();
+            fileInput.value = '';
+            updateSendButton();
+        });
+
+        // Create Message Bubble
+        function createBubble({ avatar, content, time, isUser }) {
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = isUser ?
+                'flex justify-end items-start gap-3 max-w-3xl ml-auto' :
+                'flex items-start gap-3 max-w-3xl';
+            bubbleDiv.innerHTML = `
+                ${!isUser ? avatar : ''}
+                <div class="flex flex-col">
+                    <div class="${isUser ? 'bg-blue-600 text-white' : 'bg-white text-gray-800'} rounded-2xl ${isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'} px-5 py-3 shadow-sm max-w-lg break-words oau-bubble">
+                        ${content}
+                    </div>
+                    <span class="text-xs text-gray-500 mt-1 ${isUser ? 'mr-2 text-right' : 'ml-2'}">${time}</span>
+                </div>
+                ${isUser ? avatar : ''}
+            `;
+            return bubbleDiv;
+        }
+
+        // Format MCQs
+        function renderMCQs(mcqs) {
+            let html = '<div class="mt-5"><h3 class="text-lg font-bold mb-2 text-indigo-700">CBT Practice Questions</h3>';
+            html += '<div class="space-y-4">';
+            mcqs.forEach((q, idx) => {
+                html += `<div class="bg-gray-50 border border-blue-200 rounded-xl p-4">
+                    <div class="font-semibold text-gray-900">Q${idx + 1}. ${q.text}</div>
+                    <ul class="mt-2 mb-2 space-y-1">`;
+                q.options.forEach((opt, i) => {
+                    html += `<li class="flex items-center gap-2">
+                        <span class="font-bold text-xs text-blue-500">${String.fromCharCode(65 + i)}.</span>
+                        <span class="ml-1">${opt}</span>
+                    </li>`;
+                });
+                html += `</ul>
+                        <div class="text-xs text-green-700 mb-1"><b>Correct:</b> ${String.fromCharCode(65 + (q.answer || 0))}</div>
+                        <div class="text-xs text-gray-600"><b>Why?</b> ${q.explanation}</div>
+                    </div>`;
+            });
+            html += '</div></div>';
+            return html;
+        }
+
+        // Backend API Chat
+        async function sendChatMessage(message, files = []) {
+            const formData = new FormData();
+            if (message) formData.append("message", message);
+            files.forEach((file, i) => formData.append("files", file));
+            formData.append("channel", "oau-wizard");
+            // Add chat context/history if needed: formData.append("history", JSON.stringify(chatHistory));
+
+            // Show loader
+            showAILoader();
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/oau-wizard/chat`, {
+                    method: "POST",
+                    body: formData
+                });
+                if (!res.ok) throw new Error("Failed to connect to server");
+                const data = await res.json();
+
+                // Explanation/response bubble
+                chatContainer.appendChild(createBubble({
+                    avatar: `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">AI</div>`,
+                    content: data.reply || "No response.",
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isUser: false
+                }));
+
+                // MCQs bubble
+                if (data.mcqs && Array.isArray(data.mcqs) && data.mcqs.length > 0) {
+                    chatContainer.appendChild(createBubble({
+                        avatar: `<div></div>`,
+                        content: renderMCQs(data.mcqs),
+                        time: "CBT Ready",
+                        isUser: false
+                    }));
+                }
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                chatHistory.push({ question: message, response: data.reply, mcqs: data.mcqs });
+
+            } catch (err) {
+                chatContainer.appendChild(createBubble({
+                    avatar: `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-red-700 flex items-center justify-center text-white font-bold text-lg">Err</div>`,
+                    content: `<span class="text-red-600">Unable to connect. ${err.message}</span>`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isUser: false
+                }));
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } finally {
+                removeAILoader();
+            }
+        }
+
+        function showAILoader() {
+            removeAILoader();
+            const loader = document.createElement('div');
+            loader.id = 'ai-loading';
+            loader.className = 'flex items-start gap-3 max-w-3xl';
+            loader.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-indigo-400 flex items-center justify-center text-white font-bold text-lg">AI</div>
+                <div class="flex flex-col">
+                    <div class="bg-white rounded-2xl rounded-tl-sm px-5 py-3 max-w-lg shadow-sm text-gray-700 flex items-center gap-2">
+                        <span class="font-semibold">Waiting for your OAU lecturer...</span>
+                        <svg class="w-6 h-6 animate-spin text-blue-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(loader);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        function removeAILoader() {
+            const loader = document.getElementById('ai-loading');
+            if (loader) loader.remove();
+        }
+
+        // Handle form submit
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message && attachedFiles.length === 0) return;
+
+            // User message bubble
+            const avatar = `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg">You</div>`;
+            let bubbleContent = `${message ? `<p>${message}</p>` : ''}`;
+            attachedFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    bubbleContent += `<div class="mt-3 flex flex-col items-start w-full">
+                        <img src="${URL.createObjectURL(file)}" class="rounded-lg max-w-xs w-full h-auto object-contain overflow-hidden" style="max-height:200px;" alt="${file.name}">
+                        <div class="text-xs text-white/80 mt-1">${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>
+                    </div>`;
+                } else {
+                    bubbleContent += `<div class="mt-3 bg-white/20 rounded-lg p-3 flex items-center gap-3 w-full">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z"/></svg>
+                        <div>
+                            <p class="font-medium">${file.name}</p>
+                            <p class="text-sm opacity-80">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            chatContainer.appendChild(createBubble({
+                avatar,
+                content: bubbleContent,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isUser: true
+            }));
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Send to backend
+            await sendChatMessage(message, attachedFiles);
+
+            // Reset input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            attachedFiles = [];
+            renderPreviews();
+            fileInput.value = '';
+            updateSendButton();
+        });
+
+        // Also allow Enter to send
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        updateSendButton();
+    </script>
+    <style>
+        .oau-bubble * { word-break: break-word; }
+        .oau-bubble table, .oau-bubble ul, .oau-bubble ol { margin-top: 7px; margin-bottom: 7px; }
+        .oau-bubble h1, .oau-bubble h2, .oau-bubble h3, .oau-bubble h4 { margin-top:9px;margin-bottom:4px;color:#181c49;font-weight:600; }
+        .oau-bubble b, .oau-bubble strong { color:#1e40af; }
+    </style>
+</body>
+</html>

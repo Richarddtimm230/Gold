@@ -13,6 +13,133 @@ const CashRequest = require('../models/CashRequest');
 const Student = require('../models/Student');
 const Class = require('../models/Class');
 
+// ===== DASHBOARD SUMMARY =====
+
+/**
+ * GET /api/finance/summary
+ * Returns comprehensive financial summary
+ */
+router.get('/summary', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    // Total Revenue (All payments completed)
+    const totalRevenuePipeline = [
+      { $match: { status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const totalRevenueResult = await Payment.aggregate(totalRevenuePipeline);
+    const totalRevenue = totalRevenueResult[0]?.total || 0;
+
+    // Month Revenue
+    const monthRevenuePipeline = [
+      { $match: { status: 'completed', transactionDate: { $gte: startOfMonth } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const monthRevenueResult = await Payment.aggregate(monthRevenuePipeline);
+    const monthRevenue = monthRevenueResult[0]?.total || 0;
+
+    // Year Revenue
+    const yearRevenuePipeline = [
+      { $match: { status: 'completed', transactionDate: { $gte: startOfYear } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const yearRevenueResult = await Payment.aggregate(yearRevenuePipeline);
+    const yearRevenue = yearRevenueResult[0]?.total || 0;
+
+    // Pending Payments
+    const pendingPipeline = [
+      { $match: { status: { $in: ['pending', 'overdue'] } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const pendingResult = await Fee.aggregate(pendingPipeline);
+    const totalPending = pendingResult[0]?.total || 0;
+
+    // Paid Fees
+    const paidPipeline = [
+      { $match: { status: 'paid' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const paidResult = await Fee.aggregate(paidPipeline);
+    const totalPaid = paidResult[0]?.total || 0;
+
+    // Total Expenses
+    const expensesPipeline = [
+      { $match: { status: 'approved' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const expensesResult = await Expense.aggregate(expensesPipeline);
+    const totalExpenses = expensesResult[0]?.total || 0;
+
+    // Pending Expenses
+    const pendingExpensesPipeline = [
+      { $match: { status: 'pending' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const pendingExpensesResult = await Expense.aggregate(pendingExpensesPipeline);
+    const totalPendingExpenses = pendingExpensesResult[0]?.total || 0;
+
+    // Cash in Bank (Approved cash requests - disbursed)
+    const cashRequestsPipeline = [
+      { $match: { status: 'disbursed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const cashRequestsResult = await CashRequest.aggregate(cashRequestsPipeline);
+    const totalCashRequests = cashRequestsResult[0]?.total || 0;
+
+    // Count of unpaid students
+    const unpaidStudents = await Fee.countDocuments({ status: { $in: ['pending', 'overdue'] } });
+
+    // Count of overdue fees
+    const overdueFeesCount = await Fee.countDocuments({ 
+      status: 'overdue',
+      dueDate: { $lt: now }
+    });
+
+    // Invoice stats
+    const invoiceStats = await Invoice.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$netAmount' }
+        }
+      }
+    ]);
+
+    res.json({
+      revenue: {
+        total: totalRevenue,
+        thisMonth: monthRevenue,
+        thisYear: yearRevenue
+      },
+      fees: {
+        paid: totalPaid,
+        pending: totalPending,
+        unpaidStudents,
+        overdueCount: overdueFeesCount
+      },
+      expenses: {
+        approved: totalExpenses,
+        pending: totalPendingExpenses
+      },
+      cash: {
+        disbursed: totalCashRequests
+      },
+      invoices: invoiceStats.reduce((acc, item) => {
+        acc[item._id] = { count: item.count, amount: item.totalAmount };
+        return acc;
+      }, {}),
+      netIncome: totalRevenue - totalExpenses
+    });
+  } catch (err) {
+    console.error('Error fetching finance summary:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ===== DASHBOARD STATISTICS =====
 
 /**
@@ -49,6 +176,220 @@ router.get('/statistics', authMiddleware, adminAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching statistics:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== TRANSACTIONS =====
+
+/**
+ * GET /api/finance/transactions
+ * Fetch all financial transactions (payments, expenses, cash requests)
+ */
+router.get('/transactions', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const { type, status, startDate, endDate, limit = 100 } = req.query;
+    const skip = parseInt(req.query.skip) || 0;
+
+    let matchStage = {};
+    if (status) matchStage.status = status;
+    if (startDate && endDate) {
+      matchStage.transactionDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    let transactions = [];
+
+    if (!type || type === 'all') {
+      // Fetch payments
+      const payments = await Payment.find(matchStage)
+        .populate('student', 'name regNo')
+        .sort({ transactionDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
+
+      const paymentsFormatted = payments.map(p => ({
+        _id: p._id,
+        type: 'payment',
+        studentName: p.student?.name || 'N/A',
+        amount: p.amount,
+        status: p.status,
+        method: p.paymentMethod,
+        date: p.transactionDate,
+        ref: p.receiptNumber
+      }));
+
+      transactions = paymentsFormatted;
+    } else if (type === 'payment') {
+      const payments = await Payment.find(matchStage)
+        .populate('student', 'name regNo')
+        .sort({ transactionDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
+
+      transactions = payments.map(p => ({
+        _id: p._id,
+        type: 'payment',
+        studentName: p.student?.name || 'N/A',
+        amount: p.amount,
+        status: p.status,
+        method: p.paymentMethod,
+        date: p.transactionDate,
+        ref: p.receiptNumber
+      }));
+    } else if (type === 'expense') {
+      const expenses = await Expense.find(matchStage)
+        .sort({ requestDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
+
+      transactions = expenses.map(e => ({
+        _id: e._id,
+        type: 'expense',
+        description: e.purpose,
+        amount: e.amount,
+        status: e.status,
+        category: e.category,
+        date: e.requestDate,
+        ref: e.requestNumber
+      }));
+    } else if (type === 'cash') {
+      const cashRequests = await CashRequest.find(matchStage)
+        .sort({ requestDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip);
+
+      transactions = cashRequests.map(c => ({
+        _id: c._id,
+        type: 'cash',
+        description: c.reason,
+        amount: c.amount,
+        status: c.status,
+        date: c.requestDate,
+        ref: c.requestNumber
+      }));
+    }
+
+    res.json({
+      count: transactions.length,
+      transactions
+    });
+  } catch (err) {
+    console.error('Error fetching transactions:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== APPROVALS =====
+
+/**
+ * GET /api/finance/approvals
+ * Fetch pending approvals (expenses and cash requests)
+ */
+router.get('/approvals', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const pendingExpenses = await Expense.find({ status: 'pending' })
+      .sort({ requestDate: -1 })
+      .limit(50);
+
+    const pendingCashRequests = await CashRequest.find({ status: 'pending' })
+      .sort({ requestDate: -1 })
+      .limit(50);
+
+    const approvals = [
+      ...pendingExpenses.map(e => ({
+        _id: e._id,
+        type: 'expense',
+        requestNumber: e.requestNumber,
+        description: e.purpose,
+        amount: e.amount,
+        requestedBy: e.requestedBy,
+        category: e.category,
+        requestDate: e.requestDate,
+        priority: e.priority
+      })),
+      ...pendingCashRequests.map(c => ({
+        _id: c._id,
+        type: 'cash_request',
+        requestNumber: c.requestNumber,
+        description: c.reason,
+        amount: c.amount,
+        requestedBy: c.requestedBy,
+        purpose: c.purpose,
+        requestDate: c.requestDate,
+        priority: c.priority
+      }))
+    ];
+
+    approvals.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate));
+
+    res.json({
+      count: approvals.length,
+      approvals: approvals.slice(0, 100)
+    });
+  } catch (err) {
+    console.error('Error fetching approvals:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== BANK ACCOUNTS =====
+
+/**
+ * GET /api/finance/bank-accounts
+ * Fetch configured bank accounts
+ */
+router.get('/bank-accounts', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    // For now, return mock bank accounts
+    // In production, these would be stored in a BankAccount model
+    const bankAccounts = [
+      {
+        _id: '1',
+        bankName: 'First Bank Nigeria',
+        accountNumber: '1234567890',
+        accountName: 'Gold and Linc Schools',
+        accountType: 'Current',
+        balance: 5000000,
+        currency: 'NGN',
+        status: 'active',
+        createdAt: new Date('2024-01-15')
+      },
+      {
+        _id: '2',
+        bankName: 'Zenith Bank',
+        accountNumber: '0987654321',
+        accountName: 'Gold and Linc Schools',
+        accountType: 'Savings',
+        balance: 2500000,
+        currency: 'NGN',
+        status: 'active',
+        createdAt: new Date('2024-02-10')
+      },
+      {
+        _id: '3',
+        bankName: 'Guaranty Trust Bank',
+        accountNumber: '5555555555',
+        accountName: 'Gold and Linc Schools',
+        accountType: 'Current',
+        balance: 1800000,
+        currency: 'NGN',
+        status: 'active',
+        createdAt: new Date('2024-03-05')
+      }
+    ];
+
+    const totalBalance = bankAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    res.json({
+      accounts: bankAccounts,
+      totalBalance,
+      count: bankAccounts.length
+    });
+  } catch (err) {
+    console.error('Error fetching bank accounts:', err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -119,4 +119,5 @@ CashRequestSchema.index({ reason: 1 });
 CashRequestSchema.index({ requestNumber: 1 });
 CashRequestSchema.index({ approver: 1 });
 
-module.exports = mongoose.model('CashRequest', CashRequestSchema);
+// Export with check for existing model
+module.exports = mongoose.models.CashRequest || mongoose.model('CashRequest', CashRequestSchema);

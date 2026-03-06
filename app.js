@@ -20,14 +20,10 @@ const classesRoute = require('./routes/classes');
 const studentsRoute = require('./routes/students');
 const { router: authRoute, authMiddleware } = require('./routes/auth');
 const adminAuth = require('./middleware/adminAuth'); // or your path
-
-
 const dashboardRoute = require('./routes/dashboard');
-
 const adminRoute = require('./routes/admin');
 const staffRoute = require('./routes/staff');
 const staffsRoute = require('./routes/staffs');
-                                 
 const subjectsRoute = require('./routes/subjects');
 const familiesRoute = require('./routes/families');
 const parentsRoute = require('./routes/parents');
@@ -36,24 +32,21 @@ const academicsRoute = require('./routes/academics');
 const schoolAdminRoute = require('./routes/schoolAdmin');
 const schoolAdminsRoute = require('./routes/schoolAdmins');
 const transportRoute = require('./routes/transport');
-
 const hostelRoute = require('./routes/hostel');
 const assignmentsRoute = require('./routes/assignments');
 const teachersRoute = require('./routes/teachers');
 const teacherResultsRoute = require('./routes/teacherResults');
-//...
 const examRoute = require('./routes/exam');
 const activityRoute = require('./routes/activities');
 const uploadRoute = require('./routes/upload');
 const resultscbtRoute = require('./routes/resultscbt');
+const admissionRoute = require('./routes/admission'); // NEW
 
-//...
+// Mount routes
 app.use('/api/exam', examRoute);
 app.use('/api/result', resultscbtRoute);
 app.use('/api/activity', activityRoute);
 app.use('/api/upload', uploadRoute);
-//...
-// 2. Mount it with a path
 app.use('/api/teachers', teacherResultsRoute);
 app.use('/api/teachers', teachersRoute);
 app.use('/api/assignments', assignmentsRoute);
@@ -66,25 +59,18 @@ app.use('/api/fees', feesRoute);
 app.use('/api/academics', academicsRoute);
 app.use('/api/families', familiesRoute);
 app.use('/api/parents', parentsRoute);
-// Route mounting
 app.use('/api/auth', authRoute);
 app.use('/api/staff', staffRoute);
 app.use('/api/staffs', staffsRoute);
 app.use('/api', dashboardRoute);
-
-
-
 app.use('/api/results', resultsRoute);
-
 app.use('/api/classes', authMiddleware, adminAuth, classesRoute);
-
 app.use('/api/student', studentsRoute);
 app.use('/api/students', studentsRoute);
-
-
-
 app.use('/api/admin', adminRoute);
 app.use('/api/report/preferences', require('./routes/reportPreferences'));
+app.use('/api/admission', admissionRoute); // NEW - Admission routes
+
 // Super Admin protected route
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') {
@@ -118,3 +104,5 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/myschoolap
     process.exit(1);
   }
 })();
+
+module.exports = app;

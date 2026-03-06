@@ -19,7 +19,7 @@ const AdmissionSetupSchema = new mongoose.Schema({
   arm: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Arm',
-    required: true
+    required: false
   },
   startDate: {
     type: Date,

@@ -90,4 +90,5 @@ FeeSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('Fee', FeeSchema);
+// Export with check for existing model
+module.exports = mongoose.models.Fee || mongoose.model('Fee', FeeSchema);

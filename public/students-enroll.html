@@ -359,6 +359,10 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
       font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
     }
 
     .btn-back {
@@ -367,7 +371,7 @@
       color: var(--accent);
     }
 
-    .btn-back:hover {
+    .btn-back:hover:not(:disabled) {
       background: #f8fafc;
     }
 
@@ -376,14 +380,50 @@
       color: #fff;
     }
 
-    .btn-next:hover {
+    .btn-next:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
     }
 
-    .btn-next:disabled {
+    .btn-next:disabled,
+    .btn-back:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    /* Loading spinner styles */
+    .btn-spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid #fff;
+      border-radius: 50%;
+      animation: btn-spin 0.8s linear infinite;
+    }
+
+    .btn-back .btn-spinner {
+      border-top-color: var(--accent-2);
+      border-color: rgba(15, 23, 42, 0.2);
+    }
+
+    @keyframes btn-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .btn-text {
+      display: inline;
+    }
+
+    .btn-next:disabled .btn-text,
+    .btn-back:disabled .btn-text {
+      display: none;
+    }
+
+    .btn-next:disabled .btn-spinner,
+    .btn-back:disabled .btn-spinner {
+      display: block;
     }
 
     .enroll-success {
@@ -493,6 +533,7 @@
       .btn-back,
       .btn-next {
         width: 100%;
+        justify-content: center;
       }
 
       .icon-btn {
@@ -780,13 +821,17 @@
 
           <!-- ACTION BUTTONS -->
           <div class="enroll-actions">
-            <button type="button" class="btn-back" id="back-btn" style="display:none;">← Back</button>
-            <button type="button" class="btn-next" id="next-btn">Next →</button>
+            <button type="button" class="btn-back" id="back-btn" style="display:none;">
+              <span class="btn-text">← Back</span>
+              <div class="btn-spinner"></div>
+            </button>
+            <button type="button" class="btn-next" id="next-btn">
+              <span class="btn-text">Next →</span>
+              <div class="btn-spinner"></div>
+            </button>
             <button type="submit" class="btn-next" id="submit-btn" style="display:none;">
-              <span id="submit-text">Submit</span>
-              <span id="form-spinner" style="display:none; margin-left: 8px;">
-                <i class="fas fa-spinner fa-spin"></i>
-              </span>
+              <span class="btn-text">Submit</span>
+              <div class="btn-spinner"></div>
             </button>
           </div>
         </form>
@@ -874,27 +919,50 @@
         document.getElementById('step-' + s).style.display = (s === step) ? 'flex' : 'none';
         document.querySelectorAll('.step')[s - 1].classList.toggle('step-active', s === step);
       });
-      document.getElementById('back-btn').style.display = (step > 1) ? 'inline-block' : 'none';
-      document.getElementById('next-btn').style.display = (step < 3) ? 'inline-block' : 'none';
-      document.getElementById('submit-btn').style.display = (step === 3) ? 'inline-block' : 'none';
+      document.getElementById('back-btn').style.display = (step > 1) ? 'inline-flex' : 'none';
+      document.getElementById('next-btn').style.display = (step < 3) ? 'inline-flex' : 'none';
+      document.getElementById('submit-btn').style.display = (step === 3) ? 'inline-flex' : 'none';
     }
 
-    document.getElementById('next-btn').onclick = async () => {
+    document.getElementById('next-btn').onclick = async (e) => {
+      e.preventDefault();
+      
       if (validateStep(currentStep)) {
+        // Disable button and show loader
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.disabled = true;
+        
+        // Simulate processing with 1 second delay for smooth animation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // When moving to step 2, generate registration number and scratch card if not set yet
         if (currentStep === 1) {
           await generateRegistrationNumber();
           generateScratchCard();
         }
+        
         currentStep++;
         showStep(currentStep);
+        
+        // Re-enable button
+        nextBtn.disabled = false;
       } else {
         alert('Please complete all required fields for this step.');
       }
     };
 
-    document.getElementById('back-btn').onclick = () => {
-      currentStep--;
-      showStep(currentStep);
+    document.getElementById('back-btn').onclick = (e) => {
+      e.preventDefault();
+      
+      const backBtn = document.getElementById('back-btn');
+      backBtn.disabled = true;
+      
+      // Simulate processing with 500ms delay for smooth animation
+      setTimeout(() => {
+        currentStep--;
+        showStep(currentStep);
+        backBtn.disabled = false;
+      }, 500);
     };
 
     showStep(currentStep);
@@ -1013,8 +1081,6 @@
       const form = e.target;
       const formData = new FormData(form);
       const submitBtn = document.getElementById('submit-btn');
-      const spinner = document.getElementById('form-spinner');
-      const submitText = document.getElementById('submit-text');
       const photoInput = document.getElementById('student-photo');
       
       if (photoInput && photoInput.files.length) {
@@ -1022,8 +1088,6 @@
       }
 
       submitBtn.disabled = true;
-      submitText.style.display = 'none';
-      spinner.style.display = 'inline-block';
 
       try {
         const res = await fetch(API_BASE_URL + '/api/students', {
@@ -1048,8 +1112,6 @@
         alert('Network error occurred.');
       } finally {
         submitBtn.disabled = false;
-        submitText.style.display = 'inline';
-        spinner.style.display = 'none';
       }
     };
 

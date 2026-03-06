@@ -4,111 +4,123 @@ const router = express.Router();
 
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
-// ... other code above
+const Student = require('../models/Student');
+const teacherAuth = require('../middleware/teacherAuth');
 
-// Only keep THIS endpoint for adding subjects to a class as a teacher
-const teacherAuth = require('../middleware/teacherAuth'); // Add this at top if not present
+// ===== GET ENDPOINTS =====
 
-router.post('/:classId/subjects', teacherAuth, async (req, res) => {
-  const { classId } = req.params;
-  const { subjectName } = req.body;
-
-  if (!subjectName || !subjectName.trim()) {
-    return res.status(400).json({ error: "Subject name required" });
-  }
-
-  // Find or create subject, and ensure its class field is set
-  let subject = await Subject.findOne({ name: subjectName.trim() });
-  if (!subject) {
-    subject = new Subject({ name: subjectName.trim(), class: classId });
-    await subject.save();
-  } else if (!subject.class || String(subject.class) !== String(classId)) {
-    subject.class = classId;
-    await subject.save();
-  }
-
-  const cls = await Class.findById(classId);
-  if (!cls) return res.status(404).json({ error: "Class not found" });
-
-  let justAdded = null;
-  if (!cls.subjects.some(s =>
-    s.subject &&
-    String(s.subject._id) === String(subject._id) &&
-    String(s.teacher) === String(req.staff._id)
-  )) {
-    cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
-    await cls.save();
-    justAdded = { subject: subject._id, teacher: req.staff._id };
-  }
-
-  // Populate the subject for the response
-  await cls.populate([
-    { path: 'subjects.subject', model: 'Subject' },
-    { path: 'subjects.teacher', model: 'Staff', select: 'first_name last_name email' }
-  ]);
-  // Find the just-added subject-teacher pair
-  const added = cls.subjects.find(s =>
-    s.subject &&
-    String(s.subject._id) === String(subject._id) &&
-    String(s.teacher._id) === String(req.staff._id)
-  );
-  res.json({
-    success: true,
-    subject: added
-      ? {
-        id: added.subject._id,
-        name: added.subject.name,
-        teacher: added.teacher
-          ? {
-            id: added.teacher._id,
-            name: `${added.teacher.first_name} ${added.teacher.last_name}`,
-            email: added.teacher.email
-          }
-          : null
-      }
-      : null
-  });
-});
-// NOTE: No authentication middleware here, so all authenticated users can access
+// GET /api/classes - Get all classes with optional teacher filter
 router.get('/', async (req, res) => {
   try {
     const teacherId = req.query.teacher_id;
     let query = {};
-    if (teacherId) query.teachers = teacherId; // teachers should be array of ObjectId
+    if (teacherId) query.teachers = teacherId;
+    
     const classes = await Class.find(query).populate('subjects');
     const output = classes.map(cls => {
       return {
+        _id: cls._id,
         id: cls._id,
         name: cls.name,
         arms: Array.isArray(cls.arms) ? cls.arms : [],
         teachers: Array.isArray(cls.teachers) ? cls.teachers : [],
-        subjects: cls.subjects.map(sub => ({ id: sub._id, name: sub.name }))
+        subjects: cls.subjects.map(sub => ({ 
+          _id: sub._id, 
+          id: sub._id, 
+          name: sub.name 
+        }))
       };
     });
-    res.json({ classes: output });
+    res.json(output);
   } catch (err) {
+    console.error('Error fetching classes:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// POST /api/classes/:id/teachers
-router.post('/:id/teachers', async (req, res) => {
+// GET /api/classes/:classId/students - Get all students in a class
+router.get('/:classId/students', async (req, res) => {
   try {
-    const { teacherId } = req.body;
-    if (!teacherId) return res.status(400).json({ error: 'Teacher ID required' });
+    const { classId } = req.params;
 
-    const cls = await Class.findById(req.params.id);
-    if (!cls) return res.status(404).json({ error: 'Class not found' });
+    // Validate classId format
+    if (!classId || classId.length !== 24) {
+      return res.status(400).json({ error: 'Invalid class ID format' });
+    }
 
-    cls.teachers.push(teacherId);
-    await cls.save();
+    // Find the class first
+    const cls = await Class.findById(classId).populate('students');
+    if (!cls) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
 
-    res.json({ id: cls._id, ...cls.toObject() });
+    // Also fetch students directly filtered by class
+    const students = await Student.find({ class: classId });
+    
+    // Return students with relevant fields
+    const output = students.map(student => ({
+      _id: student._id,
+      id: student._id,
+      name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+      firstName: student.first_name,
+      lastName: student.last_name,
+      regNo: student.regNo || student.registration_number || 'N/A',
+      email: student.email,
+      class: student.class,
+      className: cls.name
+    }));
+
+    res.json(output);
   } catch (err) {
+    console.error('Error fetching class students:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// GET /api/classes/:classId - Get single class details
+router.get('/:classId', async (req, res) => {
+  try {
+    const { classId } = req.params;
+
+    if (!classId || classId.length !== 24) {
+      return res.status(400).json({ error: 'Invalid class ID format' });
+    }
+
+    const cls = await Class.findById(classId)
+      .populate('subjects')
+      .populate('teachers')
+      .populate('students');
+
+    if (!cls) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    res.json({
+      _id: cls._id,
+      id: cls._id,
+      name: cls.name,
+      arms: cls.arms || [],
+      teachers: cls.teachers || [],
+      subjects: (cls.subjects || []).map(sub => ({
+        _id: sub._id,
+        id: sub._id,
+        name: sub.name
+      })),
+      students: (cls.students || []).map(student => ({
+        _id: student._id,
+        id: student._id,
+        name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+        regNo: student.regNo || student.registration_number || 'N/A'
+      }))
+    });
+  } catch (err) {
+    console.error('Error fetching class:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== POST ENDPOINTS =====
+
 // POST /api/classes - Create a new class
 router.post('/', async (req, res) => {
   try {
@@ -118,67 +130,205 @@ router.post('/', async (req, res) => {
     const existing = await Class.findOne({ name });
     if (existing) return res.status(409).json({ error: 'Class already exists' });
 
-    const newClass = new Class({ name, arms: [], subjects: [], teachers: [] });
+    const newClass = new Class({ 
+      name, 
+      arms: [], 
+      subjects: [], 
+      teachers: [],
+      students: []
+    });
     await newClass.save();
-    res.status(201).json({ id: newClass._id, name });
+    
+    res.status(201).json({ 
+      _id: newClass._id,
+      id: newClass._id, 
+      name,
+      arms: [],
+      subjects: [],
+      teachers: [],
+      students: []
+    });
   } catch (err) {
+    console.error('Error creating class:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST /api/classes/:id/arms - Add/replace arms
+// POST /api/classes/:id/teachers - Add a teacher to a class
+router.post('/:id/teachers', async (req, res) => {
+  try {
+    const { teacherId } = req.body;
+    if (!teacherId) return res.status(400).json({ error: 'Teacher ID required' });
+
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ error: 'Class not found' });
+
+    // Check if teacher already assigned
+    if (!cls.teachers.includes(teacherId)) {
+      cls.teachers.push(teacherId);
+      await cls.save();
+    }
+
+    await cls.populate('teachers');
+    res.json({ 
+      _id: cls._id,
+      id: cls._id, 
+      ...cls.toObject() 
+    });
+  } catch (err) {
+    console.error('Error adding teacher:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/classes/:id/arms - Add/replace arms in a class
 router.post('/:id/arms', async (req, res) => {
   try {
     const { arms } = req.body;
-    if (!Array.isArray(arms)) return res.status(400).json({ error: 'Arms array required' });
-
-    const updated = await Class.findByIdAndUpdate(req.params.id, { arms }, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Class not found' });
-
-    res.json({ id: updated._id, ...updated.toObject() });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/classes/:id/subjects - Add/replace subjects
-router.post('/non/:id/subjects', async (req, res) => {
-  try {
-    const { subjects } = req.body;
-    if (!Array.isArray(subjects)) return res.status(400).json({ error: 'Subjects array required' });
-
-    const subjectIds = [];
-    for (const subj of subjects) {
-      let found = null;
-      if (typeof subj === 'string' && subj.length === 24) {
-        found = await Subject.findById(subj);
-      }
-      if (!found) {
-        found = await Subject.findOne({ name: subj });
-      }
-      if (!found) {
-        const created = new Subject({ name: subj });
-        await created.save();
-        found = created;
-      }
-      subjectIds.push(found._id);
+    if (!Array.isArray(arms)) {
+      return res.status(400).json({ error: 'Arms array required' });
     }
 
-    const updated = await Class.findByIdAndUpdate(req.params.id, { subjects: subjectIds }, { new: true }).populate('subjects');
+    const updated = await Class.findByIdAndUpdate(
+      req.params.id, 
+      { arms }, 
+      { new: true }
+    ).populate('subjects').populate('teachers');
+
     if (!updated) return res.status(404).json({ error: 'Class not found' });
 
-    res.json({
-      id: updated._id,
-      name: updated.name,
-      arms: updated.arms,
-      teachers: updated.teachers,
-      subjects: updated.subjects.map(sub => ({ id: sub._id, name: sub.name }))
+    res.json({ 
+      _id: updated._id,
+      id: updated._id, 
+      ...updated.toObject() 
     });
   } catch (err) {
+    console.error('Error updating arms:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// POST /api/classes/:id/subjects - Add/replace subjects in a class
+router.post('/:id/subjects', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { subjectName } = req.body;
 
+    if (!subjectName || !subjectName.trim()) {
+      return res.status(400).json({ error: "Subject name required" });
+    }
+
+    // Find or create subject
+    let subject = await Subject.findOne({ name: subjectName.trim() });
+    if (!subject) {
+      subject = new Subject({ 
+        name: subjectName.trim(), 
+        class: req.params.id 
+      });
+      await subject.save();
+    } else if (!subject.class || String(subject.class) !== String(req.params.id)) {
+      subject.class = req.params.id;
+      await subject.save();
+    }
+
+    const cls = await Class.findById(req.params.id);
+    if (!cls) return res.status(404).json({ error: "Class not found" });
+
+    // Add subject if not already in class
+    if (!cls.subjects.includes(subject._id)) {
+      cls.subjects.push(subject._id);
+      await cls.save();
+    }
+
+    await cls.populate('subjects');
+
+    res.json({
+      success: true,
+      _id: cls._id,
+      id: cls._id,
+      name: cls.name,
+      subjects: cls.subjects.map(sub => ({
+        _id: sub._id,
+        id: sub._id,
+        name: sub.name
+      }))
+    });
+  } catch (err) {
+    console.error('Error adding subject:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/classes/:id/subjects (Teacher version) - Add subjects as a teacher
+router.post('/:classId/subjects/teacher', teacherAuth, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { subjectName } = req.body;
+
+    if (!subjectName || !subjectName.trim()) {
+      return res.status(400).json({ error: "Subject name required" });
+    }
+
+    // Find or create subject
+    let subject = await Subject.findOne({ name: subjectName.trim() });
+    if (!subject) {
+      subject = new Subject({ 
+        name: subjectName.trim(), 
+        class: classId 
+      });
+      await subject.save();
+    } else if (!subject.class || String(subject.class) !== String(classId)) {
+      subject.class = classId;
+      await subject.save();
+    }
+
+    const cls = await Class.findById(classId);
+    if (!cls) return res.status(404).json({ error: "Class not found" });
+
+    let justAdded = null;
+    if (!cls.subjects.some(s =>
+      s.subject &&
+      String(s.subject._id) === String(subject._id) &&
+      String(s.teacher) === String(req.staff._id)
+    )) {
+      cls.subjects.push({ subject: subject._id, teacher: req.staff._id });
+      await cls.save();
+      justAdded = { subject: subject._id, teacher: req.staff._id };
+    }
+
+    await cls.populate([
+      { path: 'subjects.subject', model: 'Subject' },
+      { path: 'subjects.teacher', model: 'Staff', select: 'first_name last_name email' }
+    ]);
+
+    const added = cls.subjects.find(s =>
+      s.subject &&
+      String(s.subject._id) === String(subject._id) &&
+      String(s.teacher._id) === String(req.staff._id)
+    );
+
+    res.json({
+      success: true,
+      subject: added
+        ? {
+          _id: added.subject._id,
+          id: added.subject._id,
+          name: added.subject.name,
+          teacher: added.teacher
+            ? {
+              _id: added.teacher._id,
+              id: added.teacher._id,
+              name: `${added.teacher.first_name} ${added.teacher.last_name}`,
+              email: added.teacher.email
+            }
+            : null
+        }
+        : null
+    });
+  } catch (err) {
+    console.error('Error adding subject as teacher:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

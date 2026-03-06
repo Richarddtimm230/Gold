@@ -3,641 +3,1016 @@
 <head>
   <meta charset="UTF-8">
   <title>Student Promotion & Graduation | Gold and Linc Schools</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!--  Font + FontAwesome + Tailwind + Flowbite -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --primary: #007bff;
-      --sidebar-bg: #fff;
-      --sidebar-width: 260px;
-      --sidebar-width-mobile: 90vw;
-      --border-radius: 12px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.05);
-      --neutral: #f8f9fa;
-      --card-bg: #fff;
-      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
-      --font-main: 'Inter', Arial, sans-serif;
+      --bg-0: #f6f8ff;
+      --bg-1: #eef2ff;
+      --accent: #0f172a;
+      --accent-2: #1e40af;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --sidebar-w: 300px;
+      --radius: 10px;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
+      height: 100%;
       margin: 0;
-      padding: 0;
-      font-family: var(--font-main);
-      background: var(--neutral);
-      color: #222;
-      min-height: 100vh;
-      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      -webkit-font-smoothing: antialiased;
+      color: #07102a;
     }
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      width: var(--sidebar-width);
-      min-width: 180px;
-      max-width: 320px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      box-shadow: var(--shadow);
-      z-index: 1050;
-      padding: 0 0 2rem 0;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s ease;
-      overflow: hidden;
-    }
-    .sidebar nav {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25em;
-      margin-top: 1.5em;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      padding: 0.85em 1.3em;
+
+    a {
+      color: inherit;
       text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      border-left: 4px solid transparent;
-      border-radius: 0 6px 6px 0;
-      transition: background 0.16s, border-color 0.16s;
-      font-size: 1.05em;
     }
-    .sidebar a.active, .sidebar a:hover {
-      background: #f1f6fd;
-      border-left: 4px solid var(--primary);
-      color: var(--primary);
-    }
-    .profile {
+
+    .app {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem 1.2rem 1rem 1.2rem;
-      border-bottom: 1px solid #ececec;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: 2px solid #e3e6ea;
-    }
-    .name { font-weight: 700; font-size: 1.13em; }
-    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
-    .search {
-      padding: 0.7em 1.2em;
-      flex-shrink: 0;
-      background: var(--sidebar-bg);
-    }
-    .search input {
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      padding: 0.6em 0.9em;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      font-size: 1em;
-      background: #fff;
-      margin: 0;
-    }
-    .main-content {
       min-height: 100vh;
-      margin-left: var(--sidebar-width);
-      padding: 0 2.5vw 2vw 2.5vw;
-      transition: margin-left 0.25s;
+      align-items: stretch;
     }
-    header {
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: linear-gradient(180deg, #07102a 0%, #0b3b82 100%);
+      color: #fff;
+      padding: 20px 16px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 4px 0 28px rgba(2, 11, 24, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid rgba(255, 224, 102, 0.12);
+      background: #fff;
+    }
+
+    .brand .title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #ffe066;
+    }
+
+    .brand .subtitle {
+      font-size: 0.85rem;
+      color: #b0c4ff;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      flex: 1;
+    }
+
+    .nav a {
       display: flex;
       align-items: center;
-      height: 64px;
-      gap: 1.8em;
-      padding-top: 1.5vw;
-      padding-bottom: 1.5vw;
-    }
-    .school-title {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      font-size: 1.35rem;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
       font-weight: 700;
-      color: var(--primary);
-      letter-spacing: 1px;
+      font-size: 0.98rem;
+      color: #e6eefc;
+      transition: background 0.2s, color 0.2s;
     }
-    .logo {
-      width: 32px; height: 32px;
-      border-radius: 6px;
+
+    .nav a.active,
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffe066;
     }
-    .header-actions {
-      margin-left: auto;
+
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-w);
+      top: 0;
+      width: calc(100% - var(--sidebar-w));
+      z-index: 90;
       display: flex;
       align-items: center;
-      gap: 1.03em;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid #eef3ff;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     }
-    .header-actions .icon {
-      font-size: 1.43em;
-      cursor: pointer;
-      opacity: 0.88;
-      transition: opacity 0.2s;
+
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 20px;
+      flex: 1;
+      min-height: 100vh;
+      padding-top: 80px;
+      overflow-y: auto;
     }
-    .header-actions .icon:hover {
-      opacity: 1;
+
+    .page-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent-2);
     }
-    .sidebar-toggle {
-      display: none;
+
+    .flex {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .muted-small {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .icon-btn {
       background: none;
       border: none;
-      font-size: 2rem;
-      color: var(--primary);
-      margin-right: 1.2rem;
+      font-size: 18px;
       cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      height: 64px;
+      margin-left: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
     }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
     .sidebar-overlay {
       display: none;
     }
+
     .sidebar-overlay.active {
       display: block;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.25);
-      z-index: 1040;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 99;
     }
-    @media (max-width: 900px) {
-      .sidebar {
-        width: var(--sidebar-width-mobile);
-        min-width: 0;
-        max-width: 95vw;
-        height: 100vh;
-        max-height: 100vh;
-        transform: translateX(-105%);
-        position: fixed;
-        z-index: 1050;
-        overflow: hidden;
-      }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-      .sidebar-toggle {
-        display: inline-flex;
-      }
-      .sidebar-overlay.active {
-        display: block;
-      }
-      body.sidebar-open {
-        overflow: hidden;
-      }
-      .main-content { margin-left: 0; padding: 0 3vw; }
+
+    /* Page Content */
+    .page-header {
+      margin-bottom: 24px;
     }
-    @media (max-width: 600px) {
-      .main-content { padding: 0 2vw; }
-      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .avatar { width: 37px; height: 37px; }
-      .name, .role { font-size: 0.96rem; }
-      .school-title span { font-size: 1.04rem; }
-      header { gap: 0.9em; }
-    }
-    @media (max-width: 400px) {
-      html { font-size: 13px; }
-      .sidebar { width: 97vw; }
-    }
-    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
-    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
-    .promotion-title {
-      margin: 1.5em 0 0.7em 0;
-      font-size: 1.4em;
-      font-weight: 700;
-      color: #222;
+
+    .page-header-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin: 0 0 8px 0;
       display: flex;
       align-items: center;
-      gap: 0.5em;
+      gap: 12px;
     }
-    .promotion-section {
+
+    .page-header-subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
       background: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      margin-top: 2em;
-      padding: 2.2em 1.7em 2em 1.7em;
-      max-width: 1100px;
-      width: 100%;
+      border-radius: var(--radius);
+      border: 1px solid #eef3ff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 20px;
+      margin-bottom: 24px;
     }
-    .promotion-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.3em;
-      margin-bottom: 1.1em;
-      align-items: center;
+
+    .filter-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .promotion-filters select, .promotion-filters input {
-      padding: 0.6em 0.9em;
-      border-radius: 7px;
-      border: 1px solid #ddeaff;
-      font-size: 1em;
-      min-width: 180px;
+
+    .filter-controls select,
+    .filter-controls input {
+      padding: 10px 12px;
+      border: 1px solid #e3e8ee;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
       background: #fff;
     }
-    .promotion-filters button {
-      background: var(--primary);
+
+    .filter-controls select:focus,
+    .filter-controls input:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(90deg, var(--accent-2), #3b82f6);
       color: #fff;
       font-weight: 600;
-      padding: 0.6em 1.2em;
-      border-radius: 7px;
-      border: none;
       cursor: pointer;
-      transition: background 0.18s;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
     }
-    .promotion-filters button:hover { background: #005ecb; }
-    .promotion-table-wrap {
-      overflow-x: auto;
-      margin-top: 1.5em;
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
     }
-    .promotion-table {
-      min-width: 820px;
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
-    .promotion-table th, .promotion-table td {
-      padding: 0.95em 1.1em;
-      border-bottom: 1px solid #e5e8ef;
-      text-align: left;
-      font-size: 1em;
-    }
-    .promotion-table th {
-      background: #e9f0fe;
-      color: var(--primary);
-      font-weight: 700;
-      border-top: 0;
-    }
-    .promotion-table td {
-      background: #fff;
-    }
-    .promotion-table tr:last-child td {
-      border-bottom: none;
-    }
-    .action-btn {
-      padding: 0.35em 0.95em;
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.9rem;
       border-radius: 6px;
       border: none;
       font-weight: 600;
-      margin-right: 0.5em;
       cursor: pointer;
-      font-size: 0.97em;
-      background: #e9f0fe;
-      color: var(--primary);
-      transition: background 0.18s, color 0.18s;
-    }
-    .action-btn.promote { background: #18ba89; color: #fff; }
-    .action-btn.graduate { background: #835bd1; color: #fff; }
-    .action-btn.demote { background: #e74c3c; color: #fff; }
-    .action-btn.disabled, .action-btn[disabled] { opacity: 0.62; pointer-events: none; }
-    .bulk-actions-bar {
-      background: #f5fbff;
-      border-radius: 8px;
-      padding: 0.6em 1.1em;
-      margin: 1.15em 0 1em 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1em;
+      transition: all 0.2s;
+      display: inline-flex;
       align-items: center;
-      font-size: 1em;
-      box-shadow: 0 1px 7px rgba(0,0,0,0.04);
+      gap: 4px;
     }
-    .bulk-actions-bar button {
-      padding: 0.45em 1.1em;
-      border-radius: 7px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      background: var(--primary);
+
+    .btn-promote {
+      background: var(--success);
       color: #fff;
-      transition: background 0.18s;
     }
-    .bulk-actions-bar button:hover { background: #005ecb; }
+
+    .btn-promote:hover:not(:disabled) {
+      background: #15803d;
+    }
+
+    .btn-graduate {
+      background: #8b5cf6;
+      color: #fff;
+    }
+
+    .btn-graduate:hover:not(:disabled) {
+      background: #7c3aed;
+    }
+
+    .btn-demote {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-demote:hover:not(:disabled) {
+      background: #b91c1c;
+    }
+
+    .btn-sm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Bulk Actions Bar */
+    .bulk-actions-bar {
+      background: #f0f4ff;
+      border: 1px solid #e3e8ee;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      animation: slideDown 0.2s ease;
+    }
+
+    .bulk-actions-bar.active {
+      display: flex;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .bulk-actions-bar-info {
+      font-weight: 600;
+      color: var(--accent-2);
+      margin-right: auto;
+    }
+
+    .bulk-actions-bar .btn {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid #eef3ff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .promotion-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    .promotion-table thead {
+      background: #f8fafc;
+      border-bottom: 2px solid #eef3ff;
+    }
+
+    .promotion-table th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--accent-2);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .promotion-table tbody tr {
+      border-bottom: 1px solid #eef3ff;
+      transition: background 0.2s;
+    }
+
+    .promotion-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .promotion-table td {
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      color: #222;
+    }
+
+    .promotion-table input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+
     .badge {
       display: inline-block;
-      border-radius: 9999px;
-      padding: 0.18em 0.8em;
-      font-size: 0.91em;
-      font-weight: 700;
-      margin-right: 0.2em;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
-    .badge-promoted { background: #18ba89; color: #fff; }
-    .badge-graduated { background: #835bd1; color: #fff; }
-    .badge-pending { background: #ffd600; color: #22305a; }
+
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-promoted {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-graduated {
+      background: #ede9fe;
+      color: #6b21a8;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Loading Spinner */
+    #pageSpinnerOverlay {
+      position: fixed;
+      z-index: 99999;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.93);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s;
+    }
+
+    .page-spinner {
+      border: 6px solid #ddeaff;
+      border-top: 6px solid #2647a6;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spinner-spin 1s linear infinite;
+    }
+
+    @keyframes spinner-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 280px;
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .topbar {
+        left: 0;
+        width: 100%;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 14px;
+        padding-top: 84px;
+      }
+
+      .page-header-title {
+        font-size: 1.4rem;
+      }
+
+      .filter-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .bulk-actions-bar {
+        flex-direction: column;
+      }
+
+      .bulk-actions-bar-info {
+        margin-right: 0;
+        margin-bottom: 12px;
+      }
+
+      .bulk-actions-bar .btn {
+        width: 100%;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn-sm {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 12px;
+        padding-top: 80px;
+      }
+
+      .page-header-title {
+        font-size: 1.2rem;
+      }
+
+      .filter-section {
+        padding: 16px;
+      }
+
+      .promotion-table th,
+      .promotion-table td {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+      }
+
+      .topbar {
+        padding: 10px 12px;
+      }
+
+      .page-title {
+        font-size: 1rem;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      background: #f4f8fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e7ee;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
-  <!-- Sidebar for desktop, overlays for mobile -->
-  <aside class="sidebar" id="sidebar">
-    <div class="profile">
-      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
-      <div>
-        <div class="name">SCHOOL ICT</div>
-        <div class="role">System Administrator</div>
+  <div id="pageSpinnerOverlay">
+    <div class="page-spinner"></div>
+  </div>
+
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+      <div class="brand">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo">
+        <div>
+          <div class="title">GOLD & LINC</div>
+          <div class="subtitle">Admin Portal</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="admin.html" class="nav-link">
+          <span>🏠</span> Dashboard
+        </a>
+        <a href="admission.html" class="nav-link">
+          <span>🎓</span> Admission
+        </a>
+        <a href="more.html" class="nav-link">
+          <span>🌐</span> Multi-location
+        </a>
+        <a href="people.html" class="nav-link">
+          <span>👥</span> People
+        </a>
+        <a href="academics.html" class="nav-link">
+          <span>📚</span> Academics
+        </a>
+        <a href="admin-cbt.html" class="nav-link">
+          <span>💻</span> CBT Configuration
+        </a>
+        <a href="results.html" class="nav-link">
+          <span>📄</span> Results
+        </a>
+        <a href="finance.html" class="nav-link">
+          <span>💰</span> Finance
+        </a>
+        <a href="attendance.html" class="nav-link">
+          <span>🗓️</span> Attendance
+        </a>
+        <a href="#" class="nav-link">
+          <span>⚙️</span> Settings
+        </a>
+      </nav>
+
+      <div class="muted-small" style="margin-top: auto;">
+        Signed in as <span id="adminName">Admin</span>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="topbar" role="banner">
+      <div class="flex">
+        <button id="sidebarToggle" class="icon-btn" aria-label="Toggle Sidebar" style="display: none; font-size: 24px;">☰</button>
+        <div class="page-title">Student Promotion & Graduation</div>
+      </div>
+      <div class="flex">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <button class="icon-btn" title="Settings">⚙️</button>
+        <button class="icon-btn" title="Search">🔍</button>
       </div>
     </div>
-    <div class="search">
-      <input type="text" placeholder="Quick search..." aria-label="Quick search">
-    </div>
-    <nav>
-      <a href="admin.html"><span>🏠</span> Dashboard</a>
-      <a href="admission"><span>🎓</span> Admission</a>
-      <a href="people.html"><span>👥</span> People</a>
-      <a href="academics.html"><span>📚</span> Academics</a>
-      <a href="e-class.html"><span>💻</span> E-Class</a>
-      <a href="results.html"><span>📄</span> Results</a>
-      <a href="finance.html"><span>💰</span> Finance</a>
-      <a href="attendance.html"><span>🗓️</span> Attendance</a>
-      <a href="settings.html"><span>⚙️</span> Admin</a>
-    </nav>
-  </aside>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <!-- Mobile navbar -->
-  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
-    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
-    <div class="font-bold text-primary text-lg flex items-center gap-2">
-      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
-      <span>Gold & Linc Schools</span>
-    </div>
-    <div></div>
-  </nav>
-  <!-- Main Content -->
-  <main class="main-content" style="margin-top:70px;">
-    <header>
-      <div class="school-title">
-        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
-        <span>GOLD AND LINC SCHOOLS</span>
+
+    <main class="main" id="main" role="main" tabindex="-1">
+      <div class="page-header">
+        <h1 class="page-header-title">
+          <span>🎯</span> Student Promotion, Transfer & Graduation
+        </h1>
+        <p class="page-header-subtitle">Manage student advancements and graduations</p>
       </div>
-      <div class="header-actions">
-        <span class="icon" title="Notifications">🔔</span>
-        <span class="icon" title="Help">❓</span>
-        <span class="icon" title="Settings">⚙️</span>
+
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <div class="filter-controls">
+          <select id="filterSession">
+            <option value="">Select Session</option>
+            <option value="2024–2025">2024-2025</option>
+            <option value="2023–2024">2023-2024</option>
+          </select>
+          <select id="filterTerm">
+            <option value="">All Terms</option>
+            <option>FIRST TERM</option>
+            <option>SECOND TERM</option>
+            <option>THIRD TERM</option>
+          </select>
+          <select id="filterClass">
+            <option value="">All Classes</option>
+          </select>
+          <input type="text" id="searchName" placeholder="Search by name or registration number...">
+          <button class="btn" onclick="fetchStudents()">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+          <span class="bulk-actions-bar-info">
+            <i class="fas fa-check-circle"></i> <span id="selectedCount">0 selected</span>
+          </span>
+          <button class="btn btn-promote btn-sm" onclick="bulkPromote()">
+            <i class="fas fa-arrow-up"></i> Promote
+          </button>
+          <button class="btn btn-graduate btn-sm" onclick="bulkGraduate()">
+            <i class="fas fa-graduation-cap"></i> Graduate
+          </button>
+          <button class="btn btn-demote btn-sm" onclick="bulkDemote()">
+            <i class="fas fa-arrow-down"></i> Demote
+          </button>
+        </div>
       </div>
-    </header>
-    <h2 class="promotion-title"><span>🎯</span> Student Promotion, Transfer & Graduation</h2>
-    <!-- Promotion/Graduation Filters -->
-    <section class="promotion-section">
-      <form class="promotion-filters" onsubmit="event.preventDefault(); fetchStudents();">
-        <select id="filterSession">
-          <option value="">Select Session</option>
-          <option value="2024–2025">2024-2025</option>
-          <option value="2023–2024">2023-2024</option>
-        </select>
-        <select id="filterTerm">
-          <option value="">All Terms</option>
-          <option>FIRST TERM</option>
-          <option>SECOND TERM</option>
-          <option>THIRD TERM</option>
-        </select>
-        <select id="filterClass">
-          <option value="">All Classes</option>
-          <!-- JS fill -->
-        </select>
-        <input type="text" id="searchName" placeholder="Name or Reg No.">
-        <button type="submit"><i class="fa fa-search mr-1"></i> Search</button>
-      </form>
-      <!-- Bulk actions bar -->
-      <div class="bulk-actions-bar" id="bulkActionsBar" style="display:none;">
-        <span id="selectedCount">0 selected</span>
-        <button type="button" onclick="bulkPromote()" class="bg-[#18ba89] hover:bg-[#11a57c]">Promote</button>
-        <button type="button" onclick="bulkGraduate()" class="bg-[#835bd1] hover:bg-[#6d49b3]">Graduate</button>
-        <button type="button" onclick="bulkDemote()" class="bg-[#e74c3c] hover:bg-[#c32218]">Demote</button>
-      </div>
-      <!-- Table -->
-      <div class="promotion-table-wrap">
+
+      <!-- Students Table -->
+      <div class="table-wrapper">
         <table class="promotion-table">
           <thead>
             <tr>
-              <th><input type="checkbox" id="selectAll" onchange="toggleAllStudents(this)"></th>
+              <th style="width: 40px;">
+                <input type="checkbox" id="selectAll" onchange="toggleAllStudents(this)">
+              </th>
               <th>Name</th>
               <th>Reg No.</th>
               <th>Current Class</th>
               <th>Session</th>
               <th>Term</th>
               <th>Status</th>
-              <th>Action</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="studentsTableBody">
-            <tr><td colspan="8">Loading...</td></tr>
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <div class="empty-state-icon"><i class="fas fa-spinner fa-spin"></i></div>
+                  <p>Loading students...</p>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
-    </section>
-  </main>
+    </main>
+  </div>
+
   <script>
-    // Sidebar mobile toggle logic (consistent with people.html)
+    const API_BASE_URL = "https://goldlincschools.onrender.com";
+    let students = [];
+    let selectedStudents = new Set();
+
+    // Page spinner
+    document.addEventListener('DOMContentLoaded', () => {
+      const spinner = document.getElementById('pageSpinnerOverlay');
+      if (spinner) spinner.style.display = 'flex';
+      setTimeout(() => {
+        if (spinner) {
+          spinner.style.opacity = '0';
+          setTimeout(() => { spinner.style.display = 'none'; }, 400);
+        }
+      }, 1200);
+    });
+
+    // Sidebar mobile toggle
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function handleResize() {
+      if (window.innerWidth <= 768) {
+        sidebarToggle.style.display = 'flex';
+      } else {
+        sidebarToggle.style.display = 'none';
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+
     function openSidebar() {
       sidebar.classList.add('active');
       sidebarOverlay.classList.add('active');
-      document.body.classList.add('sidebar-open');
     }
+
     function closeSidebar() {
       sidebar.classList.remove('active');
       sidebarOverlay.classList.remove('active');
-      document.body.classList.remove('sidebar-open');
     }
+
     sidebarToggle.addEventListener('click', openSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-  const API_BASE_URL = "https://goldlincschools.onrender.com";
-  let students = [];
-  let selectedStudents = new Set();
-
-  function fillClasses() {
-    fetch(API_BASE_URL + "/api/classes")
-      .then(res => res.json())
-      .then(data => {
-        const sel = document.getElementById('filterClass');
-        sel.innerHTML = '<option value="">All Classes</option>' +
-          (data.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) closeSidebar();
       });
-  }
+    });
 
-  function fetchStudents() {
-    // Build backend query
-    const filterClass = document.getElementById('filterClass').value;
-    const filterSession = document.getElementById('filterSession').value;
-    const filterTerm = document.getElementById('filterTerm').value;
-    const search = document.getElementById('searchName').value.trim();
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSidebar();
+    });
 
-    let url = `${API_BASE_URL}/api/student?`;
-    if (filterClass) url += `class=${encodeURIComponent(filterClass)}&`;
-    if (filterSession) url += `academicSession=${encodeURIComponent(filterSession)}&`;
-    if (filterTerm) url += `term=${encodeURIComponent(filterTerm)}&`;
-    if (search) url += `search=${encodeURIComponent(search)}&`; // You may need to handle search in backend
+    window.addEventListener('resize', handleResize);
+    handleResize();
 
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        students = (data.students || []).map(s => ({
-          id: s.student_id || s.regNo,
-          name: `${s.firstname} ${s.surname}`,
-          regNo: s.regNo,
-          class: s.class,
-          session: s.academicSession,
-          term: s.term || '', // Add term if available
-          status: s.status || "Pending"
-        }));
-        renderStudentsTable();
-      });
-  }
-
-  function renderStudentsTable() {
-    const tbody = document.getElementById('studentsTableBody');
-    if (!students.length) {
-      tbody.innerHTML = `<tr><td colspan="8">No students found for selected criteria.</td></tr>`;
-      document.getElementById('bulkActionsBar').style.display = "none";
-      return;
+    // Fill classes dropdown
+    function fillClasses() {
+      fetch(API_BASE_URL + "/api/classes")
+        .then(res => res.json())
+        .then(data => {
+          const sel = document.getElementById('filterClass');
+          sel.innerHTML = '<option value="">All Classes</option>' +
+            (data.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        })
+        .catch(err => console.error('Error loading classes:', err));
     }
-    tbody.innerHTML = students.map(s => `
-      <tr>
-        <td><input type="checkbox" value="${s.id}" ${selectedStudents.has(s.id) ? "checked" : ""} onchange="toggleStudent('${s.id}')"></td>
-        <td>${s.name}</td>
-        <td>${s.regNo}</td>
-        <td>${s.class}</td>
-        <td>${s.session}</td>
-        <td>${s.term}</td>
-        <td>
-          <span class="badge ${
-            s.status === "Promoted" ? "badge-promoted" :
-            s.status === "Graduated" ? "badge-graduated" :
-            "badge-pending"
-          }">${s.status}</span>
-        </td>
-        <td>
-          <button class="action-btn promote" onclick="promoteStudent('${s.id}')" ${s.status==="Promoted"||s.status==="Graduated"?"disabled":""}>Promote</button>
-          <button class="action-btn graduate" onclick="graduateStudent('${s.id}')" ${s.status==="Graduated"?"disabled":""}>Graduate</button>
-          <button class="action-btn demote" onclick="demoteStudent('${s.id}')">Demote</button>
-        </td>
-      </tr>
-    `).join('');
-    document.getElementById('bulkActionsBar').style.display = selectedStudents.size ? "flex" : "none";
-    document.getElementById('selectedCount').textContent = selectedStudents.size + " selected";
-  }
 
-  function toggleStudent(id) {
-    if (selectedStudents.has(id)) selectedStudents.delete(id); else selectedStudents.add(id);
-    renderStudentsTable();
-  }
+    // Fetch students
+    function fetchStudents() {
+      const filterClass = document.getElementById('filterClass').value;
+      const filterSession = document.getElementById('filterSession').value;
+      const filterTerm = document.getElementById('filterTerm').value;
+      const search = document.getElementById('searchName').value.trim();
 
-  function toggleAllStudents(box) {
-    if (box.checked) {
-      students.forEach(s => selectedStudents.add(s.id));
-    } else {
-      students.forEach(s => selectedStudents.delete(s.id));
+      let url = `${API_BASE_URL}/api/student?`;
+      let params = [];
+      if (filterClass) params.push(`class=${encodeURIComponent(filterClass)}`);
+      if (filterSession) params.push(`academicSession=${encodeURIComponent(filterSession)}`);
+      if (filterTerm) params.push(`term=${encodeURIComponent(filterTerm)}`);
+      if (search) params.push(`search=${encodeURIComponent(search)}`);
+      
+      if (params.length) url += params.join('&');
+
+      const tbody = document.getElementById('studentsTableBody');
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-spinner fa-spin"></i></div><p>Loading students...</p></div></td></tr>`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          students = (data.students || []).map(s => ({
+            id: s.student_id || s.regNo,
+            name: `${s.firstname || ''} ${s.surname || ''}`,
+            regNo: s.regNo,
+            class: s.class,
+            session: s.academicSession,
+            term: s.term || '',
+            status: s.status || "Pending"
+          }));
+          renderStudentsTable();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-exclamation-circle"></i></div><p style="color: #dc2626;">Failed to load students.</p></div></td></tr>`;
+          console.error('Error fetching students:', err);
+        });
     }
-    renderStudentsTable();
-  }
 
-  function promoteStudent(id) {
-    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "promote" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      const s = students.find(x => x.id === id);
-      if (s) s.status = "Promoted";
-      renderStudentsTable();
-      alert(resp.message || `Student promoted!`);
-    });
-  }
+    // Render table
+    function renderStudentsTable() {
+      const tbody = document.getElementById('studentsTableBody');
+      
+      if (!students.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-inbox"></i></div><p>No students found for selected criteria.</p></div></td></tr>`;
+        document.getElementById('bulkActionsBar').classList.remove('active');
+        return;
+      }
 
-  function graduateStudent(id) {
-    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "graduate" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      const s = students.find(x => x.id === id);
-      if (s) s.status = "Graduated";
-      renderStudentsTable();
-      alert(resp.message || `Student graduated!`);
-    });
-  }
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td>
+            <input type="checkbox" value="${s.id}" ${selectedStudents.has(s.id) ? "checked" : ""} onchange="toggleStudent('${s.id}')">
+          </td>
+          <td><span class="student-name">${s.name}</span></td>
+          <td>${s.regNo}</td>
+          <td>${s.class}</td>
+          <td>${s.session}</td>
+          <td>${s.term}</td>
+          <td>
+            <span class="badge ${
+              s.status === "Promoted" ? "badge-promoted" :
+              s.status === "Graduated" ? "badge-graduated" :
+              "badge-pending"
+            }">
+              <i class="fas ${
+                s.status === "Promoted" ? "fa-arrow-up" :
+                s.status === "Graduated" ? "fa-graduation-cap" :
+                "fa-hourglass-half"
+              }"></i> ${s.status}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-sm btn-promote" onclick="promoteStudent('${s.id}')" ${s.status === "Promoted" || s.status === "Graduated" ? "disabled" : ""} title="Promote to next class">
+                <i class="fas fa-arrow-up"></i>
+              </button>
+              <button class="btn-sm btn-graduate" onclick="graduateStudent('${s.id}')" ${s.status === "Graduated" ? "disabled" : ""} title="Graduate student">
+                <i class="fas fa-graduation-cap"></i>
+              </button>
+              <button class="btn-sm btn-demote" onclick="demoteStudent('${s.id}')" title="Demote to previous class">
+                <i class="fas fa-arrow-down"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
 
-  function demoteStudent(id) {
-    fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "demote" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      const s = students.find(x => x.id === id);
-      if (s) s.status = "Pending";
-      renderStudentsTable();
-      alert(resp.message || `Student demoted!`);
-    });
-  }
+      updateBulkActionsBar();
+    }
 
-  function bulkPromote() {
-    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "promote" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Promoted"; });
-      renderStudentsTable();
-      alert(resp.message || "Selected students promoted.");
-    });
-  }
-  function bulkGraduate() {
-    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "graduate" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Graduated"; });
-      renderStudentsTable();
-      alert(resp.message || "Selected students graduated.");
-    });
-  }
-  function bulkDemote() {
-    fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentIds: Array.from(selectedStudents), action: "demote" })
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.error) return alert(resp.error);
-      students.forEach(s => { if (selectedStudents.has(s.id)) s.status = "Pending"; });
-      renderStudentsTable();
-      alert(resp.message || "Selected students demoted.");
-    });
-  }
+    // Update bulk actions bar
+    function updateBulkActionsBar() {
+      const bar = document.getElementById('bulkActionsBar');
+      if (selectedStudents.size > 0) {
+        bar.classList.add('active');
+        document.getElementById('selectedCount').textContent = selectedStudents.size + " selected";
+      } else {
+        bar.classList.remove('active');
+      }
+    }
 
-  // Initial fill
-  fillClasses();
-  fetchStudents();
-</script>    
+    // Toggle student selection
+    function toggleStudent(id) {
+      if (selectedStudents.has(id)) {
+        selectedStudents.delete(id);
+      } else {
+        selectedStudents.add(id);
+      }
+      renderStudentsTable();
+    }
+
+    // Toggle all students
+    function toggleAllStudents(box) {
+      if (box.checked) {
+        students.forEach(s => selectedStudents.add(s.id));
+      } else {
+        students.forEach(s => selectedStudents.delete(s.id));
+      }
+      renderStudentsTable();
+    }
+
+    // Single actions
+    function promoteStudent(id) {
+      if (!confirm('Promote this student to the next class?')) return;
+      performAction(id, 'promote');
+    }
+
+    function graduateStudent(id) {
+      if (!confirm('Graduate this student?')) return;
+      performAction(id, 'graduate');
+    }
+
+    function demoteStudent(id) {
+      if (!confirm('Demote this student to the previous class?')) return;
+      performAction(id, 'demote');
+    }
+
+    function performAction(id, action) {
+      fetch(`${API_BASE_URL}/api/student/${id}/promote`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: action })
+      })
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.error) {
+            alert('Error: ' + resp.error);
+            return;
+          }
+          const s = students.find(x => x.id === id);
+          if (s) {
+            s.status = action === 'promote' ? 'Promoted' : action === 'graduate' ? 'Graduated' : 'Pending';
+          }
+          renderStudentsTable();
+          alert(resp.message || `Student ${action}ed successfully!`);
+        })
+        .catch(err => {
+          alert('Network error: ' + err.message);
+          console.error(err);
+        });
+    }
+
+    // Bulk actions
+    function bulkPromote() {
+      if (!confirm(`Promote ${selectedStudents.size} student(s) to the next class?`)) return;
+      bulkAction('promote');
+    }
+
+    function bulkGraduate() {
+      if (!confirm(`Graduate ${selectedStudents.size} student(s)?`)) return;
+      bulkAction('graduate');
+    }
+
+    function bulkDemote() {
+      if (!confirm(`Demote ${selectedStudents.size} student(s) to the previous class?`)) return;
+      bulkAction('demote');
+    }
+
+    function bulkAction(action) {
+      fetch(`${API_BASE_URL}/api/student/bulk/promote`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          studentIds: Array.from(selectedStudents), 
+          action: action 
+        })
+      })
+        .then(res => res.json())
+        .then(resp => {
+          if (resp.error) {
+            alert('Error: ' + resp.error);
+            return;
+          }
+          students.forEach(s => {
+            if (selectedStudents.has(s.id)) {
+              s.status = action === 'promote' ? 'Promoted' : action === 'graduate' ? 'Graduated' : 'Pending';
+            }
+          });
+          selectedStudents.clear();
+          renderStudentsTable();
+          alert(resp.message || `${selectedStudents.size} student(s) ${action}ed successfully!`);
+        })
+        .catch(err => {
+          alert('Network error: ' + err.message);
+          console.error(err);
+        });
+    }
+
+    // Initial load
+    fillClasses();
+    fetchStudents();
+
+    // Search on Enter
+    document.getElementById('searchName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') fetchStudents();
+    });
+
+    document.getElementById('filterClass').addEventListener('change', fetchStudents);
+    document.getElementById('filterSession').addEventListener('change', fetchStudents);
+    document.getElementById('filterTerm').addEventListener('change', fetchStudents);
+  </script>
 </body>
 </html>

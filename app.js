@@ -41,7 +41,8 @@ const activityRoute = require('./routes/activities');
 const uploadRoute = require('./routes/upload');
 const resultscbtRoute = require('./routes/resultscbt');
 const admissionRoute = require('./routes/admission');
-const paymentsRoute = require('./routes/payments'); // NEW
+const paymentsRoute = require('./routes/payments');
+const financeRoute = require('./routes/finance'); // NEW
 
 // ========== Route Mounting ==========
 app.use('/api/exam', examRoute);
@@ -71,7 +72,8 @@ app.use('/api/students', studentsRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/report/preferences', require('./routes/reportPreferences'));
 app.use('/api/admission', admissionRoute);
-app.use('/api/payments', paymentsRoute); // NEW - Payments routes
+app.use('/api/payments', paymentsRoute);
+app.use('/api/finance', financeRoute); // NEW - Finance routes
 
 // Super Admin protected route
 app.get('/api/dashboard', authMiddleware, (req, res) => {

@@ -133,4 +133,5 @@ InvoiceSchema.index({ status: 1, dueDate: 1 });
 InvoiceSchema.index({ invoiceNumber: 1 });
 InvoiceSchema.index({ issueDate: 1 });
 
-module.exports = mongoose.model('Invoice', InvoiceSchema);
+// Export with check for existing model
+module.exports = mongoose.models.Invoice || mongoose.model('Invoice', InvoiceSchema);

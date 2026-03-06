@@ -5,525 +5,1066 @@
   <title>Student Communication Book | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Inter Font + FontAwesome + Tailwind + Flowbite -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400,600,700,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --primary: #007bff;
-      --sidebar-bg: #fff;
-      --sidebar-width: 260px;
-      --sidebar-width-mobile: 90vw;
-      --neutral: #f6f8fa;
-      --border-radius: 12px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.05);
-      --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
-      --font-main: 'Inter', Arial, sans-serif;
+      --bg-0: #f6f8ff;
+      --bg-1: #eef2ff;
+      --accent: #0f172a;
+      --accent-2: #1e40af;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --sidebar-w: 300px;
+      --radius: 10px;
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
+      height: 100%;
       margin: 0;
-      padding: 0;
-      font-family: var(--font-main);
-      background: var(--neutral);
-      color: #222;
-      min-height: 100vh;
-      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      -webkit-font-smoothing: antialiased;
+      color: #07102a;
     }
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      width: var(--sidebar-width);
-      min-width: 180px;
-      max-width: 320px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      box-shadow: var(--shadow);
-      z-index: 1050;
-      padding: 0 0 2rem 0;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s ease;
-      overflow: hidden;
-    }
-    .sidebar nav {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25em;
-      margin-top: 1.5em;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      padding: 0.85em 1.3em;
+
+    a {
+      color: inherit;
       text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      border-left: 4px solid transparent;
-      border-radius: 0 6px 6px 0;
-      transition: background 0.16s, border-color 0.16s;
-      font-size: 1.05em;
     }
-    .sidebar a.active, .sidebar a:hover {
-      background: #f1f6fd;
-      border-left: 4px solid var(--primary);
-      color: var(--primary);
-    }
-    .profile {
+
+    .app {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem 1.2rem 1rem 1.2rem;
-      border-bottom: 1px solid #ececec;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: 2px solid #e3e6ea;
-    }
-    .name { font-weight: 700; font-size: 1.13em; }
-    .role { font-size: 0.98em; color: #888; margin-top: 2px; }
-    .search {
-      padding: 0.7em 1.2em;
-      flex-shrink: 0;
-      background: var(--sidebar-bg);
-    }
-    .search input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0.6em 0.9em;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      font-size: 1em;
-      background: #fff;
-      margin: 0;
-    }
-    .main-content {
       min-height: 100vh;
-      margin-left: var(--sidebar-width);
-      padding: 0 2.5vw 2vw 2.5vw;
-      transition: margin-left 0.25s;
+      align-items: stretch;
     }
-    header {
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: linear-gradient(180deg, #07102a 0%, #0b3b82 100%);
+      color: #fff;
+      padding: 20px 16px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 4px 0 28px rgba(2, 11, 24, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid rgba(255, 224, 102, 0.12);
+      background: #fff;
+    }
+
+    .brand .title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #ffe066;
+    }
+
+    .brand .subtitle {
+      font-size: 0.85rem;
+      color: #b0c4ff;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      flex: 1;
+    }
+
+    .nav a {
       display: flex;
       align-items: center;
-      height: 64px;
-      gap: 1.8em;
-      padding-top: 1.5vw;
-      padding-bottom: 1.5vw;
-    }
-    .school-title {
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-      font-size: 1.35rem;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
       font-weight: 700;
-      color: var(--primary);
-      letter-spacing: 1px;
+      font-size: 0.98rem;
+      color: #e6eefc;
+      transition: background 0.2s, color 0.2s;
     }
-    .logo {
-      width: 32px; height: 32px;
-      border-radius: 6px;
+
+    .nav a.active,
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffe066;
     }
-    .header-actions {
-      margin-left: auto;
+
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-w);
+      top: 0;
+      width: calc(100% - var(--sidebar-w));
+      z-index: 90;
       display: flex;
       align-items: center;
-      gap: 1.03em;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid #eef3ff;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     }
-    .header-actions .icon {
-      font-size: 1.43em;
-      cursor: pointer;
-      opacity: 0.88;
-      transition: opacity 0.2s;
+
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 20px;
+      flex: 1;
+      min-height: 100vh;
+      padding-top: 80px;
+      overflow-y: auto;
     }
-    .header-actions .icon:hover {
-      opacity: 1;
+
+    .page-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent-2);
     }
-    .sidebar-toggle {
-      display: none;
+
+    .flex {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .muted-small {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .icon-btn {
       background: none;
       border: none;
-      font-size: 2rem;
-      color: var(--primary);
-      margin-right: 1.2rem;
+      font-size: 18px;
       cursor: pointer;
+      margin-left: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    #pageSpinnerOverlay {
+      position: fixed;
+      z-index: 99999;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.93);
+      display: flex;
       align-items: center;
       justify-content: center;
-      height: 64px;
+      transition: opacity 0.4s;
     }
-    .sidebar-overlay {
-      display: none;
+
+    .spinner {
+      border: 6px solid #ddeaff;
+      border-top: 6px solid #2647a6;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spinner-spin 1s linear infinite;
     }
-    .sidebar-overlay.active {
-      display: block;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.25);
-      z-index: 1040;
-    }
-    @media (max-width: 900px) {
-      .sidebar {
-        width: var(--sidebar-width-mobile);
-        min-width: 0;
-        max-width: 95vw;
-        height: 100vh;
-        max-height: 100vh;
-        transform: translateX(-105%);
-        position: fixed;
-        z-index: 1050;
-        overflow: hidden;
+
+    @keyframes spinner-spin {
+      0% {
+        transform: rotate(0deg);
       }
-      .sidebar.active {
-        transform: translateX(0);
+      100% {
+        transform: rotate(360deg);
       }
-      .sidebar-toggle {
-        display: inline-flex;
-      }
-      .sidebar-overlay.active {
-        display: block;
-      }
-      body.sidebar-open {
-        overflow: hidden;
-      }
-      .main-content { margin-left: 0; padding: 0 3vw; }
     }
-    @media (max-width: 600px) {
-      .main-content { padding: 0 2vw; }
-      .profile { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .avatar { width: 37px; height: 37px; }
-      .name, .role { font-size: 0.96rem; }
-      .school-title span { font-size: 1.04rem; }
-      header { gap: 0.9em; }
-    }
-    @media (max-width: 400px) {
-      html { font-size: 13px; }
-      .sidebar { width: 97vw; }
-    }
-    ::-webkit-scrollbar { width: 7px; background: #f4f8fc; }
-    ::-webkit-scrollbar-thumb { background: #e2e7ee; border-radius: 4px; }
+
     .commbook-title {
-      margin: 1.5em 0 0.7em 0;
-      font-size: 1.4em;
-      font-weight: 700;
-      color: #222;
+      margin: 0 0 1.5rem 0;
+      font-size: 1.6rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 0.5em;
+      gap: 0.6em;
+      color: var(--accent-2);
     }
+
     .commbook-section {
-      background: #fff;
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
-      margin-top: 2em;
-      padding: 2.2em 1.7em 2em 1.7em;
-      max-width: 1100px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 2em;
+      border: 1px solid #eef3ff;
+      max-width: 1200px;
       width: 100%;
     }
-    .commbook-filters {
+
+    .filters-section {
       display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 1.3em;
-      margin-bottom: 1.1em;
       align-items: center;
     }
-    .commbook-filters select, .commbook-filters input {
-      padding: 0.6em 0.9em;
-      border-radius: 7px;
-      border: 1px solid #ddeaff;
-      font-size: 1em;
-      min-width: 170px;
-      background: #fff;
+
+    .filter-input, .filter-select {
+      flex: 1;
+      min-width: 150px;
     }
-    .commbook-filters button {
-      background: var(--primary);
+
+    .filter-input input, .filter-select select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e0e6eb;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95em;
+    }
+
+    .filter-input input:focus, .filter-select select:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--accent-2);
       color: #fff;
-      font-weight: 600;
-      padding: 0.6em 1.2em;
-      border-radius: 7px;
       border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.18s;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .commbook-filters button:hover { background: #005ecb; }
+
+    .btn-primary:hover {
+      background: #1438a0;
+    }
+
+    .msg-list-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: #f0f4ff;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      color: var(--accent-2);
+      font-weight: 600;
+    }
+
     .commbook-msglist {
-      max-height: 56vh; min-height: 330px;
+      max-height: 55vh;
+      min-height: 350px;
       overflow-y: auto;
       background: #f8fbff;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px #ddeaff15;
-      margin-top: 1.2em;
-      padding: 1.3em 1.2em;
+      border-radius: 8px;
+      border: 1px solid #eef3ff;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 1.2em;
+      gap: 12px;
+      margin: 20px 0;
     }
+
+    .commbook-msglist.loading {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-2);
+      font-weight: 600;
+    }
+
+    .spinner-inline i {
+      font-size: 20px;
+      animation: spinner-spin 1s linear infinite;
+    }
+
     .comm-msg {
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 9px #ddeaff13;
-      padding: 1em 1.15em;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 0.3em;
-      border-left: 5px solid #007bff;
-      position: relative;
+      gap: 6px;
+      border-left: 4px solid var(--accent-2);
+      border-radius: 8px;
     }
-    .comm-msg.teacher { border-left: 5px solid #18ba89; }
-    .comm-msg.student { border-left: 5px solid #007bff; }
-    .comm-msg .comm-meta {
-      font-size: 0.92em;
+
+    .comm-msg.teacher {
+      border-left-color: #18ba89;
+      background: #f0fdf7;
+    }
+
+    .comm-msg.student {
+      border-left-color: var(--accent-2);
+      background: #f0f4ff;
+    }
+
+    .comm-msg.admin {
+      border-left-color: #ea580c;
+      background: #fff5f0;
+    }
+
+    .comm-meta {
+      font-size: 0.85em;
       color: #888;
       display: flex;
       align-items: center;
-      gap: 1em;
-    }
-    .comm-msg .comm-author {
-      font-weight: 700;
-      color: #22305a;
-    }
-    .comm-msg .comm-content {
-      font-size: 1em;
-      color: #22305a;
-      margin-bottom: 0.2em;
-      margin-top: 0.2em;
-    }
-    .commbook-sendform {
-      display: flex;
+      gap: 12px;
       flex-wrap: wrap;
-      gap: 0.8em;
-      margin-top: 1.7em;
-      align-items: center;
     }
-    .commbook-sendform textarea {
-      flex: 1 1 220px;
-      min-height: 55px;
-      border-radius: 7px;
-      border: 1px solid #ddeaff;
-      padding: 0.7em 1.05em;
-      font-size: 1em;
-      margin-right: 0.7em;
+
+    .comm-author {
+      font-weight: 700;
+      color: var(--accent);
     }
-    .commbook-sendform select {
-      padding: 0.6em 0.9em;
-      border-radius: 7px;
-      border: 1px solid #ddeaff;
-      font-size: 1em;
-      min-width: 120px;
-      background: #fff;
-    }
-    .commbook-sendform button {
-      background: var(--primary);
-      color: #fff;
+
+    .comm-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75em;
       font-weight: 600;
-      padding: 0.6em 1.3em;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.18s;
     }
-    .commbook-sendform button:hover { background: #005ecb; }
+
+    .comm-badge.teacher {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .comm-badge.student {
+      background: #dbeafe;
+      color: #0c2d6b;
+    }
+
+    .comm-badge.admin {
+      background: #fed7aa;
+      color: #92400e;
+    }
+
+    .comm-content {
+      font-size: 0.98em;
+      color: var(--accent);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .send-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eef3ff;
+    }
+
+    .send-form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .send-form-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .send-form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-size: 0.95em;
+    }
+
+    .send-form-group select, .send-form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e0e6eb;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95em;
+    }
+
+    .send-form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .send-form-group select:focus, .send-form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .send-form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-success {
+      background: #18ba89;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+    }
+
+    .btn-secondary {
+      background: #e0e6eb;
+      color: var(--accent);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #d0dae0;
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 350px;
+      color: #ccc;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .success-message, .error-message {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-w: 280px;
+      }
+
+      .sidebar {
+        width: 280px;
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .topbar {
+        left: 0;
+        width: 100%;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 14px;
+        padding-top: 84px;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 99;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      #sidebarToggle {
+        display: flex !important;
+        font-size: 24px;
+      }
+
+      .filters-section {
+        flex-direction: column;
+      }
+
+      .filter-input, .filter-select {
+        min-width: 100%;
+      }
+
+      .send-form-row {
+        flex-direction: column;
+      }
+
+      .send-form-group {
+        min-width: 100%;
+      }
+
+      .send-form-actions {
+        flex-direction: column;
+      }
+
+      .btn-primary, .btn-success, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 12px;
+        padding-top: 80px;
+      }
+
+      .commbook-section {
+        padding: 1.5em;
+      }
+
+      .page-title {
+        font-size: 1rem;
+      }
+
+      .icon-btn {
+        font-size: 16px;
+        margin-left: 6px;
+        padding: 6px;
+      }
+
+      .topbar {
+        padding: 10px 12px;
+      }
+
+      .commbook-title {
+        font-size: 1.3rem;
+      }
+
+      .commbook-msglist {
+        max-height: 400px;
+        min-height: 250px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      background: #f4f8fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e7ee;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
-  <!-- Sidebar for desktop, overlays for mobile -->
-  <aside class="sidebar" id="sidebar">
-    <div class="profile">
-      <img src="https://ui-avatars.com/api/?name=Richard+Timothy&background=007bff&color=fff" alt="User Avatar" class="avatar">
-      <div>
-        <div class="name">SCHOOL ICT</div>
-        <div class="role">System Administrator</div>
+  <div id="pageSpinnerOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="app" id="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+      <div class="brand">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo">
+        <div>
+          <div class="title">GOLD & LINC</div>
+          <div class="subtitle">Admin Portal</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="admin.html" class="nav-link">
+          <span>🏠</span> Dashboard
+        </a>
+        <a href="admission.html" class="nav-link">
+          <span>🎓</span> Admission
+        </a>
+        <a href="more.html" class="nav-link">
+          <span>🌐</span> Multi-location
+        </a>
+        <a href="people.html" class="nav-link">
+          <span>👥</span> People
+        </a>
+        <a href="academics.html" class="nav-link">
+          <span>📚</span> Academics
+        </a>
+        <a href="admin-cbt.html" class="nav-link">
+          <span>💻</span> CBT Configuration
+        </a>
+        <a href="results.html" class="nav-link">
+          <span>📄</span> Results
+        </a>
+        <a href="finance.html" class="nav-link">
+          <span>💰</span> Finance
+        </a>
+        <a href="adminfees.html" class="nav-link">
+          <span>💳</span> Fees
+        </a>
+        <a href="adminpayment.html" class="nav-link">
+          <span>💸</span> Payments
+        </a>
+        <a href="attendance.html" class="nav-link">
+          <span>🗓️</span> Attendance
+        </a>
+        <a href="#" class="nav-link">
+          <span>⚙️</span> Settings
+        </a>
+      </nav>
+
+      <div class="muted-small" style="margin-top: auto;">
+        Signed in as <span id="adminName">Admin</span>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- TOPBAR -->
+    <div class="topbar" role="banner">
+      <div class="flex">
+        <button id="sidebarToggle" class="icon-btn" aria-label="Toggle Sidebar" style="display: none; font-size: 24px;">☰</button>
+        <div class="page-title">Student Communication Book</div>
+      </div>
+      <div class="flex">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <button class="icon-btn" title="Settings">⚙️</button>
+        <button class="icon-btn" title="Search">🔍</button>
       </div>
     </div>
-    <div class="search">
-      <input type="text" placeholder="Quick search..." aria-label="Quick search">
-    </div>
-    <nav>
-      <a href="admin.html"><span>🏠</span> Dashboard</a>
-      <a href="admission"><span>🎓</span> Admission</a>
-      <a href="people.html"><span>👥</span> People</a>
-      <a href="academics"><span>📚</span> Academics</a>
-      <a href="e-class"><span>💻</span> E-Class</a>
-      <a href="results.html"><span>📄</span> Results</a>
-      <a href="finance"><span>💰</span> Finance</a>
-      <a href="attendance"><span>🗓️</span> Attendance</a>
-      <a href="admin"><span>⚙️</span> Admin</a>
-    </nav>
-  </aside>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <!-- Mobile navbar -->
-  <nav class="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white shadow-md py-3 px-4" style="height: 58px;">
-    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open Sidebar">☰</button>
-    <div class="font-bold text-primary text-lg flex items-center gap-2">
-      <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo" style="width:30px;height:30px;">
-      <span>Gold & Linc Schools</span>
-    </div>
-    <div></div>
-  </nav>
-  <!-- Main Content -->
-  <main class="main-content" style="margin-top:70px;">
-    <header>
-      <div class="school-title">
-        <img src="logo-1679575828 (1).jpeg" alt="Logo" class="logo">
-        <span>GOLD AND LINC SCHOOLS</span>
-      </div>
-      <div class="header-actions">
-        <span class="icon" title="Notifications">🔔</span>
-        <span class="icon" title="Help">❓</span>
-        <span class="icon" title="Settings">⚙️</span>
-      </div>
-    </header>
-    <h2 class="commbook-title"><span>💬</span> Student Communication Book</h2>
-    <!-- Communication Filters -->
-    <section class="commbook-section">
-      <form class="commbook-filters" onsubmit="event.preventDefault(); fetchMessages();">
-        <select id="filterClass">
-          <option value="">All Classes</option>
-        </select>
-        <input type="text" id="searchStudent" placeholder="Search student name/reg no.">
-        <button type="submit"><i class="fa fa-search mr-1"></i> Filter</button>
-      </form>
-      <!-- Messages List -->
-      <div class="commbook-msglist" id="commbookMsgList">
-        <div style="text-align:center;color:#888;">Loading messages...</div>
-      </div>
-      <!-- Send Message -->
-      <form class="commbook-sendform" onsubmit="event.preventDefault(); sendMessage();">
-        <select id="messageClass" required>
-          <option value="">Select Class</option>
-        </select>
-        <select id="messageStudent" required>
-          <option value="">Select Student</option>
-        </select>
-        <textarea id="messageContent" placeholder="Type a message..." required maxlength="500"></textarea>
-        <button type="submit"><i class="fa fa-paper-plane"></i> Send</button>
-      </form>
-    </section>
-  </main>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main" role="main" tabindex="-1">
+      <h2 class="commbook-title"><span>💬</span> Student Communication Book</h2>
+      
+      <section class="commbook-section">
+        <!-- Filters -->
+        <div class="filters-section">
+          <div class="filter-select">
+            <select id="filterClass" aria-label="Filter by class">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+          <div class="filter-input">
+            <input type="text" id="searchStudent" placeholder="🔍 Search student name or reg number..." aria-label="Search student">
+          </div>
+          <button class="btn-primary" onclick="applyFilters()"><i class="fa fa-filter"></i> Filter</button>
+          <button class="btn-secondary" onclick="resetFilters()"><i class="fa fa-redo"></i> Reset</button>
+        </div>
+
+        <!-- Messages Info -->
+        <div class="msg-list-header" id="messagesInfo">
+          <i class="fa fa-info-circle"></i>
+          <span id="messageCount">Loading messages...</span>
+        </div>
+
+        <!-- Messages List -->
+        <div class="commbook-msglist loading" id="commbookMsgList">
+          <div class="spinner-inline">
+            <i class="fa fa-spinner"></i>
+            <span>Loading messages...</span>
+          </div>
+        </div>
+
+        <!-- Send Message Form -->
+        <form class="send-form" onsubmit="sendMessage(event)">
+          <h3 style="font-weight: 700; color: var(--accent-2); margin: 0 0 12px 0;">Send Message to Student</h3>
+          
+          <div class="send-form-row">
+            <div class="send-form-group" style="flex: 1;">
+              <label for="messageClass">Class <span style="color: #e74c3c;">*</span></label>
+              <select id="messageClass" required>
+                <option value="">Select Class</option>
+              </select>
+            </div>
+            <div class="send-form-group" style="flex: 1;">
+              <label for="messageStudent">Student <span style="color: #e74c3c;">*</span></label>
+              <select id="messageStudent" required>
+                <option value="">Select Student</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="send-form-group">
+            <label for="messageContent">Message <span style="color: #e74c3c;">*</span></label>
+            <textarea id="messageContent" placeholder="Type your message here..." required maxlength="500" style="max-height: 150px;"></textarea>
+            <small style="color: #888; display: block; margin-top: 4px;">
+              <span id="charCount">0</span>/500 characters
+            </small>
+          </div>
+
+          <div class="send-form-actions">
+            <button type="reset" class="btn-secondary"><i class="fa fa-times"></i> Clear</button>
+            <button type="submit" class="btn-success"><i class="fa fa-paper-plane"></i> Send Message</button>
+          </div>
+        </form>
+
+        <!-- Status Messages -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+      </section>
+    </main>
+  </div>
+
   <script>
+    // Spinner overlay logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const spinner = document.getElementById('pageSpinnerOverlay');
+      if (spinner) spinner.style.display = 'flex';
+      setTimeout(() => {
+        if (spinner) {
+          spinner.style.opacity = '0';
+          setTimeout(() => {
+            spinner.style.display = 'none';
+          }, 400);
+        }
+      }, 1200);
+    });
+
     // Sidebar mobile toggle logic
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function handleResize() {
+      if (window.innerWidth <= 768) {
+        sidebarToggle.style.display = 'flex';
+      } else {
+        sidebarToggle.style.display = 'none';
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+
     function openSidebar() {
       sidebar.classList.add('active');
       sidebarOverlay.classList.add('active');
-      document.body.classList.add('sidebar-open');
     }
+
     function closeSidebar() {
       sidebar.classList.remove('active');
       sidebarOverlay.classList.remove('active');
-      document.body.classList.remove('sidebar-open');
     }
+
     sidebarToggle.addEventListener('click', openSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-    // Fetch classes from backend
-    let classList = [], studentsByClass = {};
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          closeSidebar();
+        }
+      });
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // ===== COMMUNICATION BOOK FUNCTIONALITY =====
+    let classList = [];
+    let studentsByClass = {};
+    let allMessages = [];
+    const token = localStorage.getItem('token');
+
+    // Fetch classes
     async function fetchClasses() {
-      const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/classes', {headers: {'Authorization': 'Bearer ' + token }});
+        const res = await fetch('https://goldlincschools.onrender.com/api/classes', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
-        classList = data;
-        const sel1 = document.getElementById('filterClass');
-        const sel2 = document.getElementById('messageClass');
-        sel1.innerHTML = '<option value="">All Classes</option>' + classList.map(c=>`<option value="${c._id}">${c.name}</option>`).join('');
-        sel2.innerHTML = '<option value="">Select Class</option>' + classList.map(c=>`<option value="${c._id}">${c.name}</option>`).join('');
-      } catch { }
+        classList = Array.isArray(data) ? data : [];
+        
+        const classSelects = [
+          document.getElementById('filterClass'),
+          document.getElementById('messageClass')
+        ];
+        
+        classSelects.forEach(sel => {
+          sel.innerHTML = '<option value="">Select Class</option>' + 
+            classList.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+        });
+      } catch (err) {
+        console.error('Failed to fetch classes:', err);
+        showError('Failed to load classes');
+      }
     }
 
-    // Fetch students by class when changed
+    // Fetch students for a class
     async function fetchStudentsForClass(classId, selId) {
-      const token = localStorage.getItem('token');
+      const sel = document.getElementById(selId);
       if (!classId) {
-        document.getElementById(selId).innerHTML = '<option value="">Select Student</option>';
+        sel.innerHTML = '<option value="">Select Student</option>';
         return;
       }
+      
       if (studentsByClass[classId]) {
         renderStudentSelect(selId, studentsByClass[classId]);
         return;
       }
+      
       try {
-        const res = await fetch(`https://goldlincschools.onrender.com/api/classes/${classId}/students`, {headers: {'Authorization': 'Bearer ' + token }});
+        const res = await fetch(`https://goldlincschools.onrender.com/api/classes/${classId}/students`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
-        studentsByClass[classId] = data;
-        renderStudentSelect(selId, data);
-      } catch {
-        document.getElementById(selId).innerHTML = '<option value="">Select Student</option>';
+        studentsByClass[classId] = Array.isArray(data) ? data : [];
+        renderStudentSelect(selId, studentsByClass[classId]);
+      } catch (err) {
+        console.error('Failed to fetch students:', err);
+        sel.innerHTML = '<option value="">Select Student</option>';
       }
     }
+
     function renderStudentSelect(selId, students) {
-      document.getElementById(selId).innerHTML =
-        '<option value="">Select Student</option>' + students.map(s=>`<option value="${s._id}">${s.name} (${s.regNo})</option>`).join('');
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '<option value="">Select Student</option>' +
+        students.map(s => `<option value="${s._id}">${s.name} (${s.regNo || 'N/A'})</option>`).join('');
     }
-    document.getElementById('messageClass').addEventListener('change', function(){
+
+    // Event listeners for class selection
+    document.getElementById('messageClass').addEventListener('change', function() {
       fetchStudentsForClass(this.value, 'messageStudent');
     });
 
     // Fetch messages
     async function fetchMessages() {
-      const token = localStorage.getItem('token');
-      const classId = document.getElementById('filterClass').value;
-      const search = document.getElementById('searchStudent').value.trim();
-      let url = 'https://goldlincschools.onrender.com/api/commbook/messages?';
-      if (classId) url += `class=${encodeURIComponent(classId)}&`;
-      if (search) url += `search=${encodeURIComponent(search)}&`;
-      url = url.replace(/[&?]$/, '');
-      const list = document.getElementById('commbookMsgList');
-      list.innerHTML = `<div style="text-align:center;color:#888;">Loading messages...</div>`;
+      const msgList = document.getElementById('commbookMsgList');
+      msgList.innerHTML = `
+        <div class="spinner-inline">
+          <i class="fa fa-spinner"></i>
+          <span>Loading messages...</span>
+        </div>
+      `;
+      msgList.classList.add('loading');
+
       try {
-        const res = await fetch(url, {headers: { 'Authorization': 'Bearer ' + token }});
+        const res = await fetch('https://goldlincschools.onrender.com/api/commbook/messages', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
-        if (!Array.isArray(data) || !data.length) {
-          list.innerHTML = `<div style="text-align:center;color:#ccc;">No messages found.</div>`;
-          return;
-        }
-        list.innerHTML = data.map(msg => `
-          <div class="comm-msg ${msg.senderRole === 'teacher' ? 'teacher' : 'student'}">
-            <div class="comm-meta">
-              <span class="comm-author">${msg.senderName || 'Unknown'}${msg.senderRole==='teacher'?' (Teacher)':''}</span>
-              <span>${msg.className || ''}</span>
-              <span>${msg.date ? new Date(msg.date).toLocaleString() : ''}</span>
-            </div>
-            <div class="comm-content">${msg.content}</div>
-          </div>
-        `).join('');
-      } catch {
-        list.innerHTML = `<div style="text-align:center;color:#e74c3c;">Failed to load messages.</div>`;
+        allMessages = Array.isArray(data) ? data : [];
+        
+        msgList.classList.remove('loading');
+        renderMessages(allMessages);
+        updateMessageCount(allMessages.length);
+      } catch (err) {
+        console.error('Failed to fetch messages:', err);
+        msgList.innerHTML = `<div class="empty-state"><i class="fa fa-exclamation-circle"></i> Failed to load messages</div>`;
+        msgList.classList.remove('loading');
+        showError('Failed to load messages');
       }
     }
 
+    // Render messages
+    function renderMessages(messages) {
+      const msgList = document.getElementById('commbookMsgList');
+      
+      if (!messages || messages.length === 0) {
+        msgList.innerHTML = `<div class="empty-state"><i class="fa fa-inbox"></i> No messages found</div>`;
+        return;
+      }
+
+      msgList.innerHTML = messages.map(msg => `
+        <div class="comm-msg ${msg.senderRole === 'teacher' ? 'teacher' : msg.senderRole === 'admin' ? 'admin' : 'student'}">
+          <div class="comm-meta">
+            <span class="comm-author">${msg.senderName || 'Unknown'}</span>
+            <span class="comm-badge ${msg.senderRole === 'teacher' ? 'teacher' : msg.senderRole === 'admin' ? 'admin' : 'student'}">
+              ${msg.senderRole ? msg.senderRole.charAt(0).toUpperCase() + msg.senderRole.slice(1) : 'Student'}
+            </span>
+            <span style="color: #aaa;">•</span>
+            <span>${msg.className || 'N/A'}</span>
+            <span style="color: #aaa;">•</span>
+            <span style="font-size: 0.8em;">${msg.date ? new Date(msg.date).toLocaleString() : 'Unknown date'}</span>
+          </div>
+          <div class="comm-content">${msg.content || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    // Apply filters
+    window.applyFilters = function() {
+      const classId = document.getElementById('filterClass').value;
+      const searchTerm = document.getElementById('searchStudent').value.toLowerCase().trim();
+
+      let filtered = allMessages;
+
+      if (classId) {
+        filtered = filtered.filter(msg => msg.class === classId || msg.classId === classId);
+      }
+
+      if (searchTerm) {
+        filtered = filtered.filter(msg => 
+          (msg.studentName || '').toLowerCase().includes(searchTerm) ||
+          (msg.studentRegNo || '').toLowerCase().includes(searchTerm) ||
+          (msg.content || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      renderMessages(filtered);
+      updateMessageCount(filtered.length, allMessages.length);
+    }
+
+    // Reset filters
+    window.resetFilters = function() {
+      document.getElementById('filterClass').value = '';
+      document.getElementById('searchStudent').value = '';
+      renderMessages(allMessages);
+      updateMessageCount(allMessages.length);
+    }
+
+    // Update message count
+    function updateMessageCount(filtered, total) {
+      const countEl = document.getElementById('messageCount');
+      if (total) {
+        countEl.textContent = `Showing ${filtered} of ${total} messages`;
+      } else {
+        countEl.textContent = `Showing ${filtered} message${filtered !== 1 ? 's' : ''}`;
+      }
+    }
+
+    // Character counter
+    document.getElementById('messageContent').addEventListener('input', function() {
+      document.getElementById('charCount').textContent = this.value.length;
+    });
+
     // Send message
-    async function sendMessage() {
-      const token = localStorage.getItem('token');
+    window.sendMessage = async function(event) {
+      event.preventDefault();
+      
       const classId = document.getElementById('messageClass').value;
       const studentId = document.getElementById('messageStudent').value;
       const content = document.getElementById('messageContent').value.trim();
-      if (!classId || !studentId || !content) return;
+
+      if (!classId || !studentId || !content) {
+        showError('Please fill in all required fields');
+        return;
+      }
+
+      const submitBtn = event.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+
       try {
         const res = await fetch('https://goldlincschools.onrender.com/api/commbook/messages', {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ class: classId, student: studentId, content })
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            class: classId,
+            student: studentId,
+            content: content
+          })
         });
-        if (!res.ok) throw new Error('Failed to send message');
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        showSuccess('Message sent successfully!');
         document.getElementById('messageContent').value = '';
-        fetchMessages();
-        alert("Message sent!");
-      } catch {
-        alert("Failed to send message.");
+        document.getElementById('charCount').textContent = '0';
+        
+        // Reset form
+        document.querySelector('.send-form').reset();
+        
+        // Refresh messages
+        setTimeout(fetchMessages, 1000);
+      } catch (err) {
+        console.error('Failed to send message:', err);
+        showError('Failed to send message. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Send Message';
       }
     }
 
-    // Initial load
+    // Show success message
+    function showSuccess(message) {
+      const msgEl = document.getElementById('successMessage');
+      msgEl.textContent = message;
+      msgEl.style.display = 'block';
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 4000);
+    }
+
+    // Show error message
+    function showError(message) {
+      const msgEl = document.getElementById('errorMessage');
+      msgEl.textContent = message;
+      msgEl.style.display = 'block';
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 4000);
+    }
+
+    // Initialize
     fetchClasses();
     fetchMessages();
   </script>

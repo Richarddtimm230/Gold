@@ -139,6 +139,7 @@
       min-height: 100vh;
       padding-top: 80px;
       overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .page-title {
@@ -257,14 +258,17 @@
 
     .table-container {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       border-radius: 8px;
       border: 1px solid #eef3ff;
+      max-width: 100%;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.95rem;
+      min-width: 550px;
     }
 
     thead {
@@ -284,6 +288,7 @@
       padding: 12px 16px;
       border-bottom: 1px solid #eef3ff;
       color: #555;
+      word-break: break-word;
     }
 
     tbody tr {
@@ -301,6 +306,7 @@
       font-size: 0.85rem;
       font-weight: 700;
       text-align: center;
+      white-space: nowrap;
     }
 
     .badge-completed { background: #dcfce7; color: #15803d; }
@@ -320,6 +326,23 @@
       margin-bottom: 20px;
     }
 
+    .search-input,
+    .controls select {
+      padding: 8px 12px;
+      border: 1px solid #ddeaff;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Inter', Arial, sans-serif;
+      min-width: 150px;
+    }
+
+    .search-input:focus,
+    .controls select:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
     .btn {
       padding: 8px 16px;
       border-radius: 6px;
@@ -330,6 +353,7 @@
       font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .btn:hover {
@@ -457,12 +481,64 @@
       opacity: 0.5;
     }
 
+    @media (max-width: 1400px) {
+      table {
+        min-width: 500px;
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 10px 12px;
+      }
+    }
+
     @media (max-width: 1024px) {
       .stats-grid {
         grid-template-columns: repeat(2, 1fr);
       }
       .grid-2 {
         grid-template-columns: 1fr;
+      }
+      
+      table {
+        min-width: 480px;
+        font-size: 0.85rem;
+      }
+      
+      th, td {
+        padding: 8px 10px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      table {
+        min-width: 450px;
+        font-size: 0.8rem;
+      }
+
+      th, td {
+        padding: 6px 8px;
+      }
+
+      th {
+        font-size: 0.75rem;
+      }
+
+      .badge {
+        padding: 2px 8px;
+        font-size: 0.75rem;
+      }
+
+      .search-input,
+      .controls select {
+        min-width: 120px;
+        font-size: 0.9rem;
+        padding: 6px 10px;
+      }
+
+      .btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
       }
     }
 
@@ -506,11 +582,26 @@
       }
 
       table {
-        font-size: 0.85rem;
+        min-width: 400px;
+        font-size: 0.75rem;
       }
 
       th, td {
-        padding: 8px 12px;
+        padding: 4px 6px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      .search-input,
+      .controls select {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .btn {
+        width: 100%;
       }
     }
 
@@ -554,12 +645,13 @@
         padding: 6px;
       }
 
-      .controls {
-        flex-direction: column;
+      table {
+        min-width: 350px;
+        font-size: 0.7rem;
       }
 
-      .btn {
-        width: 100%;
+      th, td {
+        padding: 3px 4px;
       }
     }
 
@@ -580,16 +672,35 @@
       .stat-card {
         padding: 16px;
       }
+
+      table {
+        min-width: 300px;
+        font-size: 0.65rem;
+      }
+
+      th, td {
+        padding: 2px 3px;
+      }
+
+      .badge {
+        padding: 1px 6px;
+        font-size: 0.65rem;
+      }
     }
 
     ::-webkit-scrollbar {
       width: 7px;
+      height: 6px;
       background: #f4f8fc;
     }
 
     ::-webkit-scrollbar-thumb {
       background: #e2e7ee;
       border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d0d7e6;
     }
   </style>
 </head>
@@ -758,67 +869,64 @@
         </div>
       </div>
 
-      <!-- INVOICE MANAGEMENT SECTION -->
-      <div class="grid-2">
-        <!-- Invoice List -->
-        <div class="section-card">
-          <div class="section-title"><span>📄</span> Recent Invoices</div>
-          <div class="controls">
-            <input type="text" placeholder="Search invoices..." class="search-input" id="invoiceSearch">
-            <button class="btn primary" onclick="createNewInvoice()">➕ New Invoice</button>
-          </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Invoice #</th>
-                  <th>Student</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="invoiceTableBody">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    <div class="empty-state-icon">📄</div>
-                    <div>No invoices found</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- INVOICE LIST SECTION -->
+      <div class="section-card">
+        <div class="section-title"><span>📄</span> Recent Invoices</div>
+        <div class="controls">
+          <input type="text" placeholder="Search invoices..." class="search-input" id="invoiceSearch">
+          <button class="btn primary" onclick="createNewInvoice()">➕ New Invoice</button>
         </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Student</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="invoiceTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <div class="empty-state-icon">📄</div>
+                  <div>No invoices found</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        <!-- Payment Receipts -->
-        <div class="section-card">
-          <div class="section-title"><span>🧾</span> Recent Payment Receipts</div>
-          <div class="controls">
-            <input type="text" placeholder="Search receipts..." class="search-input" id="receiptSearch">
-          </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Receipt #</th>
-                  <th>Student</th>
-                  <th>Amount</th>
-                  <th>Payment Date</th>
-                  <th>Method</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="receiptTableBody">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    <div class="empty-state-icon">🧾</div>
-                    <div>No receipts found</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- PAYMENT RECEIPTS SECTION -->
+      <div class="section-card">
+        <div class="section-title"><span>🧾</span> Recent Payment Receipts</div>
+        <div class="controls">
+          <input type="text" placeholder="Search receipts..." class="search-input" id="receiptSearch">
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Receipt #</th>
+                <th>Student</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Method</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="receiptTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <div class="empty-state-icon">🧾</div>
+                  <div>No receipts found</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -871,63 +979,60 @@
         </div>
       </div>
 
-      <!-- CASH MANAGEMENT SECTION -->
-      <div class="grid-2">
-        <!-- Cash Requests -->
-        <div class="section-card">
-          <div class="section-title"><span>💸</span> Cash Requests</div>
-          <div class="controls">
-            <button class="btn primary" onclick="createCashRequest()">➕ New Request</button>
-          </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Request By</th>
-                  <th>Amount</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="cashRequestTableBody">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    <div class="empty-state-icon">💸</div>
-                    <div>No cash requests</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- CASH REQUESTS SECTION -->
+      <div class="section-card">
+        <div class="section-title"><span>💸</span> Cash Requests</div>
+        <div class="controls">
+          <button class="btn primary" onclick="createCashRequest()">➕ New Request</button>
         </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Request By</th>
+                <th>Amount</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cashRequestTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <div class="empty-state-icon">💸</div>
+                  <div>No cash requests</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        <!-- Approvals -->
-        <div class="section-card">
-          <div class="section-title"><span>✅</span> Approvals & Authorizations</div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Approved For</th>
-                  <th>Amount</th>
-                  <th>Type</th>
-                  <th>Date</th>
-                  <th>Approved By</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="approvalTableBody">
-                <tr>
-                  <td colspan="6" class="empty-state">
-                    <div class="empty-state-icon">✅</div>
-                    <div>No approvals found</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- APPROVALS & AUTHORIZATIONS SECTION -->
+      <div class="section-card">
+        <div class="section-title"><span>✅</span> Approvals & Authorizations</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Approved For</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Approved By</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="approvalTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <div class="empty-state-icon">✅</div>
+                  <div>No approvals found</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 

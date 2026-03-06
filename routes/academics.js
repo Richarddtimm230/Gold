@@ -1,7 +1,7 @@
-
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
+const { authMiddleware } = require('./auth');
 const Session = require('../models/Session');
 const Term = require('../models/Term');
 const Class = require('../models/Class');
@@ -9,14 +9,18 @@ const ExamSchedule = require('../models/ExamSchedule');
 const ExamMode = require('../models/ExamMode');
 const CBTMock = require('../models/CBTMock');
 const CBTMockResult = require('../models/CBTMockResult');
-
+const Result = require('../models/Result');
 const Staff = require('../models/Staff');
 const Subject = require('../models/Subject');
+
+// ===== EXISTING ENDPOINTS =====
+
 router.delete('/subjects/:id', adminAuth, async (req, res) => {
   const subject = await Subject.findByIdAndDelete(req.params.id);
   if (!subject) return res.status(404).json({ error: "Subject not found" });
   res.json({ success: true });
 });
+
 router.get('/subjects/:id', adminAuth, async (req, res) => {
   const subject = await Subject.findById(req.params.id);
   if (!subject) return res.status(404).json({ error: "Subject not found" });
@@ -25,6 +29,7 @@ router.get('/subjects/:id', adminAuth, async (req, res) => {
     name: subject.name
   });
 });
+
 router.delete('/classes/:classId/subjects/:subjectId', adminAuth, async (req, res) => {
   const { classId, subjectId } = req.params;
   let cls = await Class.findById(classId);
@@ -38,6 +43,7 @@ router.delete('/classes/:classId/subjects/:subjectId', adminAuth, async (req, re
   await cls.save();
   res.json({ success: true });
 });
+
 // Add a new subject to a class and assign to a teacher
 router.post('/classes/:classId/subjects', adminAuth, async (req, res) => {
   const { classId } = req.params;
@@ -69,6 +75,7 @@ router.post('/classes/:classId/subjects', adminAuth, async (req, res) => {
     teacherId
   });
 });
+
 // Get today's CBT/Mock schedule for a class
 router.get('/cbt/mocks/today/:classId', async (req, res) => {
   try {
@@ -141,12 +148,13 @@ router.post('/classes', adminAuth, async (req, res) => {
     subjects: newClass.subjects
   });
 });
+
 router.get('/classes', adminAuth, async (req, res) => {
   // Use deep populate to get subject and teacher details
   const classes = await Class.find()
     .populate('teachers')
     .populate({
-      path: 'subjects.subject', // populate the subject field inside subjects array
+      path: 'subjects.subject',
       model: 'Subject'
     })
     .populate({
@@ -164,9 +172,10 @@ router.get('/classes', adminAuth, async (req, res) => {
       last_name: t.last_name,
       email: t.email
     })),
-    subjects: c.subjects // now includes populated subject and teacher objects
+    subjects: c.subjects
   })));
 });
+
 router.get('/sessions', adminAuth, async (req, res) => {
   const sessions = await Session.find().sort('-createdAt');
   res.json(sessions.map(s => ({
@@ -176,6 +185,7 @@ router.get('/sessions', adminAuth, async (req, res) => {
     endDate: s.endDate
   })));
 });
+
 router.post('/sessions', adminAuth, async (req, res) => {
   const { name, startDate, endDate } = req.body;
   if (!name) return res.status(400).json({ error: "Session name required" });
@@ -192,6 +202,7 @@ router.post('/sessions', adminAuth, async (req, res) => {
   }
   res.json(session);
 });
+
 router.get('/terms', adminAuth, async (req, res) => {
   try {
     const terms = await Term.find().populate('session').sort('-createdAt');
@@ -223,39 +234,41 @@ router.post('/terms', adminAuth, async (req, res) => {
   }
   res.json(term);
 });
+
 router.delete('/classes/:id', adminAuth, async (req, res) => {
   const cls = await Class.findByIdAndDelete(req.params.id);
   if (!cls) return res.status(404).json({ error: "Class not found" });
   res.json({ success: true });
 });
+
 router.delete('/exams/schedules/:id', adminAuth, async (req, res) => {
   const exam = await ExamSchedule.findByIdAndDelete(req.params.id);
   if (!exam) return res.status(404).json({ error: "Exam schedule not found" });
   res.json({ success: true });
 });
+
 router.delete('/cbt/mocks/:id', adminAuth, async (req, res) => {
   const cbt = await CBTMock.findByIdAndDelete(req.params.id);
   if (!cbt) return res.status(404).json({ error: "CBT/mock not found" });
   res.json({ success: true });
 });
+
 router.delete('/results/cbt-mocks/:id', adminAuth, async (req, res) => {
   const result = await CBTMockResult.findByIdAndDelete(req.params.id);
   if (!result) return res.status(404).json({ error: "Result not found" });
   res.json({ success: true });
 });
+
 router.delete('/sessions/:id', adminAuth, async (req, res) => {
   const session = await Session.findByIdAndDelete(req.params.id);
   if (!session) return res.status(404).json({ error: "Session not found" });
   res.json({ success: true });
 });
+
 router.delete('/terms/:id', adminAuth, async (req, res) => {
   const term = await Term.findByIdAndDelete(req.params.id);
   if (!term) return res.status(404).json({ error: "Term not found" });
   res.json({ success: true });
-});
-router.get('/classes', adminAuth, async (req, res) => {
-  const classes = await Class.find().sort('name');
-  res.json(classes.map(c => ({ _id: c._id, name: c.name })));
 });
 
 router.get('/exams/schedules', adminAuth, async (req, res) => {
@@ -268,6 +281,7 @@ router.get('/exams/schedules', adminAuth, async (req, res) => {
     date: e.date
   })));
 });
+
 router.post('/exams/schedules', adminAuth, async (req, res) => {
   const { title, termId, classId, date } = req.body;
   if (!title || !termId || !classId || !date) return res.status(400).json({ error: "All fields required" });
@@ -294,6 +308,7 @@ router.get('/exams/modes', adminAuth, async (req, res) => {
     duration: m.duration
   })));
 });
+
 router.post('/exams/modes', adminAuth, async (req, res) => {
   const { examId, mode, duration } = req.body;
   if (!examId || !mode || !duration) return res.status(400).json({ error: "All fields required" });
@@ -315,6 +330,7 @@ router.get('/cbt/mocks', adminAuth, async (req, res) => {
     date: c.date
   })));
 });
+
 router.post('/cbt/mocks', adminAuth, async (req, res) => {
   const { title, classId, mode, date } = req.body;
   if (!title || !classId || !mode || !date) return res.status(400).json({ error: "All fields required" });
@@ -352,7 +368,7 @@ router.get('/results/cbt-mocks', adminAuth, async (req, res) => {
     date: r.date
   })));
 });
-// Get individual session by ID
+
 router.get('/sessions/:id', adminAuth, async (req, res) => {
   const session = await Session.findById(req.params.id);
   if (!session) return res.status(404).json({ error: "Session not found" });
@@ -364,7 +380,6 @@ router.get('/sessions/:id', adminAuth, async (req, res) => {
   });
 });
 
-// Get individual term by ID
 router.get('/terms/:id', adminAuth, async (req, res) => {
   const term = await Term.findById(req.params.id);
   if (!term) return res.status(404).json({ error: "Term not found" });
@@ -377,7 +392,6 @@ router.get('/terms/:id', adminAuth, async (req, res) => {
   });
 });
 
-// Get individual exam schedule by ID
 router.get('/exams/schedules/:id', adminAuth, async (req, res) => {
   const exam = await ExamSchedule.findById(req.params.id);
   if (!exam) return res.status(404).json({ error: "Exam schedule not found" });
@@ -390,7 +404,6 @@ router.get('/exams/schedules/:id', adminAuth, async (req, res) => {
   });
 });
 
-// Get individual exam mode by ID
 router.get('/exams/modes/:id', adminAuth, async (req, res) => {
   const mode = await ExamMode.findById(req.params.id);
   if (!mode) return res.status(404).json({ error: "Exam mode not found" });
@@ -402,7 +415,6 @@ router.get('/exams/modes/:id', adminAuth, async (req, res) => {
   });
 });
 
-// Get individual CBT/mock by ID
 router.get('/cbt/mocks/:id', adminAuth, async (req, res) => {
   const cbt = await CBTMock.findById(req.params.id);
   if (!cbt) return res.status(404).json({ error: "CBT/mock not found" });
@@ -414,7 +426,7 @@ router.get('/cbt/mocks/:id', adminAuth, async (req, res) => {
     date: cbt.date
   });
 });
-// Update a session by ID
+
 router.put('/sessions/:id', adminAuth, async (req, res) => {
   const { name, startDate, endDate } = req.body;
   const session = await Session.findByIdAndUpdate(
@@ -426,7 +438,6 @@ router.put('/sessions/:id', adminAuth, async (req, res) => {
   res.json(session);
 });
 
-// Update a term by ID
 router.put('/terms/:id', adminAuth, async (req, res) => {
   const { name, sessionId, startDate, endDate } = req.body;
   const term = await Term.findByIdAndUpdate(
@@ -438,7 +449,6 @@ router.put('/terms/:id', adminAuth, async (req, res) => {
   res.json(term);
 });
 
-// Update an exam schedule by ID
 router.put('/exams/schedules/:id', adminAuth, async (req, res) => {
   const { title, termId, classId, date } = req.body;
   const exam = await ExamSchedule.findByIdAndUpdate(
@@ -450,7 +460,6 @@ router.put('/exams/schedules/:id', adminAuth, async (req, res) => {
   res.json(exam);
 });
 
-// Update an exam mode by ID
 router.put('/exams/modes/:id', adminAuth, async (req, res) => {
   const { examId, mode, duration } = req.body;
   const examMode = await ExamMode.findByIdAndUpdate(
@@ -461,7 +470,7 @@ router.put('/exams/modes/:id', adminAuth, async (req, res) => {
   if (!examMode) return res.status(404).json({ error: "Exam mode not found" });
   res.json(examMode);
 });
-// Update a class by ID
+
 router.put('/classes/:id', adminAuth, async (req, res) => {
   const { name, arms, teacherIds } = req.body;
   const update = {
@@ -490,7 +499,7 @@ router.put('/classes/:id', adminAuth, async (req, res) => {
     subjects: cls.subjects
   });
 });
-// Get individual class by ID
+
 router.get('/classes/:id', adminAuth, async (req, res) => {
   const cls = await Class.findById(req.params.id).populate('teachers');
   if (!cls) return res.status(404).json({ error: "Class not found" });
@@ -507,7 +516,7 @@ router.get('/classes/:id', adminAuth, async (req, res) => {
     subjects: cls.subjects
   });
 });
-// Update a CBT/mock by ID
+
 router.put('/cbt/mocks/:id', adminAuth, async (req, res) => {
   const { title, classId, mode, date } = req.body;
   const cbt = await CBTMock.findByIdAndUpdate(
@@ -518,4 +527,177 @@ router.put('/cbt/mocks/:id', adminAuth, async (req, res) => {
   if (!cbt) return res.status(404).json({ error: "CBT/mock not found" });
   res.json(cbt);
 });
+
+// ===== NEW: PUSH CBT RESULTS TO UNIVERSAL =====
+
+/**
+ * POST /api/academics/push-cbt-results
+ * Push CBT exam results to universal results management system
+ */
+router.post('/push-cbt-results', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const { cbtResults, scoreField, sessionId, termId } = req.body;
+
+    if (!cbtResults || !Array.isArray(cbtResults) || cbtResults.length === 0) {
+      return res.status(400).json({ error: 'No CBT results provided' });
+    }
+
+    if (!scoreField) {
+      return res.status(400).json({ error: 'Score field not specified' });
+    }
+
+    if (!sessionId || !termId) {
+      return res.status(400).json({ error: 'Session and Term are required' });
+    }
+
+    // Valid score fields
+    const validFields = ['ca1_score', 'ca2_score', 'midterm_score', 'exam_score'];
+    if (!validFields.includes(scoreField)) {
+      return res.status(400).json({ error: 'Invalid score field' });
+    }
+
+    const session = await Session.findById(sessionId);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    const term = await Term.findById(termId);
+    if (!term) return res.status(404).json({ error: 'Term not found' });
+
+    const pushedResults = [];
+    const errors = [];
+
+    for (const cbtResult of cbtResults) {
+      try {
+        const { studentId, examId, score, subject, classId } = cbtResult;
+
+        if (!studentId || score === undefined) {
+          errors.push({
+            exam: examId || 'unknown',
+            error: 'Missing student ID or score'
+          });
+          continue;
+        }
+
+        // Check if result already exists
+        let result = await Result.findOne({
+          student: studentId,
+          session: sessionId,
+          term: termId,
+          subject: subject
+        });
+
+        if (!result) {
+          // Create new result
+          result = new Result({
+            student: studentId,
+            session: sessionId,
+            term: termId,
+            subject: subject,
+            class: classId
+          });
+        }
+
+        // Update the score field
+        result[scoreField] = parseFloat(score) || 0;
+
+        // Recalculate total score
+        const ca1 = parseFloat(result.ca1_score) || 0;
+        const ca2 = parseFloat(result.ca2_score) || 0;
+        const midterm = parseFloat(result.midterm_score) || 0;
+        const exam = parseFloat(result.exam_score) || 0;
+        result.total_score = ca1 + ca2 + midterm + exam;
+
+        // Calculate grade and remarks
+        const total = result.total_score;
+        if (total >= 70) {
+          result.grade = 'A';
+          result.remarks = 'Excellent';
+        } else if (total >= 60) {
+          result.grade = 'B';
+          result.remarks = 'Very Good';
+        } else if (total >= 50) {
+          result.grade = 'C';
+          result.remarks = 'Good';
+        } else if (total >= 45) {
+          result.grade = 'D';
+          result.remarks = 'Pass';
+        } else if (total >= 40) {
+          result.grade = 'E';
+          result.remarks = 'Poor';
+        } else {
+          result.grade = 'F';
+          result.remarks = 'Fail';
+        }
+
+        result.status = 'draft';
+        result.cbt_result_id = examId;
+
+        await result.save();
+        pushedResults.push({
+          success: true,
+          studentId,
+          examId,
+          resultId: result._id,
+          score: result.total_score,
+          grade: result.grade
+        });
+
+      } catch (itemErr) {
+        console.error('Error processing CBT result:', itemErr);
+        errors.push({
+          exam: cbtResult.examId || 'unknown',
+          error: itemErr.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Pushed ${pushedResults.length} CBT results to universal`,
+      pushedCount: pushedResults.length,
+      errorCount: errors.length,
+      pushedResults,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
+  } catch (err) {
+    console.error('Error pushing CBT results:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/academics/push-cbt-results/preview
+ * Preview CBT results before pushing to universal
+ */
+router.get('/push-cbt-results/preview', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const { examId } = req.query;
+
+    if (!examId) {
+      return res.status(400).json({ error: 'Exam ID is required' });
+    }
+
+    // Fetch CBT exam results
+    const cbtResults = await CBTMockResult.find({ mock: examId })
+      .populate('student', 'first_name surname student_id')
+      .populate('class', 'name')
+      .limit(100);
+
+    res.json({
+      count: cbtResults.length,
+      results: cbtResults.map(r => ({
+        studentId: r.student?._id,
+        studentName: `${r.student?.first_name || ''} ${r.student?.surname || ''}`,
+        studentRegNo: r.student?.student_id,
+        score: r.score,
+        examId: examId,
+        classId: r.class?._id
+      }))
+    });
+  } catch (err) {
+    console.error('Error previewing CBT results:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

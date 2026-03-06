@@ -4,279 +4,1632 @@
   <meta charset="UTF-8">
   <title>Admission Management | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Inter Font + Flowbite + Tailwind + FontAwesome -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-    body { font-family: 'Inter', Arial, sans-serif; background: #f6f8fa; color: #22305a; min-height: 100vh; }
-    .admission-bg { background: linear-gradient(180deg, #ddeaff 0%, #f6f8fa 100%); }
-    .modal-overlay { background: rgba(0,0,0,0.25); }
+    :root {
+      --bg-0: #f6f8ff;
+      --bg-1: #eef2ff;
+      --accent: #0f172a;
+      --accent-2: #1e40af;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --sidebar-w: 300px;
+      --radius: 10px;
+      --success: #18ba89;
+      --warning: #ffd600;
+      --danger: #e74c3c;
+      --info: #2647a6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      -webkit-font-smoothing: antialiased;
+      color: #07102a;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+      align-items: stretch;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: linear-gradient(180deg, #07102a 0%, #0b3b82 100%);
+      color: #fff;
+      padding: 20px 16px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 4px 0 28px rgba(2, 11, 24, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid rgba(255, 224, 102, 0.12);
+      background: #fff;
+    }
+
+    .brand .title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #ffe066;
+    }
+
+    .brand .subtitle {
+      font-size: 0.85rem;
+      color: #b0c4ff;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      flex: 1;
+    }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #e6eefc;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffe066;
+    }
+
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-w);
+      top: 0;
+      width: calc(100% - var(--sidebar-w));
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid #eef3ff;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 20px;
+      flex: 1;
+      min-height: 100vh;
+      padding-top: 80px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .page-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent-2);
+    }
+
+    .flex {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .muted-small {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      margin-left: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Container Styles */
+    .section-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 24px;
+      border: 1px solid #eef3ff;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+    }
+
+    /* Form Styles */
+    .admission-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px 12px;
+      border: 1px solid #ddeaff;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent-2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1438a0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #15803d;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #333;
+      font-weight: 700;
+    }
+
+    .btn-warning:hover {
+      background: #eab308;
+    }
+
+    .btn-full-width {
+      width: 100%;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: none;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      display: block;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid #eef3ff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      min-width: 800px;
+    }
+
+    thead {
+      background: #f3f8ff;
+      border-bottom: 2px solid #ddeaff;
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--accent-2);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eef3ff;
+      color: #555;
+    }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: #f9fbff;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .badge-approved { background: #dcfce7; color: #15803d; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-active { background: #dbeafe; color: #0369a1; }
+    .badge-paused { background: #fecdd3; color: #7c2d12; }
+    .badge-closed { background: #e5e7eb; color: #374151; }
+
+    .action-btn {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin: 0 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn-view {
+      background: var(--accent-2);
+      color: white;
+    }
+
+    .action-btn-view:hover {
+      background: #1438a0;
+    }
+
+    .action-btn-edit {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .action-btn-edit:hover {
+      background: #2563eb;
+    }
+
+    .action-btn-pause {
+      background: var(--warning);
+      color: #333;
+    }
+
+    .action-btn-pause:hover {
+      background: #eab308;
+    }
+
+    .action-btn-delete {
+      background: var(--danger);
+      color: white;
+    }
+
+    .action-btn-delete:hover {
+      background: #b91c1c;
+    }
+
+    .action-btn-resume {
+      background: var(--success);
+      color: white;
+    }
+
+    .action-btn-resume:hover {
+      background: #15803d;
+    }
+
+    /* Cohort Card Grid */
+    .cohort-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .cohort-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 20px;
+      border: 1px solid #eef3ff;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cohort-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .cohort-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eef3ff;
+    }
+
+    .cohort-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin: 0;
+    }
+
+    .cohort-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .info-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .cohort-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid #eef3ff;
+    }
+
+    .cohort-actions .action-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      justify-content: center;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 24px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eef3ff;
+      padding-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--accent-2);
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-field label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-field input,
+    .modal-field select {
+      padding: 10px 12px;
+      border: 1px solid #ddeaff;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+
+    .modal-field input:focus,
+    .modal-field select:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .modal-field value {
+      font-size: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #eef3ff;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .admission-form {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cohort-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+
+      table {
+        min-width: 700px;
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 280px;
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .topbar {
+        left: 0;
+        width: 100%;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 14px;
+        padding-top: 84px;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 99;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      .admission-form {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-full-width {
+        width: 100%;
+      }
+
+      .cohort-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        min-width: 600px;
+        font-size: 0.85rem;
+      }
+
+      th, td {
+        padding: 8px 10px;
+      }
+
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+
+      .cohort-info {
+        grid-template-columns: 1fr;
+      }
+
+      .cohort-actions {
+        flex-direction: column;
+      }
+
+      .cohort-actions .action-btn {
+        flex: 1;
+        min-width: unset;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 12px;
+        padding-top: 80px;
+      }
+
+      .section-card {
+        padding: 16px;
+      }
+
+      .page-title {
+        font-size: 1rem;
+      }
+
+      .icon-btn {
+        font-size: 16px;
+        margin-left: 6px;
+        padding: 6px;
+      }
+
+      table {
+        min-width: 500px;
+        font-size: 0.8rem;
+      }
+
+      th, td {
+        padding: 6px 8px;
+      }
+
+      .modal-content {
+        padding: 16px;
+      }
+
+      .action-btn {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+      }
+
+      .cohort-card {
+        padding: 16px;
+      }
+
+      .cohort-title {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .sidebar {
+        width: 90vw;
+        left: -90vw;
+      }
+
+      table {
+        min-width: 400px;
+        font-size: 0.75rem;
+      }
+
+      th, td {
+        padding: 4px 6px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 6px;
+      background: #f4f8fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e7ee;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d0d7e6;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .loader-spinner {
+      border: 4px solid #eef3ff;
+      border-top: 4px solid var(--accent-2);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
-<body class="admission-bg">
-  <!-- Top Navbar -->
-  <nav class="bg-white shadow-md rounded-b-2xl py-4 px-6 flex items-center justify-between sticky top-0 z-10">
-    <div class="flex items-center gap-3">
-      <img src="https://goldlincschools.com/assets/media/logos/favicon.ico" class="h-9 w-9 rounded-lg shadow" alt="Logo">
-      <span class="text-xl font-bold text-[#2647a6]">Admission Management</span>
-    </div>
-    <div class="flex items-center gap-4">
-      <button class="hidden md:inline-block px-4 py-2 rounded-lg bg-[#2647a6] text-white font-semibold hover:bg-[#18308b] transition" onclick="window.location.href='admin.html'">
-        <i class="fa fa-arrow-left mr-1"></i> Admin Dashboard
-      </button>
-    </div>
-  </nav>
-  <main class="max-w-6xl mx-auto mt-6 px-2">
-    <!-- Admission Setup Section -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
-      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-cogs"></i> Set Up Admission</h2>
-      <form id="admissionSetupForm" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+<body>
+  <div class="app" id="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+      <div class="brand">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo">
         <div>
-          <label class="block text-sm font-bold mb-1">Session</label>
-          <select name="session" id="sessionSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+          <div class="title">GOLD & LINC</div>
+          <div class="subtitle">Admin Portal</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="admin.html" class="nav-link">
+          <span>🏠</span> Dashboard
+        </a>
+        <a href="admission.html" class="nav-link active">
+          <span>🎓</span> Admission
+        </a>
+        <a href="more.html" class="nav-link">
+          <span>🌐</span> Multi-location
+        </a>
+        <a href="people.html" class="nav-link">
+          <span>👥</span> People
+        </a>
+        <a href="academics.html" class="nav-link">
+          <span>📚</span> Academics
+        </a>
+        <a href="admin-cbt.html" class="nav-link">
+          <span>💻</span> CBT Configuration
+        </a>
+        <a href="results.html" class="nav-link">
+          <span>📄</span> Results
+        </a>
+        <a href="finance.html" class="nav-link">
+          <span>💰</span> Finance
+        </a>
+        <a href="attendance.html" class="nav-link">
+          <span>🗓️</span> Attendance
+        </a>
+        <a href="#" class="nav-link">
+          <span>⚙️</span> Settings
+        </a>
+      </nav>
+
+      <div class="muted-small" style="margin-top: auto;">
+        Signed in as <span id="adminName">Admin</span>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- TOPBAR -->
+    <div class="topbar" role="banner">
+      <div class="flex">
+        <button id="sidebarToggle" class="icon-btn" aria-label="Toggle Sidebar" style="display: none; font-size: 24px;">☰</button>
+        <div class="page-title">Admission Management</div>
+      </div>
+      <div class="flex">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <button class="icon-btn" title="Settings">⚙️</button>
+        <button class="icon-btn" title="Search">🔍</button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main" role="main" tabindex="-1">
+      <!-- Admission Cohorts/Batches Section -->
+      <div class="section-card">
+        <div class="section-title"><i class="fa fa-layer-group"></i> Active Admission Cohorts/Batches</div>
+        <div style="margin-bottom: 20px;">
+          <button class="btn btn-primary" onclick="openCohortModal()">
+            <i class="fa fa-plus"></i> Create New Cohort
+          </button>
+        </div>
+        <div id="cohortsContainer" class="cohort-grid">
+          <div class="loading">
+            <div class="loader-spinner"></div>
+            <p>Loading cohorts...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admission Setup Section -->
+      <div class="section-card">
+        <div class="section-title"><i class="fa fa-cogs"></i> Set Up Admission (Legacy)</div>
+        <form id="admissionSetupForm" class="admission-form">
+          <div class="form-group">
+            <label for="sessionSelect">Session</label>
+            <select name="session" id="sessionSelect" required>
+              <option value="">Select Session</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="termSelect">Term</label>
+            <select name="term" id="termSelect" required>
+              <option value="">Select Term</option>
+              <option>First Term</option>
+              <option>Second Term</option>
+              <option>Third Term</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="classSelect">Class</label>
+            <select name="classId" id="classSelect" required>
+              <option value="">Select Class</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="armSelect">Arm</label>
+            <select name="armId" id="armSelect" required>
+              <option value="">Select Arm</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" name="startDate" required>
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" name="endDate" required>
+          </div>
+
+          <div class="form-group">
+            <label for="applicationFee">Application Fee (₦)</label>
+            <input type="number" name="applicationFee" min="0" required>
+          </div>
+
+          <button type="submit" class="btn btn-success" style="grid-column: 1/-1;">
+            <i class="fa fa-save"></i> Save Setup
+          </button>
+        </form>
+        <div id="admissionSetupMessage" class="message"></div>
+      </div>
+
+      <!-- Review Applications Table -->
+      <div class="section-card">
+        <div class="section-title"><i class="fa fa-file-alt"></i> Review Applications</div>
+        <div class="table-container">
+          <table id="applicationsTable">
+            <thead>
+              <tr>
+                <th>Applicant Name</th>
+                <th>Session</th>
+                <th>Term</th>
+                <th>Class</th>
+                <th>Arm</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 24px;">Loading applications...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Application Modal -->
+  <div class="modal-overlay" id="applicationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fa fa-user"></i> Application Details</h2>
+        <button type="button" class="modal-close" onclick="closeApplicationModal()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="applicationModalContent">
+        <div class="modal-field">
+          <label>Name</label>
+          <value id="modalName">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Email</label>
+          <value id="modalEmail">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Phone</label>
+          <value id="modalPhone">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Session</label>
+          <value id="modalSession">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Term</label>
+          <value id="modalTerm">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Class</label>
+          <value id="modalClass">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Arm</label>
+          <value id="modalArm">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Date Applied</label>
+          <value id="modalDateApplied">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Status</label>
+          <value id="modalStatus">—</value>
+        </div>
+        <div class="modal-field">
+          <label>Documents</label>
+          <value id="modalDocuments">—</value>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="approveBtn" class="btn btn-success" onclick="approveApplication()">
+          <i class="fa fa-check"></i> Approve
+        </button>
+        <button id="rejectBtn" class="btn btn-danger" onclick="rejectApplication()">
+          <i class="fa fa-times"></i> Reject
+        </button>
+      </div>
+      <div id="applicationModalMessage" class="message" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- Cohort Modal (Create/Edit) -->
+  <div class="modal-overlay" id="cohortModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="cohortModalTitle"><i class="fa fa-plus-circle"></i> Create New Cohort</h2>
+        <button type="button" class="modal-close" onclick="closeCohortModal()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <form id="cohortForm" class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="modal-field">
+          <label>Session</label>
+          <select id="cohortSession" required>
             <option value="">Select Session</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">Term</label>
-          <select name="term" id="termSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field">
+          <label>Term</label>
+          <select id="cohortTerm" required>
             <option value="">Select Term</option>
             <option>First Term</option>
             <option>Second Term</option>
             <option>Third Term</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">Class</label>
-          <select name="classId" id="classSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field">
+          <label>Class</label>
+          <select id="cohortClass" required>
             <option value="">Select Class</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">Arm</label>
-          <select name="armId" id="armSelect" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field">
+          <label>Arm</label>
+          <select id="cohortArm" required>
             <option value="">Select Arm</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">Start Date</label>
-          <input type="date" name="startDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field">
+          <label>Start Date</label>
+          <input type="date" id="cohortStartDate" required>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">End Date</label>
-          <input type="date" name="endDate" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field">
+          <label>End Date</label>
+          <input type="date" id="cohortEndDate" required>
         </div>
-        <div>
-          <label class="block text-sm font-bold mb-1">Application Fee (₦)</label>
-          <input type="number" name="applicationFee" min="0" class="w-full px-3 py-2 rounded-lg border border-[#ddeaff] focus:outline-none focus:border-[#2647a6]" required>
+
+        <div class="modal-field" style="grid-column: 1/-1;">
+          <label>Application Fee (₦)</label>
+          <input type="number" id="cohortAppFee" min="0" required>
         </div>
-        <div class="md:col-span-6">
-          <button type="submit" class="w-full md:w-auto px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition">
-            <i class="fa fa-save mr-1"></i> Save Setup
-          </button>
+
+        <div class="modal-field" style="grid-column: 1/-1;">
+          <label>Description</label>
+          <input type="text" id="cohortDescription" placeholder="Optional description">
         </div>
       </form>
-      <div id="admissionSetupMessage" class="mt-3 text-sm"></div>
-    </div>
-    <!-- Review Applications Table -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-5">
-      <h2 class="text-lg font-bold text-[#2647a6] mb-4 flex items-center gap-2"><i class="fa fa-file-alt"></i> Review Applications</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm" id="applicationsTable">
-          <thead class="bg-[#e9f0fe]">
-            <tr>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Applicant Name</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Session</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Term</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Class</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Arm</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Date Applied</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Status</th>
-              <th class="py-3 px-4 text-left font-bold text-[#2647a6]">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="applicationsTableBody" class="bg-white divide-y divide-[#e9f0fe]">
-            <tr><td colspan="8" class="py-2 px-4">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- Application Modal -->
-    <div id="applicationModal" tabindex="-1" class="hidden modal-overlay fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full">
-      <div class="bg-white rounded-xl shadow-md p-6 w-full max-w-lg">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold text-[#2647a6] flex items-center gap-2"><i class="fa fa-user"></i> Application Details</h3>
-          <button type="button" class="text-gray-400 hover:text-gray-900" onclick="closeModal('applicationModal')">
-            <i class="fa fa-times"></i>
-          </button>
-        </div>
-        <div id="applicationModalContent"></div>
-        <div class="flex gap-2 mt-4">
-          <button id="approveBtn" class="px-6 py-2 rounded-lg bg-[#18ba89] text-white font-bold hover:bg-[#13a87a] transition"><i class="fa fa-check mr-1"></i> Approve</button>
-          <button id="rejectBtn" class="px-6 py-2 rounded-lg bg-[#e74c3c] text-white font-bold hover:bg-[#c0392b] transition"><i class="fa fa-times mr-1"></i> Reject</button>
-        </div>
-        <div id="applicationModalMessage" class="mt-3 text-sm"></div>
-      </div>
-    </div>
-  </main>
-  <script>
-    // Modal helpers
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="saveCohort()">
+          <i class="fa fa-save"></i> Save Cohort
+        </button>
+        <button class="btn btn-danger" onclick="closeCohortModal()">
+          <i class="fa fa-times"></i> Cancel
+        </button>
+      </div>
+      <div id="cohortModalMessage" class="message" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <script>
     const API_BASE = "/api";
     const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
 
-    // ========== Fetch dropdown options ==========
+    let currentApplicationId = null;
+    let currentCohortId = null;
+
+    // ==================== SIDEBAR MOBILE TOGGLE ====================
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function handleResize() {
+      if (window.innerWidth <= 768) {
+        sidebarToggle.style.display = 'flex';
+      } else {
+        sidebarToggle.style.display = 'none';
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    }
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Active nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      if (link.href === window.location.href || link.href.includes(window.location.pathname)) {
+        link.classList.add('active');
+      }
+    });
+
+    // ==================== LOAD DROPDOWNS ====================
     async function loadDropdowns() {
-      // Sessions
-      const sessionRes = await fetch(API_BASE + "/sessions", { headers: { Authorization: "Bearer " + token }});
-      const sessions = await sessionRes.json();
-      const sessionSelect = document.getElementById('sessionSelect');
-      sessionSelect.innerHTML = '<option value="">Select Session</option>' + sessions.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+      try {
+        const sessionRes = await fetch(API_BASE + "/sessions", { headers: { Authorization: "Bearer " + token } });
+        const sessions = await sessionRes.json();
+        const sessionSelect = document.getElementById('sessionSelect');
+        const cohortSessionSelect = document.getElementById('cohortSession');
+        const html = '<option value="">Select Session</option>' +
+          sessions.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+        sessionSelect.innerHTML = html;
+        cohortSessionSelect.innerHTML = html;
 
-      // Classes
-      const classRes = await fetch(API_BASE + "/classes", { headers: { Authorization: "Bearer " + token }});
-      const classes = await classRes.json();
-      const classSelect = document.getElementById('classSelect');
-      classSelect.innerHTML = '<option value="">Select Class</option>' + classes.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+        const classRes = await fetch(API_BASE + "/classes", { headers: { Authorization: "Bearer " + token } });
+        const classes = await classRes.json();
+        const classSelect = document.getElementById('classSelect');
+        const cohortClassSelect = document.getElementById('cohortClass');
+        const classHtml = '<option value="">Select Class</option>' +
+          classes.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+        classSelect.innerHTML = classHtml;
+        cohortClassSelect.innerHTML = classHtml;
 
-      // Arms
-      const armRes = await fetch(API_BASE + "/arms", { headers: { Authorization: "Bearer " + token }});
-      const arms = await armRes.json();
-      const armSelect = document.getElementById('armSelect');
-      armSelect.innerHTML = '<option value="">Select Arm</option>' + arms.map(a => `<option value="${a._id}">${a.name}</option>`).join('');
+        const armRes = await fetch(API_BASE + "/arms", { headers: { Authorization: "Bearer " + token } });
+        const arms = await armRes.json();
+        const armSelect = document.getElementById('armSelect');
+        const cohortArmSelect = document.getElementById('cohortArm');
+        const armHtml = '<option value="">Select Arm</option>' +
+          arms.map(a => `<option value="${a._id}">${a.name}</option>`).join('');
+        armSelect.innerHTML = armHtml;
+        cohortArmSelect.innerHTML = armHtml;
+      } catch (e) {
+        console.error('Error loading dropdowns:', e);
+      }
     }
     loadDropdowns();
 
-    // Admission Setup
-    document.getElementById('admissionSetupForm').onsubmit = async function(e) {
+    // ==================== LOAD COHORTS ====================
+    async function loadCohorts() {
+      const container = document.getElementById('cohortsContainer');
+      container.innerHTML = '<div class="loading"><div class="loader-spinner"></div><p>Loading cohorts...</p></div>';
+
+      try {
+        const res = await fetch(API_BASE + "/admission/cohorts", { headers: { Authorization: "Bearer " + token } });
+        if (res.ok) {
+          const cohorts = await res.json();
+          if (!cohorts || cohorts.length === 0) {
+            container.innerHTML = '<div class="loading"><p>📭 No cohorts created yet. Create one to get started!</p></div>';
+            return;
+          }
+
+          container.innerHTML = cohorts.map(cohort => {
+            const status = cohort.status || 'active';
+            const statusBadge = {
+              'active': 'badge-active',
+              'paused': 'badge-paused',
+              'closed': 'badge-closed'
+            }[status] || 'badge-active';
+
+            const startDate = new Date(cohort.startDate).toLocaleDateString();
+            const endDate = new Date(cohort.endDate).toLocaleDateString();
+
+            return `
+              <div class="cohort-card">
+                <div class="cohort-header">
+                  <h3 class="cohort-title">${cohort.session?.name || '—'} - ${cohort.class?.name || '—'}</h3>
+                  <span class="badge ${statusBadge}">${status.toUpperCase()}</span>
+                </div>
+                
+                <div class="cohort-info">
+                  <div class="info-pair">
+                    <span class="info-label">Term</span>
+                    <span class="info-value">${cohort.term || '—'}</span>
+                  </div>
+                  <div class="info-pair">
+                    <span class="info-label">Arm</span>
+                    <span class="info-value">${cohort.arm?.name || '—'}</span>
+                  </div>
+                  <div class="info-pair">
+                    <span class="info-label">Start Date</span>
+                    <span class="info-value">${startDate}</span>
+                  </div>
+                  <div class="info-pair">
+                    <span class="info-label">End Date</span>
+                    <span class="info-value">${endDate}</span>
+                  </div>
+                  <div class="info-pair">
+                    <span class="info-label">App Fee</span>
+                    <span class="info-value">₦${(cohort.applicationFee || 0).toLocaleString()}</span>
+                  </div>
+                  <div class="info-pair">
+                    <span class="info-label">Applicants</span>
+                    <span class="info-value">${cohort.applicantCount || 0}</span>
+                  </div>
+                </div>
+
+                <div class="cohort-actions">
+                  <button class="action-btn action-btn-view" onclick="editCohort('${cohort._id}')">
+                    <i class="fa fa-edit"></i> Edit
+                  </button>
+                  ${status === 'active' ? 
+                    `<button class="action-btn action-btn-pause" onclick="pauseCohort('${cohort._id}')">
+                      <i class="fa fa-pause"></i> Pause
+                    </button>` :
+                    `<button class="action-btn action-btn-resume" onclick="resumeCohort('${cohort._id}')">
+                      <i class="fa fa-play"></i> Resume
+                    </button>`
+                  }
+                  <button class="action-btn action-btn-delete" onclick="deleteCohort('${cohort._id}')">
+                    <i class="fa fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '<div class="loading"><p>❌ Error loading cohorts.</p></div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div class="loading"><p>❌ Network error loading cohorts.</p></div>';
+        console.error('Error loading cohorts:', e);
+      }
+    }
+    loadCohorts();
+
+    // ==================== COHORT MODAL FUNCTIONS ====================
+    function openCohortModal() {
+      currentCohortId = null;
+      document.getElementById('cohortModalTitle').innerHTML = '<i class="fa fa-plus-circle"></i> Create New Cohort';
+      document.getElementById('cohortForm').reset();
+      document.getElementById('cohortModalMessage').classList.remove('error', 'success');
+      document.getElementById('cohortModalMessage').style.display = 'none';
+      document.getElementById('cohortModal').classList.add('active');
+    }
+
+    function closeCohortModal() {
+      document.getElementById('cohortModal').classList.remove('active');
+      currentCohortId = null;
+    }
+
+    async function editCohort(cohortId) {
+      currentCohortId = cohortId;
+      document.getElementById('cohortModalTitle').innerHTML = '<i class="fa fa-edit"></i> Edit Cohort';
+      
+      try {
+        const res = await fetch(API_BASE + "/admission/cohorts/" + cohortId, {
+          headers: { Authorization: "Bearer " + token }
+        });
+        if (res.ok) {
+          const cohort = await res.json();
+          document.getElementById('cohortSession').value = cohort.session?._id || '';
+          document.getElementById('cohortTerm').value = cohort.term || '';
+          document.getElementById('cohortClass').value = cohort.class?._id || '';
+          document.getElementById('cohortArm').value = cohort.arm?._id || '';
+          document.getElementById('cohortStartDate').value = cohort.startDate?.split('T')[0] || '';
+          document.getElementById('cohortEndDate').value = cohort.endDate?.split('T')[0] || '';
+          document.getElementById('cohortAppFee').value = cohort.applicationFee || '';
+          document.getElementById('cohortDescription').value = cohort.description || '';
+          document.getElementById('cohortModalMessage').classList.remove('error', 'success');
+          document.getElementById('cohortModalMessage').style.display = 'none';
+          document.getElementById('cohortModal').classList.add('active');
+        } else {
+          alert('❌ Error loading cohort details');
+        }
+      } catch (e) {
+        alert('❌ Network error');
+      }
+    }
+
+    async function saveCohort() {
+      const data = {
+        session: document.getElementById('cohortSession').value,
+        term: document.getElementById('cohortTerm').value,
+        class: document.getElementById('cohortClass').value,
+        arm: document.getElementById('cohortArm').value,
+        startDate: document.getElementById('cohortStartDate').value,
+        endDate: document.getElementById('cohortEndDate').value,
+        applicationFee: parseFloat(document.getElementById('cohortAppFee').value),
+        description: document.getElementById('cohortDescription').value
+      };
+
+      const messageBox = document.getElementById('cohortModalMessage');
+      messageBox.classList.remove('error', 'success');
+      messageBox.textContent = '⏳ Saving...';
+      messageBox.style.display = 'block';
+
+      try {
+        const method = currentCohortId ? 'PUT' : 'POST';
+        const url = currentCohortId 
+          ? API_BASE + "/admission/cohorts/" + currentCohortId
+          : API_BASE + "/admission/cohorts";
+
+        const res = await fetch(url, {
+          method: method,
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          messageBox.classList.add('success');
+          messageBox.innerHTML = '<i class="fa fa-check-circle"></i> Cohort saved successfully!';
+          setTimeout(() => {
+            closeCohortModal();
+            loadCohorts();
+          }, 1500);
+        } else {
+          const err = await res.json();
+          messageBox.classList.add('error');
+          messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> ' + (err.error || "Error saving cohort.");
+        }
+      } catch (e) {
+        messageBox.classList.add('error');
+        messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> Network error.';
+      }
+    }
+
+    async function pauseCohort(cohortId) {
+      if (!confirm('⏸️ Are you sure you want to pause this cohort?')) return;
+
+      try {
+        const res = await fetch(API_BASE + "/admission/cohorts/" + cohortId + "/pause", {
+          method: 'PUT',
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (res.ok) {
+          alert('✅ Cohort paused successfully!');
+          loadCohorts();
+        } else {
+          alert('❌ Error pausing cohort');
+        }
+      } catch (e) {
+        alert('❌ Network error');
+      }
+    }
+
+    async function resumeCohort(cohortId) {
+      if (!confirm('▶️ Are you sure you want to resume this cohort?')) return;
+
+      try {
+        const res = await fetch(API_BASE + "/admission/cohorts/" + cohortId + "/resume", {
+          method: 'PUT',
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (res.ok) {
+          alert('✅ Cohort resumed successfully!');
+          loadCohorts();
+        } else {
+          alert('❌ Error resuming cohort');
+        }
+      } catch (e) {
+        alert('❌ Network error');
+      }
+    }
+
+    async function deleteCohort(cohortId) {
+      if (!confirm('🗑️ Are you sure you want to delete this cohort? This action cannot be undone.')) return;
+
+      try {
+        const res = await fetch(API_BASE + "/admission/cohorts/" + cohortId, {
+          method: 'DELETE',
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (res.ok) {
+          alert('✅ Cohort deleted successfully!');
+          loadCohorts();
+        } else {
+          alert('❌ Error deleting cohort');
+        }
+      } catch (e) {
+        alert('❌ Network error');
+      }
+    }
+
+    // ==================== ADMISSION SETUP ====================
+    document.getElementById('admissionSetupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
-      document.getElementById('admissionSetupMessage').textContent = "Saving...";
+      const messageBox = document.getElementById('admissionSetupMessage');
+      messageBox.classList.remove('error', 'success');
+      messageBox.textContent = '⏳ Saving...';
+      messageBox.style.display = 'block';
+
       try {
         const res = await fetch(API_BASE + "/admission/setup", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
           body: JSON.stringify(data)
         });
+
         if (res.ok) {
-          document.getElementById('admissionSetupMessage').textContent = "Admission setup saved!";
+          messageBox.classList.add('success');
+          messageBox.innerHTML = '<i class="fa fa-check-circle"></i> Admission setup saved successfully!';
+          this.reset();
         } else {
           const err = await res.json();
-          document.getElementById('admissionSetupMessage').textContent = err.error || "Error saving setup.";
+          messageBox.classList.add('error');
+          messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> ' + (err.error || "Error saving setup.");
         }
-      } catch {
-        document.getElementById('admissionSetupMessage').textContent = "Network error.";
+      } catch (e) {
+        messageBox.classList.add('error');
+        messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> Network error.';
       }
-    };
+    });
 
-    // Applications Table
+    // ==================== LOAD APPLICATIONS ====================
     async function loadApplications() {
       const tbody = document.getElementById('applicationsTableBody');
-      tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;">Loading...</td></tr>';
+
       try {
         const res = await fetch(API_BASE + "/admission/applications", { headers: { Authorization: "Bearer " + token } });
         if (res.ok) {
           const applications = await res.json();
-          if (!applications.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">No applications found.</td></tr>';
+          if (!applications || applications.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px;">No applications found.</td></tr>';
             return;
           }
-          tbody.innerHTML = '';
-          applications.forEach(app => {
-            tbody.innerHTML += `
-              <tr>
-                <td class="py-2 px-4">${app.name}</td>
-                <td class="py-2 px-4">${app.sessionName || '-'}</td>
-                <td class="py-2 px-4">${app.term || '-'}</td>
-                <td class="py-2 px-4">${app.className || '-'}</td>
-                <td class="py-2 px-4">${app.armName || '-'}</td>
-                <td class="py-2 px-4">${app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : ''}</td>
-                <td class="py-2 px-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-bold ${
-                    app.status === 'Approved' ? 'bg-[#18ba89] text-white' :
-                    app.status === 'Rejected' ? 'bg-[#e74c3c] text-white' :
-                    'bg-[#e9f0fe] text-[#22305a]'
-                  }">${app.status}</span>
-                </td>
-                <td class="py-2 px-4 flex gap-2">
-                  <button class="px-2 py-1 rounded-lg bg-[#2647a6] text-white text-xs font-bold hover:bg-[#18308b]" onclick="showApplicationModal('${app._id}')">
-                    <i class="fa fa-eye"></i>
-                  </button>
-                </td>
-              </tr>
-            `;
-          });
+
+          tbody.innerHTML = applications.map(app => `
+            <tr>
+              <td>${app.name || '—'}</td>
+              <td>${app.sessionName || '—'}</td>
+              <td>${app.term || '—'}</td>
+              <td>${app.className || '—'}</td>
+              <td>${app.armName || '—'}</td>
+              <td>${app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : '—'}</td>
+              <td>
+                <span class="badge badge-${
+                  app.status === 'Approved' ? 'approved' :
+                  app.status === 'Rejected' ? 'rejected' : 'pending'
+                }">${app.status || 'Pending'}</span>
+              </td>
+              <td>
+                <button class="action-btn action-btn-view" onclick="showApplicationModal('${app._id}')">
+                  <i class="fa fa-eye"></i> View
+                </button>
+              </td>
+            </tr>
+          `).join('');
         } else {
-          tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Error loading applications.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #e74c3c;">Error loading applications.</td></tr>';
         }
-      } catch {
-        tbody.innerHTML = '<tr><td colspan="8" class="py-2 px-4">Network error.</td></tr>';
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #e74c3c;">Network error.</td></tr>';
       }
     }
     loadApplications();
 
-    // Application Modal
-    window.showApplicationModal = async function(applicationId) {
-      document.getElementById('applicationModalContent').innerHTML = "Loading...";
-      openModal('applicationModal');
-      try {
-        const res = await fetch(API_BASE + "/admission/application/" + applicationId, { headers: { Authorization: "Bearer " + token } });
-        if (!res.ok) throw new Error("Failed");
-        const app = await res.json();
-        document.getElementById('applicationModalContent').innerHTML = `
-          <div><b>Name:</b> ${app.name}</div>
-          <div><b>Session:</b> ${app.sessionName || '-'}</div>
-          <div><b>Term:</b> ${app.term || '-'}</div>
-          <div><b>Class:</b> ${app.className || '-'}</div>
-          <div><b>Arm:</b> ${app.armName || '-'}</div>
-          <div><b>Date Applied:</b> ${app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : ''}</div>
-          <div><b>Status:</b> ${app.status}</div>
-          <div><b>Email:</b> ${app.email || '-'}</div>
-          <div><b>Phone:</b> ${app.phone || '-'}</div>
-          <div><b>Documents:</b> ${app.documents ? `<a target="_blank" href="${app.documents}">View</a>` : '-'}</div>
-        `;
-        document.getElementById('approveBtn').onclick = async function() {
-          await updateApplicationStatus(applicationId, "Approved");
-        };
-        document.getElementById('rejectBtn').onclick = async function() {
-          await updateApplicationStatus(applicationId, "Rejected");
-        };
-      } catch {
-        document.getElementById('applicationModalContent').innerHTML = "Could not load application details.";
-      }
-    };
+    // ==================== APPLICATION MODAL ====================
+    async function showApplicationModal(applicationId) {
+      currentApplicationId = applicationId;
+      const modal = document.getElementById('applicationModal');
+      modal.classList.add('active');
 
-    async function updateApplicationStatus(applicationId, status) {
-      document.getElementById('applicationModalMessage').textContent = "Updating...";
       try {
         const res = await fetch(API_BASE + "/admission/application/" + applicationId, {
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        if (res.ok) {
+          const app = await res.json();
+          document.getElementById('modalName').textContent = app.name || '—';
+          document.getElementById('modalEmail').textContent = app.email || '—';
+          document.getElementById('modalPhone').textContent = app.phone || '—';
+          document.getElementById('modalSession').textContent = app.sessionName || '—';
+          document.getElementById('modalTerm').textContent = app.term || '—';
+          document.getElementById('modalClass').textContent = app.className || '—';
+          document.getElementById('modalArm').textContent = app.armName || '—';
+          document.getElementById('modalDateApplied').textContent = app.dateApplied ? new Date(app.dateApplied).toLocaleDateString() : '—';
+          document.getElementById('modalStatus').textContent = app.status || '—';
+
+          if (app.documents) {
+            document.getElementById('modalDocuments').innerHTML = `<a href="${app.documents}" target="_blank" style="color: var(--accent-2); font-weight: 600;"><i class="fa fa-link"></i> View Documents</a>`;
+          } else {
+            document.getElementById('modalDocuments').textContent = '—';
+          }
+        } else {
+          document.getElementById('modalName').textContent = 'Error loading details';
+        }
+      } catch (e) {
+        document.getElementById('modalName').textContent = 'Network error';
+      }
+    }
+
+    function closeApplicationModal() {
+      document.getElementById('applicationModal').classList.remove('active');
+      currentApplicationId = null;
+      document.getElementById('applicationModalMessage').classList.remove('error', 'success');
+      document.getElementById('applicationModalMessage').style.display = 'none';
+    }
+
+    async function approveApplication() {
+      await updateApplicationStatus('Approved');
+    }
+
+    async function rejectApplication() {
+      await updateApplicationStatus('Rejected');
+    }
+
+    async function updateApplicationStatus(status) {
+      if (!currentApplicationId) return;
+
+      const messageBox = document.getElementById('applicationModalMessage');
+      messageBox.classList.remove('error', 'success');
+      messageBox.textContent = '⏳ Updating...';
+      messageBox.style.display = 'block';
+
+      try {
+        const res = await fetch(API_BASE + "/admission/application/" + currentApplicationId, {
           method: "PUT",
           headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
           body: JSON.stringify({ status })
         });
+
         if (res.ok) {
-          document.getElementById('applicationModalMessage').textContent = "Application " + status + "!";
-          closeModal('applicationModal');
-          loadApplications();
+          messageBox.classList.add('success');
+          messageBox.innerHTML = '<i class="fa fa-check-circle"></i> Application ' + status + '!';
+          setTimeout(() => {
+            closeApplicationModal();
+            loadApplications();
+          }, 1500);
         } else {
           const err = await res.json();
-          document.getElementById('applicationModalMessage').textContent = err.error || "Error updating status.";
+          messageBox.classList.add('error');
+          messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> ' + (err.error || "Error updating status.");
         }
-      } catch {
-        document.getElementById('applicationModalMessage').textContent = "Network error.";
+      } catch (e) {
+        messageBox.classList.add('error');
+        messageBox.innerHTML = '<i class="fa fa-exclamation-circle"></i> Network error.';
       }
     }
 
-    // Responsive: close modal on outside click (mobile)
-    window.onclick = function(event) {
-      const modal = document.getElementById('applicationModal');
-      if (modal && !modal.classList.contains('hidden') && event.target === modal) closeModal('applicationModal');
-    };
+    // Close modals on backdrop click
+    document.getElementById('applicationModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeApplicationModal();
+      }
+    });
+
+    document.getElementById('cohortModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeCohortModal();
+      }
+    });
   </script>
 </body>
 </html>

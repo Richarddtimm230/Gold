@@ -107,4 +107,5 @@ ExpenseSchema.index({ category: 1 });
 ExpenseSchema.index({ requestNumber: 1 });
 ExpenseSchema.index({ approver: 1 });
 
-module.exports = mongoose.model('Expense', ExpenseSchema);
+// Export with check for existing model
+module.exports = mongoose.models.Expense || mongoose.model('Expense', ExpenseSchema);

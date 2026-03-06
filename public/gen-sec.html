@@ -2,39 +2,751 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Check Results | Gold and Linc Schools</title>
+  <title>Check Results (Admin) | Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="stylesheet" href="check-results-admin.css">
+  <style>
+    :root {
+      --bg-0: #f6f8ff;
+      --bg-1: #eef2ff;
+      --accent: #0f172a;
+      --accent-2: #1e40af;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --sidebar-w: 300px;
+      --radius: 10px;
+      --success: #18ba89;
+      --warning: #ffd600;
+      --danger: #e74c3c;
+      --info: #2647a6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      -webkit-font-smoothing: antialiased;
+      color: #07102a;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+      align-items: stretch;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: linear-gradient(180deg, #07102a 0%, #0b3b82 100%);
+      color: #fff;
+      padding: 20px 16px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 4px 0 28px rgba(2, 11, 24, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid rgba(255, 224, 102, 0.12);
+      background: #fff;
+    }
+
+    .brand .title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #ffe066;
+    }
+
+    .brand .subtitle {
+      font-size: 0.85rem;
+      color: #b0c4ff;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      flex: 1;
+    }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #e6eefc;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffe066;
+    }
+
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-w);
+      top: 0;
+      width: calc(100% - var(--sidebar-w));
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid #eef3ff;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 20px;
+      flex: 1;
+      min-height: 100vh;
+      padding-top: 80px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .page-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--accent-2);
+    }
+
+    .flex {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .muted-small {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      margin-left: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Loader/Spinner Styles */
+    .loader-backdrop {
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.93);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .spinner {
+      border: 7px solid #ddeaff;
+      border-top: 7px solid #1e40af;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+
+    /* Page Title */
+    .page-header {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin: 0;
+    }
+
+    /* Results Container */
+    .results-container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 24px;
+      border: 1px solid #eef3ff;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+    }
+
+    /* Form Styles */
+    .result-search-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .result-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .result-form-group label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+
+    .result-form-input,
+    .result-form-select {
+      padding: 10px 12px;
+      border: 1px solid #ddeaff;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s;
+    }
+
+    .result-form-input:focus,
+    .result-form-select:focus {
+      outline: none;
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .result-search-btn {
+      padding: 10px 24px;
+      background: var(--accent-2);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      align-self: flex-end;
+    }
+
+    .result-search-btn:hover {
+      background: #1438a0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    .result-search-error {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      color: #991b1b;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-weight: 500;
+    }
+
+    /* Results Display */
+    #resultsDisplaySection {
+      display: none;
+    }
+
+    .results-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: #f3f8ff;
+      border-radius: 8px;
+      border: 1px solid #ddeaff;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #222;
+    }
+
+    /* Skills & Attendance Sections */
+    .skills-section,
+    .attendance-section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f9fbff;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-2);
+    }
+
+    .skills-section h3,
+    .attendance-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 1rem;
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    .skills-list,
+    .attendance-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .skills-list li,
+    .attendance-list li {
+      padding: 8px 12px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #eef3ff;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .skills-list strong,
+    .attendance-list strong {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    /* Results Table */
+    .results-table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid #eef3ff;
+      margin-bottom: 20px;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      min-width: 700px;
+    }
+
+    .results-table thead {
+      background: #f3f8ff;
+      border-bottom: 2px solid #ddeaff;
+    }
+
+    .results-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--accent-2);
+      white-space: nowrap;
+    }
+
+    .results-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eef3ff;
+      color: #555;
+    }
+
+    .results-table tbody tr {
+      transition: background 0.15s;
+    }
+
+    .results-table tbody tr:hover {
+      background: #f9fbff;
+    }
+
+    .grade-high {
+      color: #15803d;
+      font-weight: 700;
+    }
+
+    .grade-mid {
+      color: #ca8a04;
+      font-weight: 700;
+    }
+
+    .grade-low {
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    /* Download Button */
+    .download-btn {
+      padding: 10px 24px;
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn:hover {
+      background: #15803d;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(24, 186, 137, 0.2);
+    }
+
+    /* News Section */
+    .news-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 24px;
+      border: 1px solid #eef3ff;
+      margin-bottom: 24px;
+    }
+
+    .news-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+    }
+
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .news-item {
+      padding: 14px;
+      background: #f3f8ff;
+      border-left: 4px solid var(--accent-2);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .news-item b {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .result-search-form {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .results-table {
+        min-width: 600px;
+        font-size: 0.9rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 280px;
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .topbar {
+        left: 0;
+        width: 100%;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 14px;
+        padding-top: 84px;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 99;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      .result-search-form {
+        grid-template-columns: 1fr;
+      }
+
+      .result-search-btn {
+        align-self: auto;
+        width: 100%;
+      }
+
+      .results-info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-table {
+        min-width: 500px;
+        font-size: 0.85rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 8px 10px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 12px;
+        padding-top: 80px;
+      }
+
+      .page-header h1 {
+        font-size: 1.4rem;
+      }
+
+      .results-container,
+      .news-section {
+        padding: 16px;
+      }
+
+      .results-table {
+        min-width: 400px;
+        font-size: 0.8rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 6px 8px;
+      }
+
+      .download-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .sidebar {
+        width: 90vw;
+        left: -90vw;
+      }
+
+      .results-table {
+        min-width: 350px;
+        font-size: 0.75rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 4px 6px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 6px;
+      background: #f4f8fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e7ee;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d0d7e6;
+    }
+  </style>
 </head>
 <body>
-  <div class="results-root">
-    <!-- Loader/Spinner -->
-    <div id="loader" class="loader-backdrop" style="display:none;">
-      <div class="spinner"></div>
-      <div class="loader-text">Searching for results...</div>
-    </div>
-    <!-- Header & Main Actions -->
-    <div class="results-header">
-      <div class="results-title">Check Results (Admin)</div>
-      <div class="results-actions">
-        <a href="student-dashboard.html"><i class="fa fa-arrow-left"></i> Dashboard</a>
+  <div id="loader" class="loader-backdrop" style="display: none;">
+    <div class="spinner"></div>
+    <div class="loader-text">🔍 Searching for results...</div>
+  </div>
+
+  <div class="app" id="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+      <div class="brand">
+        <img src="logo-1679575828 (1).jpeg" alt="Logo">
+        <div>
+          <div class="title">GOLD & LINC</div>
+          <div class="subtitle">Admin Portal</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="admin.html" class="nav-link">
+          <span>🏠</span> Dashboard
+        </a>
+        <a href="admission.html" class="nav-link">
+          <span>🎓</span> Admission
+        </a>
+        <a href="more.html" class="nav-link">
+          <span>🌐</span> Multi-location
+        </a>
+        <a href="people.html" class="nav-link">
+          <span>👥</span> People
+        </a>
+        <a href="academics.html" class="nav-link">
+          <span>📚</span> Academics
+        </a>
+        <a href="admin-cbt.html" class="nav-link">
+          <span>💻</span> CBT Configuration
+        </a>
+        <a href="results.html" class="nav-link">
+          <span>📄</span> Results
+        </a>
+        <a href="gen-sec.html" class="nav-link active">
+          <span>🔍</span> Check Results
+        </a>
+        <a href="finance.html" class="nav-link">
+          <span>💰</span> Finance
+        </a>
+        <a href="attendance.html" class="nav-link">
+          <span>🗓️</span> Attendance
+        </a>
+        <a href="#" class="nav-link">
+          <span>⚙️</span> Settings
+        </a>
+      </nav>
+
+      <div class="muted-small" style="margin-top: auto;">
+        Signed in as <span id="adminName">Admin</span>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- TOPBAR -->
+    <div class="topbar" role="banner">
+      <div class="flex">
+        <button id="sidebarToggle" class="icon-btn" aria-label="Toggle Sidebar" style="display: none; font-size: 24px;">☰</button>
+        <div class="page-title">Check Results (Admin)</div>
+      </div>
+      <div class="flex">
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Help">❓</button>
+        <button class="icon-btn" title="Settings">⚙️</button>
+        <button class="icon-btn" title="Search">🔍</button>
       </div>
     </div>
-    <main class="results-main">
-      <!-- Search Section -->
-      <section class="results-section">
-        <div class="section-title"><i class="fa fa-search"></i> Check Result (Admin)</div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main" role="main" tabindex="-1">
+      <div class="page-header">
+        <h1><span style="margin-right: 0.5rem;">🔍</span>Check Student Results</h1>
+      </div>
+
+      <!-- SEARCH SECTION -->
+      <div class="results-container">
+        <div class="section-title"><i class="fa fa-search"></i> Search Student Result</div>
         <form class="result-search-form" id="resultSearchForm" autocomplete="off" onsubmit="return handleResultSearch(event)">
           <div class="result-form-group">
             <label for="regNoInput">Registration Number</label>
-            <input id="regNoInput" class="result-form-input" placeholder="Enter Reg. Number" required>
+            <input id="regNoInput" class="result-form-input" type="text" placeholder="e.g., STU001" required>
           </div>
           <div class="result-form-group">
             <label for="scratchCardInput">Scratch Card</label>
-            <input id="scratchCardInput" class="result-form-input" placeholder="Enter Scratch Card" maxlength="8" required>
+            <input id="scratchCardInput" class="result-form-input" type="text" placeholder="8-digit code" maxlength="8" required>
           </div>
           <div class="result-form-group">
             <label for="classInput">Class</label>
@@ -81,489 +793,578 @@
           </div>
           <button class="result-search-btn" type="submit"><i class="fa fa-search"></i> View Result</button>
         </form>
-        <div class="result-search-error" id="searchError" style="display:none;"></div>
-      </section>
-      <section class="results-section" id="resultsDisplaySection" style="display:none;">
-        <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
-        <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:18px;">
-          <span><b>Reg. No:</b> <span id="dispRegNo"></span></span>
-          <span><b>Class:</b> <span id="dispClass"></span></span>
-          <span><b>Session:</b> <span id="dispSession"></span></span>
-          <span><b>Term:</b> <span id="dispTerm"></span></span>
-          <span><b>Student Name:</b> <span id="dispName"></span></span>
-          <span><b>Principal's Comment:</b> <span id="dispPrincipalComment"></span></span>
-          <span><b>Class Size:</b> <span id="dispClassSize"></span></span>
+        <div class="result-search-error" id="searchError" style="display: none;"></div>
+      </div>
+
+      <!-- RESULTS DISPLAY SECTION -->
+      <div id="resultsDisplaySection" style="display: none;">
+        <div class="results-container">
+          <div class="section-title"><i class="fa fa-table"></i> Result Details</div>
+
+          <div class="results-info-grid">
+            <div class="info-item">
+              <span class="info-label">Reg. No</span>
+              <span class="info-value" id="dispRegNo">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Student Name</span>
+              <span class="info-value" id="dispName">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Class</span>
+              <span class="info-value" id="dispClass">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Session</span>
+              <span class="info-value" id="dispSession">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Term</span>
+              <span class="info-value" id="dispTerm">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Class Size</span>
+              <span class="info-value" id="dispClassSize">—</span>
+            </div>
+          </div>
+
+          <div id="skillsSection"></div>
+          <div id="attendanceSection"></div>
+
+          <div class="results-table-container">
+            <table class="results-table" id="resultsTable">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>CA1</th>
+                  <th>CA2</th>
+                  <th>Midterm</th>
+                  <th>Exam</th>
+                  <th>Total</th>
+                  <th>Grade</th>
+                  <th>Remark</th>
+                  <th>Position</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <p><strong>Principal's Comment:</strong> <span id="dispPrincipalComment" style="color: #555;"></span></p>
+          </div>
+
+          <button class="download-btn" onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
         </div>
-        <div id="skillsSection" style="margin-bottom:16px;"></div>
-        <div id="attendanceSection" style="margin-bottom:16px;"></div>
-        <div class="results-table-container">
-          <table class="results-table" id="resultsTable">
-            <thead>
-              <tr>
-                <th>Subject</th>
-                <th>CA1</th>
-                <th>CA2</th>
-                <th>Midterm</th>
-                <th>Exam</th>
-                <th>Total</th>
-                <th>Grade</th>
-                <th>Remark</th>
-                <th>Position</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-        <button class="download-btn" onclick="downloadCurrentResult()"><i class="fa fa-download"></i> Download Result</button>
-      </section>
-      <section class="news-section">
-        <div class="news-title"><i class="fa fa-newspaper"></i> Result News & Announcements</div>
+      </div>
+
+      <!-- NEWS SECTION -->
+      <div class="news-section">
+        <div class="news-title"><i class="fa fa-newspaper"></i> Results News & Announcements</div>
         <div class="news-list" id="newsList">
-          <div class="news-item"><b>2024/2025 2nd Term Results Released!</b> Check your results now using your registration number and scratch card.</div>
-          <div class="news-item"><b>All 2023/2024 Results Archived</b> – You can still access them by searching with your details.</div>
-          <div class="news-item"><b>New Online Scratch Card Sales</b> – Cards are now available at the school portal and accredited vendors.</div>
+          <div class="news-item"><b>🎉 2024/2025 2nd Term Results Released!</b> Check your results now using your registration number and scratch card.</div>
+          <div class="news-item"><b>📦 All 2023/2024 Results Archived</b> – You can still access them by searching with your details.</div>
+          <div class="news-item"><b>🛒 New Online Scratch Card Sales</b> – Cards are now available at the school portal and accredited vendors.</div>
+          <div class="news-item"><b>📞 Need Help?</b> Contact the admin office if you're having trouble accessing your results.</div>
         </div>
-      </section>
+      </div>
     </main>
-    <nav class="bottom-nav">
-      <button class="bottom-nav-btn" title="Home" onclick="window.location.href='dashboard.html'">
-        <i class="fa fa-home"></i>
-        <div class="bottom-nav-label">Home</div>
-      </button>
-      <button class="bottom-nav-btn" title="E-Class" onclick="window.location.href='e-class.html'">
-        <i class="fa fa-laptop"></i>
-        <div class="bottom-nav-label">E-Class</div>
-      </button>
-      <button class="bottom-nav-btn" title="Assignments" onclick="window.location.href='assignments.html'">
-        <i class="fa fa-file-alt"></i>
-        <div class="bottom-nav-label">Tasks</div>
-      </button>
-      <button class="bottom-nav-btn active" title="Results" onclick="window.location.href='results.html'">
-        <i class="fa fa-chart-bar"></i>
-        <div class="bottom-nav-label">Results</div>
-      </button>
-      <button class="bottom-nav-btn" title="Profile" onclick="window.location.href='profile.html'">
-        <i class="fa fa-user"></i>
-        <div class="bottom-nav-label">Me</div>
-      </button>
-    </nav>
-    <script>
-const API_BASE_URL = "https://goldlincschools.onrender.com";
-
-function showLoader(show) {
-  document.getElementById("loader").style.display = show ? "flex" : "none";
-}
-
-function calcAge(dobStr) {
-  if (!dobStr) return "";
-  let date;
-  if (typeof dobStr === "string") {
-    const parts = dobStr.split(/[-\/]/);
-    if (parts.length === 3) {
-      let year, month, day;
-      if (parts[0].length === 4) {
-        year = +parts[0]; month = +parts[1]; day = +parts[2];
-      } else {
-        day = +parts[0]; month = +parts[1]; year = +parts[2];
-      }
-      date = new Date(year, month-1, day);
-    } else {
-      date = new Date(dobStr);
-    }
-  } else {
-    date = new Date(dobStr);
-  }
-  if (!date || isNaN(date.getTime())) return "";
-  const now = new Date();
-  let age = now.getFullYear() - date.getFullYear();
-  if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
-    age--;
-  }
-  return age;
-}
-
-function getStudentFullName(student) {
-  if (!student) return "";
-  if (student.name) return student.name;
-  let parts = [];
-  if (student.firstname) parts.push(student.firstname);
-  if (student.othernames) parts.push(student.othernames);
-  if (student.surname) parts.push(student.surname);
-  if (student.lastname) parts.push(student.lastname);
-  return parts.join(" ").trim();
-}
-
-// --- FETCH SUBJECT POSITION FOR EACH RESULT ---
-async function fetchSubjectPositions(results) {
-  // If subject_position is already present, don't re-fetch
-  // Otherwise, try to fetch via /api/results/:id
-  for (const r of results) {
-    if (r.subject_position) continue;
-    if (!r._id) continue;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.subject_position) r.subject_position = data.subject_position;
-      }
-    } catch {}
-  }
-}
-
-async function handleResultSearch(e) {
-  e.preventDefault();
-  const regNo = document.getElementById("regNoInput").value.trim();
-  const scratchCard = document.getElementById("scratchCardInput").value.trim();
-  const klass = document.getElementById("classInput").value;
-  const session = document.getElementById("sessionInput").value;
-  const term = document.getElementById("termInput").value;
-  const errorBox = document.getElementById("searchError");
-  errorBox.style.display = "none";
-
-  if (!regNo || !scratchCard || !klass || !session || !term) {
-    errorBox.textContent = "All fields are required!";
-    errorBox.style.display = "block";
-    return false;
-  }
-
-  showLoader(true);
-
-  try {
-    // 1. Validate scratch card against /api/results/check (you may skip this for admin, or keep it for parity)
-    const checkParams = new URLSearchParams({
-      regNo, scratchCard, class: klass, session, term
-    });
-    const checkResp = await fetch(`${API_BASE_URL}/api/results/check?${checkParams}`);
-    const checkJson = await checkResp.json();
-    if (checkResp.status !== 200) {
-      showLoader(false);
-      errorBox.textContent = checkJson.error || "No result found! Please check your details or contact the school.";
-      errorBox.style.display = "block";
-      document.getElementById("resultsDisplaySection").style.display = "none";
-      return false;
-    }
-
-    // 2. Fetch results for this student (like student page)
-    const params = new URLSearchParams({
-      student_id: regNo,
-      class: klass,
-      session: session,
-      term: term,
-      status: "Published"
-    });
-    const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
-    const results = await response.json();
-    const filteredResults = Array.isArray(results)
-      ? results.filter(r =>
-          (r.student_id === regNo) ||
-          (r.student && (r.student.student_id === regNo || r.student.regNo === regNo)) ||
-          (r.regNo === regNo)
-        )
-      : [];
-
-    // --- FETCH SUBJECT POSITIONS ---
-    await fetchSubjectPositions(filteredResults);
-
-    if (!filteredResults.length) {
-      showLoader(false);
-      errorBox.textContent = "No result found! Please check your details or contact the school.";
-      errorBox.style.display = "block";
-      document.getElementById("resultsDisplaySection").style.display = "none";
-      return false;
-    }
-
-    // 3. Fetch student profile
-    let studentProfile = null;
-    try {
-      const studentResp = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(regNo)}`);
-      const studentJson = await studentResp.json();
-      studentProfile = Array.isArray(studentJson.students) ? studentJson.students[0] : null;
-    } catch (err) {}
-
-    // 4. Fetch skills report for this student/session/term
-    let skillsReport = null;
-    try {
-      const normalize = str =>
-        String(str || "")
-          .replace(/–/g, "-")
-          .trim()
-          .toLowerCase();
-
-      const normalizedSession = normalize(session);
-      const normalizedTerm = normalize(term);
-
-      const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`);
-      if (skillsRes.ok) {
-        const skillsData = await skillsRes.json();
-        if (Array.isArray(skillsData.skillsReports)) {
-          skillsReport = skillsData.skillsReports.find(
-            r => normalize(r.session) === normalizedSession &&
-                 normalize(r.term) === normalizedTerm
-          ) || null;
-        }
-      }
-    } catch (e) {}
-
-    // 5. Fetch class size
-    let classSize = null;
-    try {
-      const classParams = new URLSearchParams({
-        class: klass,
-        session: session,
-        term: term,
-        status: "Published"
-      });
-      const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
-      if (classRes.ok) {
-        const classResults = await classRes.json();
-        const studentSet = new Set();
-        for (const r of classResults) {
-          if (r.student_id) studentSet.add(r.student_id);
-          else if (r.student && r.student.student_id) studentSet.add(r.student.student_id);
-          else if (r.student && r.student.regNo) studentSet.add(r.student.regNo);
-          else if (r.regNo) studentSet.add(r.regNo);
-        }
-        classSize = studentSet.size;
-      }
-    } catch (e) {}
-
-    showLoader(false);
-
-    // Use the fetched skillsReport for display and report
-    window._lastDisplayedResult = {
-      regNo,
-      class: klass,
-      session,
-      term,
-      results: filteredResults,
-      skillsReport,
-      classSize,
-      student: studentProfile
-    };
-
-    displayResult(window._lastDisplayedResult);
-
-  } catch (err) {
-    showLoader(false);
-    errorBox.textContent = err.message || "No result found! Please check your details or contact the school.";
-    errorBox.style.display = "block";
-    document.getElementById("resultsDisplaySection").style.display = "none";
-  }
-  return false;
-}
-
-function displayResult(r) {
-  document.getElementById("resultsDisplaySection").style.display = "";
-  document.getElementById("dispRegNo").textContent = r.regNo;
-  document.getElementById("dispClass").textContent = r.class;
-  document.getElementById("dispSession").textContent = r.session;
-  document.getElementById("dispTerm").textContent = r.term;
-  document.getElementById("dispName").textContent = getStudentFullName(r.student);
-  document.getElementById("dispPrincipalComment").textContent = r.skillsReport?.comment || "";
-  document.getElementById("dispClassSize").textContent = r.classSize || "";
-
-  // Skills section
-  let skillsHTML = "";
-  if (r.skillsReport && r.skillsReport.skills) {
-    if (r.skillsReport.skills.affective && Object.keys(r.skillsReport.skills.affective).length) {
-      skillsHTML += `<b>Affective Skills:</b><ul>`;
-      for (const [skill, score] of Object.entries(r.skillsReport.skills.affective)) {
-        skillsHTML += `<li>${skill}: ${score}</li>`;
-      }
-      skillsHTML += `</ul>`;
-    }
-    if (r.skillsReport.skills.psychomotor && Object.keys(r.skillsReport.skills.psychomotor).length) {
-      skillsHTML += `<b>Psychomotor Skills:</b><ul>`;
-      for (const [skill, score] of Object.entries(r.skillsReport.skills.psychomotor)) {
-        skillsHTML += `<li>${skill}: ${score}</li>`;
-      }
-      skillsHTML += `</ul>`;
-    }
-  }
-  document.getElementById("skillsSection").innerHTML = skillsHTML;
-
-  // Attendance section
-  let attendanceHTML = "";
-  let att = r.skillsReport?.attendance || {};
-  if (att && Object.keys(att).length) {
-    attendanceHTML += `<b>Attendance:</b><ul>`;
-    if (att.total_days !== undefined) attendanceHTML += `<li>Total Days: ${att.total_days}</li>`;
-    if (att.days_present !== undefined) attendanceHTML += `<li>Days Present: ${att.days_present}</li>`;
-    if (att.days_absent !== undefined) attendanceHTML += `<li>Days Absent: ${att.days_absent}</li>`;
-    if (att.days_present !== undefined && att.total_days !== undefined) {
-      attendanceHTML += `<li>Attendance %: ${((att.days_present / att.total_days) * 100).toFixed(2)}%</li>`;
-    }
-    attendanceHTML += `</ul>`;
-  }
-  document.getElementById("attendanceSection").innerHTML = attendanceHTML;
-
-  // Results table
-  const tbody = document.getElementById("resultsTable").querySelector("tbody");
-  tbody.innerHTML = Array.isArray(r.results) ? r.results.map(res => `
-    <tr>
-      <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || "")}</td>
-      <td>${res.ca1_score !== undefined ? res.ca1_score : ""}</td>
-      <td>${res.ca2_score !== undefined ? res.ca2_score : ""}</td>
-      <td>${res.midterm_score !== undefined ? res.midterm_score : ""}</td>
-      <td>${res.exam_score !== undefined ? res.exam_score : ""}</td>
-      <td>${res.total !== undefined ? res.total :
-        (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0))}</td>
-      <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ""}</td>
-      <td>${res.remarks || res.remark || ""}</td>
-      <td>${res.subject_position || ""}</td>
-    </tr>
-  `).join("") : "";
-}
-
-function getSkillsReportForStudent(regNo, session, term) {
-  // Used for download, always matches /api/students/{regNo}/skills-report, no fallback here
-  return fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`)
-    .then(resp => resp.ok ? resp.json() : Promise.reject())
-    .then(data => {
-      if (!Array.isArray(data.skillsReports)) return null;
-      const normalize = s => ("" + s).replace(/–/g, "-").trim().toLowerCase();
-      return data.skillsReports.find(
-        r => normalize(r.session) === normalize(session) && normalize(r.term) === normalize(term)
-      ) || null;
-    }).catch(() => null);
-}
-
-// --- FETCH SUBJECT POSITION FOR EACH RESULT (for download too) ---
-async function fetchSubjectPositionsForDownload(results) {
-  for (const r of results) {
-    if (r.subject_position) continue;
-    if (!r._id) continue;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.subject_position) r.subject_position = data.subject_position;
-      }
-    } catch {}
-  }
-}
-
-async function downloadCurrentResult() {
-  const r = window._lastDisplayedResult;
-  if (!r || !r.results || !r.results.length) {
-    alert("No result to download. Please check a result first.");
-    return;
-  }
-  // Always fetch the latest skills report before building reportData
-  let skillsReport = r.skillsReport;
-  let studentReg = r.student?.regNo || r.regNo;
-  let session = r.session, term = r.term;
-
-  if (studentReg && session && term) {
-    const fetchedSkills = await getSkillsReportForStudent(studentReg, session, term);
-    if (fetchedSkills) skillsReport = fetchedSkills;
-  }
-
-  // Fetch subject positions before download
-  await fetchSubjectPositionsForDownload(r.results);
-
-  let affectiveSkills = [];
-  let psychomotorSkills = [];
-  let attendanceArr = [];
-  let principalComment = skillsReport?.comment || "This is an excellent result, do not rest on your oars.";
-  let principalName = "ABIODUN FESTUS ADENIYI";
-  let classSize = r.classSize || 17;
-
-  if (skillsReport && skillsReport.skills) {
-    if (skillsReport.skills.affective) {
-      affectiveSkills = Object.entries(skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
-    }
-    if (skillsReport.skills.psychomotor) {
-      psychomotorSkills = Object.entries(skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
-    }
-  }
-  let att = skillsReport?.attendance || {};
-  if (att && Object.keys(att).length) {
-    attendanceArr = [
-      { label: "No. of School Days", value: att.total_days },
-      { label: "No. of Days Present", value: att.days_present },
-      { label: "No. of Days Absent", value: att.days_absent },
-      { label: "% Attendance", value: (att.total_days && att.days_present ? ((att.days_present/att.total_days)*100).toFixed(2) + "%" : "") }
-    ];
-  }
-
-  // Summary fields: calculate from results if possible
-  const numSubjects = r.results.length;
-  let totalScore = 0, totalMax = numSubjects * 100, gpaSum = 0;
-  let gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
-  let perfGrade = "N/A";
-  r.results.forEach(res => {
-    const tot = parseFloat(res.total || 0);
-    totalScore += tot;
-    if (res.grade && gradeMap[res.grade] !== undefined) gpaSum += gradeMap[res.grade];
-  });
-  const stuAverage = numSubjects ? ((totalScore / totalMax) * 100).toFixed(2) + "%" : "";
-  const stuGPA = numSubjects ? (gpaSum / numSubjects).toFixed(2) : "";
-  if (stuGPA >= 4.5) perfGrade = "A (Excellent)";
-  else if (stuGPA >= 4.0) perfGrade = "B (Very Good)";
-  else if (stuGPA >= 3.0) perfGrade = "C (Good)";
-  else if (stuGPA >= 2.0) perfGrade = "D (Pass)";
-  else if (stuGPA >= 1.0) perfGrade = "E (Poor)";
-  else perfGrade = "F (Fail)";
-
-  // Save DOB, calculate age, photo, and email
-  let studentObj = null;
-  if (r.student) {
-    let dobVal = r.student.dob || r.student.DOB || "";
-    let ageVal = r.student.age || calcAge(dobVal);
-    let emailVal = r.student.studentEmail || r.student.email || r.student.parentEmail || "";
-    let photoVal = r.student.photoBase64 || r.student.photo || "";
-    studentObj = {
-      name: getStudentFullName(r.student),
-      regNo: r.student.regNo || r.student.student_id || r.regNo,
-      gender: r.student.gender || "",
-      DOB: dobVal,
-      email: emailVal,
-      photoBase64: photoVal,
-      age: ageVal
-    };
-  }
-
-  const reportData = {
-    regNo: r.regNo,
-    class: r.class,
-    session: r.session,
-    term: r.term,
-    results: r.results.map(res => ({
-      subject: res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || ""),
-      ca1_score: res.ca1_score !== undefined ? res.ca1_score : "",
-      ca2_score: res.ca2_score !== undefined ? res.ca2_score : "",
-      midterm_score: res.midterm_score !== undefined ? res.midterm_score : "",
-      exam_score: res.exam_score !== undefined ? res.exam_score : "",
-      total: res.total !== undefined ? res.total :
-        (parseFloat(res.ca1_score || 0) + parseFloat(res.ca2_score || 0) + parseFloat(res.midterm_score || 0) + parseFloat(res.exam_score || 0)),
-      grade: res.grade || "",
-      remarks: res.remarks || res.remark || "",
-      grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : "",
-      teacher_comment: res.teacher_comment || res.comment || "",
-      subject_position: res.subject_position || ""
-    })),
-    student: studentObj,
-    perfGrade: perfGrade,
-    classSize: classSize,
-    numSubjects: numSubjects,
-    stuTotalScore: `${totalScore} / ${totalMax}`,
-    stuAverage: stuAverage,
-    stuGPA: stuGPA,
-    resultSummary: perfGrade.split('(')[1]?.replace(')','') || perfGrade,
-    principalComment,
-    principalName,
-    nextTermDate: "Monday 6th of January 2025.",
-    affectiveSkills,
-    psychomotorSkills,
-    attendance: attendanceArr
-  };
-
-  sessionStorage.setItem("reportData", JSON.stringify(reportData));
-  window.open('report.html', '_blank');
-}
-    </script>
   </div>
+
+  <script>
+    const API_BASE_URL = "https://goldlincschools.onrender.com";
+
+    // ==================== SIDEBAR MOBILE TOGGLE ====================
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function handleResize() {
+      if (window.innerWidth <= 768) {
+        sidebarToggle.style.display = 'flex';
+      } else {
+        sidebarToggle.style.display = 'none';
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+
+    function openSidebar() {
+      sidebar.classList.add('active');
+      sidebarOverlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    }
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Active nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      if (link.href === window.location.href || link.href.includes(window.location.pathname)) {
+        link.classList.add('active');
+      }
+    });
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function showLoader(show) {
+      document.getElementById('loader').style.display = show ? 'flex' : 'none';
+    }
+
+    function calcAge(dobStr) {
+      if (!dobStr) return '';
+      let date;
+      if (typeof dobStr === 'string') {
+        const parts = dobStr.split(/[-\/]/);
+        if (parts.length === 3) {
+          let year, month, day;
+          if (parts[0].length === 4) {
+            year = +parts[0];
+            month = +parts[1];
+            day = +parts[2];
+          } else {
+            day = +parts[0];
+            month = +parts[1];
+            year = +parts[2];
+          }
+          date = new Date(year, month - 1, day);
+        } else {
+          date = new Date(dobStr);
+        }
+      } else {
+        date = new Date(dobStr);
+      }
+      if (!date || isNaN(date.getTime())) return '';
+      const now = new Date();
+      let age = now.getFullYear() - date.getFullYear();
+      if (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    function getStudentFullName(student) {
+      if (!student) return '';
+      if (student.name) return student.name;
+      let parts = [];
+      if (student.firstname) parts.push(student.firstname);
+      if (student.othernames) parts.push(student.othernames);
+      if (student.surname) parts.push(student.surname);
+      if (student.lastname) parts.push(student.lastname);
+      return parts.join(' ').trim();
+    }
+
+    // ==================== FETCH SUBJECT POSITIONS ====================
+    async function fetchSubjectPositions(results) {
+      for (const r of results) {
+        if (r.subject_position) continue;
+        if (!r._id) continue;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.subject_position) r.subject_position = data.subject_position;
+          }
+        } catch {}
+      }
+    }
+
+    // ==================== SEARCH HANDLER ====================
+    async function handleResultSearch(e) {
+      e.preventDefault();
+      const regNo = document.getElementById('regNoInput').value.trim();
+      const scratchCard = document.getElementById('scratchCardInput').value.trim();
+      const klass = document.getElementById('classInput').value;
+      const session = document.getElementById('sessionInput').value;
+      const term = document.getElementById('termInput').value;
+      const errorBox = document.getElementById('searchError');
+      errorBox.style.display = 'none';
+
+      if (!regNo || !scratchCard || !klass || !session || !term) {
+        errorBox.textContent = '❌ All fields are required!';
+        errorBox.style.display = 'block';
+        return false;
+      }
+
+      showLoader(true);
+
+      try {
+        // Validate scratch card
+        const checkParams = new URLSearchParams({
+          regNo,
+          scratchCard,
+          class: klass,
+          session,
+          term
+        });
+        const checkResp = await fetch(`${API_BASE_URL}/api/results/check?${checkParams}`);
+        const checkJson = await checkResp.json();
+        if (checkResp.status !== 200) {
+          showLoader(false);
+          errorBox.textContent = checkJson.error || '❌ No result found! Please check your details or contact the school.';
+          errorBox.style.display = 'block';
+          document.getElementById('resultsDisplaySection').style.display = 'none';
+          return false;
+        }
+
+        // Fetch results
+        const params = new URLSearchParams({
+          student_id: regNo,
+          class: klass,
+          session: session,
+          term: term,
+          status: 'Published'
+        });
+        const response = await fetch(`${API_BASE_URL}/api/results?${params.toString()}`);
+        const results = await response.json();
+        const filteredResults = Array.isArray(results)
+          ? results.filter(r =>
+              (r.student_id === regNo) ||
+              (r.student && (r.student.student_id === regNo || r.student.regNo === regNo)) ||
+              (r.regNo === regNo)
+            )
+          : [];
+
+        // Fetch subject positions
+        await fetchSubjectPositions(filteredResults);
+
+        if (!filteredResults.length) {
+          showLoader(false);
+          errorBox.textContent = '❌ No result found! Please check your details or contact the school.';
+          errorBox.style.display = 'block';
+          document.getElementById('resultsDisplaySection').style.display = 'none';
+          return false;
+        }
+
+        // Fetch student profile
+        let studentProfile = null;
+        try {
+          const studentResp = await fetch(`${API_BASE_URL}/api/students?regNo=${encodeURIComponent(regNo)}`);
+          const studentJson = await studentResp.json();
+          studentProfile = Array.isArray(studentJson.students) ? studentJson.students[0] : null;
+        } catch (err) {}
+
+        // Fetch skills report
+        let skillsReport = null;
+        try {
+          const normalize = str =>
+            String(str || '')
+              .replace(/–/g, '-')
+              .trim()
+              .toLowerCase();
+
+          const normalizedSession = normalize(session);
+          const normalizedTerm = normalize(term);
+
+          const skillsRes = await fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`);
+          if (skillsRes.ok) {
+            const skillsData = await skillsRes.json();
+            if (Array.isArray(skillsData.skillsReports)) {
+              skillsReport = skillsData.skillsReports.find(
+                r => normalize(r.session) === normalizedSession &&
+                     normalize(r.term) === normalizedTerm
+              ) || null;
+            }
+          }
+        } catch (e) {}
+
+        // Fetch class size
+        let classSize = null;
+        try {
+          const classParams = new URLSearchParams({
+            class: klass,
+            session: session,
+            term: term,
+            status: 'Published'
+          });
+          const classRes = await fetch(`${API_BASE_URL}/api/results?${classParams.toString()}`);
+          if (classRes.ok) {
+            const classResults = await classRes.json();
+            const studentSet = new Set();
+            for (const r of classResults) {
+              if (r.student_id) studentSet.add(r.student_id);
+              else if (r.student && r.student.student_id) studentSet.add(r.student.student_id);
+              else if (r.student && r.student.regNo) studentSet.add(r.student.regNo);
+              else if (r.regNo) studentSet.add(r.regNo);
+            }
+            classSize = studentSet.size;
+          }
+        } catch (e) {}
+
+        showLoader(false);
+
+        window._lastDisplayedResult = {
+          regNo,
+          class: klass,
+          session,
+          term,
+          results: filteredResults,
+          skillsReport,
+          classSize,
+          student: studentProfile
+        };
+
+        displayResult(window._lastDisplayedResult);
+
+      } catch (err) {
+        showLoader(false);
+        errorBox.textContent = err.message || '❌ No result found! Please check your details or contact the school.';
+        errorBox.style.display = 'block';
+        document.getElementById('resultsDisplaySection').style.display = 'none';
+      }
+      return false;
+    }
+
+    // ==================== DISPLAY RESULT ====================
+    function displayResult(r) {
+      document.getElementById('resultsDisplaySection').style.display = '';
+      document.getElementById('dispRegNo').textContent = r.regNo;
+      document.getElementById('dispClass').textContent = r.class;
+      document.getElementById('dispSession').textContent = r.session;
+      document.getElementById('dispTerm').textContent = r.term;
+      document.getElementById('dispName').textContent = getStudentFullName(r.student);
+      document.getElementById('dispPrincipalComment').textContent = r.skillsReport?.comment || 'N/A';
+      document.getElementById('dispClassSize').textContent = r.classSize || 'N/A';
+
+      // Skills section
+      let skillsHTML = '';
+      if (r.skillsReport && r.skillsReport.skills) {
+        let hasSkills = false;
+        if (r.skillsReport.skills.affective && Object.keys(r.skillsReport.skills.affective).length) {
+          hasSkills = true;
+          skillsHTML += `<div class="skills-section"><h3>Affective Skills</h3><ul class="skills-list">`;
+          for (const [skill, score] of Object.entries(r.skillsReport.skills.affective)) {
+            skillsHTML += `<li><strong>${skill}:</strong> ${score}</li>`;
+          }
+          skillsHTML += `</ul></div>`;
+        }
+        if (r.skillsReport.skills.psychomotor && Object.keys(r.skillsReport.skills.psychomotor).length) {
+          hasSkills = true;
+          skillsHTML += `<div class="skills-section"><h3>Psychomotor Skills</h3><ul class="skills-list">`;
+          for (const [skill, score] of Object.entries(r.skillsReport.skills.psychomotor)) {
+            skillsHTML += `<li><strong>${skill}:</strong> ${score}</li>`;
+          }
+          skillsHTML += `</ul></div>`;
+        }
+      }
+      document.getElementById('skillsSection').innerHTML = skillsHTML;
+
+      // Attendance section
+      let attendanceHTML = '';
+      let att = r.skillsReport?.attendance || {};
+      if (att && Object.keys(att).length) {
+        attendanceHTML = `<div class="attendance-section"><h3>Attendance</h3><ul class="attendance-list">`;
+        if (att.total_days !== undefined) attendanceHTML += `<li><strong>Total Days:</strong> ${att.total_days}</li>`;
+        if (att.days_present !== undefined) attendanceHTML += `<li><strong>Days Present:</strong> ${att.days_present}</li>`;
+        if (att.days_absent !== undefined) attendanceHTML += `<li><strong>Days Absent:</strong> ${att.days_absent}</li>`;
+        if (att.days_present !== undefined && att.total_days !== undefined) {
+          const percentage = ((att.days_present / att.total_days) * 100).toFixed(2);
+          attendanceHTML += `<li><strong>Attendance %:</strong> ${percentage}%</li>`;
+        }
+        attendanceHTML += `</ul></div>`;
+      }
+      document.getElementById('attendanceSection').innerHTML = attendanceHTML;
+
+      // Results table
+      const tbody = document.getElementById('resultsTable').querySelector('tbody');
+      tbody.innerHTML = Array.isArray(r.results)
+        ? r.results
+            .map(res => `
+        <tr>
+          <td>${res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || '')}</td>
+          <td>${res.ca1_score !== undefined ? res.ca1_score : ''}</td>
+          <td>${res.ca2_score !== undefined ? res.ca2_score : ''}</td>
+          <td>${res.midterm_score !== undefined ? res.midterm_score : ''}</td>
+          <td>${res.exam_score !== undefined ? res.exam_score : ''}</td>
+          <td>${
+            res.total !== undefined
+              ? res.total
+              : parseFloat(res.ca1_score || 0) +
+                  parseFloat(res.ca2_score || 0) +
+                  parseFloat(res.midterm_score || 0) +
+                  parseFloat(res.exam_score || 0)
+          }</td>
+          <td class="${res.grade === 'A' ? 'grade-high' : res.grade === 'D' ? 'grade-low' : 'grade-mid'}">${res.grade || ''}</td>
+          <td>${res.remarks || res.remark || ''}</td>
+          <td>${res.subject_position || ''}</td>
+        </tr>
+      `)
+            .join('')
+        : '';
+    }
+
+    // ==================== DOWNLOAD FUNCTIONS ====================
+    function getSkillsReportForStudent(regNo, session, term) {
+      return fetch(`${API_BASE_URL}/api/students/${encodeURIComponent(regNo)}/skills-report`)
+        .then(resp => (resp.ok ? resp.json() : Promise.reject()))
+        .then(data => {
+          if (!Array.isArray(data.skillsReports)) return null;
+          const normalize = s => ('' + s).replace(/–/g, '-').trim().toLowerCase();
+          return (
+            data.skillsReports.find(
+              r => normalize(r.session) === normalize(session) && normalize(r.term) === normalize(term)
+            ) || null
+          );
+        })
+        .catch(() => null);
+    }
+
+    async function fetchSubjectPositionsForDownload(results) {
+      for (const r of results) {
+        if (r.subject_position) continue;
+        if (!r._id) continue;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/results/${r._id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.subject_position) r.subject_position = data.subject_position;
+          }
+        } catch {}
+      }
+    }
+
+    async function downloadCurrentResult() {
+      const r = window._lastDisplayedResult;
+      if (!r || !r.results || !r.results.length) {
+        alert('❌ No result to download. Please check a result first.');
+        return;
+      }
+
+      let skillsReport = r.skillsReport;
+      let studentReg = r.student?.regNo || r.regNo;
+      let session = r.session,
+        term = r.term;
+
+      if (studentReg && session && term) {
+        const fetchedSkills = await getSkillsReportForStudent(studentReg, session, term);
+        if (fetchedSkills) skillsReport = fetchedSkills;
+      }
+
+      await fetchSubjectPositionsForDownload(r.results);
+
+      let affectiveSkills = [];
+      let psychomotorSkills = [];
+      let attendanceArr = [];
+      let principalComment = skillsReport?.comment || 'This is an excellent result, keep it up!';
+      let principalName = 'ABIODUN FESTUS ADENIYI';
+      let classSize = r.classSize || 17;
+
+      if (skillsReport && skillsReport.skills) {
+        if (skillsReport.skills.affective) {
+          affectiveSkills = Object.entries(skillsReport.skills.affective).map(([name, score]) => ({ name, score }));
+        }
+        if (skillsReport.skills.psychomotor) {
+          psychomotorSkills = Object.entries(skillsReport.skills.psychomotor).map(([name, score]) => ({ name, score }));
+        }
+      }
+
+      let att = skillsReport?.attendance || {};
+      if (att && Object.keys(att).length) {
+        attendanceArr = [
+          { label: 'No. of School Days', value: att.total_days },
+          { label: 'No. of Days Present', value: att.days_present },
+          { label: 'No. of Days Absent', value: att.days_absent },
+          { label: '% Attendance', value: att.total_days && att.days_present ? ((att.days_present / att.total_days) * 100).toFixed(2) + '%' : '' }
+        ];
+      }
+
+      const numSubjects = r.results.length;
+      let totalScore = 0,
+        totalMax = numSubjects * 100,
+        gpaSum = 0;
+      let gradeMap = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
+      let perfGrade = 'N/A';
+      r.results.forEach(res => {
+        const tot = parseFloat(res.total || 0);
+        totalScore += tot;
+        if (res.grade && gradeMap[res.grade] !== undefined) gpaSum += gradeMap[res.grade];
+      });
+      const stuAverage = numSubjects ? ((totalScore / totalMax) * 100).toFixed(2) + '%' : '';
+      const stuGPA = numSubjects ? (gpaSum / numSubjects).toFixed(2) : '';
+      if (stuGPA >= 4.5) perfGrade = 'A (Excellent)';
+      else if (stuGPA >= 4.0) perfGrade = 'B (Very Good)';
+      else if (stuGPA >= 3.0) perfGrade = 'C (Good)';
+      else if (stuGPA >= 2.0) perfGrade = 'D (Pass)';
+      else if (stuGPA >= 1.0) perfGrade = 'E (Poor)';
+      else perfGrade = 'F (Fail)';
+
+      let studentObj = null;
+      if (r.student) {
+        let dobVal = r.student.dob || r.student.DOB || '';
+        let ageVal = r.student.age || calcAge(dobVal);
+        let emailVal = r.student.studentEmail || r.student.email || r.student.parentEmail || '';
+        let photoVal = r.student.photoBase64 || r.student.photo || '';
+        studentObj = {
+          name: getStudentFullName(r.student),
+          regNo: r.student.regNo || r.student.student_id || r.regNo,
+          gender: r.student.gender || '',
+          DOB: dobVal,
+          email: emailVal,
+          photoBase64: photoVal,
+          age: ageVal
+        };
+      }
+
+      const reportData = {
+        regNo: r.regNo,
+        class: r.class,
+        session: r.session,
+        term: r.term,
+        results: r.results.map(res => ({
+          subject: res.subject && res.subject.name ? res.subject.name : (res.subject_name || res.subject || ''),
+          ca1_score: res.ca1_score !== undefined ? res.ca1_score : '',
+          ca2_score: res.ca2_score !== undefined ? res.ca2_score : '',
+          midterm_score: res.midterm_score !== undefined ? res.midterm_score : '',
+          exam_score: res.exam_score !== undefined ? res.exam_score : '',
+          total:
+            res.total !== undefined
+              ? res.total
+              : parseFloat(res.ca1_score || 0) +
+                  parseFloat(res.ca2_score || 0) +
+                  parseFloat(res.midterm_score || 0) +
+                  parseFloat(res.exam_score || 0),
+          grade: res.grade || '',
+          remarks: res.remarks || res.remark || '',
+          grade_point: gradeMap[res.grade] !== undefined ? gradeMap[res.grade] : '',
+          teacher_comment: res.teacher_comment || res.comment || '',
+          subject_position: res.subject_position || ''
+        })),
+        student: studentObj,
+        perfGrade: perfGrade,
+        classSize: classSize,
+        numSubjects: numSubjects,
+        stuTotalScore: `${totalScore} / ${totalMax}`,
+        stuAverage: stuAverage,
+        stuGPA: stuGPA,
+        resultSummary: perfGrade.split('(')[1]?.replace(')', '') || perfGrade,
+        principalComment,
+        principalName,
+        nextTermDate: 'Monday 6th of January 2025.',
+        affectiveSkills,
+        psychomotorSkills,
+        attendance: attendanceArr
+      };
+
+      sessionStorage.setItem('reportData', JSON.stringify(reportData));
+      window.open('report.html', '_blank');
+    }
+  </script>
 </body>
 </html>

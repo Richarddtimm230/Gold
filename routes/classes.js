@@ -38,25 +38,80 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/classes/all - Get ALL classes (including those not assigned to teacher)
+router.get('/all', async (req, res) => {
+  try {
+    console.log('[DEBUG] Fetching all classes');
+    const classes = await Class.find({}).populate('subjects students teachers');
+    
+    console.log(`[DEBUG] Found ${classes.length} classes`);
+    
+    const output = classes.map(cls => {
+      return {
+        _id: cls._id,
+        id: cls._id,
+        name: cls.name,
+        arms: Array.isArray(cls.arms) ? cls.arms : [],
+        teachers: Array.isArray(cls.teachers) ? cls.teachers : [],
+        subjects: cls.subjects.map(sub => ({ 
+          _id: sub._id, 
+          id: sub._id, 
+          name: sub.name 
+        })),
+        studentCount: (cls.students || []).length
+      };
+    });
+    res.json(output);
+  } catch (err) {
+    console.error('Error fetching all classes:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/classes/:classId/students - Get all students in a class
 router.get('/:classId/students', async (req, res) => {
   try {
     const { classId } = req.params;
 
+    console.log(`[DEBUG] Fetching students for class: ${classId}`);
+
     // Validate classId format
     if (!classId || classId.length !== 24) {
-      return res.status(400).json({ error: 'Invalid class ID format' });
+      console.warn(`[DEBUG] Invalid class ID format: ${classId}`);
+      return res.status(400).json({ 
+        error: 'Invalid class ID format',
+        received: classId,
+        length: classId ? classId.length : 0
+      });
     }
 
     // Find the class first
-    const cls = await Class.findById(classId).populate('students');
+    console.log(`[DEBUG] Looking up class in database...`);
+    const cls = await Class.findById(classId);
+    
     if (!cls) {
-      return res.status(404).json({ error: 'Class not found' });
+      console.warn(`[DEBUG] Class not found in database: ${classId}`);
+      
+      // Try alternative lookup by name if ID fails
+      console.log(`[DEBUG] Attempting lookup by other fields...`);
+      const allClasses = await Class.find({}).select('_id name');
+      console.log(`[DEBUG] Available classes:`, allClasses);
+      
+      return res.status(404).json({ 
+        error: 'Class not found',
+        classId: classId,
+        message: 'No class exists with this ID. Check if the class ID is correct.',
+        availableClasses: allClasses
+      });
     }
 
-    // Also fetch students directly filtered by class
+    console.log(`[DEBUG] Class found: ${cls.name}`);
+
+    // Fetch students directly filtered by class
     const students = await Student.find({ class: classId });
     
+    console.log(`[DEBUG] Found ${students.length} students in class`);
+
     // Return students with relevant fields
     const output = students.map(student => ({
       _id: student._id,
@@ -73,14 +128,20 @@ router.get('/:classId/students', async (req, res) => {
     res.json(output);
   } catch (err) {
     console.error('Error fetching class students:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      error: err.message,
+      type: err.name,
+      classId: req.params.classId
+    });
   }
 });
 
 // GET /api/classes/:classId - Get single class details
-router.get('/:classId', async (req, res) => {
+router.get('/:classId/details', async (req, res) => {
   try {
     const { classId } = req.params;
+
+    console.log(`[DEBUG] Fetching class details for: ${classId}`);
 
     if (!classId || classId.length !== 24) {
       return res.status(400).json({ error: 'Invalid class ID format' });
@@ -92,6 +153,7 @@ router.get('/:classId', async (req, res) => {
       .populate('students');
 
     if (!cls) {
+      console.warn(`[DEBUG] Class not found: ${classId}`);
       return res.status(404).json({ error: 'Class not found' });
     }
 
@@ -139,6 +201,8 @@ router.post('/', async (req, res) => {
     });
     await newClass.save();
     
+    console.log(`[DEBUG] Created new class: ${newClass._id} - ${name}`);
+
     res.status(201).json({ 
       _id: newClass._id,
       id: newClass._id, 
@@ -211,7 +275,7 @@ router.post('/:id/arms', async (req, res) => {
 // POST /api/classes/:id/subjects - Add/replace subjects in a class
 router.post('/:id/subjects', async (req, res) => {
   try {
-    const { classId } = req.params;
+    const { id } = req.params;
     const { subjectName } = req.body;
 
     if (!subjectName || !subjectName.trim()) {
@@ -223,15 +287,15 @@ router.post('/:id/subjects', async (req, res) => {
     if (!subject) {
       subject = new Subject({ 
         name: subjectName.trim(), 
-        class: req.params.id 
+        class: id 
       });
       await subject.save();
-    } else if (!subject.class || String(subject.class) !== String(req.params.id)) {
-      subject.class = req.params.id;
+    } else if (!subject.class || String(subject.class) !== String(id)) {
+      subject.class = id;
       await subject.save();
     }
 
-    const cls = await Class.findById(req.params.id);
+    const cls = await Class.findById(id);
     if (!cls) return res.status(404).json({ error: "Class not found" });
 
     // Add subject if not already in class
@@ -259,7 +323,7 @@ router.post('/:id/subjects', async (req, res) => {
   }
 });
 
-// POST /api/classes/:id/subjects (Teacher version) - Add subjects as a teacher
+// POST /api/classes/:classId/subjects/teacher - Add subjects as a teacher
 router.post('/:classId/subjects/teacher', teacherAuth, async (req, res) => {
   try {
     const { classId } = req.params;
@@ -327,6 +391,21 @@ router.post('/:classId/subjects/teacher', teacherAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Error adding subject as teacher:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== UTILITY ENDPOINTS =====
+
+// GET /api/classes/debug/all - Debug endpoint to list all classes
+router.get('/debug/all', async (req, res) => {
+  try {
+    const classes = await Class.find({}).select('_id name');
+    res.json({
+      count: classes.length,
+      classes: classes
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

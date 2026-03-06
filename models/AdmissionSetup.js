@@ -1,11 +1,54 @@
 const mongoose = require('mongoose');
+
 const AdmissionSetupSchema = new mongoose.Schema({
-  session: { type: mongoose.Schema.Types.ObjectId, ref: "Session", required: true },
-  term: { type: String, required: true },
-  classId: { type: mongoose.Schema.Types.ObjectId, ref: "Class", required: true },
-  armId: { type: mongoose.Schema.Types.ObjectId, ref: "Arm", required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  applicationFee: { type: Number, required: true }
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session',
+    required: true
+  },
+  term: {
+    type: String,
+    enum: ['First Term', 'Second Term', 'Third Term'],
+    required: true
+  },
+  class: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Class',
+    required: true
+  },
+  arm: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Arm',
+    required: true
+  },
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: {
+    type: Date,
+    required: true
+  },
+  applicationFee: {
+    type: Number,
+    default: 0
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, { timestamps: true });
+
 module.exports = mongoose.model('AdmissionSetup', AdmissionSetupSchema);

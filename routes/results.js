@@ -224,42 +224,285 @@ router.get('/check', async (req, res) => {
 });
 
 /**
- * BULK UPLOAD
+ * MERGE DUPLICATES UTILITY
+ * Finds all duplicate results for student+subject+session+term and merges them
  */
-router.post('/upload', async (req, res) => {
+async function mergeDuplicateResults() {
+  try {
+    console.log('Starting duplicate merge process...');
+    
+    // Find all results grouped by student, subject, session, term
+    const duplicateGroups = await Result.aggregate([
+      {
+        $group: {
+          _id: {
+            student: '$student',
+            subject: '$subject',
+            session: '$session',
+            term: '$term'
+          },
+          count: { $sum: 1 },
+          ids: { $push: '$_id' },
+          results: { $push: '$$ROOT' }
+        }
+      },
+      {
+        $match: { count: { $gt: 1 } }
+      }
+    ]);
+
+    console.log(`Found ${duplicateGroups.length} duplicate groups`);
+
+    let mergedCount = 0;
+
+    for (const group of duplicateGroups) {
+      const results = group.results;
+      
+      // Keep the first result and merge all scores into it
+      const primaryResult = results[0];
+      const othersToDelete = results.slice(1);
+
+      // Merge all scores (take the highest or most recent score for each type)
+      const mergedData = {
+        ca1_score: primaryResult.ca1_score,
+        ca2_score: primaryResult.ca2_score,
+        midterm_score: primaryResult.midterm_score,
+        exam_score: primaryResult.exam_score,
+        score: primaryResult.score,
+        grade: primaryResult.grade,
+        remarks: primaryResult.remarks
+      };
+
+      // Update with any non-empty scores from other results
+      for (const other of othersToDelete) {
+        if (other.ca1_score && !mergedData.ca1_score) mergedData.ca1_score = other.ca1_score;
+        if (other.ca2_score && !mergedData.ca2_score) mergedData.ca2_score = other.ca2_score;
+        if (other.midterm_score && !mergedData.midterm_score) mergedData.midterm_score = other.midterm_score;
+        if (other.exam_score && !mergedData.exam_score) mergedData.exam_score = other.exam_score;
+        if (other.score && !mergedData.score) mergedData.score = other.score;
+      }
+
+      // Update primary result with merged data
+      await Result.findByIdAndUpdate(primaryResult._id, mergedData);
+
+      // Delete other duplicate results
+      for (const other of othersToDelete) {
+        await Result.findByIdAndDelete(other._id);
+      }
+
+      mergedCount++;
+    }
+
+    console.log(`Merged ${mergedCount} duplicate groups`);
+    return { mergedCount, duplicateGroupsFound: duplicateGroups.length };
+  } catch (err) {
+    console.error('Error in mergeDuplicateResults:', err);
+    throw err;
+  }
+}
+
+/**
+ * UPSERT BULK UPLOAD - Prevents duplicates and merges scores
+ */
+router.post('/upsert', async (req, res) => {
   try {
     const { session, term, class: className, subject, resultType, results } = req.body;
+    
+    if (!results || results.length === 0) {
+      return res.status(400).json({ success: false, error: 'No results provided' });
+    }
+
     const sessionObj = await findOrCreateByName(Session, session);
     const termObj = await findOrCreateByName(Term, term);
     const classObj = await findOrCreateByName(Class, className);
     const subjectObj = await findOrCreateByName(Subject, subject);
 
-    const insertedResults = [];
-    for (const row of results) {
-      const student = await findOrCreateStudent(row, classObj?._id);
-      if (!student || !sessionObj || !termObj || !classObj || !subjectObj) {
-        throw new Error(`Missing required reference: student=${!!student}, session=${!!sessionObj}, term=${!!termObj}, class=${!!classObj}, subject=${!!subjectObj}`);
-      }
-
-      const resultData = {
-        student: student._id,
-        session: sessionObj._id,
-        term: termObj._id,
-        class: classObj._id,
-        subject: subjectObj._id,
-        grade: row.grade,
-        remarks: row.remarks,
-        status: row.status || 'Draft'
-      };
-
-      resultData[`${resultType}_score`] = row.score;
-      const result = new Result(resultData);
-      await result.save();
-      insertedResults.push(result);
+    if (!sessionObj || !termObj || !classObj || !subjectObj) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required references (session, term, class, or subject)' 
+      });
     }
 
-    res.json({ success: true, inserted: insertedResults.length, results: insertedResults });
+    let inserted = 0;
+    let updated = 0;
+    const errors = [];
+
+    for (const row of results) {
+      try {
+        const student = await findOrCreateStudent(row, classObj._id);
+        
+        if (!student) {
+          errors.push(`${row.student_name}: Could not find or create student`);
+          continue;
+        }
+
+        // Build update data with score type
+        const updateData = {
+          student: student._id,
+          session: sessionObj._id,
+          term: termObj._id,
+          class: classObj._id,
+          subject: subjectObj._id,
+          grade: row.grade,
+          remarks: row.remarks || '',
+          status: row.status || 'Draft'
+        };
+
+        // Set the appropriate score field based on resultType
+        updateData[`${resultType}_score`] = row.score;
+
+        // Upsert: find existing record and update, or create new one
+        const existingResult = await Result.findOne({
+          student: student._id,
+          session: sessionObj._id,
+          term: termObj._id,
+          class: classObj._id,
+          subject: subjectObj._id
+        });
+
+        if (existingResult) {
+          // Update existing result - merge the score
+          const updatedResult = await Result.findByIdAndUpdate(
+            existingResult._id,
+            updateData,
+            { new: true }
+          );
+          updated++;
+        } else {
+          // Create new result
+          const newResult = new Result(updateData);
+          await newResult.save();
+          inserted++;
+        }
+      } catch (err) {
+        errors.push(`${row.student_name}: ${err.message}`);
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      inserted, 
+      updated,
+      total: inserted + updated,
+      errors: errors.length > 0 ? errors : undefined 
+    });
   } catch (err) {
+    console.error('Upsert error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * BULK UPLOAD - Updated to use upsert logic
+ */
+router.post('/upload', async (req, res) => {
+  try {
+    const { session, term, class: className, subject, resultType, results, upsert } = req.body;
+    
+    if (!results || results.length === 0) {
+      return res.status(400).json({ success: false, error: 'No results provided' });
+    }
+
+    const sessionObj = await findOrCreateByName(Session, session);
+    const termObj = await findOrCreateByName(Term, term);
+    const classObj = await findOrCreateByName(Class, className);
+    const subjectObj = await findOrCreateByName(Subject, subject);
+
+    if (!sessionObj || !termObj || !classObj || !subjectObj) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required references' 
+      });
+    }
+
+    let inserted = 0;
+    let updated = 0;
+    const insertedResults = [];
+    const errors = [];
+
+    for (const row of results) {
+      try {
+        const student = await findOrCreateStudent(row, classObj._id);
+        
+        if (!student) {
+          errors.push(`${row.student_name}: Could not find or create student`);
+          continue;
+        }
+
+        const resultData = {
+          student: student._id,
+          session: sessionObj._id,
+          term: termObj._id,
+          class: classObj._id,
+          subject: subjectObj._id,
+          grade: row.grade,
+          remarks: row.remarks || '',
+          status: row.status || 'Draft'
+        };
+
+        resultData[`${resultType}_score`] = row.score;
+
+        // If upsert flag is true, check for existing and update
+        if (upsert) {
+          const existingResult = await Result.findOne({
+            student: student._id,
+            session: sessionObj._id,
+            term: termObj._id,
+            class: classObj._id,
+            subject: subjectObj._id
+          });
+
+          if (existingResult) {
+            const updatedResult = await Result.findByIdAndUpdate(
+              existingResult._id,
+              resultData,
+              { new: true }
+            );
+            updated++;
+            insertedResults.push(updatedResult);
+            continue;
+          }
+        }
+
+        // Create new result
+        const result = new Result(resultData);
+        await result.save();
+        inserted++;
+        insertedResults.push(result);
+      } catch (err) {
+        errors.push(`${row.student_name}: ${err.message}`);
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      inserted, 
+      updated,
+      total: inserted + updated,
+      results: insertedResults,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * ADMIN ROUTE: Merge all existing duplicates
+ * Usage: POST /api/results/merge-duplicates (should be admin-protected)
+ */
+router.post('/merge-duplicates', async (req, res) => {
+  try {
+    const result = await mergeDuplicateResults();
+    res.json({ 
+      success: true, 
+      message: 'Duplicate merge completed',
+      ...result
+    });
+  } catch (err) {
+    console.error('Merge duplicates error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -452,4 +695,5 @@ router.post('/push-cbt', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 module.exports = router;

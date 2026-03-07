@@ -1,4 +1,4 @@
-// app.js
+// /app.js
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
@@ -6,15 +6,36 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const ensureSuperAdmin = require('./utils/ensureSuperAdmin');
 
-// Create Express app
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '20mb' })); 
+/* ================= CORS ================= */
+
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+  : [];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('CORS not allowed for this origin'));
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
+/* ================= Middleware ================= */
+
+app.use(express.json({ limit: '20mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ========== Routes ==========
+/* ================= Routes ================= */
+
 const resultsRoute = require('./routes/results');
 const classesRoute = require('./routes/classes');
 const studentsRoute = require('./routes/students');
@@ -42,9 +63,10 @@ const uploadRoute = require('./routes/upload');
 const resultscbtRoute = require('./routes/resultscbt');
 const admissionRoute = require('./routes/admission');
 const paymentsRoute = require('./routes/payments');
-const financeRoute = require('./routes/finance'); // NEW
+const financeRoute = require('./routes/finance');
 
-// ========== Route Mounting ==========
+/* ================= Route Mounting ================= */
+
 app.use('/api/exam', examRoute);
 app.use('/api/result', resultscbtRoute);
 app.use('/api/activity', activityRoute);
@@ -73,9 +95,10 @@ app.use('/api/admin', adminRoute);
 app.use('/api/report/preferences', require('./routes/reportPreferences'));
 app.use('/api/admission', admissionRoute);
 app.use('/api/payments', paymentsRoute);
-app.use('/api/finance', financeRoute); // NEW - Finance routes
+app.use('/api/finance', financeRoute);
 
-// Super Admin protected route
+/* ================= Super Admin Route ================= */
+
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   if (req.user.role !== 'superadmin') {
     return res.status(403).json({ error: 'Forbidden: Super Admin access only.' });
@@ -83,12 +106,14 @@ app.get('/api/dashboard', authMiddleware, (req, res) => {
   res.json({ message: 'Welcome, Super Admin!' });
 });
 
-// Serve index.html as fallback
+/* ================= Fallback ================= */
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// MongoDB connection + boot
+/* ================= Mongo Boot ================= */
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/myschoolapp';
 
@@ -98,11 +123,15 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/myschoolap
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
+
     console.log('✅ MongoDB connected');
 
-    await ensureSuperAdmin(); // 👑 Ensure superadmin now that DB is ready
+    await ensureSuperAdmin();
 
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
   } catch (err) {
     console.error('❌ App initialization failed:', err);
     process.exit(1);

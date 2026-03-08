@@ -78,11 +78,11 @@ async function computeAndPersistSubjectPositions({ classId, sessionId, termId, s
 async function getSessionSettings() {
   try {
     const sessionSettingsModule = require('./sessionSettings');
-    // Assuming sessionSettings is exported with getter or direct export
-    // Adjust based on your actual sessionSettings.js structure
-    return sessionSettingsModule.getSettings?.() || sessionSettingsModule.sessionSettings || {
-      principalName: 'Principal',
-      classAssignments: {}
+    // sessionSettingsModule has getSettings function and sessionSettings object
+    const settings = sessionSettingsModule.getSettings?.() || sessionSettingsModule.sessionSettings || {};
+    return {
+      principalName: settings.principalName || 'Principal',
+      classAssignments: settings.classAssignments || {}
     };
   } catch (err) {
     console.error('Error fetching session settings:', err);

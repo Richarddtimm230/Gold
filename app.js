@@ -64,7 +64,11 @@ const resultscbtRoute = require('./routes/resultscbt');
 const admissionRoute = require('./routes/admission');
 const paymentsRoute = require('./routes/payments');
 const financeRoute = require('./routes/finance');
+// Add this line with other route imports at the top:
+const sessionSettingsRoute = require('./routes/sessionSettings');
 
+// Add this line with other route mounting:
+app.use('/api/report/session', sessionSettingsRoute);
 /* ================= Route Mounting ================= */
 
 app.use('/api/exam', examRoute);

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
 const adminAuth = require('../middleware/adminAuth');
 
 // In-memory storage (replace with database in production)
@@ -10,12 +9,12 @@ let sessionSettings = {
 };
 
 // GET session settings
-router.get('/', authMiddleware, adminAuth, (req, res) => {
+router.get('/', adminAuth, (req, res) => {
   res.json(sessionSettings);
 });
 
 // POST/UPDATE session settings
-router.post('/', authMiddleware, adminAuth, (req, res) => {
+router.post('/', adminAuth, (req, res) => {
   try {
     const { principalName, classAssignments } = req.body;
 

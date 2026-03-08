@@ -31,4 +31,7 @@ router.post('/', adminAuth, (req, res) => {
   }
 });
 
+// Export both router and settings object
 module.exports = router;
+module.exports.getSettings = () => sessionSettings;
+module.exports.sessionSettings = sessionSettings;

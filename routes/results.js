@@ -7,6 +7,7 @@ const Session = require('../models/Session');
 const Term = require('../models/Term');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
+const Teacher = require('../models/Teacher'); // Add Teacher model
 
 /**
  * UTILITY: Assign grade/remark based on total score
@@ -19,6 +20,7 @@ function getGradeAndRemark(totalScore) {
   if (totalScore >= 40) return { grade: 'E', remark: 'Poor' };
   return { grade: 'F', remark: 'Fail' };
 }
+
 function ordinalSuffix(pos) {
   if (typeof pos !== "number") pos = parseInt(pos);
   if (pos % 100 >= 11 && pos % 100 <= 13) return pos + "th";
@@ -70,6 +72,24 @@ async function computeAndPersistSubjectPositions({ classId, sessionId, termId, s
   return posMap;
 }
 
+/**
+ * UTILITY: Get session settings from sessionSettings module
+ */
+async function getSessionSettings() {
+  try {
+    const sessionSettingsModule = require('./sessionSettings');
+    // Assuming sessionSettings is exported with getter or direct export
+    // Adjust based on your actual sessionSettings.js structure
+    return sessionSettingsModule.getSettings?.() || sessionSettingsModule.sessionSettings || {
+      principalName: 'Principal',
+      classAssignments: {}
+    };
+  } catch (err) {
+    console.error('Error fetching session settings:', err);
+    return { principalName: 'Principal', classAssignments: {} };
+  }
+}
+
 async function findOrCreateByName(Model, name, extra = {}) {
   if (!name) return null;
   let doc = await Model.findOne({ name });
@@ -78,6 +98,7 @@ async function findOrCreateByName(Model, name, extra = {}) {
   await doc.save();
   return doc;
 }
+
 async function findOrCreateStudent(row, classId) {
   if (!row.student_id) return null;
   let student = await Student.findOne({ student_id: row.student_id });
@@ -91,7 +112,121 @@ async function findOrCreateStudent(row, classId) {
   return student;
 }
 
-// --- MAIN CHECK ROUTE (GET /check) ---
+/**
+ * BUILD REPORT DATA - Helper function
+ */
+async function buildReportData(student, classObj, sessionObj, termObj, results, sessionSettings) {
+  const data = [];
+  
+  for (const r of results) {
+    let total = 0;
+    if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
+    if (r.ca2_score) total += parseFloat(r.ca2_score) || 0;
+    if (r.midterm_score) total += parseFloat(r.midterm_score) || 0;
+    if (r.exam_score) total += parseFloat(r.exam_score) || 0;
+    if (!r.ca1_score && !r.ca2_score && !r.midterm_score && !r.exam_score && r.score) total = parseFloat(r.score) || 0;
+
+    const { grade, remark } = getGradeAndRemark(total);
+
+    let subjectPos = '';
+    if (r.subject && r.subject.name) {
+      const posMap = await computeAndPersistSubjectPositions({
+        classId: classObj._id,
+        sessionId: sessionObj._id,
+        termId: termObj._id,
+        subjectId: r.subject._id
+      });
+      subjectPos = posMap[r._id.toString()]?.position || r.subject_position || '';
+      if (r.grade !== grade || r.remarks !== remark || r.subject_position !== subjectPos) {
+        await Result.findByIdAndUpdate(r._id, {
+          grade: grade,
+          remarks: remark,
+          subject_position: subjectPos
+        });
+      }
+    }
+
+    data.push({
+      subject: r.subject?.name || '',
+      ca1_score: r.ca1_score || '',
+      ca2_score: r.ca2_score || '',
+      midterm_score: r.midterm_score || '',
+      exam_score: r.exam_score || '',
+      total,
+      grade,
+      remarks: remark,
+      subject_position: subjectPos
+    });
+  }
+
+  const classSize = await Result.distinct('student', {
+    class: classObj._id,
+    session: sessionObj._id,
+    term: termObj._id,
+    status: 'Published'
+  }).then(students => students.length);
+
+  let skillsReport = { skills: { affective: {}, psychomotor: {} }, attendance: {}, comment: "" };
+  if (Array.isArray(student.skillsReports)) {
+    const found = student.skillsReports.find(r =>
+      r.session?.toLowerCase() === sessionObj.name.toLowerCase() &&
+      r.term?.toLowerCase() === termObj.name.toLowerCase()
+    );
+    if (found) {
+      skillsReport = {
+        skills: found.skills || { affective: {}, psychomotor: {} },
+        attendance: found.attendance || {},
+        comment: found.comment || ""
+      };
+    }
+  }
+
+  const principalComment = skillsReport.comment || "";
+  const attendance = skillsReport.attendance || {};
+
+  // Get form master for this student's class
+  const classId = classObj._id.toString();
+  const formMasterId = sessionSettings?.classAssignments?.[classId];
+  let formMasterName = 'Form Master';
+
+  if (formMasterId) {
+    try {
+      const formMaster = await Teacher.findById(formMasterId);
+      if (formMaster) {
+        formMasterName = `${formMaster.firstName || ''} ${formMaster.lastName || ''}`.trim() || 'Form Master';
+      }
+    } catch (err) {
+      console.error('Error fetching form master:', err);
+    }
+  }
+
+  const studentInfo = {
+    name: student.name || `${student.surname || ''} ${student.firstname || ''}`.trim(),
+    regNo: student.regNo,
+    gender: student.gender,
+    DOB: student.dob,
+    email: student.studentEmail,
+    age: student.age,
+    class: { name: classObj.name, _id: classObj._id },
+    photoBase64: student.photoBase64 || ""
+  };
+
+  return {
+    results: data,
+    skillsReport,
+    attendance,
+    principalComment,
+    classSize,
+    student: studentInfo,
+    principalName: sessionSettings?.principalName || 'Principal',
+    teacherName: formMasterName,
+    session: sessionObj.name,
+    term: termObj.name,
+    studentPosition: 1 // Calculate this if needed
+  };
+}
+
+// --- MAIN CHECK ROUTE (GET /check) - WITH PRINCIPAL & FORM MASTER ---
 router.get('/check', async (req, res) => {
   try {
     const { regNo, scratchCard, class: className, session, term } = req.query;
@@ -115,7 +250,6 @@ router.get('/check', async (req, res) => {
     const termObj = await Term.findOne({ name: term });
     if (!termObj) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
-    // Find results and populate subject
     const results = await Result.find({
       student: student._id,
       class: classObj._id,
@@ -126,98 +260,71 @@ router.get('/check', async (req, res) => {
 
     if (!results.length) return res.status(404).json({ error: 'Result unavailable for selected session and term.' });
 
-    // --- Compose result data, auto-fill grade/remark/position ---
-    const data = [];
-    for (const r of results) {
-      let total = 0;
-      if (r.ca1_score) total += parseFloat(r.ca1_score) || 0;
-      if (r.ca2_score) total += parseFloat(r.ca2_score) || 0;
-      if (r.midterm_score) total += parseFloat(r.midterm_score) || 0;
-      if (r.exam_score) total += parseFloat(r.exam_score) || 0;
-      if (!r.ca1_score && !r.ca2_score && !r.midterm_score && !r.exam_score && r.score) total = parseFloat(r.score) || 0;
+    // Get session settings from your sessionSettings route/module
+    const sessionSettings = await getSessionSettings();
 
-      // Assign grade/remark if missing or incorrect in DB
-      const { grade, remark } = getGradeAndRemark(total);
+    // Build complete report data with principal name and form master
+    const reportData = await buildReportData(student, classObj, sessionObj, termObj, results, sessionSettings);
 
-      // --- Calculate and persist subject position for this subject ---
-      let subjectPos = '';
-      if (r.subject && r.subject.name) {
-        const posMap = await computeAndPersistSubjectPositions({
-          classId: classObj._id,
-          sessionId: sessionObj._id,
-          termId: termObj._id,
-          subjectId: r.subject._id
-        });
-        subjectPos = posMap[r._id.toString()]?.position || r.subject_position || '';
-        if (r.grade !== grade || r.remarks !== remark || r.subject_position !== subjectPos) {
-          await Result.findByIdAndUpdate(r._id, {
-            grade: grade,
-            remarks: remark,
-            subject_position: subjectPos
-          });
-        }
-      }
+    res.json(reportData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-      data.push({
-        subject: r.subject?.name || '',
-        ca1_score: r.ca1_score || '',
-        ca2_score: r.ca2_score || '',
-        midterm_score: r.midterm_score || '',
-        exam_score: r.exam_score || '',
-        total,
-        grade,
-        remarks: remark,
-        subject_position: subjectPos
-      });
+/**
+ * NEW ROUTE: GET student report by ID (for admin/teacher viewing)
+ * Usage: GET /api/results/student/:studentId/report?sessionId=xxx&termId=xxx
+ */
+router.get('/student/:studentId/report', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { sessionId, termId, classId } = req.query;
+
+    if (!studentId || !sessionId || !termId) {
+      return res.status(400).json({ error: 'Missing required parameters: studentId, sessionId, termId' });
     }
 
-    const classSize = await Result.distinct('student', {
+    // Fetch student
+    const student = await Student.findById(studentId).populate('class');
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
+    // Fetch session and term
+    const sessionObj = await Session.findById(sessionId);
+    const termObj = await Term.findById(termId);
+    if (!sessionObj || !termObj) {
+      return res.status(404).json({ error: 'Session or Term not found' });
+    }
+
+    // Fetch class
+    let classObj = student.class;
+    if (classId) {
+      classObj = await Class.findById(classId);
+    }
+    if (!classObj) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    // Fetch results
+    const results = await Result.find({
+      student: student._id,
       class: classObj._id,
       session: sessionObj._id,
       term: termObj._id,
       status: 'Published'
-    }).then(students => students.length);
+    }).populate('subject');
 
-    // --- improved skillsReport and attendance extraction ---
-    let skillsReport = { skills: { affective: {}, psychomotor: {} }, attendance: {}, comment: "" };
-    if (Array.isArray(student.skillsReports)) {
-      const found = student.skillsReports.find(r =>
-        r.session?.toLowerCase() === session.toLowerCase() &&
-        r.term?.toLowerCase() === term.toLowerCase()
-      );
-      if (found) {
-        skillsReport = {
-          skills: found.skills || { affective: {}, psychomotor: {} },
-          attendance: found.attendance || {},
-          comment: found.comment || ""
-        };
-      }
+    if (!results.length) {
+      return res.status(404).json({ error: 'No results found for this student' });
     }
 
-    // --- Always send principalComment and attendance at top-level too ---
-    const principalComment = skillsReport.comment || "";
-    const attendance = skillsReport.attendance || {};
+    // Get session settings from your sessionSettings module
+    const sessionSettings = await getSessionSettings();
 
-    // --- Add class info to student object ---
-    const studentInfo = {
-      name: student.name || `${student.surname || ''} ${student.firstname || ''}`.trim(),
-      regNo: student.regNo,
-      gender: student.gender,
-      DOB: student.dob,
-      email: student.studentEmail,
-      age: student.age,
-      class: { name: classObj.name, _id: classObj._id },
-      photoBase64: student.photoBase64 || ""
-    };
+    // Build complete report data with principal name and form master
+    const reportData = await buildReportData(student, classObj, sessionObj, termObj, results, sessionSettings);
 
-    res.json({
-      results: data,
-      skillsReport,
-      attendance,
-      principalComment,
-      classSize,
-      student: studentInfo
-    });
+    res.json(reportData);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

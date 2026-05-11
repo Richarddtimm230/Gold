@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domain Expired - Gold and Linc Schools</title>
+  <title>Service Unavailable - Gold and Linc Schools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
     * {
@@ -13,242 +13,500 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #217353 0%, #0e4a30 100%);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a2818 0%, #1a4d2e 50%, #217353 100%);
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
       padding: 20px;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    .expired-container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(33, 115, 83, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(14, 74, 48, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
       width: 100%;
-      padding: 60px 40px;
-      text-align: center;
+      max-width: 700px;
     }
 
-    .expired-icon {
-      font-size: 80px;
-      color: #d32f2f;
-      margin-bottom: 20px;
-      animation: pulse 2s infinite;
+    .card {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                  0 0 1px rgba(255, 255, 255, 0.5) inset;
+      padding: 80px 60px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #217353 0%, #ffe08a 50%, #217353 100%);
+      border-radius: 24px 24px 0 0;
     }
 
-    .expired-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.5rem;
-      color: #217353;
-      margin-bottom: 15px;
-      font-weight: 800;
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 50px;
     }
 
-    .expired-subtitle {
-      font-size: 1.3rem;
-      color: #555;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
-
-    .expired-message {
-      font-size: 1.05rem;
-      color: #666;
-      line-height: 1.8;
+    .logo-wrapper {
       margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
     }
 
-    .contact-section {
-      background: #f5f5f5;
-      border-left: 4px solid #217353;
-      padding: 25px;
-      margin-bottom: 35px;
-      border-radius: 8px;
+    .logo-wrapper img {
+      height: 48px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(33, 115, 83, 0.15));
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #217353;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .brand-tagline {
+      font-size: 0.85rem;
+      color: #ffe08a;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .status-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-icon i {
+      font-size: 50px;
+      color: #d32f2f;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0a2818;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+
+    .subheadline {
+      font-size: 1.1rem;
+      color: #666;
+      font-weight: 500;
+      margin-bottom: 32px;
+      letter-spacing: 0.3px;
+    }
+
+    .description {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 42px;
       text-align: left;
     }
 
-    .contact-section h3 {
-      color: #217353;
-      font-size: 1.1rem;
-      margin-bottom: 15px;
+    .info-grid {
+      background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+      border: 1px solid #e5e5e5;
+    }
+
+    .info-title {
       display: flex;
       align-items: center;
       gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #217353;
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+    }
+
+    .info-title i {
+      font-size: 1.2rem;
+    }
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .contact-item {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 12px;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.5;
     }
 
     .contact-item i {
       color: #217353;
       width: 20px;
-      text-align: center;
+      margin-top: 2px;
+      flex-shrink: 0;
+      font-size: 1rem;
     }
 
     .contact-item a {
       color: #217353;
       text-decoration: none;
       font-weight: 600;
-      transition: color 0.3s;
+      transition: all 0.3s ease;
+      position: relative;
     }
 
-    .contact-item a:hover {
-      color: #0e4a30;
-      text-decoration: underline;
+    .contact-item a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #217353;
+      transition: width 0.3s ease;
     }
 
-    .button-group {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
+    .contact-item a:hover::after {
+      width: 100%;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 40px;
     }
 
     .btn {
-      padding: 14px 28px;
-      font-size: 1rem;
-      font-weight: 700;
+      padding: 16px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
       text-decoration: none;
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.3s ease;
+      z-index: -1;
+    }
+
+    .btn:hover::before {
+      left: 100%;
     }
 
     .btn-primary {
-      background: #217353;
+      background: linear-gradient(135deg, #217353 0%, #0e4a30 100%);
       color: white;
+      box-shadow: 0 10px 25px rgba(33, 115, 83, 0.3);
     }
 
     .btn-primary:hover {
-      background: #0e4a30;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(33, 115, 83, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(33, 115, 83, 0.4);
     }
 
     .btn-secondary {
       background: white;
       color: #217353;
       border: 2px solid #217353;
+      box-shadow: 0 5px 15px rgba(33, 115, 83, 0.1);
     }
 
     .btn-secondary:hover {
-      background: #217353;
-      color: white;
-      transform: translateY(-2px);
+      background: #f5f5f5;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(33, 115, 83, 0.15);
     }
 
-    .logo-section {
-      margin-bottom: 30px;
+    .btn i {
+      font-size: 1.05rem;
     }
 
-    .logo-section img {
-      height: 50px;
-      margin-right: 10px;
+    .footer-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      letter-spacing: 0.2px;
     }
 
-    .school-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      color: #217353;
-      font-weight: 800;
-    }
-
-    @media (max-width: 600px) {
-      .expired-container {
-        padding: 40px 25px;
+    /* Mobile Responsive */
+    @media (max-width: 700px) {
+      .card {
+        padding: 50px 32px;
+        border-radius: 20px;
       }
 
-      .expired-title {
-        font-size: 2rem;
+      .headline {
+        font-size: 1.8rem;
       }
 
-      .expired-subtitle {
+      .subheadline {
+        font-size: 1rem;
+      }
+
+      .logo-wrapper {
+        margin-bottom: 30px;
+      }
+
+      .logo-wrapper img {
+        height: 40px;
+      }
+
+      .brand-name {
         font-size: 1.1rem;
       }
 
-      .expired-icon {
-        font-size: 60px;
+      .status-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
       }
 
-      .button-group {
-        flex-direction: column;
+      .status-icon i {
+        font-size: 40px;
       }
 
-      .btn {
-        width: 100%;
-        justify-content: center;
+      .info-grid {
+        padding: 24px;
+        margin-bottom: 32px;
       }
 
-      .contact-section {
-        text-align: center;
+      .info-title {
+        font-size: 0.95rem;
+        margin-bottom: 18px;
       }
 
       .contact-item {
-        justify-content: center;
+        font-size: 0.9rem;
+        gap: 12px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 14px 20px;
+        font-size: 0.9rem;
+      }
+
+      .description {
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 40px 24px;
+      }
+
+      .headline {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+      }
+
+      .subheadline {
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+      }
+
+      .status-icon {
+        width: 70px;
+        height: 70px;
+      }
+
+      .status-icon i {
+        font-size: 35px;
+      }
+
+      .logo-wrapper {
+        margin-bottom: 24px;
+      }
+
+      .brand-name {
+        font-size: 1rem;
+      }
+
+      .brand-tagline {
+        font-size: 0.75rem;
+      }
+
+      .info-grid {
+        padding: 20px;
+      }
+
+      .contact-item {
+        font-size: 0.85rem;
+      }
+
+      .footer-note {
+        font-size: 0.8rem;
+        margin-top: 24px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="expired-container">
-    <div class="logo-section">
-      <img src="logo-1679575828 (1).jpeg" alt="Gold and Linc Schools Logo">
-      <span class="school-name">Gold and Linc Schools</span>
-    </div>
+  <div class="wrapper">
+    <div class="card">
+      <!-- Header with Logo -->
+      <div class="header">
+        <div class="logo-wrapper">
+          <img src="logo-1679575828 (1).jpeg" alt="Gold and Linc Schools">
+          <div class="brand-text">
+            <div class="brand-name">Gold & Linc Schools</div>
+            <div class="brand-tagline">For a solid beginning</div>
+          </div>
+        </div>
 
-    <div class="expired-icon">
-      <i class="fas fa-exclamation-circle"></i>
-    </div>
+        <!-- Status Icon -->
+        <div class="status-icon">
+          <i class="fas fa-lock"></i>
+        </div>
 
-    <h1 class="expired-title">Domain Expired</h1>
-    <p class="expired-subtitle">This domain has expired</p>
-
-    <p class="expired-message">
-      We apologize for the inconvenience. This domain is currently unavailable. Please reach out to our development team for more details and assistance.
-    </p>
-
-    <div class="contact-section">
-      <h3><i class="fas fa-phone"></i> Contact Our Development Team</h3>
-      <div class="contact-item">
-        <i class="fas fa-envelope"></i>
-        <a href="mailto:goldlincschools@gmail.com">goldlincschools@gmail.com</a>
+        <!-- Headline -->
+        <h1 class="headline">Service Unavailable</h1>
+        <p class="subheadline">This domain is currently restricted</p>
       </div>
-      <div class="contact-item">
-        <i class="fas fa-phone"></i>
-        <a href="tel:08034430941">08034430941</a>
-      </div>
-      <div class="contact-item">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State</span>
-      </div>
-    </div>
 
-    <div class="button-group">
-      <button class="btn btn-secondary" onclick="history.back()">
-        <i class="fas fa-arrow-left"></i> Go Back
-      </button>
-      <a href="mailto:goldlincschools@gmail.com" class="btn btn-primary">
-        <i class="fas fa-envelope"></i> Contact Us
-      </a>
+      <!-- Description -->
+      <p class="description">
+        We appreciate your interest in Gold and Linc Schools. This domain is temporarily unavailable. For inquiries and assistance, please reach out to our development team using the contact information below.
+      </p>
+
+      <!-- Contact Information -->
+      <div class="info-grid">
+        <div class="info-title">
+          <i class="fas fa-headset"></i>
+          Get in Touch
+        </div>
+        <div class="contact-list">
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:goldlincschools@gmail.com">goldlincschools@gmail.com</a>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <a href="tel:08034430941">+234 803 443 0941</a>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State, Nigeria</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="actions">
+        <a href="mailto:goldlincschools@gmail.com" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Email Us
+        </a>
+        <a href="tel:08034430941" class="btn btn-secondary">
+          <i class="fas fa-phone-alt"></i> Call Us
+        </a>
+      </div>
+
+      <!-- Footer Note -->
+      <div class="footer-note">
+        © 2025 Gold and Linc Schools. All rights reserved.
+      </div>
     </div>
   </div>
 </body>

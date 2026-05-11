@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Domain Expired - Gold and Linc Schools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #217353 0%, #0e4a30 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .expired-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .expired-icon {
+      font-size: 80px;
+      color: #d32f2f;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .expired-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: #217353;
+      margin-bottom: 15px;
+      font-weight: 800;
+    }
+
+    .expired-subtitle {
+      font-size: 1.3rem;
+      color: #555;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .expired-message {
+      font-size: 1.05rem;
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .contact-section {
+      background: #f5f5f5;
+      border-left: 4px solid #217353;
+      padding: 25px;
+      margin-bottom: 35px;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .contact-section h3 {
+      color: #217353;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .contact-item {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .contact-item i {
+      color: #217353;
+      width: 20px;
+      text-align: center;
+    }
+
+    .contact-item a {
+      color: #217353;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .contact-item a:hover {
+      color: #0e4a30;
+      text-decoration: underline;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #217353;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0e4a30;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(33, 115, 83, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #217353;
+      border: 2px solid #217353;
+    }
+
+    .btn-secondary:hover {
+      background: #217353;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .logo-section {
+      margin-bottom: 30px;
+    }
+
+    .logo-section img {
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .school-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #217353;
+      font-weight: 800;
+    }
+
+    @media (max-width: 600px) {
+      .expired-container {
+        padding: 40px 25px;
+      }
+
+      .expired-title {
+        font-size: 2rem;
+      }
+
+      .expired-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .expired-icon {
+        font-size: 60px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .contact-section {
+        text-align: center;
+      }
+
+      .contact-item {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="expired-container">
+    <div class="logo-section">
+      <img src="logo-1679575828 (1).jpeg" alt="Gold and Linc Schools Logo">
+      <span class="school-name">Gold and Linc Schools</span>
+    </div>
+
+    <div class="expired-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+
+    <h1 class="expired-title">Domain Expired</h1>
+    <p class="expired-subtitle">This domain has expired</p>
+
+    <p class="expired-message">
+      We apologize for the inconvenience. This domain is currently unavailable. Please reach out to our development team for more details and assistance.
+    </p>
+
+    <div class="contact-section">
+      <h3><i class="fas fa-phone"></i> Contact Our Development Team</h3>
+      <div class="contact-item">
+        <i class="fas fa-envelope"></i>
+        <a href="mailto:goldlincschools@gmail.com">goldlincschools@gmail.com</a>
+      </div>
+      <div class="contact-item">
+        <i class="fas fa-phone"></i>
+        <a href="tel:08034430941">08034430941</a>
+      </div>
+      <div class="contact-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Behind Irenitemi Hotel, Testing Ground Area, Off Osogbo Road, Ilesa, Osun State</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-secondary" onclick="history.back()">
+        <i class="fas fa-arrow-left"></i> Go Back
+      </button>
+      <a href="mailto:goldlincschools@gmail.com" class="btn btn-primary">
+        <i class="fas fa-envelope"></i> Contact Us
+      </a>
+    </div>
+  </div>
+</body>
+</html>

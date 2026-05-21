@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bright Future Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fb;
+      color: #14213d;
+      line-height: 1.6;
+    }
+
+    .topbar {
+      background: #041c4a;
+      color: white;
+      padding: 10px 20px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .navbar {
+      background: white;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0b2c6b, #d4a437);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    .logo h1 {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .logo span {
+      color: #d4a437;
+      letter-spacing: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .apply-btn {
+      background: #d4a437;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .hero {
+      background: linear-gradient(to bottom right, rgba(255,255,255,0.96), rgba(255,255,255,0.75)), url('https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      padding: 70px 20px;
+    }
+
+    .hero h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      max-width: 600px;
+    }
+
+    .hero h2 span {
+      color: #d4a437;
+    }
+
+    .hero p {
+      max-width: 520px;
+      font-size: 18px;
+      margin-bottom: 28px;
+      color: #33415c;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: #041c4a;
+      color: white;
+    }
+
+    .btn-secondary {
+      border: 2px solid #041c4a;
+      color: #041c4a;
+      background: white;
+    }
+
+    .section {
+      padding: 70px 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-title small {
+      color: #d4a437;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .section-title h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      margin-top: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+    }
+
+    .card h4 {
+      margin: 16px 0 12px;
+      font-size: 22px;
+    }
+
+    .icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      background: rgba(212,164,55,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+    }
+
+    .stats {
+      background: #041c4a;
+      color: white;
+      padding: 60px 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 24px;
+      text-align: center;
+    }
+
+    .stat h2 {
+      font-size: 40px;
+      color: #d4a437;
+    }
+
+    .campus {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .campus img {
+      width: 100%;
+      border-radius: 24px;
+      object-fit: cover;
+      height: 320px;
+    }
+
+    .news-item {
+      background: white;
+      padding: 22px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    }
+
+    .cta {
+      background: linear-gradient(to right, rgba(4,28,74,0.95), rgba(4,28,74,0.82)), url('https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=1200&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .cta h3 {
+      font-size: 42px;
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 18px;
+    }
+
+    footer {
+      background: #02112d;
+      color: #d7dbe7;
+      padding: 60px 20px 30px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    footer h4 {
+      color: white;
+      margin-bottom: 14px;
+    }
+
+    footer ul {
+      list-style: none;
+    }
+
+    footer li {
+      margin-bottom: 10px;
+    }
+
+    footer a {
+      color: #d7dbe7;
+      text-decoration: none;
+    }
+
+    .copyright {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 36px;
+      }
+
+      .section-title h3 {
+        font-size: 28px;
+      }
+
+      .cta h3 {
+        font-size: 30px;
+      }
+
+      .navbar {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>📍 123 Education Way, Springfield, USA</div>
+    <div>📞 (555) 123-4567</div>
+    <div>✉️ info@brightfuture.edu</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <h1>BRIGHT FUTURE</h1>
+        <span>ACADEMY</span>
+      </div>
+    </div>
+
+    <button class="apply-btn">Apply Now</button>
+  </nav>
+
+  <section class="hero">
+    <h2>Shaping Minds. <span>Inspiring Futures.</span></h2>
+    <p>
+      A nurturing academic environment where every student is empowered to learn,
+      lead, and make a meaningful impact.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">Discover Our School</a>
+      <a href="#programs" class="btn-secondary">Explore Programs</a>
+    </div>
+  </section>
+
+  <section class="section" id="programs">
+    <div class="section-title">
+      <small>OUR PROGRAMS</small>
+      <h3>Empowering Students at Every Stage</h3>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="icon">📘</div>
+        <h4>Elementary School</h4>
+        <p>Building strong foundations through engaging and joyful learning experiences.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🎓</div>
+        <h4>Middle School</h4>
+        <p>Encouraging critical thinking, curiosity, and leadership development.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🌍</div>
+        <h4>High School</h4>
+        <p>Preparing students for college, careers, and confident global citizenship.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🏆</div>
+        <h4>Extracurriculars</h4>
+        <p>Helping students discover passions through arts, sports, and innovation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat">
+        <h2>850+</h2>
+        <p>Students Enrolled</p>
+      </div>
+
+      <div class="stat">
+        <h2>65+</h2>
+        <p>Dedicated Teachers</p>
+      </div>
+
+      <div class="stat">
+        <h2>20+</h2>
+        <p>Years of Excellence</p>
+      </div>
+
+      <div class="stat">
+        <h2>100%</h2>
+        <p>College Acceptance Rate</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <small>CAMPUS LIFE</small>
+      <h3>Explore. Learn. Grow.</h3>
+    </div>
+
+    <div class="campus">
+      <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&auto=format&fit=crop" alt="Campus Life" />
+
+      <div class="grid">
+        <div class="card">
+          <div class="icon">🤝</div>
+          <h4>Vibrant Community</h4>
+          <p>A welcoming environment where every student belongs and thrives.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🧪</div>
+          <h4>Innovative Learning</h4>
+          <p>Hands-on learning experiences designed to spark creativity and discovery.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">⚽</div>
+          <h4>Beyond the Classroom</h4>
+          <p>Activities and athletics that inspire leadership, teamwork, and confidence.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <small>NEWS & EVENTS</small>
+      <h3>Stay Connected</h3>
+    </div>
+
+    <div class="news-item">
+      <h4>Spring Arts Festival</h4>
+      <p>Join us for an evening of performances, exhibits, and student creativity.</p>
+    </div>
+
+    <div class="news-item">
+      <h4>Academic Showcase</h4>
+      <p>Students present their innovative projects and achievements to the community.</p>
+    </div>
+
+    <div class="news-item">
+      <h4>Graduation Ceremony</h4>
+      <p>Celebrating the achievements and bright futures of the Class of 2025.</p>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h3>Ready to Brighten Their Future?</h3>
+    <p>
+      Discover how Bright Future Academy can help your child thrive academically,
+      socially, and creatively.
+    </p>
+    <br />
+    <a href="#" class="btn-primary">Schedule a Tour</a>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h4>Bright Future Academy</h4>
+        <p>
+          A nurturing community dedicated to academic excellence, character
+          development, and lifelong success.
+        </p>
+      </div>
+
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Admissions</a></li>
+          <li><a href="#">Programs</a></li>
+          <li><a href="#">Campus Life</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Parent Portal</a></li>
+          <li><a href="#">School Calendar</a></li>
+          <li><a href="#">Student Handbook</a></li>
+          <li><a href="#">FAQs</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li>📍 Springfield, USA</li>
+          <li>📞 (555) 123-4567</li>
+          <li>✉️ info@brightfuture.edu</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="copyright">
+      © 2025 Bright Future Academy. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
